@@ -1,6 +1,6 @@
 ..
    Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+   Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
@@ -57,7 +57,7 @@ QoR for this library element can be estimated using the ``config_qor_helper`` to
 
 The following table provides results for Cholesky across a wide range of supported parameters, defined in :ref:`SOLVER_CONFIGURATION_PARAMETERS_CHOLESKY`.
 
-:download:`cholesky_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.2/solver/docs/src/csv_data_files/L2/cholesky_benchmark.csv>`
+:download:`cholesky_benchmark.csv <../../csv_data_files/L2/cholesky_benchmark.csv>`
 
 QRD
 ============
@@ -66,7 +66,7 @@ QoR for this library element can be estimated using the ``config_qor_helper`` to
 
 The following table provides results for QRD across a wide range of supported parameters, defined in :ref:`SOLVER_CONFIGURATION_PARAMETERS_QRD`.
 
-:download:`qrd_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2025.2/solver/docs/src/csv_data_files/L2/qrd_benchmark.csv>`
+:download:`qrd_benchmark.csv <../../csv_data_files/L2/qrd_benchmark.csv>`
 
 QRD_HH
 ============

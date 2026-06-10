@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2025-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,6 @@ cholesky reference model
 #include "fir_ref_utils.hpp"
 
 using namespace adf;
-
-// #define _DSPLIB_CHOLESKY_REF_DEBUG_
 
 namespace xf {
 namespace solver {

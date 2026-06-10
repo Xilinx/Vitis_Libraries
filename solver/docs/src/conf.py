@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@
 # This file does only contain a selection of the most common options. For a
 # full list see the documentation:
 # http://www.sphinx-doc.org/en/master/config
-
 # -- Path setup --------------------------------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -40,13 +39,13 @@ sys.path.insert(1, os.path.join(tools_dir, 'share/doxyrest_b/sphinx'))
 # -- Project information -----------------------------------------------------
 
 project = 'Vitis Solver Library'
-copyright = "2019-2022, Xilinx Inc. 2022-2025, Advanced Micro Devices, Inc."
+copyright = "2019-2022, Xilinx Inc. 2022-2026, Advanced Micro Devices, Inc."
 author = "AMD Inc."
 
 # The short X.Y version
-version = '2025.2'
+version = '2026.1'
 # The full version, including alpha/beta/rc tags
-release = '2025.2 release'
+release = '2026.1 release'
 html_last_updated_fmt = '%B %d, %Y'
 
 rst_epilog = """

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,8 +131,9 @@ class create_casc_kernel<1, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CAS
 
 /**
  * @ingroup svd_graph
- * @brief svd performs the decomposition of a matrix into three matrices
- *        (one diagonal, two orthonormal) such that M = USV^H.
+ * @brief SVD implements the Singular Value Decomposition of a matrix M such that M = U S V^H,
+ *        where U has orthonormal columns, S is a vector of non-negative real singular values,
+ *        and V is an orthonormal matrix.
  *
  * These are the templates to configure the function.
  * @tparam TT_DATA describes the type of individual data samples input to the function.
@@ -140,8 +141,10 @@ class create_casc_kernel<1, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CAS
  *         float, cfloat.
  * @tparam TP_DIM_ROWS describes the number of rows in the input matrix.
  * @tparam TP_DIM_COLS describes the number of columns in the input matrix.
- * @tparam TP_PASSES describes the number of Jacobi sweep passes (for convergence).
- * @tparam TP_CASC_LEN selects the number of kernels the SVD will be split over in series.
+ * @tparam TP_PASSES describes the number of Jacobi sweep passes to perform. More passes
+ *         improve accuracy at the cost of additional cycles.
+ * @tparam TP_CASC_LEN selects the number of kernels the SVD will be split over to support
+ *         larger matrix sizes.
  **/
 template <typename TT_DATA,
           unsigned int TP_DIM_ROWS,
@@ -200,20 +203,28 @@ class svd_graph : public graph {
                   "Reduce TP_DIM_ROWS, TP_DIM_COLS, or TP_CASC_LEN.");
 
     /**
-     * The input data to the function. Each kernel receives a unique partition of the input matrix rows.
+     * The input matrix partition(s). Each port receives a distinct contiguous block of
+     * rows of the input matrix M, in column-major order.
      **/
     port<input> in[TP_CASC_LEN];
 
     /**
-     * The output U matrix (orthonormal, left singular vectors). Each kernel outputs its row partition.
+     * The output U matrix partition(s) (left singular vectors). Each port carries a unique
+     * row partition of U and must be consumed independently. The buffer column stride is
+     * padded for alignment; only the first TP_DIM_COLS columns of each row are valid.
      **/
     port<output> outU[TP_CASC_LEN];
     /**
-     * The output S vector (singular values, on the diagonal). Each kernel outputs the full singular value vector.
+     * The output S vector(s) (singular values in descending order). The buffer holds
+     * TP_DIM_COLS valid elements followed by padding. All kernels output identical data;
+     * only one port needs to be consumed, but all ports must be connected.
      **/
     port<output> outS[TP_CASC_LEN];
     /**
-     * The output V matrix (orthonormal, right singular vectors). Each kernel outputs the full V matrix.
+     * The output V matrix(s) (right singular vectors). The valid V matrix occupies the
+     * first TP_DIM_COLS x TP_DIM_COLS elements of the buffer; any remaining elements
+     * should be discarded. All kernels output identical data; only one port needs to be
+     * consumed, but all ports must be connected.
      **/
     port<output> outV[TP_CASC_LEN];
 

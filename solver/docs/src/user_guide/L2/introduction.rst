@@ -1,6 +1,6 @@
 ..
    Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+   Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
@@ -28,7 +28,7 @@ AMD documentation is organized around a set of standard design processes to help
 
    -  :ref:`SOLVER_TUTORIALS`
 
-   -  :ref:`SOLVER_SOLVER_LIB_FUNC`
+   -  :ref:`SOLVER_LIB_FUNC`
 
    -  :ref:`SOLVER_COMPILING_AND_SIMULATING`
 
@@ -46,7 +46,7 @@ AMD documentation is organized around a set of standard design processes to help
    -  :ref:`SOLVER_QRD_HH`
 
    -  :ref:`SOLVER_SVD`
-   
+
    -  :ref:`SOLVER_SUBSTITUTION`
 
 -  **System Integration and Validation:** Integrating and validating the system functional performance, including timing, resource use, and power closure. Topics in this document that apply to this design process include:
@@ -60,6 +60,7 @@ AMD documentation is organized around a set of standard design processes to help
 ============
 Organization
 ============
+
 
 The following figure shows the SolverLib organization.
 
@@ -159,6 +160,7 @@ The `L2/examples` subdirectory holds example wrapper designs to demonstrate the 
 Using Library Elements within User-Defined Graphs
 =================================================
 
+
 It is recommended to include the L2 (graph) library element in your design, i.e., a subgraph. For example, to include Cholesky, include ``cholesky_graph.hpp`` from ``L2/include/aie/``. The test harness for each library unit illustrates how to instantiate a parameterized graph; see ``L2/tests/aie/<library_element>/test.hpp`` and ``test.cpp``.
 
 Set the environment variable to SOLVERLIB_ROOT.
@@ -185,14 +187,15 @@ Use the following option in the aiecompiler command to provide the path:
 Known Issues
 ============
 
-See Answer Record `75802 <https://adaptivesupport.amd.com/s/article/75802>`__ for a list of known issues.
 
+See Answer Record `75802 <https://adaptivesupport.amd.com/s/article/75802>`__ for a list of known issues.
 
 .. _SOLVER_TUTORIALS:
 
 ===============
 Vitis Tutorials
 ===============
+
 
 AMD provides an extensive library of purpose-built tutorials. Visit `Vitis Tutorials <https://github.com/Xilinx/Vitis-Tutorials>`__ to get familiar with the AMD Vitis |trade| in-depth tutorials.
 

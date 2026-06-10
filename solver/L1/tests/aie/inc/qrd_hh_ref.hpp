@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2025-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,6 @@ QRD Product reference model
 
 #include "qrd_hh_ref_traits.hpp"
 using namespace adf;
-
-//#define _SOLVERLIB_QRD_REF_DEBUG_
 
 namespace xf {
 namespace solver {

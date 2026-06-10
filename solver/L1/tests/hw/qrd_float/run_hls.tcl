@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 # SPDX-License-Identifier: X11
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy

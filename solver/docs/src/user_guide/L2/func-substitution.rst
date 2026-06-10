@@ -1,13 +1,13 @@
 ..
    Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+   Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _SOLVER_SUBSTITUTION:
 
 ============
-SUBSTITUTION
+Substitution
 ============
 
 This function performs forwards or backwards substitution to solve :math:`x` in the equation  
@@ -85,8 +85,8 @@ The following is an example of ``TP_DIM`` and ``TP_GRID_DIM`` being used:
         +-----+-----+-----+
 
 .. note:: The numbers represent sample indices of the input sub-matrices, and the drawn boundaries represent the samples processed by each sub-kernel. 
-Note that diagonal elements must be real (any value on the imaginary is ignored and assumed to be zero) and samples in the off-diagonal upper triangle are ignored and
-assumed to be zero.
+
+.. note:: Diagonal elements must be real (any value on the imaginary is ignored and assumed to be zero) and samples in the off-diagonal upper triangle are ignored and assumed to be zero.
 
 Input Form
 ----------

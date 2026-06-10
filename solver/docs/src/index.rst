@@ -1,6 +1,6 @@
 ..
    Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+   Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
@@ -53,9 +53,12 @@ Currently, the Vitis AIE Solver Library provides the following operations on AI 
 The AMD Vitis AI Engine Solver library encapsulates several solver algorithms, optimized to take full advantage of the processing power of AMD Versal |trade| Adaptive SoC devices, which contain an array of AI Engines.
 
 * Matrix decomposition
-   * Cholesky decomposition for symmetric positive definite matrix
+   * Cholesky decomposition
    * QR decomposition (Gram-Schmidt method)
+   * QR decomposition (House-Holder method)
    * Singular Value Decomposition (one-sided Jacobi with parallel-pairs schedule)
+* Linear system solving
+   * Substitution (forward and backward)
 
 .. toctree::
    :caption: Introduction
@@ -86,8 +89,10 @@ The AMD Vitis AI Engine Solver library encapsulates several solver algorithms, o
    :caption: API Reference
 
    API Reference Overview <user_guide/L2/api-reference.rst>
-   Cholesky <rst/group_cholesky.rst>
+   Cholesky <rst/group_cholesky_graph.rst>
+   Substitution <rst/group_substitution_graph.rst>
    QRD <rst/group_qrd_graph.rst>
+   QRD_HH <rst/group_qrd_hh_graph.rst>
    SVD <rst/group_svd_graph.rst>
 
 

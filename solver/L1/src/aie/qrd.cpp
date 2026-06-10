@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2025-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,6 @@ using namespace ::xf::dsp::aie;
 
 // #include "qrd_traits.hpp"
 // #include "qrd_utils.hpp"
-
-// #define _SOLVERLIB_QRD_HPP_DEBUG_
 
 namespace xf {
 namespace solver {

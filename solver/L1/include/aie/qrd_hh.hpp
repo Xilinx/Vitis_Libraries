@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2025-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,8 +43,6 @@ compilation.
 #include "qrd_hh_traits.hpp"
 
 using namespace adf;
-
-//#define _DSPLIB_QRD_HPP_DEBUG_
 
 // #include "qrd_hh_traits.hpp" //for fnPointSizePwr
 

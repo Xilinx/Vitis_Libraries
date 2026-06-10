@@ -1,6 +1,6 @@
 ..
    Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+   Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
@@ -20,8 +20,8 @@ The SolverLib consists of the following solver elements:
    Cholesky <func-cholesky.rst>
    QRD <func-qrd.rst>
    QRD Householder <func-qrd_hh.rst>
-   SVD <func-svd.rst>
    Substitution <func-substitution.rst>
+   SVD <func-svd.rst>
 
 .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
    :ltrim:

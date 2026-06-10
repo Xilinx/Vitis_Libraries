@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ class create_casc_kernel_recur_qrd {
  */
 
 /**
- * @defgroup qrd_hh QRD Householder function
+ * @defgroup qrd_hh_graph QRD Householder function
  *
  * QR Decomposition (Householder) function graph class
 **/
@@ -95,7 +95,7 @@ class create_casc_kernel_recur_qrd {
 // qrd_hh_graph template
 //--------------------------------------------------------------------------------------------------
 /**
- * @ingroup qrd_hh
+ * @ingroup qrd_hh_graph
  * @brief QRD Householder implements the QR Decomposition of a matrix A such that A = QR, where Q is an orthogonal
  *matrix
  * and R is an upper triangular matrix using Householder reflections.

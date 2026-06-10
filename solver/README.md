@@ -4,7 +4,7 @@
 Licensed using the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0).
 
     Copyright (C) 2019-2022, Xilinx, Inc.
-    Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+    Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -70,6 +70,6 @@ For more details of the Graph library, please refer to [Vitis Solver Library Doc
 
 ## License
 
- Copyright © 2019–2023 Advanced Micro Devices, Inc
+ Copyright © 2019–2026 Advanced Micro Devices, Inc
 
 Terms and Conditions <https://www.amd.com/en/corporate/copyright>

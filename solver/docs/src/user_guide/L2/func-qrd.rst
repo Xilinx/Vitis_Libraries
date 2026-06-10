@@ -1,14 +1,14 @@
 ..
    Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+   Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _SOLVER_QRD:
 
-================
-QR Decomposition
-================
+=======================================
+QR Decomposition (Modified Gram-Shmidt)
+=======================================
 
 This function computes the QR decomposition of matrix :math:`A` using the modified Gram-Schmidt process. The QR decomposition is defined as:
 

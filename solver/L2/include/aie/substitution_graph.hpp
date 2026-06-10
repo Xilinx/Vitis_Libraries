@@ -120,7 +120,7 @@ class substitution_recur {
   */
 
 /**
- * @defgroup substitution Forward Backward Substitution
+ * @defgroup substitution_graph Forward Backward Substitution
  *
  * Forward Backward Substitution
  *
@@ -130,7 +130,7 @@ class substitution_recur {
 // substitution_graph template
 //--------------------------------------------------------------------------------------------------
 /**
- * @ingroup substitution
+ * @ingroup substitution_graph
  * @brief This class encapsulates a Forward or Backward Substitution function.
  *        When provided an input lower or upper triangular matrix L and a vector of the same length B
  *        It will solve Lx = b for x.

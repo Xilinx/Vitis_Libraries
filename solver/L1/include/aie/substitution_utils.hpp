@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2025-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 #ifndef _DSPLIB_SUBSTITUTION_UTILS_HPP_
 #define _DSPLIB_SUBSTITUTION_UTILS_HPP_
-
-// #define _DSPLIB_CHOLESKY_RUNTIME_DEBUG_
 
 /*
 This file contains sets of overloaded, templatized and specialized templatized functions for use

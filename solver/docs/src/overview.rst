@@ -1,6 +1,6 @@
 ..
    Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+   Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
    
    `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
@@ -49,6 +49,10 @@ Currently, the AMD Vitis AIE Solver Library provides the following operations on
 * Matrix decomposition
    * Cholesky decomposition
    * QR decomposition (Gram-Schmidt method)
+   * QR decomposition (House-Holder method)
+   * Singular Value Decomposition (one-sided Jacobi with parallel-pairs schedule)
+* Linear system solving
+   * Substitution (forward and backward)
 
 Requirements
 ------------
@@ -56,7 +60,7 @@ Requirements
 Software requirements
 ~~~~~~~~~~~~~~~~~~~~~
 * This library is designed to work with AMD Vitis |trade|, and therefore inherits the system requirements of Vitis and XRT.
-* Supported operating systems are RHEL/CentOS RHEL 9.4, RHEL 9.5, RHEL 9.6, and RHEL 10.0, Ubuntu 22.04.3 LTS, 22.04.4 LTS, and 22.04.5 LTS, Ubuntu 24.04 LTS, 24.04.1 LTS, and 24.04.2 LTS, as well as AlmaLinux OS ver. 8.10, 9.4, 9.5, 9.6, and 10.0, Rocky 8.10, 9.6, and 10.0.
+* Supported operating systems are: RHEL 8.10, 9.6, 9.7, 10.0, and 10.1, Ubuntu 22.04.5 LTS, Ubuntu 24.04.2 LTS, and 24.04.3 LTS, as well as AlmaLinux OS ver. 8.10, 9.6, 9.7, 10.0 and 10.1, Rocky 8.10, 9.6, 9.7, 10.0 and 10.1.
 
 Hardware requirements
 ~~~~~~~~~~~~~~~~~~~~~

@@ -969,6 +969,11 @@
                         "type": "unsigned int",
                         "name": "TP_GRID_DIM",
                         "description": "The dimension size of the grid of kernels used to break up a matrix."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIAG_INV",
+                        "description": "Whether to apply diagonal inversion."
                     }
                 ],
                 "header_file_name": [
@@ -1029,16 +1034,16 @@
                         "type": "unsigned int",
                         "name": "TP_CASC_LEN",
                         "description": "The number of cascaded kernels to be used to perform the function."
-                    },     
+                    },
                     {
                         "type": "unsigned int",
                         "name": "TP_DIM_A_LEADING",
                         "description": "Describes which dimension of the Matrix A input data is contigious in memory. TP_DIM_A_LEADING=1 is row major, and TP_DIM_A_LEADING=0 is column major."
-                    },                    
+                    },
                     {
                         "type": "unsigned int",
                         "name": "TP_DIM_Q_LEADING",
-                        "description": "Describes which dimension of the Matrix Q output data is contigious in memory. TP_DIM_Q_LEADING=1 is row major, and TP_DIM_Q_LEADING=0 is column major."  
+                        "description": "Describes which dimension of the Matrix Q output data is contigious in memory. TP_DIM_Q_LEADING=1 is row major, and TP_DIM_Q_LEADING=0 is column major."
                     },
                     {
                         "type": "unsigned int",
@@ -1109,16 +1114,16 @@
                         "type": "unsigned int",
                         "name": "TP_CASC_LEN",
                         "description": "The number of cascaded kernels to be used to perform the function."
-                    },     
+                    },
                     {
                         "type": "unsigned int",
                         "name": "TP_DIM_A_LEADING",
                         "description": "Describes which dimension of the Matrix A input data is contigious in memory. TP_DIM_A_LEADING=1 is row major, and TP_DIM_A_LEADING=0 is column major."
-                    },                    
+                    },
                     {
                         "type": "unsigned int",
                         "name": "TP_DIM_Q_LEADING",
-                        "description": "Describes which dimension of the Matrix Q output data is contigious in memory. TP_DIM_Q_LEADING=1 is row major, and TP_DIM_Q_LEADING=0 is column major."  
+                        "description": "Describes which dimension of the Matrix Q output data is contigious in memory. TP_DIM_Q_LEADING=1 is row major, and TP_DIM_Q_LEADING=0 is column major."
                     },
                     {
                         "type": "unsigned int",
@@ -1146,6 +1151,151 @@
                         "direction": "output",
                         "type": "output_port xf::solver::aie::qrd_hh::qrd_hh_graph< TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES,TP_CASC_LEN>::outR",
                         "name": "outR"
+                    }
+                ],
+                "schema": "vitis_libraries_api_list_schema-1.0"
+            }
+        },
+        {
+            "api_name": "xf::solver::aie::substitution::substitution_graph",
+            "target_domain": "AIE",
+            "spec": {
+                "brief": "Forward Backward Substitution",
+                "search_paths": [
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
+                ],
+                "visible": true,
+                "target_domain": "AIE",
+                "display_name": "substitution_graph",
+                "parameters": [
+                    {
+                        "type": "typename",
+                        "name": "TT_DATA",
+                        "description": "The type of individual data samples input to the function."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIM_SIZE",
+                        "description": "Describes the length of one dimension of the matrix, in samples."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_SUBST_TYPE",
+                        "description": "Describes the direction of substitution: forward or backward."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_L_LEADING",
+                        "description": "Describes the memory arrangement of elements of L."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_GRID_DIM",
+                        "description": "Describes the length of one dimension of the tiling scheme used to divide up the input matrix."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_NUM_FRAMES",
+                        "description": "Describes the number of matrices to perform substitution on per call to this function."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIAG_INV",
+                        "description": "Instructs this function to operate on a matrix conventionally, or on a matrix with pre-inverted values on the diagonal elements."
+                    }
+                ],
+                "header_file_name": [
+                    "substitution_graph.hpp"
+                ],
+                "instance": "class",
+                "api_name": "xf::solver::aie::substitution::substitution_graph",
+                "ports": [
+                    {
+                        "direction": "input",
+                        "type": "input_port xf::solver::aie::substitution::substitution_graph< TT_DATA, TP_DIM_SIZE, TP_SUBST_TYPE, TP_L_LEADING, TP_GRID_DIM, TP_NUM_FRAMES, TP_DIAG_INV>::L_in",
+                        "name": "L_in"
+                    },
+                    {
+                        "direction": "input",
+                        "type": "input_port xf::solver::aie::substitution::substitution_graph< TT_DATA, TP_DIM_SIZE, TP_SUBST_TYPE, TP_L_LEADING, TP_GRID_DIM, TP_NUM_FRAMES, TP_DIAG_INV>::y_in",
+                        "name": "y_in"
+                    },
+                    {
+                        "direction": "output",
+                        "type": "output_port xf::solver::aie::substitution::substitution_graph< TT_DATA, TP_DIM_SIZE, TP_SUBST_TYPE, TP_L_LEADING, TP_GRID_DIM, TP_NUM_FRAMES, TP_DIAG_INV>::x_out",
+                        "name": "x_out"
+                    }
+                ],
+                "schema": "vitis_libraries_api_list_schema-1.0"
+            }
+        },
+        {
+            "api_name": "xf::solver::aie::svd::svd_graph",
+            "target_domain": "AIE",
+            "spec": {
+                "brief": "Singular Value Decomposition function graph class",
+                "search_paths": [
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
+                ],
+                "visible": true,
+                "target_domain": "AIE",
+                "display_name": "svd_graph",
+                "parameters": [
+                    {
+                        "type": "typename",
+                        "name": "TT_DATA",
+                        "description": "describes the type of individual data samples input to the function."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIM_ROWS",
+                        "description": "describes the number of rows in the input matrix."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIM_COLS",
+                        "description": "describes the number of columns in the input matrix."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_PASSES",
+                        "description": "describes the number of Jacobi sweep passes (for convergence)."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_CASC_LEN",
+                        "description": "selects the number of kernels the SVD will be split over in series."
+                    }
+                ],
+                "header_file_name": [
+                    "svd_graph.hpp"
+                ],
+                "instance": "class",
+                "api_name": "xf::solver::aie::svd::svd_graph",
+                "ports": [
+                    {
+                        "direction": "input",
+                        "type": "input_port xf::solver::aie::svd::svd_graph< TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CASC_LEN>::in",
+                        "name": "in"
+                    },
+                    {
+                        "direction": "output",
+                        "type": "output_port xf::solver::aie::svd::svd_graph< TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CASC_LEN>::outU",
+                        "name": "outU"
+                    },
+                    {
+                        "direction": "output",
+                        "type": "output_port xf::solver::aie::svd::svd_graph< TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CASC_LEN>::outS",
+                        "name": "outS"
+                    },
+                    {
+                        "direction": "output",
+                        "type": "output_port xf::solver::aie::svd::svd_graph< TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CASC_LEN>::outV",
+                        "name": "outV"
                     }
                 ],
                 "schema": "vitis_libraries_api_list_schema-1.0"

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2025-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,7 +140,7 @@ class cholesky_grid_recur {
   */
 
 /**
- * @defgroup cholesky Cholesky Decomposition
+ * @defgroup cholesky_graph Cholesky Decomposition
  *
  * Cholesky Decomposition
  *
@@ -150,7 +150,7 @@ class cholesky_grid_recur {
 // cholesky_graph template
 //--------------------------------------------------------------------------------------------------
 /**
- * @ingroup cholesky
+ * @ingroup cholesky_graph
  * @brief The Cholesky Decomposition is a specialization of the LU Decomposition. It decomposes a
  *        Hermitian, positive-definite matrix into the product of a lower triangular matrix and its
  *        conjugate transpose.

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2025-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 #define _DSPLIB_CHOLESKY_TRAITS_HPP_
 
 #include "device_defs.h"
-
-// #define _DSPLIB_CHOLESKY_HPP_DEBUG_
 
 /*
 This file contains sets of overloaded, templatized and specialized templatized functions which

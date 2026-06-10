@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2025-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ Coding conventions
 #include "qrd_hh_utils.hpp"
 
 using namespace ::xf::dsp::aie;
-//#define _SOLVERLIB_QRD_HH_HPP_DEBUG_
 
 namespace xf {
 namespace solver {
