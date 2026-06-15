@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,10 +44,10 @@ int main(int argc, char** argv) {
 // merged_bin[3] = bin[192 to 4095]
 #endif
 
-    int roi_tlx = 0;
-    int roi_tly = 0;
-    int roi_brx = 127;
-    int roi_bry = 127;
+    int roi_tlx = TB_ROI_TLX;
+    int roi_tly = TB_ROI_TLY;
+    int roi_brx = TB_ROI_BRX;
+    int roi_bry = TB_ROI_BRY;
     int stats_size = STATS_SIZE;
     const int N = 8;
     const int M = 8;

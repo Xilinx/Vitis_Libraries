@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,10 @@
 #include "ap_int.h"
 
 #define __ABS(X) ((X) < 0 ? (-(X)) : (X))
+
+enum layout_format { XF_NHWC = 0, XF_HCWNC4 = 1, XF_HCWNC8 = 2, XF_NCHW = 3 };
+
+enum data_types { INT8 = 0, FP16 = 1, BF16 = 2, FP32 = 3 };
 
 // Channels of an image
 enum _channel_extract {
@@ -132,11 +136,15 @@ enum _pixel_type {
     XF_10UP = 18,
     XF_12UP = 19,
     XF_40UP = 20,
-    XF_42UP = 20,
-    XF_48UP = 21,
-    XF_30UP = 22,
-    XF_36UP = 23,
-    XF_96FP = 24
+    XF_42UP = 21,
+    XF_48UP = 22,
+    XF_30UP = 23,
+    XF_36UP = 24,
+    XF_128UP = 25,
+    XF_96FP = 26,
+    XF_128FP = 27,
+    XF_256FP = 28,
+    XF_512FP = 29
 };
 typedef _pixel_type XF_pixel_type_e;
 
@@ -197,10 +205,14 @@ enum _word_width {
     XF_560SW = 52,
     XF_576UW = 53,
     XF_96FW = 54,
-    XF_192FW = 55,
-    XF_384FW = 56,
-    XF_768FW = 57,
-    XF_1536FW = 58
+    XF_128FW = 55,
+    XF_192FW = 56,
+    XF_256FW = 57,
+    XF_384FW = 58,
+    XF_512FW = 59,
+    XF_768FW = 60,
+    XF_1024FW = 61,
+    XF_1536FW = 62
 };
 typedef _word_width XF_word_width_e;
 
@@ -336,7 +348,11 @@ enum _pixeltype {
     XF_12UC3 = 21,
     XF_14UC3 = 22,
     XF_32FC3 = 23,
-    XF_64UC1 = 24
+    XF_32FC4 = 24,
+    XF_64UC1 = 25,
+    XF_8UC8 = 26,
+    XF_16UC8 = 27,
+    XF_32FC8 = 28
 };
 typedef _pixeltype XF_npt_e;
 

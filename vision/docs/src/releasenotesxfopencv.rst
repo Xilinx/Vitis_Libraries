@@ -51,4 +51,5 @@ Known issues
 	• Few AIE-ML testcases take a long time to finish hardware emulation because of large input size.
 	• ``rgbir2bayer`` and ``isppipeline_rgbir`` PL functions are not supplied with input images.
 	• ``lkdensepyroptflow`` fails to meet timing when URAM is enabled.
-	• AWB-npc8, customconv-npc8, lkdensepyrof_uram, tonemapping, meanstddev-pipeline, cases fail hw_emu because of a known tool issue. Other targets work fine.
+	• ``lkdensepyrof_uram``, ``tonemapping``, ``meanstddev-pipeline``, ``hls2rgb aiesim``, ``stereo-pipeline-URAM``, 
+  		cases fail hw_emu because of a known tool issue. Other targets work fine.

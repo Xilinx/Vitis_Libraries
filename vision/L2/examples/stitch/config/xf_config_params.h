@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef _XF_STITCH_L2_PARAMS_H_
 #define _XF_STITCH_L2_PARAMS_H_
 

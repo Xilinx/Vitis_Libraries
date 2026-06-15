@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,10 +47,10 @@ int main(int argc, char** argv) {
 
 #endif
 
-    int roi_tlx = 0;
-    int roi_tly = 0;
-    int roi_brx = 127;
-    int roi_bry = 127;
+    int roi_tlx = TB_ROI_TLX;
+    int roi_tly = TB_ROI_TLY;
+    int roi_brx = TB_ROI_BRX;
+    int roi_bry = TB_ROI_BRY;
     int stats_size = STATS_SIZE;
     const int N = 1;
     const int M = 1;
@@ -114,7 +114,7 @@ int main(int argc, char** argv) {
             cv::Vec3w bgr = in_img.at<cv::Vec3w>(row, col);
 #endif
             // Count if inside ROI
-            if ((row >= roi_tlx) && (row <= (roi_brx)) && (col >= roi_tly) && (col <= (roi_bry))) {
+            if ((col >= roi_tlx) && (col <= (roi_brx)) && (row >= roi_tly) && (row <= (roi_bry))) {
                 int zone_col = int((col - roi_tlx) / zone_width);
                 int zone_row = int((row - roi_tly) / zone_height);
                 int zone_idx = (zone_row * N) + zone_col;
@@ -175,7 +175,7 @@ STATS_ROW_LOOP:
             // Read BGR, 8-bit per channel at once
 
             // Check if part of zone
-            if ((row >= roi_tlx) && (row <= (roi_brx)) && (col >= roi_tly) && (col <= (roi_bry))) {
+            if ((col >= roi_tlx) && (col <= (roi_brx)) && (row >= roi_tly) && (row <= (roi_bry))) {
                 int zone_col = int((col - roi_tlx) / zone_width);
                 int zone_row = int((row - roi_tly) / zone_height);
                 zone_idx = (zone_row * N) + zone_col;
@@ -229,7 +229,7 @@ STATS_ROW_LOOP:
 #endif
 
     if (in_img.data == NULL) {
-        fprintf(stderr, "Cannot open image %s\n", argv[1]);
+        fprintf(stderr, "Cannot open image %s\n", argv[2]);
         return 0;
     }
 
@@ -246,7 +246,7 @@ STATS_ROW_LOOP:
 #endif
             currentBin_aec = int((val - minValue) * internal_inv);
             // Count if inside ROI
-            if ((row >= roi_tlx) && (row <= (roi_brx)) && (col >= roi_tly) && (col <= (roi_bry))) {
+            if ((col >= roi_tlx) && (col <= (roi_brx)) && (row >= roi_tly) && (row <= (roi_bry))) {
                 int zone_col = int((col - roi_tlx) / zone_width);
                 int zone_row = int((row - roi_tly) / zone_height);
                 int zone_idx = (zone_row * N) + zone_col;

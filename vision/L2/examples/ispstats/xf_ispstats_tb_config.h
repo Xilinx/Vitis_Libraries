@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,3 +16,18 @@
  */
 
 #include "xf_config_params.h"
+
+// ROI in OpenCV coordinates: columns [TB_ROI_TLX, TB_ROI_BRX], rows [TB_ROI_TLY, TB_ROI_BRY].
+// Non-square ROI (top half of 128x128) validates column/row mapping vs legacy row/col swap.
+#ifndef TB_ROI_TLX
+#define TB_ROI_TLX 0
+#endif
+#ifndef TB_ROI_TLY
+#define TB_ROI_TLY 0
+#endif
+#ifndef TB_ROI_BRX
+#define TB_ROI_BRX 127
+#endif
+#ifndef TB_ROI_BRY
+#define TB_ROI_BRY 63
+#endif

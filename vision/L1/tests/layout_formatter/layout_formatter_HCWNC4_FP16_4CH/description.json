@@ -1,0 +1,68 @@
+{
+    "name": "xilinx layout_formatter_HCWNC4_FP16_4CH test",
+    "description": "Layout formatter runtime test: HCWNC4, FP16, 4 channels",
+    "flow": "hls",
+    "platform_allowlist": [
+        "vek280"
+    ],
+    "platform_blocklist": [],
+    "part_allowlist": [],
+    "part_blocklist": [],
+    "project": "layout_formatter",
+    "solution": "sol1",
+    "clock": "7.5",
+    "topfunction": "layout_formatter_accel",
+    "top": {
+        "source": [
+            "${XF_PROJ_ROOT}/L1/examples/layout_formatter/xf_layout_formatter_accel.cpp"
+        ],
+        "cflags": " -I ${XF_PROJ_ROOT}/L1/tests/layout_formatter/layout_formatter_HCWNC4_FP16_4CH -I${XF_PROJ_ROOT}/L1/examples/layout_formatter/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x",
+        "csimflags": " -I ${XF_PROJ_ROOT}/L1/tests/layout_formatter/layout_formatter_HCWNC4_FP16_4CH -I${XF_PROJ_ROOT}/L1/examples/layout_formatter/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+    },
+    "testbench": {
+        "source": [
+            "${XF_PROJ_ROOT}/L1/examples/layout_formatter/xf_layout_formatter_tb.cpp"
+        ],
+        "cflags": " -I ${XF_PROJ_ROOT}/L1/tests/layout_formatter/layout_formatter_HCWNC4_FP16_4CH -I${XF_PROJ_ROOT}/L1/examples/layout_formatter/config -I${XF_PROJ_ROOT}/L1/examples/layout_formatter -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x",
+        "ldflags": "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d",
+        "argv": {
+            "hls_csim": " ${XF_PROJ_ROOT}/data/128x128.png",
+            "hls_cosim": " ${XF_PROJ_ROOT}/data/128x128.png"
+        },
+        "stdmath": false
+    },
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": {
+                    "hls_csim": 10240,
+                    "hls_csynth": 10240,
+                    "hls_cosim": 16384,
+                    "vivado_syn": 16384,
+                    "vivado_impl": 16384
+                },
+                "max_time_min": {
+                    "hls_csim": 60,
+                    "hls_csynth": 60,
+                    "hls_cosim": 300,
+                    "vivado_syn": 300,
+                    "vivado_impl": 300
+                }
+            }
+        ],
+        "targets": [
+            "hls_csim",
+            "hls_csynth",
+            "hls_cosim",
+            "vivado_syn",
+            "vivado_impl"
+        ],
+        "category": "canary"
+    },
+    "gui": true
+}

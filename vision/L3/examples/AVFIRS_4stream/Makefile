@@ -1,4 +1,3 @@
-# Copyright (C) 2019-2022, Xilinx, Inc.
 # Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.10
+# vitis makefile-generator v2.0.11
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -49,7 +48,7 @@ XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L3/
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XFLIB_DIR = $(XF_PROJ_ROOT)
 SCRIPTS_DIR := ${CUR_DIR}/scripts_mk
-VITIS_LIB_ROOT = $(dir $(XF_PROJ_ROOT))
+VITIS_LIB_ROOT ?= $(XFLIB_DIR)/../../Vitis_Librarie
 export XF_PROJ_ROOT
 export VITIS_LIB_ROOT
 
@@ -142,14 +141,14 @@ EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 EXE_FILE_DEPS := $(HOST_SRCS) $(INSTANCE_FILES)  $(EXE_FILE_DEPS)
 
 ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
-HOST_ARGS := $(XFLIB_DIR)/data/my_frames/ $(XFLIB_DIR)/data/dewarp_inputs/ $(XFLIB_DIR)/data/stitch_inputs/ $(XFLIB_DIR)/data/mask_inputs/ 
+HOST_ARGS := $(XFLIB_DIR)/data/avfirs_frames $(XFLIB_DIR)/data/dewarp_inputs $(XFLIB_DIR)/data/stitch_inputs $(XFLIB_DIR)/data/mask_inputs 
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
 LIBRARY_PATH := $(OPENCV_LIB):$(LD_LIBRARY_PATH):$(XILINX_XRT)/lib
 endif
 ifeq ($(TARGET),$(filter $(TARGET),hw))
-HOST_ARGS := $(XFLIB_DIR)/data/my_frames/ $(XFLIB_DIR)/data/dewarp_inputs/ $(XFLIB_DIR)/data/stitch_inputs/ $(XFLIB_DIR)/data/mask_inputs/ 
+HOST_ARGS := $(XFLIB_DIR)/data/avfirs_frames $(XFLIB_DIR)/data/dewarp_inputs $(XFLIB_DIR)/data/stitch_inputs $(XFLIB_DIR)/data/mask_inputs 
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
@@ -204,7 +203,11 @@ $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 $(EXE_FILE): $(EXE_FILE_DEPS)
 	mkdir -p $(BUILD_DIR)
+ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
 	$(CXX) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^) $(CXXFLAGS) $(LDFLAGS)
+else
+	$(CXX) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^) $(CXXFLAGS) $(LDFLAGS)
+endif
 
 $(EMCONFIG):
 	emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
@@ -221,12 +224,14 @@ ifeq ($(SD_CARD_NEEDED), on)
 RUN_SCRIPT := $(BUILD_DIR)/run_script.sh
 $(RUN_SCRIPT):
 	rm -rf $(RUN_SCRIPT)
+ifeq (,$(findstring AIE2PS, $(AIE_TYPE)))
 	@echo 'export LD_LIBRARY_PATH=/mnt:/tmp${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}} ' >> $(RUN_SCRIPT)
+	@echo 'export XILINX_VITIS=/mnt' >> $(RUN_SCRIPT)
+	@echo 'export XILINX_XRT=/usr' >> $(RUN_SCRIPT)
+endif
 ifneq ($(filter hw_emu, $(TARGET)),)
 	@echo 'export XCL_EMULATION_MODE=$(TARGET)' >> $(RUN_SCRIPT)
 endif
-	@echo 'export XILINX_VITIS=/mnt' >> $(RUN_SCRIPT)
-	@echo 'export XILINX_XRT=/usr' >> $(RUN_SCRIPT)
 	@echo 'if [ -f platform_desc.txt  ]; then' >> $(RUN_SCRIPT)
 	@echo '        cp platform_desc.txt /etc/xocl.txt' >> $(RUN_SCRIPT)
 	@echo 'fi' >> $(RUN_SCRIPT)
@@ -244,7 +249,7 @@ endif
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
 DATA_FILE := $(custom_data_file)
-DATA_DIR := $(XFLIB_DIR)/data/mask_inputs/ $(XFLIB_DIR)/data/stitch_inputs/ $(XFLIB_DIR)/data/dewarp_inputs/ $(XFLIB_DIR)/data/avfirs_frames/ $(custom_data_dir)
+DATA_DIR := $(XFLIB_DIR)/data/mask_inputs $(XFLIB_DIR)/data/stitch_inputs $(XFLIB_DIR)/data/dewarp_inputs $(XFLIB_DIR)/data/avfirs_frames $(custom_data_dir)
 DATA_FILE := $(strip $(DATA_FILE))
 DATA_DIR := $(strip $(DATA_DIR))
 SD_FILES += $(RUN_SCRIPT)
@@ -258,7 +263,13 @@ PACKAGE_FILES := $(BINARY_CONTAINERS)
 PACKAGE_FILES += $(AIE_CONTAINER)
 PACKAGE_DIR := $(CUR_DIR)/package_$(TARGET)
 PACKAGE_DIR_HW := $(CUR_DIR)/package.$(TARGET)
-SD_CARD := $(CUR_DIR)/package_$(TARGET)
+SD_CARD := $(PACKAGE_DIR)
+ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
+PACKAGE_SD_DIR := $(PACKAGE_DIR)/sd_card
+QEMU_COMBINED := $(PACKAGE_SD_DIR)
+PDI_DIR := $(PACKAGE_SD_DIR)/$(BINARY_NAME).pdi
+DTBO_DIR := $(PACKAGE_SD_DIR)/$(BINARY_NAME).dtbo
+endif
 $(PACKAGE_DIR): host xclbin $(RUN_SCRIPT) $(EMCONFIG) #check_kimage check_rootfs
 	@echo "Generating sd_card folder...."
 	mkdir -p $(PACKAGE_DIR)
@@ -267,31 +278,41 @@ $(PACKAGE_DIR): host xclbin $(RUN_SCRIPT) $(EMCONFIG) #check_kimage check_rootfs
 ifeq ($(dfx_hw), on)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p $(PACKAGE_FILES) $(VPP_PACKAGE) -o $(BINARY_CONTAINERS_PKG)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(PACKAGE_DIR) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
-	@echo "### ***** sd_card generation done! ***** ###"
 endif
 # 2. General Embeded flow
 ifeq ($(dfx_hw), off)
 ifeq ($(pcie_versal), off)
 ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
-	$(VPP) -s -t $(TARGET) -p -f $(PACKAGE_FILES) -o $(BINARY_CONTAINERS_PKG) $(VPP_PACKAGE) --package.out_dir $(PACKAGE_DIR)
+	$(VPP) -s -t $(TARGET) -p -f $(PACKAGE_FILES) -o $(BINARY_CONTAINERS_PKG) $(VPP_PACKAGE) \
+		--package.out_dir $(PACKAGE_SD_DIR)
+	@SD="$(PACKAGE_SD_DIR)"; \
+	if [ ! -f "$$SD/BOOT.bin" ]; then \
+	  for src in "$(PACKAGE_DIR)/BOOT.bin" "$(PACKAGE_DIR)/_x/package/BOOT.bin"; do \
+	    [ -f "$$src" ] && cp -af "$$src" "$$SD/BOOT.bin" && echo "INFO: copied $$src -> $$SD/BOOT.bin" && break; \
+	  done; \
+	fi
 ifeq (${TARGET},hw)
 	@mkdir -p $(PACKAGE_DIR)/sd_card
-	@cp -rf $(PACKAGE_DIR)/${BINARY_NAME}.dtbo $(PACKAGE_DIR)/*.bif $(BINARY_CONTAINERS_PKG) $(EXE_FILE) $(RUN_SCRIPT) $(PACKAGE_DIR)/sd_card
-	mv $(PACKAGE_DIR)/${BINARY_NAME}.pdi $(PACKAGE_DIR)/sd_card/${BINARY_NAME}.pdi
+	@cp -rf $(BINARY_CONTAINERS_PKG) $(EXE_FILE) $(RUN_SCRIPT) $(PACKAGE_DIR)/sd_card/
+	@if [ ! -f $(PACKAGE_DIR)/sd_card/BOOT.bin ]; then \
+	  for src in $(PACKAGE_DIR)/BOOT.bin $(PACKAGE_DIR)/_x/package/BOOT.bin; do \
+	    [ -f "$$src" ] && cp -af "$$src" $(PACKAGE_DIR)/sd_card/BOOT.bin && break; \
+	  done; \
+	fi
 	@for dir in $(DATA_DIR); do \
-	    cp -r $$dir/* $(PACKAGE_DIR)/sd_card/ ; \
+	    cp -r $$dir $(PACKAGE_DIR)/sd_card/ ; \
 	done
 	@for f in $(DATA_FILE); do \
 	    [ -e "$$f" ] && cp -r $$f $(PACKAGE_DIR)/sd_card/ ; \
 	done
-	@ln -sfn $(PACKAGE_DIR) $(PACKAGE_DIR_HW)
-endif	
+endif
 else
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(PACKAGE_DIR) --package.rootfs $(ROOTFS) --package.generate_sdcard --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 endif
+endif
+endif
+	@ln -sfn $(PACKAGE_DIR) $(PACKAGE_DIR_HW)
 	@echo "### ***** sd_card generation done! ***** ###"
-endif
-endif
 
 .PHONY: sd_card
 sd_card: $(PACKAGE_DIR)
@@ -303,7 +324,8 @@ ifeq ($(SD_CARD_NEEDED), on)
 ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
 RUN_DEPS += $(PACKAGE_DIR)
 ifeq ($(TARGET),hw_emu)
-RUN_DEPS += qemu_combined copy_wic
+RUN_DEPS += qemu_combined
+RUN_DEPS += copy_wic
 endif
 else
 RUN_DEPS += $(PACKAGE_DIR)
@@ -335,12 +357,15 @@ else
 endif
 else
 ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
-	cd ${PACKAGE_DIR} && ./launch_hw_emu.sh -qemu-config ${QEMU_COMBINED}/combined.qemuboot.conf -login "amd-edf" -password "amd-edf" -run-app " mount /dev/sda2 /media; cd /media; ls; bash $(notdir $(RUN_SCRIPT)) " 2>&1 | tee qemu_output.log
+	@echo "INFO: Running hw_emu (linux_edf)"
+	@test -x ${SCRIPTS_DIR}/edf_pre_package_cleanup.sh || (echo "ERROR: missing ${SCRIPTS_DIR}/edf_pre_package_cleanup.sh (regenerate Makefile with vitis_makefile_gen.py)" && exit 1)
+	bash ${SCRIPTS_DIR}/edf_pre_package_cleanup.sh $(PACKAGE_DIR) kill-only
+	cd ${PACKAGE_DIR} && bash ${SCRIPTS_DIR}/hw_emu_run.sh linux_edf ${PACKAGE_DIR} $(RUN_SCRIPT) $(EDF_QEMU_CONF) 2>&1 | tee qemu_output.log; exit $${PIPESTATUS[0]}
 else
-	@echo $(RUN_DEPS)
-	$(PACKAGE_DIR)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+	@echo "INFO: Running hw_emu (legacy)"
+	cd ${PACKAGE_DIR} && bash ${SCRIPTS_DIR}/hw_emu_run.sh legacy ${PACKAGE_DIR} $(RUN_SCRIPT) 2>&1 | tee qemu_output.log; exit $${PIPESTATUS[0]}
 endif
-	grep "TEST PASSED, RC=0" $(PACKAGE_DIR)/qemu_output.log || exit 1
+	grep -E 'TEST PASSED|Test passed\.' $(PACKAGE_DIR)/qemu_output.log || exit 1
 	
 endif
 endif
@@ -364,25 +389,28 @@ else
 endif
 endif
 
-############################## qemu combined and config ##############################
+############################## AIE2PS vek385 hw_emu (linux_edf | baremetal_ps | legacy) ##############################
 ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
-QEMU_COMBINED := ${PACKAGE_DIR}/base_camp_images
-QEMU_PREBUILT := amd-cortexa78-mali-common_vek385_qemu_prebuilt
+QEMU_PREBUILT := amd-cortexa78-mali-common_vek385revb_qemu_prebuilt
+WIC_PARTITION := edf-platform-disk-image-amd-cortexa78-mali-common.rootfs.wic.ufs:2
+EDF_BOOT_BIN := BOOT-versal-2ve-2vm-vek385-revb-multidomain.bin
+QEMU_OSPI_BIN := qemu-ospi.bin
+EDF_QEMU_CONF := $(QEMU_COMBINED)/combined.qemuboot.conf
+EDF_PREPARE_PDI :=
+XCLBIN_LOOKUP_NAMES := krnl_AVFIRS_4stream
+.PHONY: qemu_combined copy_wic
 
-qemu_combined:
-	cd ${PACKAGE_DIR}; \
-	rm -rf ${QEMU_COMBINED}; \
-	mkdir -p ${QEMU_COMBINED}; \
-	cp -prf ${YOCTO_ARTIFACTS}/${QEMU_PREBUILT}/* ${QEMU_COMBINED}/.; 
-endif
+qemu_combined: $(PACKAGE_DIR)
+	@test -x ${SCRIPTS_DIR}/edf_hw_emu_prepare.sh || (echo "ERROR: missing ${SCRIPTS_DIR}/edf_hw_emu_prepare.sh (regenerate Makefile with vitis_makefile_gen.py)" && exit 1)
+	bash ${SCRIPTS_DIR}/edf_hw_emu_prepare.sh \
+		$(PACKAGE_DIR) $(QEMU_COMBINED) \
+		$(QEMU_PREBUILT) $(EDF_BOOT_BIN) $(QEMU_OSPI_BIN) $(EDF_PREPARE_PDI)
 
-############################## copy files to quem ##############################
-ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
-PDI_DIR := ${PACKAGE_DIR}/${BINARY_NAME}.pdi
-DTBO_DIR := ${PACKAGE_DIR}/${BINARY_NAME}.dtbo
-WIC_PARTITION := edf-linux-disk-image-amd-cortexa78-mali-common.rootfs.wic.ufs:2
-copy_wic:
-	bash ${SCRIPTS_DIR}/run_copy_wic.sh ${BINARY_CONTAINERS_PKG} ${EXE_FILE} ${DTBO_DIR} ${PDI_DIR} ${RUN_SCRIPT} ${QEMU_COMBINED} ${WIC_PARTITION} "${DATA_DIR}" ${DATA_FILE}
+copy_wic: qemu_combined
+	LINUX_EDF_INSTALL_VPP_BOOT=1 XCLBIN_LOOKUP_NAMES="$(XCLBIN_LOOKUP_NAMES)" bash ${SCRIPTS_DIR}/edf_wic_deploy.sh \
+		$(BINARY_CONTAINERS_PKG) $(EXE_FILE) $(DTBO_DIR) $(PDI_DIR) \
+		$(RUN_SCRIPT) $(QEMU_COMBINED) "$(WIC_PARTITION)" \
+		"$(DATA_DIR)" $(EMCONFIG) $(DATA_FILE)
 endif
 
 ############################## Setting Targets ##############################
@@ -451,7 +479,7 @@ cleank:
 	-$(RMDIR) _x_temp.* _x* $(INST_FILES)
 
 cleanall: cleanh cleank
-	-$(RMDIR) $(BUILD_DIR)  emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
+	-$(RMDIR) $(BUILD_DIR)  emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_* package.* $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR)  $(AIE_WORK_DIR) $(AIE_PKG_DIR) $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
 	-$(RMDIR)  *.html $(GENERATED_FILES)
 

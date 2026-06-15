@@ -1,5 +1,6 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,7 +177,7 @@ loop_row_axi2mat:
  *  input: img
  *  output: AXI_video_strm
  */
-template <int W, int TYPE, int ROWS, int COLS, int NPPC, int XFCVDEPTH = _XFCVDEPTH_DEFAULT>
+template <int W, int TYPE, int ROWS, int COLS, int NPPC, int XFCVDEPTH = _XFCVDEPTH_DEFAULT, int XFAXIGBR = 0>
 int xfMat2AXIvideo(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH>& img,
                    hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_video_strm) {
     ap_axiu<W, 1, 1, 1> axi;
@@ -189,7 +190,11 @@ int xfMat2AXIvideo(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH>& img,
     assert(img.rows <= ROWS);
     assert(img.cols <= COLS);
 
+    XF_TNAME(TYPE, NPPC) srcpixel;
+
     const int m_pix_width = XF_PIXELWIDTH(TYPE, NPPC) * XF_NPIXPERCYCLE(NPPC);
+
+    int depth = XF_DTPIXELDEPTH(TYPE, NPPC);
 
     bool sof = true; // Indicates start of frame
 
@@ -215,7 +220,34 @@ loop_row_mat2axi:
             }
 
             axi.data = 0;
-            axi.data(m_pix_width - 1, 0) = img.read(idx++);
+            if (XFAXIGBR) {
+                srcpixel = img.read(idx++);
+
+                int kmap[4] = {0};
+
+                if (XF_CHANNELS(TYPE, NPPC) == 3) {
+                    kmap[0] = 1;
+                    kmap[1] = 0;
+                    kmap[2] = 2;
+                } else if (XF_CHANNELS(TYPE, NPPC) == 4) {
+                    kmap[0] = 1;
+                    kmap[1] = 0;
+                    kmap[2] = 2;
+                    kmap[3] = 3;
+                } else if (XF_CHANNELS(TYPE, NPPC) == 1) {
+                    kmap[0] = 0;
+                }
+
+                for (int npc = 0; npc < NPPC; npc++) {
+                    for (int rs = 0; rs < XF_CHANNELS(TYPE, NPPC); rs++) {
+                        int start = (rs + npc * XF_CHANNELS(TYPE, NPPC)) * depth;
+                        int start_format = (kmap[rs] + npc * XF_CHANNELS(TYPE, NPPC)) * depth;
+                        axi.data(start + (depth - 1), start) = srcpixel.range(start_format + (depth - 1), start_format);
+                    }
+                }
+            } else {
+                axi.data(m_pix_width - 1, 0) = img.read(idx++);
+            }
 
             axi.keep = -1;
             AXI_video_strm << axi;

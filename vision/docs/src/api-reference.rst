@@ -15272,6 +15272,8 @@ The following table summarizes the resource utilization of preProcess for NPC =8
     +----------------+---------------------+----------------------+----------+------+-------+-------+
 
 
+.. include:: include/layout_formatter_api.rst
+
 
 .. _pyramid-up:
 
@@ -15739,7 +15741,7 @@ Remap
 =====
 
 | The ``remap`` function takes pixels from one place in the image and
-  relocates them to another position in another image. Two types of
+  relocates them to another position in another image. Three types of
   interpolation methods are used here for mapping the image from source
   to destination image.
 | |image146|

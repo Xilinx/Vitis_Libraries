@@ -1,0 +1,68 @@
+{
+    "name": "xilinx preprocess_multidatatype_BF16 test",
+    "description": "Preprocess multidatatype runtime test: BF16 datatype",
+    "flow": "hls",
+    "platform_allowlist": [
+        "vek280"
+    ],
+    "platform_blocklist": [],
+    "part_allowlist": [],
+    "part_blocklist": [],
+    "project": "preprocess_multidatatype",
+    "solution": "sol1",
+    "clock": "7.5",
+    "topfunction": "preprocess_accel",
+    "top": {
+        "source": [
+            "${XF_PROJ_ROOT}/L1/examples/preprocess_multidatatype/xf_preprocess_accel.cpp"
+        ],
+        "cflags": " -I ${XF_PROJ_ROOT}/L1/tests/preprocess_multidatatype/preprocess_multidatatype_BF16 -I${XF_PROJ_ROOT}/L1/examples/preprocess_multidatatype/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++14",
+        "csimflags": " -I ${XF_PROJ_ROOT}/L1/tests/preprocess_multidatatype/preprocess_multidatatype_BF16 -I${XF_PROJ_ROOT}/L1/examples/preprocess_multidatatype/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++14"
+    },
+    "testbench": {
+        "source": [
+            "${XF_PROJ_ROOT}/L1/examples/preprocess_multidatatype/xf_preprocess_tb.cpp"
+        ],
+        "cflags": " -I ${XF_PROJ_ROOT}/L1/tests/preprocess_multidatatype/preprocess_multidatatype_BF16 -I${XF_PROJ_ROOT}/L1/examples/preprocess_multidatatype/config -I${XF_PROJ_ROOT}/L1/examples/preprocess_multidatatype -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++14",
+        "ldflags": "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d",
+        "argv": {
+            "hls_csim": " ${XF_PROJ_ROOT}/data/128x128.png",
+            "hls_cosim": " ${XF_PROJ_ROOT}/data/128x128.png"
+        },
+        "stdmath": false
+    },
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": {
+                    "hls_csim": 10240,
+                    "hls_csynth": 10240,
+                    "hls_cosim": 16384,
+                    "vivado_syn": 16384,
+                    "vivado_impl": 16384
+                },
+                "max_time_min": {
+                    "hls_csim": 60,
+                    "hls_csynth": 60,
+                    "hls_cosim": 300,
+                    "vivado_syn": 300,
+                    "vivado_impl": 300
+                }
+            }
+        ],
+        "targets": [
+            "hls_csim",
+            "hls_csynth",
+            "hls_cosim",
+            "vivado_syn",
+            "vivado_impl"
+        ],
+        "category": "canary"
+    },
+    "gui": true
+}

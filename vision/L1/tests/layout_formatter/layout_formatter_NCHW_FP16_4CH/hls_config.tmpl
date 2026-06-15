@@ -1,0 +1,20 @@
+[hls]
+
+clock=7.5
+flow_target=vivado
+syn.file=${XF_PROJ_ROOT}/L1/examples/layout_formatter/xf_layout_formatter_accel.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/examples/layout_formatter/xf_layout_formatter_accel.cpp, -I ${XF_PROJ_ROOT}/L1/tests/layout_formatter/layout_formatter_NCHW_FP16_4CH -I${XF_PROJ_ROOT}/L1/examples/layout_formatter/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
+syn.file_csimflags=${XF_PROJ_ROOT}/L1/examples/layout_formatter/xf_layout_formatter_accel.cpp, -I ${XF_PROJ_ROOT}/L1/tests/layout_formatter/layout_formatter_NCHW_FP16_4CH -I${XF_PROJ_ROOT}/L1/examples/layout_formatter/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
+syn.top=layout_formatter_accel
+tb.file=${XF_PROJ_ROOT}/L1/examples/layout_formatter/xf_layout_formatter_tb.cpp
+tb.file_cflags=${XF_PROJ_ROOT}/L1/examples/layout_formatter/xf_layout_formatter_tb.cpp, -I ${XF_PROJ_ROOT}/L1/tests/layout_formatter/layout_formatter_NCHW_FP16_4CH -I${XF_PROJ_ROOT}/L1/examples/layout_formatter/config -I${XF_PROJ_ROOT}/L1/examples/layout_formatter -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
+
+csim.argv=${XF_PROJ_ROOT}/data/128x128.png
+csim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d
+
+cosim.argv=${XF_PROJ_ROOT}/data/128x128.png
+cosim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+sim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d

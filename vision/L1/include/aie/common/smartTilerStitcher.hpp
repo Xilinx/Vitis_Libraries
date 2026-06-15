@@ -1,6 +1,6 @@
 /*
- * Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
- * Copyright 2023-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

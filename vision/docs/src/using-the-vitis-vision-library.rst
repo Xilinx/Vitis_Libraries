@@ -74,6 +74,8 @@ folder name, which contains the library function.
    +-------------------------------------------+-----------------------------------+
    | xf::cv::autoexposurecorrection            | imgproc/xf_aec.hpp                |
    +-------------------------------------------+-----------------------------------+
+   | xf::cv::autogain                          | imgproc/xf_agc.hpp                |
+   +-------------------------------------------+-----------------------------------+
    | xf::cv::bilateralFilter                   | imgproc/xf_bilaterealfilter.hpp   |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::blackLevelCorrection              | imgproc/xf_black_level.hpp        |
@@ -107,6 +109,8 @@ folder name, which contains the library function.
    | xf::cv::convertTo                         | imgproc/xf_convert_bitdepth.hpp   |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::crop                              | imgproc/xf_crop.hpp               |
+   +-------------------------------------------+-----------------------------------+
+   | xf::cv::custom_bgr2y8                     | imgproc/xf_custom_bgr2y8.hpp      |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::distanceTransform                 | imgproc/xf_distancetransform.hpp  |
    +-------------------------------------------+-----------------------------------+
@@ -145,11 +149,15 @@ folder name, which contains the library function.
    +-------------------------------------------+-----------------------------------+
    | xf::cv::dilate                            | imgproc/xf_dilation.hpp           |
    +-------------------------------------------+-----------------------------------+
+   | xf::cv::degamma                           | imgproc/xf_degamma.hpp            |
+   +-------------------------------------------+-----------------------------------+
    | xf::cv::demosaicing                       | imgproc/xf_demosaicing.hpp        |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::erode                             | imgproc/xf_erosion.hpp            |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::fast                              | features/xf_fast.hpp              |
+   +-------------------------------------------+-----------------------------------+
+   | xf::cv::findcontours                      | imgproc/xf_findcontours.hpp       |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::filter2D                          | imgproc/xf_custom_convolution.hpp |
    +-------------------------------------------+-----------------------------------+
@@ -173,6 +181,8 @@ folder name, which contains the library function.
    +-------------------------------------------+-----------------------------------+
    | xf::cv::HDRMerge_bayer                    | imgproc/xf_hdrmerge.hpp           |
    +-------------------------------------------+-----------------------------------+
+   | xf::cv::hdr_decompand                     | imgproc/xf_hdrdecompand.hpp       |
+   +-------------------------------------------+-----------------------------------+
    | xf::cv::HOGDescriptor                     | imgproc/xf_hog_descriptor.hpp     |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::Houghlines                        | imgproc/xf_houghlines.hpp         |
@@ -181,12 +191,16 @@ folder name, which contains the library function.
    +-------------------------------------------+-----------------------------------+
    | xf::cv::integralImage                     | imgproc/xf_integral_image.hpp     |
    +-------------------------------------------+-----------------------------------+
+   | xf::cv::ispStats                          | imgproc/xf_ispstats.hpp           |
+   +-------------------------------------------+-----------------------------------+
    | xf::cv::KalmanFilter                      | video/xf_kalmanfilter.hpp         |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::Lscdistancebased                  | imgproc/xf_lensshadingcorrection  |
    |                                           | .hpp                              |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::LTM::process                      | imgproc/xf_ltm.hpp                |
+   +-------------------------------------------+-----------------------------------+
+   | xf::cv::layout_formatter                  | imgproc/xf_layout_formatter.hpp   |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::LUT                               | imgproc/xf_lut.hpp                |
    +-------------------------------------------+-----------------------------------+
@@ -227,6 +241,8 @@ folder name, which contains the library function.
    +-------------------------------------------+-----------------------------------+
    | xf::cv::rgbir2bayer                       | imgproc/xf_rgbir.hpp              |
    +-------------------------------------------+-----------------------------------+
+   | xf::cv::rotate                            | imgproc/xf_rotate.hpp             |
+   +-------------------------------------------+-----------------------------------+
    | xf::cv::convertScaleAbs                   | imgproc/xf_convertscaleabs.hpp    |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::Scharr                            | imgproc/xf_scharr.hpp             |
@@ -236,6 +252,8 @@ folder name, which contains the library function.
    | xf::cv::Sobel                             | imgproc/xf_sobel.hpp              |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::StereoPipeline                    | imgproc/xf_stereo_pipeline.hpp    |
+   +-------------------------------------------+-----------------------------------+
+   | xf::cv::stitch                            | imgproc/xf_stitch.hpp             |
    +-------------------------------------------+-----------------------------------+
    | xf::cv::sum                               | imgproc/xf_sum.hpp                |
    +-------------------------------------------+-----------------------------------+

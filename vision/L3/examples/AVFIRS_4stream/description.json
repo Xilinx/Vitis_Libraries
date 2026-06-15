@@ -33,7 +33,7 @@
     "launch": [
         {
             "target": "hw_emu",
-            "cmd_args": "LIB_DIR/data/my_frames/ LIB_DIR/data/dewarp_inputs/ LIB_DIR/data/stitch_inputs/ LIB_DIR/data/mask_inputs/ ",
+            "cmd_args": "LIB_DIR/data/avfirs_frames LIB_DIR/data/dewarp_inputs LIB_DIR/data/stitch_inputs LIB_DIR/data/mask_inputs ",
             "name": "hw_emu",
             "ld_library_path": [
                 "$(OPENCV_LIB)",
@@ -43,7 +43,7 @@
         },
         {
             "target": "hw",
-            "cmd_args": "LIB_DIR/data/my_frames/ LIB_DIR/data/dewarp_inputs/ LIB_DIR/data/stitch_inputs/ LIB_DIR/data/mask_inputs/ ",
+            "cmd_args": "LIB_DIR/data/avfirs_frames LIB_DIR/data/dewarp_inputs LIB_DIR/data/stitch_inputs LIB_DIR/data/mask_inputs ",
             "name": "Hardware",
             "ld_library_path": [
                 "$(OPENCV_LIB)",
@@ -53,10 +53,10 @@
         }
     ],
     "data": [
-        "LIB_DIR/data/avfirs_frames/",
-        "LIB_DIR/data/dewarp_inputs/",
-        "LIB_DIR/data/stitch_inputs/",
-        "LIB_DIR/data/mask_inputs/"
+        "LIB_DIR/data/avfirs_frames",
+        "LIB_DIR/data/dewarp_inputs",
+        "LIB_DIR/data/stitch_inputs",
+        "LIB_DIR/data/mask_inputs"
     ],
     "host": {
         "host_exe": "AVFIRS_4stream",

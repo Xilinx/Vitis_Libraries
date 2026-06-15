@@ -2436,6 +2436,91 @@
                                       }
                     },
   {
+                                      "api_name": "xf::cv::depth3D",
+                                      "target_domain": "PL",
+                                      "spec": {
+                                                        "schema": "vitis_libraries_api_list_schema-1.0",
+                                                        "api_name": "xf::cv::depth3D",
+                                                        "target_domain": "PL",
+                                                        "display_name": "depth3D",
+                                                        "brief": "The ``depth3D`` function converts a stereo disparity map into a floating-point depth map using Z = (f * B) / d, where f is focal length, B is camera baseline, and d is disparity.",
+                                                        
+                                                        "header_file_name": [
+                                                                          "imgproc/xf_3ddepth.hpp"
+                                                        ],
+                                                        "search_paths": [
+                                                                          "L1/include/"
+                                                        ],
+                                                        "instance": "function",
+                                                        "parameters": [
+                                                                          {
+                                                                                            "name": "SRC_T",
+                                                                                            "type": "int",
+                                                                                            "description": " Input disparity pixel type. Supported values are XF_16UC1 and XF_16SC1. ",
+                                                                                            "enum": ["XF_16UC1", "XF_16SC1"]
+                                                                          },
+                                                                          {
+                                                                                            "name": "DST_T",
+                                                                                            "type": "int",
+                                                                                            "description": " Output depth pixel type. Supported value is XF_32FC1. ",
+                                                                                            "enum": ["XF_32FC1"]
+                                                                          },
+                                                                          {
+                                                                                            "name": "ROWS",
+                                                                                            "type": "int",
+                                                                                            "minimum": 16,
+                                                                                            "maximum": 2160,
+                                                                                            "description": " Maximum image height the kernel is compiled for. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "COLS",
+                                                                                            "type": "int",
+                                                                                            "minimum": 16,
+                                                                                            "maximum": 3840,
+                                                                                            "description": " Maximum image width the kernel is compiled for. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "NPC",
+                                                                                            "type": "int",
+                                                                                            "description": " Number of pixels processed per clock cycle. Only XF_NPPC1 is supported. ",
+                                                                                            "enum": ["XF_NPPC1"]
+                                                                          },
+                                                                          {
+                                                                                            "name": "XFCVDEPTH_disp",
+                                                                                            "type": "int",
+                                                                                            "description": " FIFO depth of the input disparity xf::cv::Mat stream. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "XFCVDEPTH_out",
+                                                                                            "type": "int",
+                                                                                            "description": " FIFO depth of the output depth xf::cv::Mat stream. "
+                                                                          }
+                                                        ],
+                                                        "ports": [
+                                                                          {
+                                                                                            "name": "_disp_mat",
+                                                                                            "direction": "in",
+                                                                                            "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_disp>& "
+                                                                          },
+                                                                          {
+                                                                                            "name": "_depth_mat",
+                                                                                            "direction": "out",
+                                                                                            "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_out>& "
+                                                                          },
+                                                                          {
+                                                                                            "name": "focal_len",
+                                                                                            "direction": "in",
+                                                                                            "type": "float"
+                                                                          },
+                                                                          {
+                                                                                            "name": "base_dis",
+                                                                                            "direction": "in",
+                                                                                            "type": "float"
+                                                                          }
+                                                        ]
+                                      }
+                    },
+  {
                                       "api_name": "xf::cv::dilate",
                                       "target_domain": "PL",
                                       "spec": {
@@ -4282,6 +4367,140 @@
                                       }
                     },
   {
+                                      "api_name": "xf::cv::layout_formatter",
+                                      "target_domain": "PL",
+                                      "spec": {
+                                                        "schema": "vitis_libraries_api_list_schema-1.0",
+                                                        "api_name": "xf::cv::layout_formatter",
+                                                        "target_domain": "PL",
+                                                        "display_name": "layout_formatter",
+                                                        "brief": "The ``layout_formatter`` function reformats an input image into a DNN-friendly tensor layout. It supports runtime selection of output layout format (NHWC, HCWNC4, HCWNC8, or NCHW), output datatype (INT8, FP16, BF16, or FP32), and channel count when the corresponding compile-time options are enabled. For NHWC, HCWNC4, and HCWNC8, a single output buffer holds the formatted tensor. For NCHW, each active channel plane is written to a separate output buffer.",
+                                                        
+                                                        "header_file_name": [
+                                                                          "imgproc/xf_layout_formatter.hpp"
+                                                        ],
+                                                        "search_paths": [
+                                                                          "L1/include/"
+                                                        ],
+                                                        "instance": "function",
+                                                        "parameters": [
+                                                                          {
+                                                                                            "name": "OUT_PTR_WIDTH",
+                                                                                            "type": "int",
+                                                                                            "description": " AXI pointer width (bits) for NHWC/HCWNC output. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "OUT_PTR_WIDTH_NCHW",
+                                                                                            "type": "int",
+                                                                                            "description": " AXI pointer width (bits) for NCHW per-channel output. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "DATAORDER",
+                                                                                            "type": "int",
+                                                                                            "description": " Compile-time bitmask of enabled layouts. Bit 0 = NHWC, bit 1 = HCWNC4, bit 2 = HCWNC8, bit 3 = NCHW. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "DATATYPE",
+                                                                                            "type": "int",
+                                                                                            "description": " Compile-time bitmask of enabled datatypes. Bit 0 = INT8, bit 1 = FP16, bit 2 = BF16, bit 3 = FP32. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "INTYPE",
+                                                                                            "type": "int",
+                                                                                            "description": " Input pixel type (e.g. XF_8UC3, XF_32FC4). ",
+                                                                                            "enum": ["XF_8UC3", "XF_8UC4", "XF_32FC4"]
+                                                                          },
+                                                                          {
+                                                                                            "name": "OUTTYPE",
+                                                                                            "type": "int",
+                                                                                            "description": " Output pixel type for NHWC/HCWNC layouts. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "OUT_TYPE_NCHW",
+                                                                                            "type": "int",
+                                                                                            "description": " Output pixel type for NCHW per-channel planes. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "ROWS",
+                                                                                            "type": "int",
+                                                                                            "minimum": 16,
+                                                                                            "maximum": 2160,
+                                                                                            "description": " Maximum image height the kernel is compiled for. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "COLS",
+                                                                                            "type": "int",
+                                                                                            "minimum": 16,
+                                                                                            "maximum": 3840,
+                                                                                            "description": " Maximum image width the kernel is compiled for. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "NPC",
+                                                                                            "type": "int",
+                                                                                            "description": " Number of pixels processed per clock cycle (NPPC). ",
+                                                                                            "enum": ["XF_NPPC1", "XF_NPPC2", "XF_NPPC4"]
+                                                                          },
+                                                                          {
+                                                                                            "name": "XFCVDEPTH_IN",
+                                                                                            "type": "int",
+                                                                                            "description": " FIFO depth of the input xf::cv::Mat stream. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "XFCVDEPTH_OUT",
+                                                                                            "type": "int",
+                                                                                            "description": " Output buffer depth (-1 for memory buffer). "
+                                                                          }
+                                                        ],
+                                                        "ports": [
+                                                                          {
+                                                                                            "name": "in_mat",
+                                                                                            "direction": "in",
+                                                                                            "type": "xf::cv::Mat<INTYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& "
+                                                                          },
+                                                                          {
+                                                                                            "name": "out_mat",
+                                                                                            "direction": "out",
+                                                                                            "type": "ap_uint<OUT_PTR_WIDTH>* "
+                                                                          },
+                                                                          {
+                                                                                            "name": "out_mat1",
+                                                                                            "direction": "out",
+                                                                                            "type": "ap_uint<OUT_PTR_WIDTH_NCHW>* "
+                                                                          },
+                                                                          {
+                                                                                            "name": "out_mat2",
+                                                                                            "direction": "out",
+                                                                                            "type": "ap_uint<OUT_PTR_WIDTH_NCHW>* "
+                                                                          },
+                                                                          {
+                                                                                            "name": "out_mat3",
+                                                                                            "direction": "out",
+                                                                                            "type": "ap_uint<OUT_PTR_WIDTH_NCHW>* "
+                                                                          },
+                                                                          {
+                                                                                            "name": "out_mat4",
+                                                                                            "direction": "out",
+                                                                                            "type": "ap_uint<OUT_PTR_WIDTH_NCHW>* "
+                                                                          },
+                                                                          {
+                                                                                            "name": "data_order",
+                                                                                            "direction": "in",
+                                                                                            "type": "int"
+                                                                          },
+                                                                          {
+                                                                                            "name": "data_type",
+                                                                                            "direction": "in",
+                                                                                            "type": "int"
+                                                                          },
+                                                                          {
+                                                                                            "name": "out_pixel_channels",
+                                                                                            "direction": "in",
+                                                                                            "type": "int"
+                                                                          }
+                                                        ]
+                                      }
+                    },
+  {
                                       "api_name": "xf::cv::lut3d",
                                       "target_domain": "PL",
                                       "spec": {
@@ -5722,6 +5941,96 @@
                                                                                             "name": "_mapy_mat",
                                                                                             "direction": "in",
                                                                                             "type": "xf::cv::Mat<MAP_T, ROWS, COLS, NPC> &"
+                                                                          }
+                                                        ]
+                                      }
+                    },
+  {
+                                      "api_name": "xf::cv::reprojectimageto3D",
+                                      "target_domain": "PL",
+                                      "spec": {
+                                                        "schema": "vitis_libraries_api_list_schema-1.0",
+                                                        "api_name": "xf::cv::reprojectimageto3D",
+                                                        "target_domain": "PL",
+                                                        "display_name": "reprojectimageto3D",
+                                                        "brief": "The ``reprojectimageto3D`` function transforms a single-channel disparity map into a 3-channel image representing a 3D surface using a 4x4 reprojection matrix Q.",
+                                                        
+                                                        "header_file_name": [
+                                                                          "imgproc/xf_reproject3D.hpp"
+                                                        ],
+                                                        "search_paths": [
+                                                                          "L1/include/"
+                                                        ],
+                                                        "instance": "function",
+                                                        "parameters": [
+                                                                          {
+                                                                                            "name": "SRC_T",
+                                                                                            "type": "int",
+                                                                                            "description": " Input disparity pixel type. Supported values are XF_16UC1 and XF_16SC1. ",
+                                                                                            "enum": ["XF_16UC1", "XF_16SC1"]
+                                                                          },
+                                                                          {
+                                                                                            "name": "DST_T",
+                                                                                            "type": "int",
+                                                                                            "description": " Output 3D coordinate pixel type. Supported value is XF_16SC3. ",
+                                                                                            "enum": ["XF_16SC3"]
+                                                                          },
+                                                                          {
+                                                                                            "name": "ROWS",
+                                                                                            "type": "int",
+                                                                                            "minimum": 16,
+                                                                                            "maximum": 2160,
+                                                                                            "description": " Maximum image height the kernel is compiled for. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "COLS",
+                                                                                            "type": "int",
+                                                                                            "minimum": 16,
+                                                                                            "maximum": 3840,
+                                                                                            "description": " Maximum image width the kernel is compiled for. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "NPC",
+                                                                                            "type": "int",
+                                                                                            "description": " Number of pixels processed per clock cycle. Only XF_NPPC1 is supported. ",
+                                                                                            "enum": ["XF_NPPC1"]
+                                                                          },
+                                                                          {
+                                                                                            "name": "XFCVDEPTH_disp",
+                                                                                            "type": "int",
+                                                                                            "description": " FIFO depth of the input disparity xf::cv::Mat stream. "
+                                                                          },
+                                                                          {
+                                                                                            "name": "XFCVDEPTH_out",
+                                                                                            "type": "int",
+                                                                                            "description": " FIFO depth of the output 3D xf::cv::Mat stream. "
+                                                                          }
+                                                        ],
+                                                        "ports": [
+                                                                          {
+                                                                                            "name": "_disp_mat",
+                                                                                            "direction": "in",
+                                                                                            "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_disp>& "
+                                                                          },
+                                                                          {
+                                                                                            "name": "_3D_mat",
+                                                                                            "direction": "out",
+                                                                                            "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_out>& "
+                                                                          },
+                                                                          {
+                                                                                            "name": "Q_mtrx",
+                                                                                            "direction": "in",
+                                                                                            "type": "short int* "
+                                                                          },
+                                                                          {
+                                                                                            "name": "min_disp",
+                                                                                            "direction": "in",
+                                                                                            "type": "int16_t"
+                                                                          },
+                                                                          {
+                                                                                            "name": "handle_missval",
+                                                                                            "direction": "in",
+                                                                                            "type": "bool"
                                                                           }
                                                         ]
                                       }

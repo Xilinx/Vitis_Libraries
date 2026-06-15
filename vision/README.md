@@ -182,7 +182,7 @@ This library is written by developers at
 **PL additions/enhancements:** :
 
     • New additions:
-        • Preprocess
+        • Preprocess-multidatatype
         • Layout Formatter        
         • Stitch
         • waitMat
@@ -192,7 +192,7 @@ This library is written by developers at
     • Updates:
         • Remap functionality updated to support different input and output sizes.
         • InitUndistorRectofyMapInverse function API updated to use float datatypes.
-        • Fixed isp stats bug of x and y index swap.
+        • Fixed L2 isp-stats host side bug of x and y index swap.
         • Minor bugs and doc fixes
 	
 **AIE additions/enhancements:** :
@@ -205,5 +205,5 @@ This library is written by developers at
   * Few AIE-ML testcases take a long time to finish hardware emulation because of large input size.
   * ``rgbir2bayer`` and ``isppipeline_rgbir`` PL functions are not supplied with input images.
   * ``lkdensepyroptflow`` fails to meet timing when URAM is enabled.
-  * AWB-npc8, customconv-npc8, lkdensepyrof_uram, tonemapping, meanstddev-pipeline, 
+  * lkdensepyrof_uram, tonemapping, meanstddev-pipeline, hls2rgb aiesim, stereo-pipeline-URAM, 
   cases fail hw_emu because of a known tool issue. Other targets work fine.

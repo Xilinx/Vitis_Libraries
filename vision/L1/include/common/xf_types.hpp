@@ -1,5 +1,6 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1192,6 +1193,59 @@ struct DataType<XF_32FC3, XF_NPPC16> {
     static const int pixeldepth = XF_96FP;
     static const int wordwidth = XF_1536FW;
     static const int channel = 3;
+};
+
+template <>
+struct DataType<XF_32FC4, XF_NPPC1> {
+    typedef ap_uint<128> name;
+    typedef ap_uint<128> uname;
+    typedef ap_uint<32> cname;
+    typedef float sname;
+    typedef floatn<4> wname;
+    static const int bitdepth = 32;
+    static const int pixelwidth = 128;
+    static const int pixeldepth = XF_128FP;
+    static const int wordwidth = XF_128FW;
+    static const int channel = 4;
+};
+template <>
+struct DataType<XF_32FC4, XF_NPPC2> {
+    typedef ap_uint<256> name;
+    typedef ap_uint<128> uname;
+    typedef ap_uint<32> cname;
+    typedef float sname;
+    typedef floatn<8> wname;
+    static const int bitdepth = 32;
+    static const int pixelwidth = 128;
+    static const int pixeldepth = XF_128FP;
+    static const int wordwidth = XF_256FW;
+    static const int channel = 4;
+};
+template <>
+struct DataType<XF_32FC4, XF_NPPC4> {
+    typedef ap_uint<512> name;
+    typedef ap_uint<128> uname;
+    typedef ap_uint<32> cname;
+    typedef float sname;
+    typedef floatn<16> wname;
+    static const int bitdepth = 32;
+    static const int pixelwidth = 128;
+    static const int pixeldepth = XF_128FP;
+    static const int wordwidth = XF_512FW;
+    static const int channel = 4;
+};
+template <>
+struct DataType<XF_32FC4, XF_NPPC8> {
+    typedef ap_uint<768> name;
+    typedef ap_uint<128> uname;
+    typedef ap_uint<32> cname;
+    typedef float sname;
+    typedef floatn<32> wname;
+    static const int bitdepth = 32;
+    static const int pixelwidth = 128;
+    static const int pixeldepth = XF_128FP;
+    static const int wordwidth = XF_768FW;
+    static const int channel = 4;
 };
 
 template <>

@@ -1,4 +1,3 @@
-# Copyright (C) 2019-2022, Xilinx, Inc.
 # Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.10
+# vitis makefile-generator v2.0.11
 #
 #+-------------------------------------------------------------------------------
 # The following parameters are assigned with default values. These parameters can
@@ -87,7 +86,7 @@ ifeq (,$(XPLATFORM))
 # 2.1 as exact name vitis < 2022.2
 XPLATFORM := $(strip $(wildcard $(XILINX_VITIS)/platforms/$(PLATFORM)/$(PLATFORM).xpfm))
 ifeq (,$(XPLATFORM))
-# 2.2 as exact name vitis >= 2022.2
+# 2.2 as exact name vitis >= 2022.2 (base_platforms)
 XPLATFORM := $(strip $(wildcard $(XILINX_VITIS)/base_platforms/$(PLATFORM)/$(PLATFORM).xpfm))
 # 2.3 as a pattern vitis < 2022.2
 ifeq (,$(XPLATFORM))

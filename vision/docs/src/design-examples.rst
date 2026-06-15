@@ -31,6 +31,7 @@ examples are described in this section:
 -  `Difference of Gaussian Filter <#difference-gaussian-filter>`_
 -  `Stereo Vision Pipeline <#stereo-vision>`_
 -  `Blob From Image <#x-mlpipeline>`_
+-  `Preprocess Multidatatype <#preprocess-multidatatype>`_
 -  `Letterbox <#letter-box>`_
 -  `Image Sensor Processing pipeline <#isp>`_
 -  `Image Sensor Processing pipeline with HDR <#isp-201hdr>`_
@@ -666,6 +667,8 @@ This piepeline is integrated with Deep learning Processign Unit (DPU) as part of
   * with software pre-processing : 125 images/sec
 
   * with hardware accelerated pre-processing : 140 images/sec
+
+.. include:: include/preprocess_multidatatype_api.rst
 
 .. _letter-box: 
 

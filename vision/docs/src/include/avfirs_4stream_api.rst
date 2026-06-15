@@ -15,7 +15,7 @@ host verification.
 
 .. rubric:: AVFIRS Pipeline Diagram
 
-.. figure:: ./images/AVFIRS.jpg
+.. figure:: ../images/AVFIRS.jpg
    :alt: AVFIRS 4-stream multi-camera pipeline block diagram
    :figclass: image
    :name: avfirs-4stream-pipeline-diagram

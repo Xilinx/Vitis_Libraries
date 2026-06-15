@@ -1,5 +1,6 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -164,8 +165,9 @@ void xfAXIGetBitFields(ap_uint<W> pix, IplImage* img, int row, int col) {
                     cv_pix.val[k] = temp;
                 } break;
                 case IPL_DEPTH_32F: {
-                    float temp = pix.range(start + depth - 1, start);
-                    cv_pix.val[k] = temp;
+                    unsigned int temp1 = pix.range(start + depth - 1, start);
+                    float* temp = reinterpret_cast<float*>(&temp1);
+                    cv_pix.val[k] = *temp;
                 } break;
                 case IPL_DEPTH_64F: {
                     double temp = pix.range(start + depth - 1, start);
