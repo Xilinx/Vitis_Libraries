@@ -16,7 +16,7 @@ The devices used for benchmarking are:
 
 - AIE: xcvc1902-vsva2197-2MP-e-S
 - AIE-ML: xcve2802-vsvh1760-2MP-e-S
-- AIE-MLv2: xc2ve3858-ssva2112-2LP-e-S
+- AIE-MLv2: xc2ve3858-ssva2112-2MP-e-S
 
 The benchmark results are obtained with an AI Engine clock frequency of 1.25 GHz (AIE and AIE-ML devices) or 1.05 GHz (AIE-MLv2), and 64-bit PLIOs at 625 MHz.
 
@@ -57,7 +57,7 @@ QoR for this library element can be estimated using the ``config_qor_helper`` to
 
 The following table provides results for Cholesky across a wide range of supported parameters, defined in :ref:`SOLVER_CONFIGURATION_PARAMETERS_CHOLESKY`.
 
-:download:`cholesky_benchmark.csv <../../csv_data_files/L2/cholesky_benchmark.csv>`
+:download:`cholesky_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2026.1/solver/docs/src/csv_data_files/L2/cholesky_benchmark.csv>`
 
 QRD
 ============
@@ -66,23 +66,27 @@ QoR for this library element can be estimated using the ``config_qor_helper`` to
 
 The following table provides results for QRD across a wide range of supported parameters, defined in :ref:`SOLVER_CONFIGURATION_PARAMETERS_QRD`.
 
-:download:`qrd_benchmark.csv <../../csv_data_files/L2/qrd_benchmark.csv>`
+:download:`qrd_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2026.1/solver/docs/src/csv_data_files/L2/qrd_benchmark.csv>`
 
 QRD_HH
 ============
 
 The following table provides results for QRD_HH across a wide range of supported parameters, defined in :ref:`SOLVER_CONFIGURATION_PARAMETERS_QRD_HH`.
 
-.. note:: Benchmark data for QRD_HH is not currently available.
+:download:`qrd_hh_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2026.1/solver/docs/src/csv_data_files/L2/qrd_hh_benchmark.csv>`
 
 SVD
 ============
 
 The following table provides results for SVD across a wide range of supported parameters, defined in :ref:`SOLVER_CONFIGURATION_PARAMETERS_SVD`.
 
-.. note:: Benchmark data for SVD is not currently available.
+:download:`svd_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2026.1/solver/docs/src/csv_data_files/L2/svd_benchmark.csv>`
 
 Substitution
 ============
 
 QoR for this library element can be estimated using the ``config_qor_helper`` tool, located at ``L2/meta/scripts/qor_helper/``. Refer to the README in ``L2/meta/scripts/qor_helper/`` for usage instructions.
+
+The following table provides results for Substitution across a wide range of supported parameters, defined in :ref:`SOLVER_CONFIGURATION_PARAMETERS_SUBSTITUTION`.
+
+:download:`substitution_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2026.1/solver/docs/src/csv_data_files/L2/substitution_benchmark.csv>`

@@ -2247,6 +2247,55 @@
             "target_domain": "PL"
         },
         {
+            "api_name": "xf::solver::xf_block_cholesky_inplace",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::xf_block_cholesky_inplace",
+                "display_name": "xf_block_cholesky_inplace",
+                "brief": "In-place blocked upper Cholesky factorization for Hermitian positive-definite complex float matrices.",
+                "target_domain": "PL",
+                "header_file_name": [
+                    "block_cholesky_cfloat.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "source_file_name": "L1/tests/hw/block_cholesky_cfloat/kernel/kernel_block_cholesky_cfloat_0.cpp",
+                "parameters": [
+                    {
+                        "name": "N",
+                        "type": "int",
+                        "description": "Defines the input matrix dimension. Supported configurations are 128 and 256.",
+                        "minimum": "128",
+                        "maximum": "256",
+                        "enum": [
+                            "256",
+                            "128"
+                        ]
+                    },
+                    {
+                        "name": "B",
+                        "type": "int",
+                        "description": "Defines the square block size used by the blocked Cholesky algorithm.",
+                        "minimum": "32",
+                        "maximum": "32",
+                        "enum": [
+                            "32"
+                        ]
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "A",
+                        "direction": "input/output",
+                        "type": "std::complex<float> A[N][N]"
+                    }
+                ],
+                "visible": true
+            },
+            "target_domain": "PL"
+        },
+        {
             "api_name": "xf::solver::matrixBlockMultiply",
             "spec": {
                 "schema": "vitis_libraries_api_list_schema-1.0",

@@ -23,5 +23,6 @@ Core Utility
    Cholesky_Inverse <kernel/cholesky_inverse.rst>
    Cholesky <kernel/cholesky.rst>
    Cholesky_cfloat <kernel/cholesky_cfloat.rst>
+   Block_Cholesky_cfloat <kernel/block_cholesky_cfloat.rst>
    MatrixBlockMultiply <kernel/matrix_block_multiply.rst>
    MatrixVectorMultiply <kernel/matrix_vector_multiply.rst>
