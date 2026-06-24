@@ -16,7 +16,7 @@ The devices used for benchmarking are:
 
 - AIE: xcvc1902-vsva2197-2MP-e-S
 - AIE-ML: xcve2802-vsvh1760-2MP-e-S
-- AIE-MLv2: xc2ve3858-ssva2112-2LP-e-S
+- AIE-MLv2: xc2ve3858-ssva2112-2MP-e-S
 
 The benchmark results are obtained using these devices with an AI Engine clock frequency of 1.25 GHz (AIE and AIE-ML devices) or 1.05 GHz (AIE-MLv2 device) and 64-bit PLIOs at 625 MHz.
 
