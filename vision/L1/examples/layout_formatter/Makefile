@@ -44,8 +44,7 @@ help::
 ############################## Setting up Project Variables ##############################
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 export CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
-#export XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH}') #echo $${MK_PATH%/L3/*}
-export XF_PROJ_ROOT ?= /proj/sdxapps/users/gouthamb/gitrepos/new_forked
+export XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L1/*}')
 
 # setting default value
 PLATFORM ?= xilinx_u200_gen3x16_xdma_2_202110_1
