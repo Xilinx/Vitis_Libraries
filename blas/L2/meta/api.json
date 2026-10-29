@@ -26,12 +26,12 @@
                 "ports": [
                     {
                         "name": "p_DdrRd",
-                        "direction": "",
+                        "direction": "input",
                         "type": "DdrIntType *"
                     },
                     {
                         "name": "p_DdrWr",
-                        "direction": "",
+                        "direction": "output",
                         "type": "DdrIntType *"
                     }
                 ],
@@ -63,27 +63,27 @@
                 "ports": [
                     {
                         "name": "p_m",
-                        "direction": "",
+                        "direction": "input",
                         "type": "uint32_t"
                     },
                     {
                         "name": "p_n",
-                        "direction": "",
+                        "direction": "input",
                         "type": "uint32_t"
                     },
                     {
                         "name": "p_A0",
-                        "direction": "",
+                        "direction": "input",
                         "type": "BLAS_interface *"
                     },
                     {
                         "name": "p_pk",
-                        "direction": "",
+                        "direction": "input",
                         "type": "BLAS_interface *"
                     },
                     {
                         "name": "p_Apk",
-                        "direction": "",
+                        "direction": "output",
                         "type": "BLAS_interface *"
                     }
                 ],

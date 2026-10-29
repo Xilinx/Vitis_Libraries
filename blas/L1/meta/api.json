@@ -37,17 +37,17 @@
                 "ports": [
                     {
                         "name": "p_n",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     },
                     {
                         "name": "p_x",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< typename WideType< t_DataType,(1<< t_LogParEntries)>::t_TypeInt > &"
                     },
                     {
                         "name": "p_result",
-                        "direction": "",
+                        "direction": "output",
                         "type": "t_IndexType &"
                     }
                 ],
@@ -91,17 +91,17 @@
                 "ports": [
                     {
                         "name": "p_n",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     },
                     {
                         "name": "p_x",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< typename WideType< t_DataType,(1<< t_LogParEntries)>::t_TypeInt > &"
                     },
                     {
                         "name": "p_result",
-                        "direction": "",
+                        "direction": "output",
                         "type": "t_IndexType &"
                     }
                 ],
@@ -145,17 +145,17 @@
                 "ports": [
                     {
                         "name": "p_n",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     },
                     {
                         "name": "p_x",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< typename WideType< t_DataType,(1<< t_LogParEntries)>::t_TypeInt > &"
                     },
                     {
                         "name": "p_sum",
-                        "direction": "",
+                        "direction": "output",
                         "type": "t_DataType &"
                     }
                 ],
@@ -199,27 +199,27 @@
                 "ports": [
                     {
                         "name": "p_n",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     },
                     {
                         "name": "p_alpha",
-                        "direction": "",
-                        "type": "const t_DataType"
+                        "direction": "input",
+                        "type": "t_DataType"
                     },
                     {
                         "name": "p_x",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     },
                     {
                         "name": "p_y",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     },
                     {
                         "name": "p_r",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     }
                 ],
@@ -263,17 +263,17 @@
                 "ports": [
                     {
                         "name": "p_n",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     },
                     {
                         "name": "p_x",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     },
                     {
                         "name": "p_y",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     }
                 ],
@@ -317,22 +317,22 @@
                 "ports": [
                     {
                         "name": "p_n",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     },
                     {
                         "name": "p_x",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< typename WideType< t_DataType,(1<< t_LogParEntries)>::t_TypeInt > &"
                     },
                     {
                         "name": "p_y",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< typename WideType< t_DataType,(1<< t_LogParEntries)>::t_TypeInt > &"
                     },
                     {
                         "name": "p_res",
-                        "direction": "",
+                        "direction": "output",
                         "type": "t_DataType &"
                     }
                 ],
@@ -386,37 +386,37 @@
                 "ports": [
                     {
                         "name": "p_m",
-                        "direction": "",
-                        "type": "const unsigned int"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "p_n",
-                        "direction": "",
-                        "type": "const unsigned int"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "p_kl",
-                        "direction": "",
-                        "type": "const unsigned int"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "p_ku",
-                        "direction": "",
-                        "type": "const unsigned int"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "p_A",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>&"
                     },
                     {
                         "name": "p_x",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>&"
                     },
                     {
                         "name": "p_y",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<typename WideType<t_MacType, t_ParEntries>::t_TypeInt>&"
                     }
                 ],
@@ -470,52 +470,52 @@
                 "ports": [
                     {
                         "name": "p_m",
-                        "direction": "",
-                        "type": "const unsigned int"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "p_n",
-                        "direction": "",
-                        "type": "const unsigned int"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "p_kl",
-                        "direction": "",
-                        "type": "const unsigned int"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "p_ku",
-                        "direction": "",
-                        "type": "const unsigned int"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "p_alpha",
-                        "direction": "",
-                        "type": "const t_DataType"
+                        "direction": "input",
+                        "type": "t_DataType"
                     },
                     {
                         "name": "p_M",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>&"
                     },
                     {
                         "name": "p_x",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>&"
                     },
                     {
                         "name": "p_beta",
-                        "direction": "",
-                        "type": "const t_DataType"
+                        "direction": "input",
+                        "type": "t_DataType"
                     },
                     {
                         "name": "p_y",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>&"
                     },
                     {
                         "name": "p_yr",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>&"
                     }
                 ],
@@ -559,32 +559,32 @@
                 "ports": [
                     {
                         "name": "p_m",
-                        "direction": "",
-                        "type": "const unsigned int"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "p_n",
-                        "direction": "",
-                        "type": "const unsigned int"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "p_k",
-                        "direction": "",
-                        "type": "const unsigned int"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "p_A",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     },
                     {
                         "name": "p_B",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     },
                     {
                         "name": "p_C",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     }
                 ],
@@ -628,42 +628,42 @@
                 "ports": [
                     {
                         "name": "p_m",
-                        "direction": "",
-                        "type": "const unsigned int"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "p_n",
-                        "direction": "",
-                        "type": "const unsigned int"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "p_alpha",
-                        "direction": "",
-                        "type": "const t_DataType"
+                        "direction": "input",
+                        "type": "t_DataType"
                     },
                     {
                         "name": "p_M",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
                     },
                     {
                         "name": "p_x",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
                     },
                     {
                         "name": "p_beta",
-                        "direction": "",
-                        "type": "const t_DataType"
+                        "direction": "input",
+                        "type": "t_DataType"
                     },
                     {
                         "name": "p_y",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<typename WideType<t_DataType, 1>::t_TypeInt>&"
                     },
                     {
                         "name": "p_yr",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<typename WideType<t_DataType, 1>::t_TypeInt>&"
                     }
                 ],
@@ -707,17 +707,17 @@
                 "ports": [
                     {
                         "name": "p_n",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     },
                     {
                         "name": "p_x",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< typename WideType< t_DataType,(1<< t_LogParEntries)>::t_TypeInt > &"
                     },
                     {
                         "name": "p_res",
-                        "direction": "",
+                        "direction": "output",
                         "type": "t_DataType &"
                     }
                 ],
@@ -761,22 +761,22 @@
                 "ports": [
                     {
                         "name": "p_n",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     },
                     {
                         "name": "p_alpha",
-                        "direction": "",
+                        "direction": "input",
                         "type": "t_DataType"
                     },
                     {
                         "name": "p_x",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     },
                     {
                         "name": "p_res",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     }
                 ],
@@ -820,27 +820,27 @@
                 "ports": [
                     {
                         "name": "p_n",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     },
                     {
                         "name": "p_x",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     },
                     {
                         "name": "p_y",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     },
                     {
                         "name": "p_xRes",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     },
                     {
                         "name": "p_yRes",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     }
                 ],
@@ -884,37 +884,37 @@
                 "ports": [
                     {
                         "name": "p_n",
-                        "direction": "",
-                        "type": "const unsigned int"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "p_alpha",
-                        "direction": "",
-                        "type": "const t_DataType"
+                        "direction": "input",
+                        "type": "t_DataType"
                     },
                     {
                         "name": "p_M",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
                     },
                     {
                         "name": "p_x",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
                     },
                     {
                         "name": "p_beta",
-                        "direction": "",
-                        "type": "const t_DataType"
+                        "direction": "input",
+                        "type": "t_DataType"
                     },
                     {
                         "name": "p_y",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
                     },
                     {
                         "name": "p_yr",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
                     }
                 ],
@@ -958,42 +958,42 @@
                 "ports": [
                     {
                         "name": "p_uplo",
-                        "direction": "",
-                        "type": "const bool"
+                        "direction": "input",
+                        "type": "bool"
                     },
                     {
                         "name": "p_n",
-                        "direction": "",
-                        "type": "const unsigned int"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "p_alpha",
-                        "direction": "",
-                        "type": "const t_DataType"
+                        "direction": "input",
+                        "type": "t_DataType"
                     },
                     {
                         "name": "p_M",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
                     },
                     {
                         "name": "p_x",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
                     },
                     {
                         "name": "p_beta",
-                        "direction": "",
-                        "type": "const t_DataType"
+                        "direction": "input",
+                        "type": "t_DataType"
                     },
                     {
                         "name": "p_y",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
                     },
                     {
                         "name": "p_yr",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
                     }
                 ],

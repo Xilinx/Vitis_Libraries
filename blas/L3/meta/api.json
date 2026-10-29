@@ -87,27 +87,27 @@
                 "ports": [
                     {
                         "name": "xclbin",
-                        "direction": "",
-                        "type": "const char *"
+                        "direction": "input",
+                        "type": "char *"
                     },
                     {
                         "name": "configFile",
-                        "direction": "",
+                        "direction": "input",
                         "type": "string"
                     },
                     {
                         "name": "engineName",
-                        "direction": "",
+                        "direction": "input",
                         "type": "xfblasEngine_t"
                     },
                     {
                         "name": "kernelNumber",
-                        "direction": "",
-                        "type": "unsigned int=1,"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "deviceIndex",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     }
                 ],
@@ -135,32 +135,32 @@
                 "ports": [
                     {
                         "name": "devPtr",
-                        "direction": "",
+                        "direction": "output",
                         "type": "short **"
                     },
                     {
                         "name": "rows",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "lda",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "elemSize",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "kernelIndex",
-                        "direction": "",
-                        "type": "unsigned int=0,"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "deviceIndex",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     }
                 ],
@@ -188,37 +188,37 @@
                 "ports": [
                     {
                         "name": "rows",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "cols",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "elemSize",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "A",
-                        "direction": "",
+                        "direction": "input",
                         "type": "void *"
                     },
                     {
                         "name": "lda",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "kernelIndex",
-                        "direction": "",
-                        "type": "unsigned int=0,"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "deviceIndex",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     }
                 ],
@@ -246,37 +246,37 @@
                 "ports": [
                     {
                         "name": "devPtr",
-                        "direction": "",
+                        "direction": "output",
                         "type": "short **"
                     },
                     {
                         "name": "paddedLda",
-                        "direction": "",
+                        "direction": "output",
                         "type": "int *"
                     },
                     {
                         "name": "rows",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "lda",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "elemSize",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "kernelIndex",
-                        "direction": "",
-                        "type": "unsigned int=0,"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "deviceIndex",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     }
                 ],
@@ -304,42 +304,42 @@
                 "ports": [
                     {
                         "name": "rows",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "cols",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "elemSize",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "A",
-                        "direction": "",
+                        "direction": "input",
                         "type": "short *"
                     },
                     {
                         "name": "lda",
-                        "direction": "",
-                        "type": "unsigned int kernelIndex=0, unsigned int deviceIndex=0"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "d_A",
-                        "direction": "",
-                        "type": "unsigned int kernelIndex=0, unsigned int deviceIndex=0"
+                        "direction": "output",
+                        "type": "short *"
                     },
                     {
                         "name": "kernelIndex",
-                        "direction": "",
-                        "type": "unsigned int=0,"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "deviceIndex",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     }
                 ],
@@ -367,17 +367,17 @@
                 "ports": [
                     {
                         "name": "A",
-                        "direction": "",
+                        "direction": "input",
                         "type": "void *"
                     },
                     {
                         "name": "kernelIndex",
-                        "direction": "",
-                        "type": "unsigned int=0,"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "deviceIndex",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     }
                 ],
@@ -405,18 +405,18 @@
                 "ports": [
                     {
                         "name": "x",
-                        "direction": "",
+                        "direction": "input",
                         "type": "void *"
                     },
                     {
                         "name": "kernelIndex",
-                        "direction": "",
-                        "type": "=0"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "deviceIndex",
-                        "direction": "",
-                        "type": "=0"
+                        "direction": "input",
+                        "type": "unsigned int"
                     }
                 ],
                 "visible": false
@@ -443,12 +443,12 @@
                 "ports": [
                     {
                         "name": "kernelIndex",
-                        "direction": "",
-                        "type": "unsigned int=0,"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "deviceIndex",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     }
                 ],
@@ -476,42 +476,42 @@
                 "ports": [
                     {
                         "name": "rows",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "cols",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "elemSize",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "d_A",
-                        "direction": "",
+                        "direction": "input",
                         "type": "short *"
                     },
                     {
                         "name": "A",
-                        "direction": "",
+                        "direction": "output",
                         "type": "short *"
                     },
                     {
                         "name": "lda",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "kernelIndex",
-                        "direction": "",
-                        "type": "unsigned int=0,"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "deviceIndex",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     }
                 ],
@@ -539,17 +539,17 @@
                 "ports": [
                     {
                         "name": "A",
-                        "direction": "",
+                        "direction": "output",
                         "type": "void *"
                     },
                     {
                         "name": "kernelIndex",
-                        "direction": "",
-                        "type": "unsigned int=0,"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "deviceIndex",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     }
                 ],
@@ -577,18 +577,18 @@
                 "ports": [
                     {
                         "name": "x",
-                        "direction": "",
+                        "direction": "output",
                         "type": "void *"
                     },
                     {
                         "name": "kernelIndex",
-                        "direction": "",
-                        "type": "=0"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "deviceIndex",
-                        "direction": "",
-                        "type": "=0"
+                        "direction": "input",
+                        "type": "unsigned int"
                     }
                 ],
                 "visible": false
@@ -615,17 +615,17 @@
                 "ports": [
                     {
                         "name": "A",
-                        "direction": "",
+                        "direction": "input",
                         "type": "void *"
                     },
                     {
                         "name": "kernelIndex",
-                        "direction": "",
-                        "type": "unsigned int=0,"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "deviceIndex",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     }
                 ],
@@ -653,12 +653,12 @@
                 "ports": [
                     {
                         "name": "kernelIndex",
-                        "direction": "",
-                        "type": "unsigned int=0,"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "deviceIndex",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     }
                 ],
@@ -686,12 +686,12 @@
                 "ports": [
                     {
                         "name": "kernelNumber",
-                        "direction": "",
-                        "type": "unsigned int=1,"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "deviceIndex",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     }
                 ],
@@ -719,78 +719,78 @@
                 "ports": [
                     {
                         "name": "transa",
-                        "direction": "",
+                        "direction": "input",
                         "type": "xfblasOperation_t"
                     },
                     {
                         "name": "transb",
-                        "direction": "",
+                        "direction": "input",
                         "type": "xfblasOperation_t"
                     },
                     {
                         "name": "m",
-                        "direction": "",
+                        "direction": "input",
                         "type": "int"
                     },
                     {
                         "name": "n",
-                        "direction": "",
-                        "type": "i"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "k",
-                        "direction": "",
-                        "type": "dex=0"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "alpha",
-                        "direction": "",
-                        "type": "dex=0"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "A",
-                        "direction": "",
-                        "type": "dex=0"
+                        "direction": "input",
+                        "type": "void *"
                     },
                     {
                         "name": "lda",
-                        "direction": "",
-                        "type": "dex=0"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "B",
-                        "direction": "",
-                        "type": "dex=0"
+                        "direction": "input",
+                        "type": "void *"
                     },
                     {
                         "name": "ldb",
-                        "direction": "",
-                        "type": "dex=0"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "beta",
-                        "direction": "",
-                        "type": "dex=0"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "C",
-                        "direction": "",
-                        "type": "dex=0"
+                        "direction": "inout",
+                        "type": "void *"
                     },
                     {
                         "name": "ldc",
-                        "direction": "",
-                        "type": "dex=0"
+                        "direction": "input",
+                        "type": "int"
                     },
                     {
                         "name": "kernelIndex",
-                        "direction": "",
-                        "type": "dex=0"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "deviceIndex",
-                        "direction": "",
-                        "type": "dex=0"
+                        "direction": "input",
+                        "type": "unsigned int"
                     }
                 ],
                 "visible": false
@@ -839,17 +839,17 @@
                 "ports": [
                     {
                         "name": "A",
-                        "direction": "",
+                        "direction": "output",
                         "type": "void *"
                     },
                     {
                         "name": "kernelIndex",
-                        "direction": "",
-                        "type": "unsigned int=0,"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "deviceIndex",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     }
                 ],
@@ -877,27 +877,27 @@
                 "ports": [
                     {
                         "name": "A",
-                        "direction": "",
+                        "direction": "output",
                         "type": "void *"
                     },
                     {
                         "name": "p_bufSize",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned long long"
                     },
                     {
                         "name": "offset",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     },
                     {
                         "name": "kernelIndex",
-                        "direction": "",
-                        "type": "unsigned int=0,"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "deviceIndex",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     }
                 ],
@@ -925,12 +925,12 @@
                 "ports": [
                     {
                         "name": "kernelIndex",
-                        "direction": "",
-                        "type": "unsigned int=0,"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "deviceIndex",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     }
                 ],
@@ -958,12 +958,12 @@
                 "ports": [
                     {
                         "name": "numKernels",
-                        "direction": "",
-                        "type": "unsigned int=1,"
+                        "direction": "input",
+                        "type": "unsigned int"
                     },
                     {
                         "name": "deviceIndex",
-                        "direction": "",
+                        "direction": "input",
                         "type": "unsigned int"
                     }
                 ],
