@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FP32 FOC Multi-Motor HLS Design</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --ink: #1f2937;
+      --muted: #5b6472;
+      --line: #d8dee9;
+      --blue: #2563eb;
+      --green: #0f766e;
+      --orange: #c2410c;
+      --code: #eef2ff;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.55;
+    }
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 32px 24px 56px;
+    }
+    h1, h2, h3 {
+      line-height: 1.2;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 34px;
+    }
+    h2 {
+      margin-top: 34px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+      font-size: 24px;
+    }
+    h3 {
+      margin-top: 24px;
+      font-size: 18px;
+    }
+    p {
+      margin: 10px 0;
+    }
+    code {
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: var(--code);
+      font-family: Consolas, Menlo, monospace;
+      font-size: 0.95em;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 20px;
+      margin: 18px 0;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+    }
+    .metric {
+      border-left: 4px solid var(--blue);
+      background: #f8fbff;
+      padding: 12px 14px;
+      border-radius: 10px;
+    }
+    .metric strong {
+      display: block;
+      font-size: 22px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      background: var(--panel);
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 9px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #eef3ff;
+    }
+    .note {
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .ok {
+      color: var(--green);
+      font-weight: 700;
+    }
+    .warn {
+      color: var(--orange);
+      font-weight: 700;
+    }
+    svg text {
+      font-family: Arial, Helvetica, sans-serif;
+      fill: var(--ink);
+      font-size: 13px;
+    }
+    .box {
+      fill: #ffffff;
+      stroke: #94a3b8;
+      stroke-width: 1.5;
+    }
+    .box-blue {
+      fill: #eff6ff;
+      stroke: #2563eb;
+    }
+    .box-green {
+      fill: #ecfdf5;
+      stroke: #0f766e;
+    }
+    .box-orange {
+      fill: #fff7ed;
+      stroke: #c2410c;
+    }
+    .arrow {
+      stroke: #475569;
+      stroke-width: 1.7;
+      marker-end: url(#arrow);
+      fill: none;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>FP32 FOC Multi-Motor HLS Design</h1>
+  <p class="note">Target library area: <code>xf_motorcontrol/L1</code>. Target device used for QoR: VCK190, <code>xcvc1902-vsva2197-2MP-e-S</code>, 5 ns clock.</p>
+
+  <section class="card">
+    <h2>Summary</h2>
+    <p>
+      The FP32 FOC design is layered into a golden algorithm core, an HLS stream wrapper, and a testcase top.
+      Multi-motor support is implemented as a shared compute datapath with a per-motor context array.
+      Each input sample carries a sideband motor-id stream, so the wrapper updates
+      <code>ctx[FOC_MOTOR_ID]</code> and returns the selected id with the voltage command.
+    </p>
+    <p>
+      <code>NUM_MOTORS=1</code> degenerates to the existing single-motor implementation and preserves the current QoR.
+      <code>NUM_MOTORS=64</code> reuses the same FOC compute and adds context-indexing overhead without replicating 64 FOC datapaths.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2>Top-Level Interface Block Diagram</h2>
+    <svg viewBox="0 0 1080 430" width="100%" role="img" aria-label="FP32 FOC multi-motor interface block diagram">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"></path>
+        </marker>
+      </defs>
+
+      <rect class="box box-blue" x="30" y="45" width="175" height="70" rx="10"></rect>
+      <text x="118" y="75" text-anchor="middle">AXIS Inputs</text>
+      <text x="118" y="96" text-anchor="middle">Ia / Ib / Ic</text>
+
+      <rect class="box box-blue" x="30" y="145" width="175" height="70" rx="10"></rect>
+      <text x="118" y="174" text-anchor="middle">AXIS Input</text>
+      <text x="118" y="195" text-anchor="middle">RPM + Theta + ID</text>
+
+      <rect class="box" x="30" y="260" width="175" height="90" rx="10"></rect>
+      <text x="118" y="292" text-anchor="middle">AXI4-Lite</text>
+      <text x="118" y="313" text-anchor="middle">Shared FOC Config</text>
+      <text x="118" y="334" text-anchor="middle">kp / ki / mode / ppr</text>
+
+      <rect class="box box-green" x="285" y="95" width="190" height="120" rx="12"></rect>
+      <text x="380" y="125" text-anchor="middle">Stream Wrapper</text>
+      <text x="380" y="148" text-anchor="middle">hls_foc_strm_fp32</text>
+      <text x="380" y="176" text-anchor="middle">motor_idx from</text>
+      <text x="380" y="197" text-anchor="middle">FOC_MOTOR_ID</text>
+
+      <rect class="box box-orange" x="540" y="65" width="210" height="105" rx="12"></rect>
+      <text x="645" y="96" text-anchor="middle">Per-Motor State</text>
+      <text x="645" y="119" text-anchor="middle">FOCContext ctx[]</text>
+      <text x="645" y="143" text-anchor="middle">PI state, mode, angle</text>
+
+      <rect class="box box-green" x="540" y="220" width="210" height="105" rx="12"></rect>
+      <text x="645" y="253" text-anchor="middle">Shared FOC Core</text>
+      <text x="645" y="276" text-anchor="middle">foc_core_golden</text>
+      <text x="645" y="300" text-anchor="middle">Clarke / Park / PI</text>
+
+      <rect class="box box-blue" x="840" y="105" width="190" height="90" rx="12"></rect>
+      <text x="935" y="139" text-anchor="middle">AXIS Outputs</text>
+      <text x="935" y="162" text-anchor="middle">Va / Vb / Vc + ID</text>
+
+      <rect class="box" x="840" y="250" width="190" height="90" rx="12"></rect>
+      <text x="935" y="284" text-anchor="middle">AXI4-Lite Status</text>
+      <text x="935" y="307" text-anchor="middle">latest processed motor</text>
+
+      <path class="arrow" d="M 205 80 H 285"></path>
+      <path class="arrow" d="M 205 180 H 285"></path>
+      <path class="arrow" d="M 205 305 H 300 V 215"></path>
+      <path class="arrow" d="M 475 145 H 540"></path>
+      <path class="arrow" d="M 645 170 V 220"></path>
+      <path class="arrow" d="M 540 275 H 475 V 205"></path>
+      <path class="arrow" d="M 750 270 H 815 V 150 H 840"></path>
+      <path class="arrow" d="M 750 295 H 840"></path>
+    </svg>
+
+    <h3>Dynamic Streaming Interfaces</h3>
+    <p>
+      Dynamic data is transferred through AXI4-Stream ports. The current multi-motor design uses an explicit
+      sideband input id stream and an output id stream. This avoids relying on implicit round-robin ordering and
+      lets downstream logic verify that each voltage command belongs to the expected motor.
+    </p>
+    <table>
+      <tr><th>Port</th><th>Direction</th><th>Type</th><th>Description</th></tr>
+      <tr><td><code>Ia</code></td><td>Input</td><td><code>hls::stream&lt;float&gt;</code></td><td>Phase-A current sample for the current motor slot.</td></tr>
+      <tr><td><code>Ib</code></td><td>Input</td><td><code>hls::stream&lt;float&gt;</code></td><td>Phase-B current sample for the current motor slot.</td></tr>
+      <tr><td><code>Ic</code></td><td>Input</td><td><code>hls::stream&lt;float&gt;</code></td><td>Phase-C current sample for the current motor slot.</td></tr>
+      <tr><td><code>FOC_RPM_THETA_m</code></td><td>Input</td><td><code>hls::stream&lt;int&gt;</code></td><td>Packed feedback: lower 16 bits are RPM, upper 16 bits are mechanical angle.</td></tr>
+      <tr><td><code>FOC_MOTOR_ID</code></td><td>Input</td><td><code>hls::stream&lt;int&gt;</code></td><td>Sideband motor id using natural binary encoding. Valid range is <code>0 .. NUM_MOTORS-1</code>; invalid ids do not update context and emit zero voltage commands.</td></tr>
+      <tr><td><code>Va_cmd</code></td><td>Output</td><td><code>hls::stream&lt;float&gt;</code></td><td>Phase-A voltage command aligned with the input motor slot.</td></tr>
+      <tr><td><code>Vb_cmd</code></td><td>Output</td><td><code>hls::stream&lt;float&gt;</code></td><td>Phase-B voltage command aligned with the input motor slot.</td></tr>
+      <tr><td><code>Vc_cmd</code></td><td>Output</td><td><code>hls::stream&lt;float&gt;</code></td><td>Phase-C voltage command aligned with the input motor slot.</td></tr>
+      <tr><td><code>FOC_MOTOR_ID_out</code></td><td>Output</td><td><code>hls::stream&lt;int&gt;</code></td><td>Returned motor id aligned with <code>Va_cmd</code>, <code>Vb_cmd</code>, and <code>Vc_cmd</code>.</td></tr>
+    </table>
+
+    <h3>Static Configuration Parameters</h3>
+    <p>
+      These AXI4-Lite arguments are sampled into a local <code>FOCConfig&lt;float&gt;</code> for each processed sample.
+      They are shared across all motor slots in the current implementation. A future extension can replace these scalar
+      arguments with per-motor configuration memory indexed by <code>motor_idx</code>.
+    </p>
+    <table>
+      <tr><th>Parameter</th><th>Type</th><th>Meaning</th></tr>
+      <tr><td><code>ppr_args</code></td><td><code>int</code></td><td>Motor pole-pair related setting used for electrical angle conversion.</td></tr>
+      <tr><td><code>control_mode_args</code></td><td><code>int</code></td><td>FOC control mode, such as stopped, torque, speed, manual, or fixed angle mode.</td></tr>
+      <tr><td><code>control_fixperiod_args</code></td><td><code>int</code></td><td>Period used by generated-angle modes.</td></tr>
+      <tr><td><code>flux_sp_args</code></td><td><code>float</code></td><td>Flux loop setpoint.</td></tr>
+      <tr><td><code>flux_kp_args</code>, <code>flux_ki_args</code>, <code>flux_kd_args</code></td><td><code>float</code></td><td>Flux loop PI/PID coefficients. The current core uses KP and KI.</td></tr>
+      <tr><td><code>torque_sp_args</code></td><td><code>float</code></td><td>Torque loop setpoint.</td></tr>
+      <tr><td><code>torque_kp_args</code>, <code>torque_ki_args</code>, <code>torque_kd_args</code></td><td><code>float</code></td><td>Torque loop PI/PID coefficients. The current core uses KP and KI.</td></tr>
+      <tr><td><code>speed_sp_args</code></td><td><code>float</code></td><td>Speed loop setpoint.</td></tr>
+      <tr><td><code>speed_kp_args</code>, <code>speed_ki_args</code>, <code>speed_kd_args</code></td><td><code>float</code></td><td>Speed loop PI/PID coefficients. The current core uses KP and KI.</td></tr>
+      <tr><td><code>angle_sh_args</code></td><td><code>int</code></td><td>Mechanical angle shift applied before electrical angle conversion.</td></tr>
+      <tr><td><code>vd_args</code>, <code>vq_args</code></td><td><code>float</code></td><td>Manual direct/quadrature voltage commands used by manual modes.</td></tr>
+      <tr><td><code>fw_kp_args</code>, <code>fw_ki_args</code></td><td><code>float</code></td><td>Field-weakening PI coefficients.</td></tr>
+      <tr><td><code>fixed_angle_args</code></td><td><code>int</code></td><td>Fixed angle used by fixed-angle manual mode.</td></tr>
+    </table>
+
+    <h3>Status and Debug Outputs</h3>
+    <p>
+      Status outputs are AXI4-Lite registers reflecting the latest processed sample. In the 64-motor ID-tagged mode,
+      software should treat them as "last motor slot processed" debug values unless per-motor status memory is added.
+    </p>
+    <table>
+      <tr><th>Status Register</th><th>Type</th><th>Description</th></tr>
+      <tr><td><code>id_stts</code>, <code>iq_stts</code></td><td><code>float</code></td><td>D/Q current feedback after Clarke and Park transforms.</td></tr>
+      <tr><td><code>flux_acc_stts</code>, <code>flux_err_stts</code>, <code>flux_out_stts</code></td><td><code>float</code></td><td>Flux PI integral, error, and raw output.</td></tr>
+      <tr><td><code>torque_acc_stts</code>, <code>torque_err_stts</code>, <code>torque_out_stts</code></td><td><code>float</code></td><td>Torque PI integral, error, and raw output.</td></tr>
+      <tr><td><code>speed_stts</code>, <code>speed_acc_stts</code>, <code>speed_err_stts</code>, <code>speed_out_stts</code></td><td><code>float</code></td><td>Speed feedback, speed PI integral, error, and raw output.</td></tr>
+      <tr><td><code>angle_stts</code></td><td><code>int</code></td><td>Normalized angle used for the current sample.</td></tr>
+      <tr><td><code>Va_cmd_stts</code>, <code>Vb_cmd_stts</code>, <code>Vc_cmd_stts</code></td><td><code>float</code></td><td>Latest voltage command debug mirror.</td></tr>
+      <tr><td><code>Ialpha_stts</code>, <code>Ibeta_stts</code>, <code>Ihomopolar_stts</code></td><td><code>float</code></td><td>Clarke transform intermediate values.</td></tr>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Architecture</h2>
+    <div class="grid">
+      <div class="metric">
+        <strong>Shared Compute</strong>
+        One FP32 FOC datapath is reused across motors.
+      </div>
+      <div class="metric">
+        <strong>Per-Motor Context</strong>
+        <code>FOCContext&lt;float&gt; ctx[NUM_MOTORS]</code> stores independent runtime state.
+      </div>
+      <div class="metric">
+        <strong>ID-Tagged Schedule</strong>
+        Sideband <code>FOC_MOTOR_ID</code> selects the active motor context.
+      </div>
+      <div class="metric">
+        <strong>Single Config Set</strong>
+        Current implementation shares AXI4-Lite config across all motors.
+      </div>
+    </div>
+
+    <h3>Files</h3>
+    <table>
+      <tr><th>File</th><th>Role</th></tr>
+      <tr><td><code>L1/include/models_fp/foc_golden.hpp</code></td><td>Core FP32 golden algorithm and per-motor <code>FOCContext</code>.</td></tr>
+      <tr><td><code>L1/include/models_fp/foc_fp32_sync.hpp</code></td><td>HLS stream wrapper with <code>NUM_MOTORS</code> context array scheduling.</td></tr>
+      <tr><td><code>L1/tests/tests_fp32/foc_fp32_tb/src/foc_fp32_top.cpp</code></td><td>Top-level HLS interface and static context allocation.</td></tr>
+      <tr><td><code>L1/tests/tests_fp32/foc_fp32_tb/tb/test_foc_fp32.cpp</code></td><td>C simulation testbench comparing stream output against the golden core.</td></tr>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>QoR and Validation Results</h2>
+    <p>
+      Both configurations were validated with Vitis HLS 2026.2 on VCK190 at a 5 ns clock.
+      The loop is intentionally not pipelined in this version, so throughput is approximately equal to the loop iteration latency.
+    </p>
+    <table>
+      <tr>
+        <th>Configuration</th>
+        <th>CSIM</th>
+        <th>Slack</th>
+        <th>Loop Iteration Latency</th>
+        <th>Approx. Per-Sample Time</th>
+        <th>DSP</th>
+        <th>BRAM</th>
+        <th>FF</th>
+        <th>LUT</th>
+      </tr>
+      <tr>
+        <td>Legacy <code>ap_fixed</code></td>
+        <td class="ok">Pass, legacy test</td>
+        <td>0.05 ns</td>
+        <td>33 cycles, II=5</td>
+        <td>50 ns throughput at 10 ns clock</td>
+        <td>43</td>
+        <td>2</td>
+        <td>6207</td>
+        <td>10442</td>
+      </tr>
+      <tr>
+        <td><code>NUM_MOTORS=1</code></td>
+        <td class="ok">Pass, 0 errors</td>
+        <td>0.05 ns</td>
+        <td>142 cycles</td>
+        <td>710 ns</td>
+        <td>35</td>
+        <td>0</td>
+        <td>9273</td>
+        <td>13957</td>
+      </tr>
+      <tr>
+        <td><code>NUM_MOTORS=64</code></td>
+        <td class="ok">Pass, 0 errors</td>
+        <td>0.05 ns</td>
+        <td>165 cycles</td>
+        <td>825 ns</td>
+        <td>23</td>
+        <td>0</td>
+        <td>9834</td>
+        <td>12142</td>
+      </tr>
+    </table>
+
+    <p>
+      The 64-motor configuration increases the single-sample iteration latency by 23 cycles, from 710 ns to 825 ns at 5 ns.
+      This is a modest increase for storing independent context for 64 motors while keeping a single shared FOC compute instance.
+    </p>
+
+    <h3>Report Paths</h3>
+    <ul>
+      <li><code>hls_vck190_safe_id_m1_csim</code>: <code>NUM_MOTORS=1</code> C simulation with valid and invalid motor ids.</li>
+      <li><code>hls_vck190_safe_id_m64_csim</code>: <code>NUM_MOTORS=64</code> C simulation with non-sequential and invalid motor ids.</li>
+      <li><code>hls_vck190_safe_id_m1_csynth/hls/syn/report/csynth.rpt</code>: <code>NUM_MOTORS=1</code> synthesis report.</li>
+      <li><code>hls_vck190_safe_id_m64_csynth/hls/syn/report/csynth.rpt</code>: <code>NUM_MOTORS=64</code> synthesis report.</li>
+      <li><code>../../IP_FOC/hls_vck190/hls/syn/report/csynth.rpt</code>: legacy <code>ap_fixed</code> synthesis report.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>Legacy ap_fixed Design Reference</h2>
+    <p>
+      The legacy IP is implemented by <code>hls_foc_periodic_ap_fixed</code> and
+      <code>hls_foc_oneSample_ap_fixed</code> under <code>L1/tests/IP_FOC/src</code>, with the core template in
+      <code>L1/include/hw/foc.hpp</code>. It uses fixed-point stream types for current and voltage commands, and
+      AXI4-Lite integer registers that encode the FOC configuration and status values.
+    </p>
+
+    <h3>Legacy Interface Summary</h3>
+    <table>
+      <tr><th>Interface Group</th><th>Legacy ap_fixed Ports</th><th>Notes</th></tr>
+      <tr>
+        <td>AXIS current inputs</td>
+        <td><code>Ia</code>, <code>Ib</code>, <code>Ic</code> as <code>hls::stream&lt;t_glb_foc2pwm&gt;</code></td>
+        <td>Fixed-point phase-current samples.</td>
+      </tr>
+      <tr>
+        <td>AXIS feedback input</td>
+        <td><code>SPEED_THETA_m</code> as <code>hls::stream&lt;t_glb_speed_theta&gt;</code></td>
+        <td>Packed RPM and mechanical angle, equivalent in role to FP32 <code>FOC_RPM_THETA_m</code>.</td>
+      </tr>
+      <tr>
+        <td>AXIS voltage outputs</td>
+        <td><code>Va_cmd</code>, <code>Vb_cmd</code>, <code>Vc_cmd</code> as <code>hls::stream&lt;t_glb_foc2pwm&gt;</code></td>
+        <td>Fixed-point phase-voltage command streams.</td>
+      </tr>
+      <tr>
+        <td>AXI4-Lite config</td>
+        <td><code>ppr_args</code>, <code>control_mode_args</code>, PI coefficients, <code>angle_sh_args</code>, <code>vd_args</code>, <code>vq_args</code>, <code>fw_kp_args</code>, <code>fw_ki_args</code>, <code>fixed_angle_args</code></td>
+        <td>Same logical parameter set as FP32, but encoded as fixed-point/integer register values.</td>
+      </tr>
+      <tr>
+        <td>AXI4-Lite status</td>
+        <td><code>id_stts</code>, <code>iq_stts</code>, PI accumulators/errors/outputs, <code>angle_stts</code>, command mirrors, Clarke intermediate values</td>
+        <td>Status mirrors the latest sample, similar to the FP32 debug/status registers.</td>
+      </tr>
+    </table>
+
+    <h3>Design Comparison</h3>
+    <table>
+      <tr><th>Aspect</th><th>Legacy ap_fixed FOC</th><th>Current FP32 Multi-Motor FOC</th></tr>
+      <tr>
+        <td>Numeric type</td>
+        <td>Fixed-point types such as <code>t_glb_foc2pwm</code> and <code>t_glb_q15q16</code>.</td>
+        <td>Single-precision floating point for current, voltage, PI coefficients, and status values.</td>
+      </tr>
+      <tr>
+        <td>Motor scaling model</td>
+        <td>Single-motor top; multi-motor support would require external replication or additional scheduling logic.</td>
+        <td>Template parameter <code>NUM_MOTORS</code> creates a per-motor <code>FOCContext</code> array and reuses one shared compute datapath.</td>
+      </tr>
+      <tr>
+        <td>Scheduling</td>
+        <td>Periodic stream loop is pipelined with <code>II=5</code>.</td>
+        <td>ID-tagged context scheduling. Current validated version is not pipelined and prioritizes timing closure.</td>
+      </tr>
+      <tr>
+        <td>Context/state</td>
+        <td>State is embedded in the legacy FOC implementation for one active motor instance.</td>
+        <td>State is explicit in <code>FOCContext&lt;float&gt; ctx[NUM_MOTORS]</code>, enabling independent PI state per motor.</td>
+      </tr>
+      <tr>
+        <td>Configuration</td>
+        <td>Shared AXI4-Lite config registers for the current IP instance.</td>
+        <td>Shared AXI4-Lite config registers for all motor slots in this revision; per-motor config memory is future work.</td>
+      </tr>
+      <tr>
+        <td>QoR point</td>
+        <td>10 ns clock, slack 0.05 ns, II=5, 43 DSP, 2 BRAM, 6207 FF, 10442 LUT.</td>
+        <td>5 ns clock, slack 0.05 ns. <code>NUM_MOTORS=64</code>: 165-cycle iteration latency, 23 DSP, 0 BRAM, 9834 FF, 12142 LUT.</td>
+      </tr>
+    </table>
+
+    <p class="note">
+      Because the legacy <code>ap_fixed</code> report was built at 10 ns and the FP32 reports were built at 5 ns, the
+      table compares measured QoR points rather than claiming an apples-to-apples frequency-normalized performance result.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2>Implemented Legacy IP_FOC_Multiple Variant</h2>
+    <p>
+      The legacy <code>ap_fixed</code> IP now keeps the existing <code>IP_FOC</code> public signatures intact and adds
+      context-aware variants in <code>L1/include/hw/foc.hpp</code>. The original <code>foc_core_ap_fixed</code> remains as a
+      compatibility wrapper around one static context, while new multi-motor code calls the context-aware core directly.
+    </p>
+
+    <h3>Context and Sideband Architecture</h3>
+    <table>
+      <tr><th>Implemented Item</th><th>Role</th><th>Compatibility Rule</th></tr>
+      <tr>
+        <td><code>FocContext_ap_fixed&lt;T_IO, W, I&gt;</code></td>
+        <td>Holds the legacy state previously stored as function-local statics: speed, flux, torque, field weakening, generated-angle, and previous-mode state.</td>
+        <td>New public type only; no existing caller changes required.</td>
+      </tr>
+      <tr>
+        <td><code>details::foc_core_ap_fixed_context</code></td>
+        <td>Runs the original fixed-point FOC algorithm against one explicit context object.</td>
+        <td><code>details::foc_core_ap_fixed</code> still has its original signature and forwards through one static context.</td>
+      </tr>
+      <tr>
+        <td><code>hls_foc_strm_ap_fixed_context</code></td>
+        <td>Shares one fixed-point FOC compute path across <code>ctx[NUM_MOTORS]</code>, selected by <code>FOC_MOTOR_ID</code>.</td>
+        <td><code>hls_foc_strm_ap_fixed</code> remains source-compatible and unchanged at its public boundary.</td>
+      </tr>
+      <tr>
+        <td><code>hls_foc_periodic_ap_fixed_multiple</code></td>
+        <td>New top under <code>L1/tests/IP_FOC_Multiple</code> with sideband <code>FOC_MOTOR_ID</code> input and <code>FOC_MOTOR_ID_out</code> output streams.</td>
+        <td>Original <code>L1/tests/IP_FOC</code> top functions remain untouched.</td>
+      </tr>
+    </table>
+
+    <p>
+      <code>FOC_MOTOR_ID</code> uses natural binary motor IDs. IDs in <code>0 .. NUM_MOTORS-1</code> update the selected
+      context and emit the computed voltage commands. Invalid IDs are not remapped; they skip context update, emit safe zero
+      voltage commands, and return the original ID on <code>FOC_MOTOR_ID_out</code>.
+    </p>
+
+    <h3>Legacy ap_fixed QoR Comparison</h3>
+    <table>
+      <tr><th>Design</th><th>Clock</th><th>Slack</th><th>Loop II</th><th>Core Latency</th><th>BRAM</th><th>DSP</th><th>FF</th><th>LUT</th></tr>
+      <tr>
+        <td>Existing <code>IP_FOC</code></td>
+        <td>10 ns</td>
+        <td>0.05 ns</td>
+        <td>5</td>
+        <td>33 cycles</td>
+        <td>2</td>
+        <td>43</td>
+        <td>6207</td>
+        <td>10442</td>
+      </tr>
+      <tr>
+        <td><code>IP_FOC_Multiple</code>, <code>NUM_MOTORS=1</code></td>
+        <td>10 ns</td>
+        <td>0.05 ns</td>
+        <td>20</td>
+        <td>30 cycles</td>
+        <td>2</td>
+        <td>43</td>
+        <td>6966</td>
+        <td>11443</td>
+      </tr>
+      <tr>
+        <td><code>IP_FOC_Multiple</code>, <code>NUM_MOTORS=64</code></td>
+        <td>10 ns</td>
+        <td>0.05 ns</td>
+        <td>27</td>
+        <td>25 cycles</td>
+        <td>2</td>
+        <td>43</td>
+        <td>8187</td>
+        <td>12106</td>
+      </tr>
+    </table>
+
+    <h3>Legacy Validation Artifacts</h3>
+    <ul>
+      <li><code>../../IP_FOC_Multiple/hls_vck190_m1_csim</code>: <code>NUM_MOTORS=1</code> C simulation with valid and invalid motor IDs.</li>
+      <li><code>../../IP_FOC_Multiple/hls_vck190_m64_csim</code>: <code>NUM_MOTORS=64</code> C simulation with non-sequential valid IDs and invalid IDs.</li>
+      <li><code>../../IP_FOC_Multiple/hls_vck190_m1_csynth/hls/syn/report/csynth.rpt</code>: <code>NUM_MOTORS=1</code> VCK190 synthesis report.</li>
+      <li><code>../../IP_FOC_Multiple/hls_vck190_m64_csynth/hls/syn/report/csynth.rpt</code>: <code>NUM_MOTORS=64</code> VCK190 synthesis report.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>Scalability Notes</h2>
+    <p>
+      The legacy fixed-point multi-motor top shares one FOC datapath and stores only per-motor control state. At 10 ns,
+      the synthesized stream loop accepts one tagged sample every 200 ns for <code>NUM_MOTORS=1</code> and every 270 ns for
+      <code>NUM_MOTORS=64</code>. Servicing all 64 motor slots once therefore takes about 17.3 us, or roughly 57.9 kHz per
+      motor when every slot is active once per round.
+    </p>
+    <p>
+      The 64-context design adds about 1.2k FF and 663 LUT over the single-context multi-motor top while keeping BRAM and
+      DSP unchanged. Higher throughput would require reducing context/status dependencies, banking/partitioning selected
+      context state, or instantiating multiple shared FOC engines.
+    </p>
+  </section>
+</main>
+</body>
+</html>

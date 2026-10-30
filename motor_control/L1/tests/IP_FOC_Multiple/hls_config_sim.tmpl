@@ -1,0 +1,16 @@
+[hls]
+
+clock=10
+clock_uncertainty=1.25
+flow_target=vivado
+syn.file=${CUR_DIR}/src/ip_foc_multiple.cpp
+syn.file_cflags=${CUR_DIR}/src/ip_foc_multiple.cpp,-DSIM_FINITE -O0 -DIP_FOC_NUM_MOTORS=${NUM_MOTORS} ${MODEL_SIM_CFLAGS} -I${XF_PROJ_ROOT}/L1/include/hw -I${CUR_DIR}/src
+syn.top=hls_foc_periodic_ap_fixed_multiple
+tb.file=${TB_FILE}
+tb.file_cflags=${TB_FILE},-O0 -DIP_FOC_NUM_MOTORS=${NUM_MOTORS} ${MODEL_SIM_CFLAGS} -I${XF_PROJ_ROOT}/L1/include/hw -I${CUR_DIR}/src
+
+csim.ldflags=-lncurses
+cosim.ldflags=-lncurses
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+

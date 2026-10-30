@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 SPDX-License-Identifier: X11
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -352,6 +352,49 @@ enum FOC_Mode {
     MOD_TOTAL_NUM
 };
 
+template <class T_IO, int W, int I>
+struct FocContext_ap_fixed {
+    typedef ap_uint<4> t_mode;
+    typedef short t_angle;
+    typedef ap_fixed<16, 16, AP_TRN, AP_SAT> t_RPM;
+    typedef ap_fixed<17, 17, AP_TRN, AP_SAT> t_RPME;
+    typedef ap_fixed<26, 26, AP_TRN, AP_SAT> t_RPMI;
+
+    static const int I_used = (I < 8) ? 8 : I;
+    static const int W_IQ = I_used + 16;
+    static const int I_IQ = I_used + 8;
+    static const int W_IQE = W_IQ + 1;
+    static const int I_IQE = I_IQ + 1;
+    static const int W_IQI = W_IQ + 10;
+    static const int I_IQI = I_IQ + 10;
+    typedef ap_fixed<W_IQ, I_IQ, AP_TRN, AP_WRAP> t_IQ;
+    typedef ap_fixed<W_IQE, I_IQE, AP_TRN, AP_SAT> t_IQE;
+    typedef ap_fixed<W_IQI, I_IQI, AP_TRN, AP_SAT> t_IQI;
+
+    static const int W_ID = I_used + 16;
+    static const int I_ID = I_used + 8;
+    static const int W_IDE = W_ID + 1;
+    static const int I_IDE = I_ID + 1;
+    static const int W_IDI = W_ID + 10;
+    static const int I_IDI = I_ID + 10;
+    typedef ap_fixed<W_ID, I_ID, AP_TRN, AP_WRAP> t_ID;
+    typedef ap_fixed<W_IDE, I_IDE, AP_TRN, AP_SAT> t_IDE;
+    typedef ap_fixed<W_IDI, I_IDI, AP_TRN, AP_SAT> t_IDI;
+
+    t_RPMI Speed_I_err_prev = 0;
+    t_RPME Speed_Error_prev = 0;
+    t_ID Vd_weakened = 0;
+    t_IDI Flux_I_err_prev = 0;
+    t_IDE Flux_Error_prev = 0;
+    t_IQI Torque_I_err_prev = 0;
+    t_IQE Torque_Error_prev = 0;
+    t_IDI FWiE_prev = 0;
+    t_IDE FW_err_prev = 0;
+    int gen_delay = 0;
+    t_angle gen_angle = 0;
+    t_mode Mode_Prev = MOD_STOPPED;
+};
+
 } // namespace xf
 } // namespace motorcontrol
 
@@ -450,7 +493,7 @@ void Control_foc_ap_fixed(T_IO& Vd,
 //--------------------------------------------------------------------------
 
 template <int VALUE_CPR, class T_IO, int MAX_IO, int W, int I>
-void foc_core_ap_fixed(
+void foc_core_ap_fixed_context(
     // Input
     T_IO Ia,     // Phase A current
     T_IO Ib,     // Phase B current
@@ -507,7 +550,8 @@ void foc_core_ap_fixed(
     volatile int& Ialpha_stts,
     volatile int& Ibeta_stts,
     volatile int& Ihomopolar_stts,
-    volatile int& fixed_angle_args) {
+    volatile int& fixed_angle_args,
+    FocContext_ap_fixed<T_IO, W, I>& ctx) {
 #pragma HLS INLINE off
 #pragma HLS BIND_STORAGE variable = sin_table type = RAM_2P impl = BRAM
 #pragma HLS BIND_STORAGE variable = cos_table type = RAM_2P impl = BRAM
@@ -599,26 +643,26 @@ void foc_core_ap_fixed(
 
     // static T_Vabc SVM_inv_index = MAX_LIM >> 1;
     // short V_fw = 1;
-    static t_RPMI Speed_I_err_prev = 0;
-    static t_RPME Speed_Error_prev = 0;
+    t_RPMI& Speed_I_err_prev = ctx.Speed_I_err_prev;
+    t_RPME& Speed_Error_prev = ctx.Speed_Error_prev;
 
-    static t_ID Vd_weakened = 0; // case FW
+    t_ID& Vd_weakened = ctx.Vd_weakened; // case FW
 
-    static t_IDI Flux_I_err_prev = 0; // Variable for previous integral value
-    static t_IDE Flux_Error_prev = 0; // Variable for previous derivative value
+    t_IDI& Flux_I_err_prev = ctx.Flux_I_err_prev; // Variable for previous integral value
+    t_IDE& Flux_Error_prev = ctx.Flux_Error_prev; // Variable for previous derivative value
 
-    static t_IQI Torque_I_err_prev = 0; // Variable for previous integral value
-    static t_IQE Torque_Error_prev = 0; // Variable for previous derivative value
+    t_IQI& Torque_I_err_prev = ctx.Torque_I_err_prev; // Variable for previous integral value
+    t_IQE& Torque_Error_prev = ctx.Torque_Error_prev; // Variable for previous derivative value
 
-    static t_IDI FWiE_prev = 0;
-    static t_IDE FW_err_prev = 0;
+    t_IDI& FWiE_prev = ctx.FWiE_prev;
+    t_IDE& FW_err_prev = ctx.FW_err_prev;
 
-    static int gen_delay = 0;     // Generator period counter
-    static t_angle gen_angle = 0; // Generator angle counter
+    int& gen_delay = ctx.gen_delay;     // Generator period counter
+    t_angle& gen_angle = ctx.gen_angle; // Generator angle counter
     //--------------------------------------------------------------------------
     // load args
     //--------------------------------------------------------------------------
-    static t_mode Mode_Prev = MOD_STOPPED; // Previous control Register.
+    t_mode& Mode_Prev = ctx.Mode_Prev; // Previous control Register.
     t_mode FOC_mode = control_mode_args;
     /*
     if(FOC_mode == MOD_STOPPED){
@@ -942,6 +986,75 @@ void foc_core_ap_fixed(
     Ihomopolar_stts = apx_speed_Ihomopolar_stts.range(31, 0);
 }
 
+template <int VALUE_CPR, class T_IO, int MAX_IO, int W, int I>
+void foc_core_ap_fixed(
+    // Input
+    T_IO Ia,     // Phase A current
+    T_IO Ib,     // Phase B current
+    T_IO Ic,     // Phase B current
+    short RPM,   // RPM
+    short Angle, // Encoder count
+    // Output for GPIO
+    T_IO& Va_cmd,
+    T_IO& Vb_cmd,
+    T_IO& Vc_cmd,
+    // Angle translation parameters
+    int tab_map_factor,
+    short cpr_div_ppr,
+    T_IO RPM_to_speed,
+    // Inout put for parameters
+    volatile int& control_mode_args,
+    volatile int& control_fixperiod_args,
+    // the following are all representated in q15q16 format
+    volatile int& flux_sp_args,
+    volatile int& flux_kp_args,
+    volatile int& flux_ki_args,
+    volatile int& flux_kd_args,
+    volatile int& torque_sp_args,
+    volatile int& torque_kp_args,
+    volatile int& torque_ki_args,
+    volatile int& torque_kd_args,
+    volatile int& speed_sp_args,
+    volatile int& speed_kp_args,
+    volatile int& speed_ki_args,
+    volatile int& speed_kd_args,
+    volatile int& angle_sh_args,
+    volatile int& vd_args,
+    volatile int& vq_args,
+    volatile int& trigger_args,
+    // int format
+    volatile int& control2_args,
+    // the following are all representated in q15q16 format
+    volatile int& fw_kp_args,
+    volatile int& fw_ki_args,
+    // the following are all representated in q15q16 format
+    volatile int& id_stts,
+    volatile int& flux_acc_stts,
+    volatile int& flux_err_stts,
+    volatile int& flux_out_stts,
+    volatile int& iq_stts,
+    volatile int& torque_acc_stts,
+    volatile int& torque_err_stts,
+    volatile int& torque_out_stts,
+    volatile int& speed_stts,
+    volatile int& speed_acc_stts,
+    volatile int& speed_err_stts,
+    volatile int& speed_out_stts,
+    volatile int& angle_stts,
+    volatile int& Ialpha_stts,
+    volatile int& Ibeta_stts,
+    volatile int& Ihomopolar_stts,
+    volatile int& fixed_angle_args) {
+    static FocContext_ap_fixed<T_IO, W, I> ctx;
+    foc_core_ap_fixed_context<VALUE_CPR, T_IO, MAX_IO, W, I>(
+        Ia, Ib, Ic, RPM, Angle, Va_cmd, Vb_cmd, Vc_cmd, tab_map_factor, cpr_div_ppr, RPM_to_speed, control_mode_args,
+        control_fixperiod_args, flux_sp_args, flux_kp_args, flux_ki_args, flux_kd_args, torque_sp_args, torque_kp_args,
+        torque_ki_args, torque_kd_args, speed_sp_args, speed_kp_args, speed_ki_args, speed_kd_args, angle_sh_args,
+        vd_args, vq_args, trigger_args, control2_args, fw_kp_args, fw_ki_args, id_stts, flux_acc_stts, flux_err_stts,
+        flux_out_stts, iq_stts, torque_acc_stts, torque_err_stts, torque_out_stts, speed_stts, speed_acc_stts,
+        speed_err_stts, speed_out_stts, angle_stts, Ialpha_stts, Ibeta_stts, Ihomopolar_stts, fixed_angle_args, ctx);
+}
+
 } // namespace details
 
 //--------------------------------------------------------------------------
@@ -1116,6 +1229,140 @@ LOOP_FOC_STRM:
         if (!Va_cmd.full()) Va_cmd.write(va);
         if (!Vb_cmd.full()) Vb_cmd.write(vb);
         if (!Vc_cmd.full()) Vc_cmd.write(vc);
+    } // for(long i = 0; i < trip_cnt; i++)
+}
+
+template <int VALUE_CPR, int NUM_MOTORS, typename T_IO, int MAX_IO, int W, int I, typename T_RPM_THETA_FOC>
+void hls_foc_strm_ap_fixed_context(
+    // Input
+    hls::stream<T_IO>& Ia,
+    hls::stream<T_IO>& Ib,
+    hls::stream<T_IO>& Ic,
+    hls::stream<T_RPM_THETA_FOC>& FOC_RPM_THETA_m, // RPM & Theta_m
+    hls::stream<int>& FOC_MOTOR_ID,
+    // Output
+    hls::stream<T_IO>& Va_cmd,
+    hls::stream<T_IO>& Vb_cmd,
+    hls::stream<T_IO>& Vc_cmd,
+    hls::stream<int>& FOC_MOTOR_ID_out,
+    // In-out for parameters
+    volatile int& ppr_args,
+    volatile int& control_mode_args,
+    volatile int& control_fixperiod_args,
+    volatile int& flux_sp_args,
+    volatile int& flux_kp_args,
+    volatile int& flux_ki_args,
+    volatile int& flux_kd_args,
+    volatile int& torque_sp_args,
+    volatile int& torque_kp_args,
+    volatile int& torque_ki_args,
+    volatile int& torque_kd_args,
+    volatile int& speed_sp_args,
+    volatile int& speed_kp_args,
+    volatile int& speed_ki_args,
+    volatile int& speed_kd_args,
+    volatile int& angle_sh_args,
+    volatile int& vd_args,
+    volatile int& vq_args,
+    volatile int& fw_kp_args,
+    volatile int& fw_ki_args,
+    //
+    volatile int& id_stts,
+    volatile int& flux_acc_stts,
+    volatile int& flux_err_stts,
+    volatile int& flux_out_stts,
+    volatile int& iq_stts,
+    volatile int& torque_acc_stts,
+    volatile int& torque_err_stts,
+    volatile int& torque_out_stts,
+    volatile int& speed_stts,
+    volatile int& speed_acc_stts,
+    volatile int& speed_err_stts,
+    volatile int& speed_out_stts,
+    volatile int& angle_stts,
+    volatile int& Va_cmd_stts,
+    volatile int& Vb_cmd_stts,
+    volatile int& Vc_cmd_stts,
+    volatile int& Ialpha_stts,
+    volatile int& Ibeta_stts,
+    volatile int& Ihomopolar_stts,
+    volatile int& fixed_angle_args,
+    volatile long& trip_cnt,
+    FocContext_ap_fixed<T_IO, W, I> ctx[NUM_MOTORS]) {
+    short cpr_div_ppr = VALUE_CPR / ppr_args;
+    unsigned int tab_map_factor = ((COMM_MACRO_TLB_LENTH * (unsigned int)ppr_args) << 16) / VALUE_CPR;
+    const T_IO RPM_factor = 60.0 / 2 / 3.1415926535;
+    T_IO RPM_to_speed = (t_glb_q15q16)ppr_args / RPM_factor;
+LOOP_FOC_STRM_CONTEXT:
+    for (long i = 0; i < trip_cnt; i++) {
+#pragma HLS pipeline II = 5
+        static int FOC_RPM_THETA_m_in;
+        static T_IO Ia_in;
+        static T_IO Ib_in;
+        static T_IO Ic_in;
+        int motor_id_in = 0;
+        if (!Ia.empty()) {
+            Ia_in = Ia.read();
+            Ib_in = Ib.read();
+            Ic_in = Ic.read();
+        }
+
+        if (!FOC_RPM_THETA_m.empty()) FOC_RPM_THETA_m_in = FOC_RPM_THETA_m.read();
+        if (!FOC_MOTOR_ID.empty()) motor_id_in = FOC_MOTOR_ID.read();
+
+        short RPM_in = (FOC_RPM_THETA_m_in & 0x0000FFFF);
+        short Angle_in = (FOC_RPM_THETA_m_in & 0xFFFF0000) >> 16;
+
+        T_IO Va_out = 0;
+        T_IO Vb_out = 0;
+        T_IO Vc_out = 0;
+        // reserved word
+        int trigger_args = 0;
+        int control2_args = 0;
+
+        const bool motor_id_valid = (motor_id_in >= 0) && (motor_id_in < NUM_MOTORS);
+        if (motor_id_valid) {
+            details::foc_core_ap_fixed_context<VALUE_CPR, T_IO, MAX_IO, W, I>(
+                Ia_in, Ib_in, Ic_in, RPM_in, Angle_in, Va_out, Vb_out, Vc_out, tab_map_factor, cpr_div_ppr,
+                RPM_to_speed, control_mode_args, control_fixperiod_args, flux_sp_args, flux_kp_args, flux_ki_args,
+                flux_kd_args, torque_sp_args, torque_kp_args, torque_ki_args, torque_kd_args, speed_sp_args,
+                speed_kp_args, speed_ki_args, speed_kd_args, angle_sh_args, vd_args, vq_args, trigger_args,
+                control2_args, fw_kp_args, fw_ki_args,
+                //
+                id_stts, flux_acc_stts, flux_err_stts, flux_out_stts, iq_stts, torque_acc_stts, torque_err_stts,
+                torque_out_stts, speed_stts, speed_acc_stts, speed_err_stts, speed_out_stts, angle_stts, Ialpha_stts,
+                Ibeta_stts, Ihomopolar_stts, fixed_angle_args, ctx[motor_id_in]);
+        } else {
+            id_stts = 0;
+            flux_acc_stts = 0;
+            flux_err_stts = 0;
+            flux_out_stts = 0;
+            iq_stts = 0;
+            torque_acc_stts = 0;
+            torque_err_stts = 0;
+            torque_out_stts = 0;
+            speed_stts = 0;
+            speed_acc_stts = 0;
+            speed_err_stts = 0;
+            speed_out_stts = 0;
+            angle_stts = 0;
+            Ialpha_stts = 0;
+            Ibeta_stts = 0;
+            Ihomopolar_stts = 0;
+        }
+
+        t_glb_q15q16 apx_va = Va_out;
+        t_glb_q15q16 apx_vb = Vb_out;
+        t_glb_q15q16 apx_vc = Vc_out;
+
+        Va_cmd_stts = apx_va(31, 0);
+        Vb_cmd_stts = apx_vb(31, 0);
+        Vc_cmd_stts = apx_vc(31, 0);
+
+        if (!Va_cmd.full()) Va_cmd.write(Va_out);
+        if (!Vb_cmd.full()) Vb_cmd.write(Vb_out);
+        if (!Vc_cmd.full()) Vc_cmd.write(Vc_out);
+        if (!FOC_MOTOR_ID_out.full()) FOC_MOTOR_ID_out.write(motor_id_in);
     } // for(long i = 0; i < trip_cnt; i++)
 }
 

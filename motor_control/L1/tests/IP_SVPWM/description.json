@@ -2,10 +2,6 @@
     "name": "Space vector pulse width modulation module HLS Test",
     "description": "Test SVPWM DUTY",
     "flow": "hls",
-    "platform_allowlist": [
-        "xck26-sfvc784-2LV-c"
-    ],
-    "platform_blocklist": [],
     "part_allowlist": [
         "xck26-sfvc784-2LV-c"
     ],
@@ -36,11 +32,11 @@
                 "env": "",
                 "cmd": "",
                 "max_memory_MB": {
-                    "vivado_syn": 16384,
-                    "hls_csim": 20480,
-                    "hls_cosim": 20480,
-                    "vivado_impl": 16384,
-                    "hls_csynth": 10240
+                    "vivado_syn": 4096,
+                    "hls_csim": 4096,
+                    "hls_cosim": 4096,
+                    "vivado_impl": 4096,
+                    "hls_csynth": 4096
                 },
                 "max_time_min": {
                     "vivado_syn": 300,

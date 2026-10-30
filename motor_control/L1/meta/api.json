@@ -21,232 +21,232 @@
                 "ports": [
                     {
                         "name": "Ia",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<t_glb_foc2pwm>"
                     },
                     {
                         "name": "Ib",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<t_glb_foc2pwm>"
                     },
                     {
                         "name": "Ic",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<t_glb_foc2pwm>"
                     },
                     {
                         "name": "SPEED_THETA_m",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<t_glb_speed_theta>"
                     },
                     {
                         "name": "Va_cmd",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<t_glb_foc2pwm>"
                     },
                     {
                         "name": "Vb_cmd",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<t_glb_foc2pwm>"
                     },
                     {
                         "name": "Vc_cmd",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<t_glb_foc2pwm>"
                     },
                     {
                         "name": "control_mode_args",
-                        "direction": "",
+                        "direction": "input",
                         "type": "volatile int&"
                     },
                     {
                         "name": "control_fixperiod_args",
-                        "direction": "",
+                        "direction": "input",
                         "type": "volatile int&"
                     },
                     {
                         "name": "flux_sp_args",
-                        "direction": "",
+                        "direction": "input",
                         "type": "volatile int&"
                     },
                     {
                         "name": "flux_kp_args",
-                        "direction": "",
+                        "direction": "input",
                         "type": "volatile int&"
                     },
                     {
                         "name": "flux_ki_args",
-                        "direction": "",
+                        "direction": "input",
                         "type": "volatile int&"
                     },
                     {
                         "name": "flux_kd_args",
-                        "direction": "",
+                        "direction": "input",
                         "type": "volatile int&"
                     },
                     {
                         "name": "torque_sp_args",
-                        "direction": "",
+                        "direction": "input",
                         "type": "volatile int&"
                     },
                     {
                         "name": "torque_kp_args",
-                        "direction": "",
+                        "direction": "input",
                         "type": "volatile int&"
                     },
                     {
                         "name": "torque_ki_args",
-                        "direction": "",
+                        "direction": "input",
                         "type": "volatile int&"
                     },
                     {
                         "name": "torque_kd_args",
-                        "direction": "",
+                        "direction": "input",
                         "type": "volatile int&"
                     },
                     {
                         "name": "speed_sp_args",
-                        "direction": "",
+                        "direction": "input",
                         "type": "volatile int&"
                     },
                     {
                         "name": "speed_kp_args",
-                        "direction": "",
+                        "direction": "input",
                         "type": "volatile int&"
                     },
                     {
                         "name": "speed_ki_args",
-                        "direction": "",
+                        "direction": "input",
                         "type": "volatile int&"
                     },
                     {
                         "name": "speed_kd_args",
-                        "direction": "",
+                        "direction": "input",
                         "type": "volatile int&"
                     },
                     {
                         "name": "angle_sh_args",
-                        "direction": "",
+                        "direction": "input",
                         "type": "volatile int&"
                     },
                     {
                         "name": "vd_args",
-                        "direction": "",
+                        "direction": "input",
                         "type": "volatile int&"
                     },
                     {
                         "name": "vq_args",
-                        "direction": "",
+                        "direction": "input",
                         "type": "volatile int&"
                     },
                     {
                         "name": "fw_kp_args",
-                        "direction": "",
+                        "direction": "input",
                         "type": "volatile int&"
                     },
                     {
                         "name": "fw_ki_args",
-                        "direction": "",
+                        "direction": "input",
                         "type": "volatile int&"
                     },
                     {
                         "name": "id_stts",
-                        "direction": "",
+                        "direction": "output",
                         "type": "volatile int&"
                     },
                     {
                         "name": "flux_acc_stts",
-                        "direction": "",
+                        "direction": "output",
                         "type": "volatile int&"
                     },
                     {
                         "name": "flux_err_stts",
-                        "direction": "",
+                        "direction": "output",
                         "type": "volatile int&"
                     },
                     {
                         "name": "flux_out_stts",
-                        "direction": "",
+                        "direction": "output",
                         "type": "volatile int&"
                     },
                     {
                         "name": "iq_stts",
-                        "direction": "",
+                        "direction": "output",
                         "type": "volatile int&"
                     },
                     {
                         "name": "torque_acc_stts",
-                        "direction": "",
+                        "direction": "output",
                         "type": "volatile int&"
                     },
                     {
                         "name": "torque_err_stts",
-                        "direction": "",
+                        "direction": "output",
                         "type": "volatile int&"
                     },
                     {
                         "name": "torque_out_stts",
-                        "direction": "",
+                        "direction": "output",
                         "type": "volatile int&"
                     },
                     {
                         "name": "speed_stts",
-                        "direction": "",
+                        "direction": "output",
                         "type": "volatile int&"
                     },
                     {
                         "name": "speed_acc_stts",
-                        "direction": "",
+                        "direction": "output",
                         "type": "volatile int&"
                     },
                     {
                         "name": "speed_err_stts",
-                        "direction": "",
+                        "direction": "output",
                         "type": "volatile int&"
                     },
                     {
                         "name": "speed_out_stts",
-                        "direction": "",
+                        "direction": "output",
                         "type": "volatile int&"
                     },
                     {
                         "name": "angle_stts",
-                        "direction": "",
+                        "direction": "output",
                         "type": "volatile int&"
                     },
                     {
                         "name": "Va_cmd_stts",
-                        "direction": "",
+                        "direction": "output",
                         "type": "volatile int&"
                     },
                     {
                         "name": "Vb_cmd_stts",
-                        "direction": "",
+                        "direction": "output",
                         "type": "volatile int&"
                     },
                     {
                         "name": "Vc_cmd_stts",
-                        "direction": "",
+                        "direction": "output",
                         "type": "volatile int&"
                     },
                     {
                         "name": "Ialpha_stts",
-                        "direction": "",
+                        "direction": "output",
                         "type": "volatile int&"
                     },
                     {
                         "name": "Ibeta_stts",
-                        "direction": "",
+                        "direction": "output",
                         "type": "volatile int&"
                     },
                     {
                         "name": "Ihomopolar_stts",
-                        "direction": "",
+                        "direction": "output",
                         "type": "volatile int&"
                     },
                     {
                         "name": "trip_cnt",
-                        "direction": "",
+                        "direction": "input",
                         "type": "volatile int&"
                     }
                 ]
@@ -273,57 +273,57 @@
                 "ports": [
                     {
                         "name": "qei_A",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<t_bin_qei>"
                     },
                     {
                         "name": "qei_B",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<t_bin_qei>"
                     },
                     {
                         "name": "qei_I",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<t_bin_qei>"
                     },
                     {
                         "name": "qei_RPM_THETA_m",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<32> >"
                     },
                     {
                         "name": "qei_dir",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<t_bin_qei>"
                     },
                     {
                         "name": "qei_err",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<t_err_qei>"
                     },
                     {
                         "name": "qei_args_cpr",
-                        "direction": "",
+                        "direction": "input",
                         "type": "volatile int&"
                     },
                     {
                         "name": "qei_args_ctrl",
-                        "direction": "",
+                        "direction": "input",
                         "type": "volatile int&"
                     },
                     {
                         "name": "qei_stts_RPM_THETA_m",
-                        "direction": "",
+                        "direction": "output",
                         "type": "volatile int&"
                     },
                     {
                         "name": "qei_stts_dir",
-                        "direction": "",
+                        "direction": "output",
                         "type": "volatile int&"
                     },
                     {
                         "name": "qei_stts_err",
-                        "direction": "",
+                        "direction": "output",
                         "type": "volatile int&"
                     }
                 ]
@@ -351,87 +351,87 @@
                 "ports": [
                     {
                         "name": "strm_duty_ratio_a",
-                        "direction": "In",
+                        "direction": "input",
                         "type": "hls::stream<t_svpwm_ratio >"
                     },
                     {
                         "name": "strm_duty_ratio_b",
-                        "direction": "In",
+                        "direction": "input",
                         "type": "hls::stream<t_svpwm_ratio >"
                     },
                     {
                         "name": "strm_duty_ratio_c",
-                        "direction": "In",
+                        "direction": "input",
                         "type": "hls::stream<t_svpwm_ratio >"
                     },
                     {
                         "name": "strm_pwm_h_a",
-                        "direction": "Out",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<1> >"
                     },
                     {
                         "name": "strm_pwm_h_b",
-                        "direction": "Out",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<1> >"
                     },
                     {
                         "name": "strm_pwm_h_c",
-                        "direction": "Out",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<1> >"
                     },
                     {
                         "name": "strm_pwm_l_a",
-                        "direction": "Out",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<1> >"
                     },
                     {
                         "name": "strm_pwm_l_b",
-                        "direction": "Out",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<1> >"
                     },
                     {
                         "name": "strm_pwm_l_c",
-                        "direction": "Out",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<1> >"
                     },
                     {
                         "name": "strm_pwm_sync_a",
-                        "direction": "Out",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<1> >"
                     },
                     {
                         "name": "strm_pwm_sync_b",
-                        "direction": "Out",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<1> >"
                     },
                     {
                         "name": "strm_pwm_sync_c",
-                        "direction": "Out",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<1> >"
                     },
                     {
                         "name": "pwm_args_pwm_freq",
-                        "direction": "In",
+                        "direction": "input",
                         "type": "volatile int&"
                     },
                     {
                         "name": "pwm_args_dead_cycles",
-                        "direction": "In",
+                        "direction": "input",
                         "type": "volatile int&"
                     },
                     {
                         "name": "pwm_args_phase_shift",
-                        "direction": "In",
+                        "direction": "input",
                         "type": "volatile int&"
                     },
                     {
                         "name": "pwm_stt_pwm_cycle",
-                        "direction": "In",
+                        "direction": "output",
                         "type": "volatile int&"
                     },
                     {
                         "name": "pwm_args_sample_ii",
-                        "direction": "In",
+                        "direction": "input",
                         "type": "volatile int&"
                     }
                 ]

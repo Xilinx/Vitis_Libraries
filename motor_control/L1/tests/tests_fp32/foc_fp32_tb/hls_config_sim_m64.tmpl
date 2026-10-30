@@ -1,0 +1,13 @@
+[hls]
+
+clock=5
+clock_uncertainty=1.25
+flow_target=vivado
+syn.file=${XF_PROJ_ROOT}/L1/tests/tests_fp32/foc_fp32_tb/src/foc_fp32_top.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/tests/tests_fp32/foc_fp32_tb/src/foc_fp32_top.cpp,-DSIM_FINITE -DFOC_FP32_NUM_MOTORS=64 -I${XF_PROJ_ROOT}/L1/include/models_fp
+syn.top=hls_foc_periodic_fp32
+tb.file=${XF_PROJ_ROOT}/L1/tests/tests_fp32/foc_fp32_tb/tb/test_foc_fp32.cpp
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/tests_fp32/foc_fp32_tb/tb/test_foc_fp32.cpp,-DFOC_FP32_NUM_MOTORS=64 -I${XF_PROJ_ROOT}/L1/include/models_fp
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog

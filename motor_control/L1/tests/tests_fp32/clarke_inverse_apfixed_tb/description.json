@@ -37,8 +37,8 @@
                 "env": "",
                 "cmd": "",
                 "max_memory_MB": {
-                    "hls_csim": 20480,
-                    "hls_csynth": 10240
+                    "hls_csim": 4096,
+                    "hls_csynth": 4096
                 },
                 "max_time_min": {
                     "hls_csim": 300,
