@@ -53,6 +53,8 @@ class aesTable {
 
 template <int W>
 class aesEnc {
+    static_assert(W == 128 || W == 192 || W == 256, "AES key width must be 128, 192, or 256 bits");
+
    public:
     void updateKey(ap_uint<W> cipherkey) {}
     void process(ap_uint<128> plaintext, ap_uint<W> cipherkey, ap_uint<128>& ciphertext) {}
@@ -514,6 +516,8 @@ class aesEnc<128> : public aesTable {
  */
 template <int W>
 class aesDec {
+    static_assert(W == 128 || W == 192 || W == 256, "AES key width must be 128, 192, or 256 bits");
+
    public:
     /**
      * @brief Update key before using it to decrypt.

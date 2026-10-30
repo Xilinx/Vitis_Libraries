@@ -4,28 +4,18 @@
     "description": "Adler32 checksum algorithm benchmark",
     "flow": "system",
     "platform_allowlist": [
-        "u50",
-        "aws-vu9p-f1"
+        "vck190_base"
     ],
-    "platform_blocklist": [
-        "zc"
-    ],
-    "platform_properties": {
-        "u50": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u50.cfg"
-                    ]
-                }
-            }
-        }
-    },
+    "platform_blocklist": [],
+    "platform_properties": {},
     "launch": [
         {
             "cmd_args": " -xclbin BUILD/Adler32Kernel.xclbin -data PROJECT/data/test.dat -num 16",
             "name": "generic launch for all flows"
         }
+    ],
+    "data": [
+        "data/test.dat"
     ],
     "host": {
         "host_exe": "host.exe",
@@ -104,7 +94,7 @@
                 "max_time_min": {
                     "vitis_hw_build": 470,
                     "vitis_hw_emu": 300,
-                    "vitis_hw_run": 10
+                    "vitis_hw_run": 40
                 }
             }
         ],

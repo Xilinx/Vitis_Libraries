@@ -67,30 +67,6 @@ MON_PRODUCT_MOD:
 }
 
 /*
- * @brief Modular Exponentiation
- *
- * @tparam L bit width of base and modulus
- * @tparam N bit width of exponent
- *
- * @param base Base of Modular Exponentiation
- * @param exponent Exponent of Modular Exponentiation
- * @param modulus Modulus of Modular Exponentiation
- * @param rMod 2^(2*L) mod modulus could be pre-calculated.
- */
-template <int L, int N>
-ap_uint<L> modularExp(ap_uint<L> base, ap_uint<N> exponent, ap_uint<L> modulus, ap_uint<L> rMod) {
-    ap_uint<L> P = monProduct<L>(rMod, base, modulus);
-    ap_uint<L> R = monProduct<L>(rMod, 1, modulus);
-    for (int i = N - 1; i >= 0; i--) {
-        R = monProduct<L>(R, R, modulus);
-        if (exponent[i] == 1) {
-            R = monProduct<L>(R, P, modulus);
-        }
-    }
-    return monProduct<L>(R, 1, modulus);
-}
-
-/*
  * @brief modulo operation, returns remainder of dividend against divisor.
  *
  * @tparam L bit width of dividend

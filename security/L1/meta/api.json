@@ -27,32 +27,32 @@
                 "ports": [
                     {
                         "name": "adlerStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<32> >&"
                     },
                     {
                         "name": "inStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<W * 8> >&"
                     },
                     {
                         "name": "inLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<32> >&"
                     },
                     {
                         "name": "endInLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "outStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<32> >&"
                     },
                     {
                         "name": "endOutStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<bool>&"
                     }
                 ]
@@ -79,42 +79,42 @@
                 "ports": [
                     {
                         "name": "msg_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "msg_len_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "key_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<512> >&"
                     },
                     {
                         "name": "key_len_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<8> >&"
                     },
                     {
                         "name": "out_len_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<8> >&"
                     },
                     {
                         "name": "end_len_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "digest_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<8 * 64> >&"
                     },
                     {
                         "name": "end_digest_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<bool>&"
                     }
                 ]
@@ -141,32 +141,32 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<bool>&"
                     }
                 ]
@@ -193,32 +193,32 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -245,32 +245,32 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<bool>&"
                     }
                 ]
@@ -297,32 +297,32 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<bool>&"
                     }
                 ]
@@ -349,32 +349,32 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<192> >&"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<bool>&"
                     }
                 ]
@@ -401,32 +401,32 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<192> >&"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<bool>&"
                     }
                 ]
@@ -453,32 +453,32 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<256> >&"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<bool>&"
                     }
                 ]
@@ -505,32 +505,32 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<256> >&"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<bool>&"
                     }
                 ]
@@ -568,57 +568,57 @@
                 "ports": [
                     {
                         "name": "payloadStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "nonceStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 8 *(15-_q)> > &"
                     },
                     {
                         "name": "ADStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "lenADStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "lenPldStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "lenCphStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "tagStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 8 *_t > > &"
                     },
                     {
                         "name": "endTagStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -656,57 +656,57 @@
                 "ports": [
                     {
                         "name": "payloadStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "nonceStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 8 *(15-_q)> > &"
                     },
                     {
                         "name": "ADStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "lenADStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "lenPldStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "lenCphStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "tagStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 8 *_t > > &"
                     },
                     {
                         "name": "endTagStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -744,57 +744,57 @@
                 "ports": [
                     {
                         "name": "payloadStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 192 > > &"
                     },
                     {
                         "name": "nonceStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 8 *(15-_q)> > &"
                     },
                     {
                         "name": "ADStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "lenADStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "lenPldStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "lenCphStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "tagStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 8 *_t > > &"
                     },
                     {
                         "name": "endTagStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -832,57 +832,57 @@
                 "ports": [
                     {
                         "name": "payloadStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 192 > > &"
                     },
                     {
                         "name": "nonceStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 8 *(15-_q)> > &"
                     },
                     {
                         "name": "ADStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "lenADStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "lenPldStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "lenCphStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "tagStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 8 *_t > > &"
                     },
                     {
                         "name": "endTagStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -920,57 +920,57 @@
                 "ports": [
                     {
                         "name": "payloadStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 256 > > &"
                     },
                     {
                         "name": "nonceStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 8 *(15-_q)> > &"
                     },
                     {
                         "name": "ADStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "lenADStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "lenPldStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "lenCphStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "tagStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 8 *_t > > &"
                     },
                     {
                         "name": "endTagStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -1008,57 +1008,57 @@
                 "ports": [
                     {
                         "name": "payloadStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 256 > > &"
                     },
                     {
                         "name": "nonceStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 8 *(15-_q)> > &"
                     },
                     {
                         "name": "ADStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "lenADStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "lenPldStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "lenCphStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "tagStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 8 *_t > > &"
                     },
                     {
                         "name": "endTagStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -1085,32 +1085,32 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -1137,32 +1137,32 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -1189,32 +1189,32 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -1241,32 +1241,32 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -1293,32 +1293,32 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 192 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -1345,32 +1345,32 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 192 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -1397,32 +1397,32 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 256 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -1449,32 +1449,32 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 256 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -1501,32 +1501,32 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -1553,32 +1553,32 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -1605,32 +1605,32 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -1657,32 +1657,32 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -1709,32 +1709,32 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 192 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -1761,32 +1761,32 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 192 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -1813,32 +1813,32 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 256 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -1865,32 +1865,32 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 256 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -1917,32 +1917,32 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -1969,32 +1969,32 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -2021,32 +2021,32 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -2073,32 +2073,32 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -2125,32 +2125,32 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 192 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -2177,32 +2177,32 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 192 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -2229,32 +2229,32 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 256 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -2281,136 +2281,32 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 256 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
-                        "type": "hls::stream< bool > &"
-                    }
-                ]
-            },
-            "target_domain": "PL"
-        },
-        {
-            "api_name": "xf::security::chacha20",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::security::chacha20",
-                "display_name": "chacha20",
-                "brief": "chahcha20 is a basic function for stream ciphering when key is \"keylayout-chacha\", its layout in a 256-bit ap_uint<> likes this,",
-                "target_domain": "PL",
-                "visible": false,
-                "header_file_name": [
-                    "chacha20.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/xf_security"
-                ],
-                "instance": "function",
-                "parameters": [],
-                "ports": [
-                    {
-                        "name": "keyStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 256 > > &"
-                    },
-                    {
-                        "name": "counterNonceStm",
-                        "direction": "",
-                        "type": "hls::stream<ap_uint<128> >&"
-                    },
-                    {
-                        "name": "plainStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 512 > > &"
-                    },
-                    {
-                        "name": "ePlainStrm",
-                        "direction": "",
-                        "type": "hls::stream< bool > &"
-                    },
-                    {
-                        "name": "cipherStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 512 > > &"
-                    },
-                    {
-                        "name": "eCipherStrm",
-                        "direction": "",
-                        "type": "hls::stream< bool > &"
-                    }
-                ]
-            },
-            "target_domain": "PL"
-        },
-        {
-            "api_name": "xf::security::xchacha20",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::security::xchacha20",
-                "display_name": "xchacha20",
-                "brief": "xchahcha20 is variant of original chacha20 to support longer nonce of 192bits.",
-                "target_domain": "PL",
-                "visible": false,
-                "header_file_name": [
-                    "chacha20.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/xf_security"
-                ],
-                "instance": "function",
-                "parameters": [],
-                "ports": [
-                    {
-                        "name": "keyStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 256 > > &"
-                    },
-                    {
-                        "name": "nonceStm",
-                        "direction": "",
-                        "type": "hls::stream<ap_uint<192> >&"
-                    },
-                    {
-                        "name": "plainStrm",
-                        "direction": "",
-                        "type": "hls::stream<ap_uint<512> >&"
-                    },
-                    {
-                        "name": "ePlainStrm",
-                        "direction": "",
-                        "type": "hls::stream< bool > &"
-                    },
-                    {
-                        "name": "cipherStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 512 > > &"
-                    },
-                    {
-                        "name": "eCipherStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -2443,32 +2339,32 @@
                 "ports": [
                     {
                         "name": "crcInitStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 32 > > &"
                     },
                     {
                         "name": "inStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 8 *W > > &"
                     },
                     {
                         "name": "inPackLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 5 > > &"
                     },
                     {
                         "name": "endInPackLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "outStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 32 > > &"
                     },
                     {
                         "name": "endOutStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -2501,32 +2397,32 @@
                 "ports": [
                     {
                         "name": "crcInitStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 32 > > &"
                     },
                     {
                         "name": "inStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 8 *W > > &"
                     },
                     {
                         "name": "inLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 32 > > &"
                     },
                     {
                         "name": "endInStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "outStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 32 > > &"
                     },
                     {
                         "name": "endOutStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -2553,32 +2449,32 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -2605,32 +2501,32 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -2657,32 +2553,32 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 192 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -2709,32 +2605,32 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 192 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -2761,32 +2657,32 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 256 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -2813,32 +2709,32 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 256 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -2865,17 +2761,17 @@
                 "ports": [
                     {
                         "name": "in",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint<64>"
                     },
                     {
                         "name": "key",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint<64>"
                     },
                     {
                         "name": "out",
-                        "direction": "",
+                        "direction": "output",
                         "type": "ap_uint<64>&"
                     }
                 ]
@@ -2902,17 +2798,17 @@
                 "ports": [
                     {
                         "name": "in",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint<64>"
                     },
                     {
                         "name": "cipherKey",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint<64>"
                     },
                     {
                         "name": "out",
-                        "direction": "",
+                        "direction": "output",
                         "type": "ap_uint<64>&"
                     }
                 ]
@@ -2939,27 +2835,27 @@
                 "ports": [
                     {
                         "name": "in",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint<64>"
                     },
                     {
                         "name": "key1",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint<64>"
                     },
                     {
                         "name": "key2",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint<64>"
                     },
                     {
                         "name": "key3",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint<64>"
                     },
                     {
                         "name": "out",
-                        "direction": "",
+                        "direction": "output",
                         "type": "ap_uint<64>&"
                     }
                 ]
@@ -2986,27 +2882,27 @@
                 "ports": [
                     {
                         "name": "in",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint<64>"
                     },
                     {
                         "name": "key1",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint<64>"
                     },
                     {
                         "name": "key2",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint<64>"
                     },
                     {
                         "name": "key3",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint<64>"
                     },
                     {
                         "name": "out",
-                        "direction": "",
+                        "direction": "output",
                         "type": "ap_uint<64>&"
                     }
                 ]
@@ -3033,27 +2929,27 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -3080,27 +2976,27 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -3127,27 +3023,27 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -3174,27 +3070,27 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -3221,27 +3117,27 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 192 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -3268,27 +3164,27 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 192 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -3315,27 +3211,27 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 256 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -3362,631 +3258,28 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 256 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
-                    }
-                ]
-            },
-            "target_domain": "PL"
-        },
-        {
-            "api_name": "xf::security::aes128GcmEncrypt",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::security::aes128GcmEncrypt",
-                "display_name": "aes128GcmEncrypt",
-                "brief": "aes128GcmEncrypt is GCM encryption mode with AES-128 single block cipher.",
-                "target_domain": "PL",
-                "visible": false,
-                "header_file_name": [
-                    "gcm.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/xf_security"
-                ],
-                "instance": "function",
-                "parameters": [],
-                "ports": [
-                    {
-                        "name": "payloadStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "cipherkeyStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "IVStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 96 > > &"
-                    },
-                    {
-                        "name": "AADStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "lenAADStrm",
-                        "direction": "",
-                        "type": "hls::stream<ap_uint<64> >&"
-                    },
-                    {
-                        "name": "lenPldStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
-                    },
-                    {
-                        "name": "endLenStrm",
-                        "direction": "",
-                        "type": "hls::stream< bool > &"
-                    },
-                    {
-                        "name": "cipherStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "lenCphStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
-                    },
-                    {
-                        "name": "tagStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "endTagStrm",
-                        "direction": "",
-                        "type": "hls::stream< bool > &"
-                    }
-                ]
-            },
-            "target_domain": "PL"
-        },
-        {
-            "api_name": "xf::security::aes128GcmDecrypt",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::security::aes128GcmDecrypt",
-                "display_name": "aes128GcmDecrypt",
-                "brief": "aes128GcmDecrypt is GCM decryption mode with AES-128 single block cipher.",
-                "target_domain": "PL",
-                "visible": false,
-                "header_file_name": [
-                    "gcm.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/xf_security"
-                ],
-                "instance": "function",
-                "parameters": [],
-                "ports": [
-                    {
-                        "name": "payloadStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "cipherkeyStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "IVStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 96 > > &"
-                    },
-                    {
-                        "name": "AADStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "lenAADStrm",
-                        "direction": "",
-                        "type": "hls::stream<ap_uint<64> >&"
-                    },
-                    {
-                        "name": "lenPldStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
-                    },
-                    {
-                        "name": "endLenStrm",
-                        "direction": "",
-                        "type": "hls::stream< bool > &"
-                    },
-                    {
-                        "name": "cipherStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "lenCphStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
-                    },
-                    {
-                        "name": "tagStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "endTagStrm",
-                        "direction": "",
-                        "type": "hls::stream< bool > &"
-                    }
-                ]
-            },
-            "target_domain": "PL"
-        },
-        {
-            "api_name": "xf::security::aes192GcmEncrypt",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::security::aes192GcmEncrypt",
-                "display_name": "aes192GcmEncrypt",
-                "brief": "aes192GcmEncrypt is GCM encryption mode with AES-192 single block cipher.",
-                "target_domain": "PL",
-                "visible": false,
-                "header_file_name": [
-                    "gcm.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/xf_security"
-                ],
-                "instance": "function",
-                "parameters": [],
-                "ports": [
-                    {
-                        "name": "payloadStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "cipherkeyStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 192 > > &"
-                    },
-                    {
-                        "name": "IVStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 96 > > &"
-                    },
-                    {
-                        "name": "AADStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "lenAADStrm",
-                        "direction": "",
-                        "type": "hls::stream<ap_uint<64> >&"
-                    },
-                    {
-                        "name": "lenPldStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
-                    },
-                    {
-                        "name": "endLenStrm",
-                        "direction": "",
-                        "type": "hls::stream< bool > &"
-                    },
-                    {
-                        "name": "cipherStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "lenCphStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
-                    },
-                    {
-                        "name": "tagStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "endTagStrm",
-                        "direction": "",
-                        "type": "hls::stream< bool > &"
-                    }
-                ]
-            },
-            "target_domain": "PL"
-        },
-        {
-            "api_name": "xf::security::aes192GcmDecrypt",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::security::aes192GcmDecrypt",
-                "display_name": "aes192GcmDecrypt",
-                "brief": "aes192GcmDecrypt is GCM decryption mode with AES-192 single block cipher.",
-                "target_domain": "PL",
-                "visible": false,
-                "header_file_name": [
-                    "gcm.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/xf_security"
-                ],
-                "instance": "function",
-                "parameters": [],
-                "ports": [
-                    {
-                        "name": "payloadStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "cipherkeyStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 192 > > &"
-                    },
-                    {
-                        "name": "IVStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 96 > > &"
-                    },
-                    {
-                        "name": "AADStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "lenAADStrm",
-                        "direction": "",
-                        "type": "hls::stream<ap_uint<64> >&"
-                    },
-                    {
-                        "name": "lenPldStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
-                    },
-                    {
-                        "name": "endLenStrm",
-                        "direction": "",
-                        "type": "hls::stream< bool > &"
-                    },
-                    {
-                        "name": "cipherStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "lenCphStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
-                    },
-                    {
-                        "name": "tagStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "endTagStrm",
-                        "direction": "",
-                        "type": "hls::stream< bool > &"
-                    }
-                ]
-            },
-            "target_domain": "PL"
-        },
-        {
-            "api_name": "xf::security::aes256GcmEncrypt",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::security::aes256GcmEncrypt",
-                "display_name": "aes256GcmEncrypt",
-                "brief": "aes256GcmEncrypt is GCM encryption mode with AES-256 single block cipher.",
-                "target_domain": "PL",
-                "visible": false,
-                "header_file_name": [
-                    "gcm.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/xf_security"
-                ],
-                "instance": "function",
-                "parameters": [],
-                "ports": [
-                    {
-                        "name": "payloadStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "cipherkeyStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 256 > > &"
-                    },
-                    {
-                        "name": "IVStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 96 > > &"
-                    },
-                    {
-                        "name": "AADStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "lenAADStrm",
-                        "direction": "",
-                        "type": "hls::stream<ap_uint<64> >&"
-                    },
-                    {
-                        "name": "lenPldStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
-                    },
-                    {
-                        "name": "endLenStrm",
-                        "direction": "",
-                        "type": "hls::stream< bool > &"
-                    },
-                    {
-                        "name": "cipherStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "lenCphStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
-                    },
-                    {
-                        "name": "tagStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "endTagStrm",
-                        "direction": "",
-                        "type": "hls::stream< bool > &"
-                    }
-                ]
-            },
-            "target_domain": "PL"
-        },
-        {
-            "api_name": "xf::security::aes256GcmDecrypt",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::security::aes256GcmDecrypt",
-                "display_name": "aes256GcmDecrypt",
-                "brief": "aes256GcmDecrypt is GCM decryption mode with AES-2562 single block cipher.",
-                "target_domain": "PL",
-                "visible": false,
-                "header_file_name": [
-                    "gcm.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/xf_security"
-                ],
-                "instance": "function",
-                "parameters": [],
-                "ports": [
-                    {
-                        "name": "payloadStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "cipherkeyStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 256 > > &"
-                    },
-                    {
-                        "name": "IVStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 96 > > &"
-                    },
-                    {
-                        "name": "AADStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "lenAADStrm",
-                        "direction": "",
-                        "type": "hls::stream<ap_uint<64> >&"
-                    },
-                    {
-                        "name": "lenPldStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
-                    },
-                    {
-                        "name": "endLenStrm",
-                        "direction": "",
-                        "type": "hls::stream< bool > &"
-                    },
-                    {
-                        "name": "cipherStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "lenCphStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
-                    },
-                    {
-                        "name": "tagStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "endTagStrm",
-                        "direction": "",
-                        "type": "hls::stream< bool > &"
-                    }
-                ]
-            },
-            "target_domain": "PL"
-        },
-        {
-            "api_name": "xf::security::aes128Gmac",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::security::aes128Gmac",
-                "display_name": "aes128Gmac",
-                "brief": "GMAC using AES-128 block cipher.",
-                "target_domain": "PL",
-                "visible": false,
-                "header_file_name": [
-                    "gmac.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/xf_security"
-                ],
-                "instance": "function",
-                "parameters": [],
-                "ports": [
-                    {
-                        "name": "dataStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "lenDataStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
-                    },
-                    {
-                        "name": "cipherkeyStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "IVStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 96 > > &"
-                    },
-                    {
-                        "name": "tagStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    }
-                ]
-            },
-            "target_domain": "PL"
-        },
-        {
-            "api_name": "xf::security::aes192Gmac",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::security::aes192Gmac",
-                "display_name": "aes192Gmac",
-                "brief": "GMAC using AES-192 block cipher.",
-                "target_domain": "PL",
-                "visible": false,
-                "header_file_name": [
-                    "gmac.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/xf_security"
-                ],
-                "instance": "function",
-                "parameters": [],
-                "ports": [
-                    {
-                        "name": "dataStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "lenDataStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
-                    },
-                    {
-                        "name": "cipherkeyStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 192 > > &"
-                    },
-                    {
-                        "name": "IVStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 96 > > &"
-                    },
-                    {
-                        "name": "tagStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    }
-                ]
-            },
-            "target_domain": "PL"
-        },
-        {
-            "api_name": "xf::security::aes256Gmac",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::security::aes256Gmac",
-                "display_name": "aes256Gmac",
-                "brief": "GMAC using AES-256 block cipher.",
-                "target_domain": "PL",
-                "visible": false,
-                "header_file_name": [
-                    "gmac.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/xf_security"
-                ],
-                "instance": "function",
-                "parameters": [],
-                "ports": [
-                    {
-                        "name": "dataStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "lenDataStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
-                    },
-                    {
-                        "name": "cipherkeyStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 256 > > &"
-                    },
-                    {
-                        "name": "IVStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 96 > > &"
-                    },
-                    {
-                        "name": "tagStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
                     }
                 ]
             },
@@ -4036,39 +3329,39 @@
                     },
                     {
                         "name": "F",
-                        "type": "template< int iW, int ilW, int oW > class",
+                        "type": "typename",
                         "description": "a wrapper of hash function which must have a static fucntion named"
                     }
                 ],
                 "ports": [
                     {
                         "name": "keyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< dataW > > &"
                     },
                     {
                         "name": "msgStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< dataW > > &"
                     },
                     {
                         "name": "msgLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< lW > > &"
                     },
                     {
                         "name": "eLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "hshStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< hshW > > &"
                     },
                     {
                         "name": "eHshStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -4095,27 +3388,27 @@
                 "ports": [
                     {
                         "name": "msgStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "msgLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endMsgLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "digestStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 256 > > &"
                     },
                     {
                         "name": "endDigestStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -4142,27 +3435,27 @@
                 "ports": [
                     {
                         "name": "msg_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 32 > > &"
                     },
                     {
                         "name": "len_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "end_len_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "digest_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "end_digest_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": ""
                     }
                 ]
@@ -4189,27 +3482,27 @@
                 "ports": [
                     {
                         "name": "msg_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 32 > > &"
                     },
                     {
                         "name": "len_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "end_len_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "digest_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "end_digest_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": ""
                     }
                 ]
@@ -4236,32 +3529,32 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -4288,32 +3581,32 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -4340,32 +3633,32 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -4392,32 +3685,32 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -4444,32 +3737,32 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 192 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -4496,32 +3789,32 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 192 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -4548,32 +3841,32 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 256 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -4600,185 +3893,33 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 256 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
-                    }
-                ]
-            },
-            "target_domain": "PL"
-        },
-        {
-            "api_name": "xf::security::poly1305",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::security::poly1305",
-                "display_name": "poly1305",
-                "brief": "The poly1305 takes a 32-byte one-time key and a message and produces a 16-byte tag. This tag is used to authenticate the message.",
-                "target_domain": "PL",
-                "visible": false,
-                "header_file_name": [
-                    "poly1305.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/xf_security"
-                ],
-                "instance": "function",
-                "parameters": [],
-                "ports": [
-                    {
-                        "name": "keyStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 256 > > &"
-                    },
-                    {
-                        "name": "payloadStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "lenPldStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
-                    },
-                    {
-                        "name": "endLenStrm",
-                        "direction": "",
-                        "type": "hls::stream< bool > &"
-                    },
-                    {
-                        "name": "tagStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    }
-                ]
-            },
-            "target_domain": "PL"
-        },
-        {
-            "api_name": "xf::security::poly1305MultiChan",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::security::poly1305MultiChan",
-                "display_name": "poly1305MultiChan",
-                "brief": "The poly1305MultiChan takes N 32-byte one-time keys and N messages and produces N 16-byte tags. These tags are used to authenticate the corresponding messages.",
-                "target_domain": "PL",
-                "visible": false,
-                "header_file_name": [
-                    "poly1305.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/xf_security"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "N",
-                        "type": "int",
-                        "description": "Channel number"
-                    }
-                ],
-                "ports": [
-                    {
-                        "name": "keyStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 256 > > &"
-                    },
-                    {
-                        "name": "payloadStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    },
-                    {
-                        "name": "lenPldStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
-                    },
-                    {
-                        "name": "endLenStrm",
-                        "direction": "",
-                        "type": "hls::stream< bool > &"
-                    },
-                    {
-                        "name": "tagStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
-                    }
-                ]
-            },
-            "target_domain": "PL"
-        },
-        {
-            "api_name": "xf::security::rc4",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::security::rc4",
-                "display_name": "rc4",
-                "brief": "Rc_4 is the basic function for stream ciphering keyLength defined as the number of bytes in the key and can be in the range 1<= keylength <=256, typically between 5 and 16, corresponding to a key length of 40-128 bits.",
-                "target_domain": "PL",
-                "visible": false,
-                "header_file_name": [
-                    "rc4.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/xf_security"
-                ],
-                "instance": "function",
-                "parameters": [],
-                "ports": [
-                    {
-                        "name": "keyStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 8 > > &"
-                    },
-                    {
-                        "name": "eKeyStrm",
-                        "direction": "",
-                        "type": "hls::stream< bool > &"
-                    },
-                    {
-                        "name": "plaintStrm",
-                        "direction": "",
-                        "type": "hls::stream<ap_uint<8> >&"
-                    },
-                    {
-                        "name": "ePlaintStrm",
-                        "direction": "",
-                        "type": "hls::stream<bool>&"
-                    },
-                    {
-                        "name": "cipherStrm",
-                        "direction": "",
-                        "type": "hls::stream<ap_uint<8> >&"
-                    },
-                    {
-                        "name": "eCipherStrm",
-                        "direction": "",
-                        "type": "hls::stream<bool>&"
                     }
                 ]
             },
@@ -4804,27 +3945,27 @@
                 "ports": [
                     {
                         "name": "inStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<32> >&"
                     },
                     {
                         "name": "inLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "endInLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "outStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<160> >&"
                     },
                     {
                         "name": "endOutStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<bool>&"
                     }
                 ]
@@ -4857,27 +3998,27 @@
                 "ports": [
                     {
                         "name": "msg_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< w > > &"
                     },
                     {
                         "name": "len_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "end_len_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "digest_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 5 *w > > &"
                     },
                     {
                         "name": "end_digest_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<bool>&"
                     }
                 ]
@@ -4910,27 +4051,27 @@
                 "ports": [
                     {
                         "name": "msg_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< m_width > > &"
                     },
                     {
                         "name": "len_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "end_len_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "hash_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 224 > > &"
                     },
                     {
                         "name": "end_hash_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<bool>&"
                     }
                 ]
@@ -4963,27 +4104,27 @@
                 "ports": [
                     {
                         "name": "msg_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< m_width > > &"
                     },
                     {
                         "name": "len_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "end_len_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "hash_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 256 > > &"
                     },
                     {
                         "name": "end_hash_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<bool>&"
                     }
                 ]
@@ -5010,27 +4151,27 @@
                 "ports": [
                     {
                         "name": "msgStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "msgLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endMsgLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "digestStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 224 > > &"
                     },
                     {
                         "name": "endDigestStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -5057,27 +4198,27 @@
                 "ports": [
                     {
                         "name": "msgStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "msgLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endMsgLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "digestStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 256 > > &"
                     },
                     {
                         "name": "endDigestStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -5104,27 +4245,27 @@
                 "ports": [
                     {
                         "name": "msgStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "msgLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endMsgLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "digestStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 384 > > &"
                     },
                     {
                         "name": "endDigestStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -5151,27 +4292,27 @@
                 "ports": [
                     {
                         "name": "msgStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "msgLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endMsgLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "digestStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 512 > > &"
                     },
                     {
                         "name": "endDigestStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -5198,27 +4339,27 @@
                 "ports": [
                     {
                         "name": "msgStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "msgLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endMsgLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "digestStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endDigestStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -5245,27 +4386,27 @@
                 "ports": [
                     {
                         "name": "msgStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "msgLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endMsgLenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "digestStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 256 > > &"
                     },
                     {
                         "name": "endDigestStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -5298,27 +4439,27 @@
                 "ports": [
                     {
                         "name": "msg_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< w > > &"
                     },
                     {
                         "name": "len_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "end_len_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "digest_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 384 > > &"
                     },
                     {
                         "name": "end_digest_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<bool>&"
                     }
                 ]
@@ -5351,27 +4492,27 @@
                 "ports": [
                     {
                         "name": "msg_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< w > > &"
                     },
                     {
                         "name": "len_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "end_len_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "digest_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 512 > > &"
                     },
                     {
                         "name": "end_digest_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": ""
                     }
                 ]
@@ -5402,281 +4543,35 @@
                     },
                     {
                         "name": "t",
-                        "type": "unsigned in",
+                        "type": "unsigned int",
                         "description": "The bit width of the digest which depends on specific algorithm, typically is 224 or 256."
                     }
                 ],
                 "ports": [
                     {
                         "name": "msg_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< w > > &"
                     },
                     {
                         "name": "len_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "end_len_strm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "digest_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< t > > &"
                     },
                     {
                         "name": "end_digest_strm",
-                        "direction": "",
+                        "direction": "output",
                         "type": ""
-                    }
-                ]
-            },
-            "target_domain": "PL"
-        },
-        {
-            "api_name": "xf::security::sm3",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::security::sm3",
-                "display_name": "sm3",
-                "brief": "SM3 function to genrate digest value for input messages.",
-                "target_domain": "PL",
-                "visible": false,
-                "header_file_name": [
-                    "sm234.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/xf_security"
-                ],
-                "instance": "function",
-                "parameters": [],
-                "ports": [
-                    {
-                        "name": "msgStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
-                    },
-                    {
-                        "name": "lenStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
-                    },
-                    {
-                        "name": "endLenStrm",
-                        "direction": "",
-                        "type": "hls::stream< bool > &"
-                    },
-                    {
-                        "name": "hashStrm",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< 256 > > &"
-                    },
-                    {
-                        "name": "endHashStrm",
-                        "direction": "",
-                        "type": "hls::stream< bool > &"
-                    }
-                ]
-            },
-            "target_domain": "PL"
-        },
-        {
-            "api_name": "xf::security::evaluate",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::security::evaluate",
-                "display_name": "evaluate",
-                "brief": "",
-                "target_domain": "PL",
-                "visible": false,
-                "header_file_name": [
-                    "vdf.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/xf_security"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "L",
-                        "type": "int",
-                        "description": "bit width"
-                    },
-                    {
-                        "name": "N",
-                        "type": "int",
-                        "description": "bit width"
-                    }
-                ],
-                "ports": [
-                    {
-                        "name": "g",
-                        "direction": "",
-                        "type": "ap_uint<L>"
-                    },
-                    {
-                        "name": "l",
-                        "direction": "",
-                        "type": "ap_uint<L>"
-                    },
-                    {
-                        "name": "modulus",
-                        "direction": "",
-                        "type": "ap_uint<L>"
-                    },
-                    {
-                        "name": "r2Mod",
-                        "direction": "",
-                        "type": "ap_uint<L>"
-                    },
-                    {
-                        "name": "t",
-                        "direction": "",
-                        "type": "ap_uint<N>"
-                    },
-                    {
-                        "name": "y",
-                        "direction": "",
-                        "type": "ap_uint<L>&"
-                    },
-                    {
-                        "name": "pi",
-                        "direction": "",
-                        "type": "ap_uint<L>&"
-                    }
-                ]
-            },
-            "target_domain": "PL"
-        },
-        {
-            "api_name": "xf::security::verifyWesolowski",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::security::verifyWesolowski",
-                "display_name": "verifyWesolowski",
-                "brief": "",
-                "target_domain": "PL",
-                "visible": false,
-                "header_file_name": [
-                    "vdf.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/xf_security"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "L",
-                        "type": "int",
-                        "description": "bit width"
-                    },
-                    {
-                        "name": "N",
-                        "type": "int",
-                        "description": "bit width"
-                    }
-                ],
-                "ports": [
-                    {
-                        "name": "g",
-                        "direction": "",
-                        "type": "ap_uint<L>"
-                    },
-                    {
-                        "name": "l",
-                        "direction": "",
-                        "type": "ap_uint<L>"
-                    },
-                    {
-                        "name": "modulus",
-                        "direction": "",
-                        "type": "ap_uint<L>"
-                    },
-                    {
-                        "name": "r2Mod",
-                        "direction": "",
-                        "type": "ap_uint<L>"
-                    },
-                    {
-                        "name": "tMod",
-                        "direction": "",
-                        "type": "ap_uint<L>"
-                    },
-                    {
-                        "name": "t",
-                        "direction": "",
-                        "type": "ap_uint<N>"
-                    },
-                    {
-                        "name": "y",
-                        "direction": "",
-                        "type": "ap_uint<L>"
-                    },
-                    {
-                        "name": "pi",
-                        "direction": "",
-                        "type": "ap_uint<L>&"
-                    }
-                ]
-            },
-            "target_domain": "PL"
-        },
-        {
-            "api_name": "xf::security::verifyPietrzak",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::security::verifyPietrzak",
-                "display_name": "verifyPietrzak",
-                "brief": "verifyPietrzak verify function of verifiable delay function, its algorithm: if T is even, return (N, x, T/2, y) = (N, x^(r+2^(T/2)), T/2, x^(r*2^(T/2)+2^T)), if T is odd, return (N, x, (T+1)/2, y) = (N, x^(r+2^((T-1)/2)), T/2, x^(r*2^((T+1)/2)+2^T))",
-                "target_domain": "PL",
-                "visible": false,
-                "header_file_name": [
-                    "vdf.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/xf_security"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "L",
-                        "type": "int",
-                        "description": "bit width"
-                    },
-                    {
-                        "name": "N",
-                        "type": "int",
-                        "description": "bit width"
-                    }
-                ],
-                "ports": [
-                    {
-                        "name": "g",
-                        "direction": "",
-                        "type": "ap_uint< L >"
-                    },
-                    {
-                        "name": "modulus",
-                        "direction": "",
-                        "type": "ap_uint< L >"
-                    },
-                    {
-                        "name": "r2Mod",
-                        "direction": "",
-                        "type": "ap_uint< L >"
-                    },
-                    {
-                        "name": "T",
-                        "direction": "",
-                        "type": "ap_uint< N >"
-                    },
-                    {
-                        "name": "y",
-                        "direction": "",
-                        "type": "ap_uint< L >"
                     }
                 ]
             },
@@ -5702,37 +4597,37 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "lenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -5759,37 +4654,37 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "lenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -5816,37 +4711,37 @@
                 "ports": [
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "lenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 256 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     }
                 ]
@@ -5873,37 +4768,37 @@
                 "ports": [
                     {
                         "name": "ciphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endCiphertextStrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "lenStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     },
                     {
                         "name": "cipherkeyStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 256 > > &"
                     },
                     {
                         "name": "IVStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "plaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 128 > > &"
                     },
                     {
                         "name": "endPlaintextStrm",
-                        "direction": "",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     }
                 ]

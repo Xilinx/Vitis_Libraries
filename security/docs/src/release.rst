@@ -22,6 +22,27 @@ Release Note
 Known Issue
 ------------
 
+2026.2
+------
+
+In this release, support for the following security-sensitive APIs is withdrawn:
+
+* ChaCha20 / XChaCha20 stream cipher
+* Poly1305 message authentication
+* RC4 stream cipher
+* RSA public-key encryption (``asymmetric.hpp``)
+* DSA digital signature
+* ``modularExp()`` in ``modular.hpp`` (secret-dependent exponentiation). ``addMod`` and ``monProduct`` remain available.
+* Ed25519 (EdDSA) sign/verify
+* Poseidon hash
+* Verifiable Delay Function (VDF) evaluate/verify
+* Host-side msgpack helper (``msgpack.hpp``)
+* AES-GCM authenticated encryption (``gcm.hpp``): encrypt/decrypt for AES-128/192/256
+* AES-GMAC message authentication (``gmac.hpp``): AES-128/192/256
+* SM3 hash and SM4 block cipher (``sm234.hpp``): ``sm3()`` and ``sm4`` class
+
+Other AES modes (CBC, CTR, OFB, XTS, CCM, etc.), SHA, and HMAC remain available.
+
 2026.1
 ------
 

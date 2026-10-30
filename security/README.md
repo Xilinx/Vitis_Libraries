@@ -81,12 +81,6 @@ A list of Vitis projects can be found `L1/benchmarks`. They are provided to help
 | aes192EcbDecrypt | aes192EcbDecrypt is ECB decryption mode with AES-192 single block cipher | L1 |
 | aes256EcbEncrypt | aes256EcbEncrypt is ECB encryption mode with AES-256 single block cipher | L1 |
 | aes256EcbDecrypt | aes256EcbDecrypt is ECB decryption mode with AES-256 single block cipher | L1 |
-| aes128GcmEncrypt | aes128GcmEncrypt is GCM encryption mode with AES-128 single block cipher | L1 |
-| aes128GcmDecrypt | aes128GcmDecrypt is GCM decryption mode with AES-128 single block cipher | L1 |
-| aes192GcmEncrypt | aes192GcmEncrypt is GCM encryption mode with AES-192 single block cipher | L1 |
-| aes192GcmDecrypt | aes192GcmDecrypt is GCM decryption mode with AES-192 single block cipher | L1 |
-| aes256GcmEncrypt | aes256GcmEncrypt is GCM encryption mode with AES-256 single block cipher | L1 |
-| aes256GcmDecrypt | aes256GcmDecrypt is GCM decryption mode with AES-2562 single block cipher | L1 |
 | desOfbEncrypt | desOfbEncrypt is OFB encryption mode with DES single block cipher | L1 |
 | desOfbDecrypt | desOfbDecrypt is OFB decryption mode with DES single block cipher | L1 |
 | aes128OfbEncrypt | aes128OfbEncrypt is OFB encryption mode with AES-128 single block cipher | L1 |
@@ -99,13 +93,7 @@ A list of Vitis projects can be found `L1/benchmarks`. They are provided to help
 | aes128XtsDecrypt | aes128XtsDecrypt is XTS decryption mode with AES-128 single block cipher | L1 |
 | aes256XtsEncrypt | aes256XtsEncrypt is XTS encryption mode with AES-256 single block cipher | L1 |
 | aes256XtsDecrypt | aes256XtsDecrypt is XTS decryption mode with AES-256 single block cipher | L1 |
-| aes128Gmac | The GMAC using AES-128 block cipher | L1 |
-| aes192Gmac | The GMAC using AES-192 block cipher | L1 |
-| aes256Gmac | The GMAC using AES-256 block cipher | L1 |
 | hmac | compute hmac value according to specific hash function and input data | L1 |
-| chacha20 | CHACHA20 algorithm implementation | L1 |
-| poly1305 | POLY1305 algorithm implementation | L1 |
-| rc4 | RC4, also known as ARC4 algorithm implementation | L1 |
 | md4 | MD4 algorithm implementation | L1 |
 | md5 | MD5 algorithm implementation | L1 |
 | sha1 | SHA-1 algorithm implementation | L1 |
@@ -122,9 +110,6 @@ A list of Vitis projects can be found `L1/benchmarks`. They are provided to help
 | shake256 | SHAKE-256 algorithm implementation | L1 |
 | blake2b | BLAKE2B algorithm implementation | L1 |
 | keccak_256 | KECCAK-256 algorithm implementation | L1 |
-| vdf_evaluate | Evaluate VDF implementation | L1 |
-| verifyWesolowski | Verify VDF Wesolowski implementation | L1 |
-| verifyPietrzak | Verify VDF Pietrzak implementation | L1 |
 
 
 ## Requirements
