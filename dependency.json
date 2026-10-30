@@ -5,9 +5,7 @@
     }, 
     {
         "lib": "data_mover", 
-        "dependsOn": [
-            "utils"
-        ]
+        "dependsOn": []
     }, 
     {
         "lib": "dsp", 

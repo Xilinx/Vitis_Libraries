@@ -1,0 +1,975 @@
+{
+    "schema": "vitis_libraries_api_list_schema-1.0",
+    "api_list": [
+        {
+            "api_name": "xf::blas::buildConfigDict",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::buildConfigDict",
+                "display_name": "buildConfigDict",
+                "brief": "",
+                "target_domain": "CPU",
+                "header_file_name": [
+                    "helper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/utility/",
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "CPU"
+        },
+        {
+            "api_name": "xf::blas::getPaddedSize",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::getPaddedSize",
+                "display_name": "getPaddedSize",
+                "brief": "",
+                "target_domain": "CPU",
+                "header_file_name": [
+                    "helper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/utility/",
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "CPU"
+        },
+        {
+            "api_name": "xf::blas::getTypeSize",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::getTypeSize",
+                "display_name": "getTypeSize",
+                "brief": "",
+                "target_domain": "CPU",
+                "header_file_name": [
+                    "helper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/utility/",
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "CPU"
+        },
+        {
+            "api_name": "xf::blas::xfblasCreate",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasCreate",
+                "display_name": "xfblasCreate",
+                "brief": "This function initializes the XFBLAS library and creates a handle for the specific engine. It must be called prior to any other XFBLAS library calls.",
+                "target_domain": "CPU",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/utility/",
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "xclbin",
+                        "direction": "input",
+                        "type": "char *"
+                    },
+                    {
+                        "name": "configFile",
+                        "direction": "input",
+                        "type": "string"
+                    },
+                    {
+                        "name": "engineName",
+                        "direction": "input",
+                        "type": "xfblasEngine_t"
+                    },
+                    {
+                        "name": "kernelNumber",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
+        },
+        {
+            "api_name": "xf::blas::xfblasMalloc",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasMalloc",
+                "display_name": "xfblasMalloc",
+                "brief": "This function allocates memory on the FPGA device.",
+                "target_domain": "CPU",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/utility/",
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "devPtr",
+                        "direction": "output",
+                        "type": "short **"
+                    },
+                    {
+                        "name": "rows",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "lda",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "elemSize",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
+        },
+        {
+            "api_name": "xf::blas::xfblasMallocRestricted",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasMallocRestricted",
+                "display_name": "xfblasMallocRestricted",
+                "brief": "This function allocates memory for host row-major format matrix on the FPGA device.",
+                "target_domain": "CPU",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/utility/",
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "rows",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "cols",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "elemSize",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "A",
+                        "direction": "input",
+                        "type": "void *"
+                    },
+                    {
+                        "name": "lda",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
+        },
+        {
+            "api_name": "xf::blas::xfblasMallocManaged",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasMallocManaged",
+                "display_name": "xfblasMallocManaged",
+                "brief": "This function allocates memory on the FPGA device, rewrites the leading dimension size after padding.",
+                "target_domain": "CPU",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/utility/",
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "devPtr",
+                        "direction": "output",
+                        "type": "short **"
+                    },
+                    {
+                        "name": "paddedLda",
+                        "direction": "output",
+                        "type": "int *"
+                    },
+                    {
+                        "name": "rows",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "lda",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "elemSize",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
+        },
+        {
+            "api_name": "xf::blas::xfblasSetMatrix",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasSetMatrix",
+                "display_name": "xfblasSetMatrix",
+                "brief": "This function copies a matrix in host memory to FPGA device memory.",
+                "target_domain": "CPU",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/utility/",
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "rows",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "cols",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "elemSize",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "A",
+                        "direction": "input",
+                        "type": "short *"
+                    },
+                    {
+                        "name": "lda",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "d_A",
+                        "direction": "output",
+                        "type": "short *"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
+        },
+        {
+            "api_name": "xf::blas::xfblasSetMatrixRestricted",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasSetMatrixRestricted",
+                "display_name": "xfblasSetMatrixRestricted",
+                "brief": "This function copies a matrix in host memory to FPGA device memory.",
+                "target_domain": "CPU",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/utility/",
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "A",
+                        "direction": "input",
+                        "type": "void *"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
+        },
+        {
+            "api_name": "xf::blas::xfblasSetVectorRestricted",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasSetVectorRestricted",
+                "display_name": "xfblasSetVectorRestricted",
+                "brief": "This function copies a vector in host memory to FPGA device memory.",
+                "target_domain": "CPU",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/utility/",
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "x",
+                        "direction": "input",
+                        "type": "void *"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
+        },
+        {
+            "api_name": "xf::blas::xfblasDeviceSynchronize",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasDeviceSynchronize",
+                "display_name": "xfblasDeviceSynchronize",
+                "brief": "This function will synchronize all the device memory to host memory.",
+                "target_domain": "CPU",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/utility/",
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "kernelIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
+        },
+        {
+            "api_name": "xf::blas::xfblasGetMatrix",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasGetMatrix",
+                "display_name": "xfblasGetMatrix",
+                "brief": "This function copies a matrix in FPGA device memory to host memory.",
+                "target_domain": "CPU",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/utility/",
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "rows",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "cols",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "elemSize",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "d_A",
+                        "direction": "input",
+                        "type": "short *"
+                    },
+                    {
+                        "name": "A",
+                        "direction": "output",
+                        "type": "short *"
+                    },
+                    {
+                        "name": "lda",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
+        },
+        {
+            "api_name": "xf::blas::xfblasGetMatrixRestricted",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasGetMatrixRestricted",
+                "display_name": "xfblasGetMatrixRestricted",
+                "brief": "This function copies a matrix in FPGA device memory to host memory.",
+                "target_domain": "CPU",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/utility/",
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "A",
+                        "direction": "output",
+                        "type": "void *"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
+        },
+        {
+            "api_name": "xf::blas::xfblasGetVectorRestricted",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasGetVectorRestricted",
+                "display_name": "xfblasGetVectorRestricted",
+                "brief": "This function copies a matrix in FPGA device memory to host memory.",
+                "target_domain": "CPU",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/utility/",
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "x",
+                        "direction": "output",
+                        "type": "void *"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
+        },
+        {
+            "api_name": "xf::blas::xfblasFree",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasFree",
+                "display_name": "xfblasFree",
+                "brief": "This function frees memory in FPGA device.",
+                "target_domain": "CPU",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/utility/",
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "A",
+                        "direction": "input",
+                        "type": "void *"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
+        },
+        {
+            "api_name": "xf::blas::xfblasFreeInstr",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasFreeInstr",
+                "display_name": "xfblasFreeInstr",
+                "brief": "This function frees instrution.",
+                "target_domain": "CPU",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/utility/",
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "kernelIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
+        },
+        {
+            "api_name": "xf::blas::xfblasDestroy",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasDestroy",
+                "display_name": "xfblasDestroy",
+                "brief": "This function releases handle used by the XFBLAS library.",
+                "target_domain": "CPU",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/utility/",
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "kernelNumber",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
+        },
+        {
+            "api_name": "xf::blas::xfblasGemm",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasGemm",
+                "display_name": "xfblasGemm",
+                "brief": "This function performs the matrix-matrix multiplication C = alpha*op(A)op(B) + beta*C.",
+                "target_domain": "CPU",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/utility/",
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "transa",
+                        "direction": "input",
+                        "type": "xfblasOperation_t"
+                    },
+                    {
+                        "name": "transb",
+                        "direction": "input",
+                        "type": "xfblasOperation_t"
+                    },
+                    {
+                        "name": "m",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "n",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "k",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "alpha",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "A",
+                        "direction": "input",
+                        "type": "void *"
+                    },
+                    {
+                        "name": "lda",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "B",
+                        "direction": "input",
+                        "type": "void *"
+                    },
+                    {
+                        "name": "ldb",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "beta",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "C",
+                        "direction": "inout",
+                        "type": "void *"
+                    },
+                    {
+                        "name": "ldc",
+                        "direction": "input",
+                        "type": "int"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
+        },
+        {
+            "api_name": "xf::blas::xfblasGemmByAddress",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasGemmByAddress",
+                "display_name": "xfblasGemmByAddress",
+                "brief": "",
+                "target_domain": "CPU",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/utility/",
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "CPU"
+        },
+        {
+            "api_name": "xf::blas::xfblasGetByPointer",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasGetByPointer",
+                "display_name": "xfblasGetByPointer",
+                "brief": "This function copies a matrix in FPGA device memory to host memory by pointer.",
+                "target_domain": "CPU",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/utility/",
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "A",
+                        "direction": "output",
+                        "type": "void *"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
+        },
+        {
+            "api_name": "xf::blas::xfblasGetByAddress",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasGetByAddress",
+                "display_name": "xfblasGetByAddress",
+                "brief": "This function copies a matrix in FPGA device memory to host memory by its address in device memory.",
+                "target_domain": "CPU",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/utility/",
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "A",
+                        "direction": "output",
+                        "type": "void *"
+                    },
+                    {
+                        "name": "p_bufSize",
+                        "direction": "input",
+                        "type": "unsigned long long"
+                    },
+                    {
+                        "name": "offset",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "kernelIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
+        },
+        {
+            "api_name": "xf::blas::xfblasExecute",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasExecute",
+                "display_name": "xfblasExecute",
+                "brief": "This function starts the kernel and wait until it finishes.",
+                "target_domain": "CPU",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/utility/",
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "kernelIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
+        },
+        {
+            "api_name": "xf::blas::xfblasExecuteAsync",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::xfblasExecuteAsync",
+                "display_name": "xfblasExecuteAsync",
+                "brief": "This asynchronous function starts all kernels and wait until them finish.",
+                "target_domain": "CPU",
+                "header_file_name": [
+                    "wrapper.hpp"
+                ],
+                "search_paths": [
+                    "L3/include/sw/utility/",
+                    "L3/include/sw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "numKernels",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "deviceIndex",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
+        }
+    ]
+}

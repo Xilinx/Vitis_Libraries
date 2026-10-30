@@ -1,6 +1,6 @@
+# Minimal makefile for Sphinx documentation
 #
-# Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+# Copyright 2019 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,13 +15,10 @@
 # limitations under the License.
 #
 
-# Minimal makefile for Sphinx documentation
-#
-
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
-SOURCEDIR     = src
+SOURCEDIR     = ./src
 BUILDDIR      = build
 
 # Put it first so that "make" without argument is like "make help".

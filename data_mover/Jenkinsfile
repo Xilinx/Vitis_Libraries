@@ -1,3 +1,2 @@
 @Library('pipeline-library')_
-VitisLibPipeline ( libname:'xf_data_mover',
-                   upstream_dependencies:'xf_utils_hw,next,../utils')
+VitisLibPipeline ( libname:'xf_blas' )

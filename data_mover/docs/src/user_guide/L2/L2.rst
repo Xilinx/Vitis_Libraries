@@ -1,0 +1,23 @@
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
+.. meta::
+   :keywords: BLAS, Library, Vitis BLAS Library, L2 kernels 
+   :description: Vitis BLAS library L2 kernels user guide.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
+
+
+.. _l2_module_guide:
+
+=========================
+L2 Kernels User Guide
+=========================
+
+.. toctree::
+   :maxdepth: 2
+
+   L2 API Overview <L2_overview.rst>
+   Blas Function Kernel <L2_gemm.rst>
+

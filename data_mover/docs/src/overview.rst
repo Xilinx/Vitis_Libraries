@@ -1,20 +1,32 @@
-.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+..  Copyright (C) 2019-2022, Xilinx, Inc.
+    Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
 
 .. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
+.. meta::
+   :keywords: BLAS, Library, Vitis BLAS Library, linear, algebra, subroutines
+   :description: Vitis BLAS Library licensing, trademark notice and hardware & software requirements.
+   :xlnxdocumentclass: Document
+   :xlnxdocumenttype: Tutorials
 
 .. _overview:
 
 .. toctree::
    :hidden:
 
-========
-Overview
-========
+Requirements
+------------
 
-The AMD Vitis™ Data Mover Library is an open-source Vitis library for exchanging data between the programmable logic (PL) and AI Engine (AIE).
+Software Platform
+~~~~~~~~~~~~~~~~~
 
-This library provides the **Programmable 4D Data Mover** and the **Static Data Mover** to help generate kernel designs and improve development efficiency.
+This library is designed to work with AMD Vitis™ 2022.2, and therefore inherits the system requirements of Vitis and XRT.
 
-The **Programmable 4D Data Mover** has two types of kernels, **4DCuboidRead** and **4DCuboidWrite**, that provide flexible access patterns and high performance between the double-data rate (DDR) memory and AIE.
+Supported operating systems are RHEL8.10, RHEL9.2,RHEL9.3,RHEL9.4,RHEL9.5 and Ubuntu 22.04.3 LTS, 22.04.4 LTS, 22.04.5 LTS. 
+And C++14 should be enabled during compilation.
 
-The **Static Data Mover** has nine types of kernels that connect AIE with DDR, URAM, and block RAM using a contiguous read/write access pattern.
+
+PCIe Accelerator Card
+~~~~~~~~~~~~~~~~~~~~~
+
+Hardware modules and kernels are designed to work with AMD Alveo™ U200 and U280 cards.

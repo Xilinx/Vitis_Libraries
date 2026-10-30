@@ -1,773 +1,1005 @@
 {
     "schema": "vitis_libraries_api_list_schema-1.0",
-        "api_list": [
+    "api_list": [
         {
-            "api_name": "xf::data_mover::bi_details::bi_dm",
-            "target_domain": "PL",
+            "api_name": "xf::blas::amax",
             "spec": {
-                "schema": "vitis_library_api_spec_schema-1.0",
-                "api_name": "xf::data_mover::bi_details::bi_dm",
-                "display_name": "bi_dm",
-                "brief": "Bi-directional Data Mover",
-                "lifecycle_status": "production",
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::amax",
+                "display_name": "amax",
+                "brief": "amax function that returns the position of the vector element that has the maximum magnitude.",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "xf_data_mover/bi_pl_4d_data_mover.hpp"
-                    ],
-                "search_paths": [
-                    "L1/include"
-                    ],
-                "source_file_name": "L1/tests/bi_dm_4d_handshake/tb.cpp",
-                "parameters": [
-                {
-                    "name": "WDATA",
-                    "type": "int",
-                    "description": "width of AXI-master/URAM/AXI-stream port"
-                },
-                {
-                    "name": "CACHE_DEPTH",
-                    "type": "int",
-                    "description": "depth of external URAM"
-                },
-                {
-                    "name": "LATENCY",
-                    "type": "int",
-                    "description": "latency of MAXI port"
-                },
-                {
-                    "name": "BURST_LEN",
-                    "type": "int",
-                    "description": "burst length of MAXI port"
-                },
-                {
-                    "name": "OUTSTANDING",
-                    "type": "int",
-                    "description": "write outstanding of MAXI port, should be less than 512"
-                }
+                    "amax.hpp"
                 ],
-                    "ports": [
+                "search_paths": [
+                    "L1/include/hw",
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
                     {
-                        "name": "i_axis_strm",
-                        "direction": "in",
-                        "type": "hls::stream<ap_axiu<WDATA, 0, 0, 0> >&"
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
                     },
                     {
-                        "name": "o_axis_strm",
-                        "direction": "out",
-                        "type": "hls::stream<ap_axiu<WDATA, 0, 0, 0> >&"
+                        "name": "t_LogParEntries",
+                        "type": "unsigned int",
+                        "description": "log2 of the number of parallelly processed entries in the input vector"
                     },
                     {
-                        "name": "i_maxi_port",
-                        "direction": "in",
-                        "type": "hls::burst_maxi<ap_uint<WDATA> >"
-                    },
-                    {
-                        "name": "o_maxi_port",
-                        "direction": "out",
-                        "type": "hls::burst_maxi<ap_uint<WDATA> >"
-                    },
-                    {
-                        "name": "pattern_0",
-                        "direction": "in",
-                        "type": "ap_uint<32>*"
-                    },
-                    {
-                        "name": "pattern_1",
-                        "direction": "in",
-                        "type": "ap_uint<32>*"
-                    },
-                    {
-                        "name": "pattern_2",
-                        "direction": "in",
-                        "type": "ap_uint<32>*"
-                    },
-                    {
-                        "name": "pattern_3",
-                        "direction": "in",
-                        "type": "ap_uint<32>*"
-                    },
-                    {
-                        "name": "pm_0",
-                        "direction": "in",
-                        "type": "ap_uint<32>*"
-                    },
-                    {
-                        "name": "pm_1",
-                        "direction": "in",
-                        "type": "ap_uint<32>*"
-                    },
-                    {
-                        "name": "pm_2",
-                        "direction": "in",
-                        "type": "ap_uint<32>*"
-                    },
-                    {
-                        "name": "pm_3",
-                        "direction": "in",
-                        "type": "ap_uint<32>*"
+                        "name": "t_IndexType",
+                        "type": "typename",
+                        "description": "the datatype of the index"
                     }
                 ],
-                    "target_domain": "PL",
-                    "visible": false
-            }
+                "ports": [
+                    {
+                        "name": "p_n",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "input",
+                        "type": "hls::stream< typename WideType< t_DataType,(1<< t_LogParEntries)>::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_result",
+                        "direction": "output",
+                        "type": "t_IndexType &"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
-            "api_name": "xf::data_mover::checkStreamWithMaster",
-            "target_domain": "PL",
+            "api_name": "xf::blas::amin",
             "spec": {
-                "schema": "vitis_library_api_spec_schema-1.0",
-                "api_name": "xf::data_mover::checkStreamWithMaster",
-                "display_name": "checkStreamWithMaster",
-                "brief": "Load from AXI master and stream, validate and save result to buffer.",
-                "lifecycle_status": "production",
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::amin",
+                "display_name": "amin",
+                "brief": "amin function that returns the position of the vector element that has the minimum magnitude.",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "xf_data_mover/check_stream_with_master.hpp"
-                    ],
-                "search_paths": [
-                    "L1/include"
-                    ],
-                "source_file_name": "L1/tests/check_stream_with_master/test_check_stream_with_master.cpp",
-                "parameters": [
-                {
-                    "name": "WM",
-                    "type": "int",
-                    "description": "width of AXI master, the size is aligned with (WM/8)"
-                },
-                {
-                    "name": "WS",
-                    "type": "int",
-                    "description": "width of AXI master, the size is aligned with (WS/8)"
-                },
-                {
-                    "name": "BLEN",
-                    "type": "int",
-                    "description": "burst length when reading from AXI master",
-                    "enum": [
-                        "32"
-                        ]
-                }
+                    "amin.hpp"
                 ],
-                    "ports": [
+                "search_paths": [
+                    "L1/include/hw",
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
                     {
-                        "name": "s",
-                        "direction": "in",
-                        "type": "hls::stream<ap_axiu<WS, 0, 0, 0> >&"
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
                     },
                     {
-                        "name": "gm",
-                        "direction": "out",
-                        "type": "ap_uint<WM>*"
+                        "name": "t_LogParEntries",
+                        "type": "unsigned int",
+                        "description": "log2 of the number of parallelly processed entries in the input vector"
                     },
                     {
-                        "name": "ret",
-                        "direction": "out",
-                        "type": "hls::stream<CheckResult::type>&"
-                    },
-                    {
-                        "name": "sz",
-                        "direction": "in",
-                        "type": "uint64_t"
+                        "name": "t_IndexType",
+                        "type": "typename",
+                        "description": "the datatype of the index"
                     }
                 ],
-                    "target_domain": "PL",
-                    "visible": false
-            }
+                "ports": [
+                    {
+                        "name": "p_n",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "input",
+                        "type": "hls::stream< typename WideType< t_DataType,(1<< t_LogParEntries)>::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_result",
+                        "direction": "output",
+                        "type": "t_IndexType &"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
-            "api_name": "xf::data_mover::read4D",
-            "target_domain": "PL",
+            "api_name": "xf::blas::asum",
             "spec": {
-                "schema": "vitis_library_api_spec_schema-1.0",
-                "api_name": "xf::data_mover::read4D",
-                "display_name": "read4D",
-                "brief": "data_mover for reading multiple 4D cuboids.",
-                "lifecycle_status": "production",
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::asum",
+                "display_name": "asum",
+                "brief": "asum function that returns the sum of the magnitude of vector elements.",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "xf_data_mover/pl_data_mover.hpp"
-                    ],
-                "search_paths": [
-                    "L1/include"
-                    ],
-                "source_file_name": "L1/tests/cuboid_read_hls/tb.cpp",
-                "parameters": [
-                {
-                    "name": "WDATA",
-                    "type": "int",
-                    "description": "Bit width of data element"
-                },
-                {
-                    "name": "LATENCY",
-                    "type": "int",
-                    "description": "MAXI port latency"
-                },
-                {
-                    "name": "OUTSTANDING",
-                    "type": "int",
-                    "description": "MAXI port read/write outstanding"
-                },
-                {
-                    "name": "BURSTLEN",
-                    "type": "int",
-                    "description": "MAXI port read/write burst length"
-                }
+                    "asum.hpp"
                 ],
-                    "ports": [
+                "search_paths": [
+                    "L1/include/hw",
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
                     {
-                        "name": "descriptor_buffer",
-                        "direction": "in",
-                        "type": "hls::burst_maxi<ap_uint<64> >&"
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
                     },
                     {
-                        "name": "data",
-                        "direction": "in",
-                        "type": "hls::burst_maxi<ap_uint<WDATA> >&"
+                        "name": "t_LogParEntries",
+                        "type": "unsigned int",
+                        "description": "log2 of the number of parallelly processed entries in the input vector"
                     },
                     {
-                        "name": "w_data",
-                        "direction": "out",
-                        "type": "hls::stream<ap_axiu<WDATA, 0, 0, 0> >&"
+                        "name": "t_IndexType",
+                        "type": "typename",
+                        "description": "the datatype of the index"
                     }
                 ],
-                    "target_domain": "PL",
-                    "visible": false
-            }
+                "ports": [
+                    {
+                        "name": "p_n",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "input",
+                        "type": "hls::stream< typename WideType< t_DataType,(1<< t_LogParEntries)>::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_sum",
+                        "direction": "output",
+                        "type": "t_DataType &"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
-            "api_name": "xf::data_mover::write4D",
-            "target_domain": "PL",
+            "api_name": "xf::blas::axpy",
             "spec": {
-                "schema": "vitis_library_api_spec_schema-1.0",
-                "api_name": "xf::data_mover::write4D",
-                "display_name": "write4D",
-                "brief": "data_mover for writing multiple 4D cuboids.",
-                "lifecycle_status": "production",
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::axpy",
+                "display_name": "axpy",
+                "brief": "axpy function that compute Y = alpha*X + Y.",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "xf_data_mover/pl_data_mover.hpp"
-                    ],
-                "search_paths": [
-                    "L1/include"
-                    ],
-                "source_file_name": "L1/tests/cuboid_write_hls/tb.cpp",
-                "parameters": [
-                {
-                    "name": "WDATA",
-                    "type": "int",
-                    "description": "Bit width of data element"
-                },
-                {
-                    "name": "LATENCY",
-                    "type": "int",
-                    "description": "MAXI port latency"
-                },
-                {
-                    "name": "OUTSTANDING",
-                    "type": "int",
-                    "description": "MAXI port read/write outstanding"
-                },
-                {
-                    "name": "BURSTLEN",
-                    "type": "int",
-                    "description": "MAXI port read/write burst length"
-                }
+                    "axpy.hpp"
                 ],
-                    "ports": [
+                "search_paths": [
+                    "L1/include/hw",
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
                     {
-                        "name": "descriptor_buffer",
-                        "direction": "in",
-                        "type": "hls::burst_maxi<ap_uint<64> >&"
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
                     },
                     {
-                        "name": "w_data",
-                        "direction": "in",
-                        "type": "hls::stream<ap_axiu<WDATA, 0, 0, 0> >&"
+                        "name": "t_ParEntries",
+                        "type": "unsigned int",
+                        "description": "log2 of the number of parallelly processed entries in the input vector"
                     },
                     {
-                        "name": "data",
-                        "direction": "out",
-                        "type": "hls::burst_maxi<ap_uint<WDATA> >&"
+                        "name": "t_IndexType",
+                        "type": "typename",
+                        "description": "the datatype of the index"
                     }
                 ],
-                    "target_domain": "PL",
-                    "visible": false
-            }
+                "ports": [
+                    {
+                        "name": "p_n",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_alpha",
+                        "direction": "input",
+                        "type": "t_DataType"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "input",
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_y",
+                        "direction": "input",
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_r",
+                        "direction": "output",
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
-            "api_name": "xf::data_mover::loadMasterToStream",
-            "target_domain": "PL",
+            "api_name": "xf::blas::copy",
             "spec": {
-                "schema": "vitis_library_api_spec_schema-1.0",
-                "api_name": "xf::data_mover::loadMasterToStream",
-                "display_name": "loadMasterToStream",
-                "brief": "Load from AXI master, and send data to stream.",
-                "lifecycle_status": "production",
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::copy",
+                "display_name": "copy",
+                "brief": "copy function that compute Y = X",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "xf_data_mover/load_master_to_stream.hpp"
-                    ],
-                "search_paths": [
-                    "L1/include"
-                    ],
-                "source_file_name": "L1/tests/load_master_to_stream/test_load_master_to_stream.cpp",
-                "parameters": [
-                {
-                    "name": "WM",
-                    "type": "int",
-                    "description": "width of AXI master, expected that the size is aligned with (WM/8)"
-                },
-                {
-                    "name": "WS",
-                    "type": "int",
-                    "description": "width of AXI stream, expected that the size is aligned with (WS/8)"
-                },
-                {
-                    "name": "BLEN",
-                    "type": "int",
-                    "description": "burst length when reading from AXI master",
-                    "enum": [
-                        "32"
-                        ]
-                }
+                    "copy.hpp"
                 ],
-                    "ports": [
+                "search_paths": [
+                    "L1/include/hw",
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
                     {
-                        "name": "mm",
-                        "direction": "in",
-                        "type": "ap_uint<WM>*"
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
                     },
                     {
-                        "name": "s",
-                        "direction": "out",
-                        "type": "hls::stream<ap_axiu<WS, 0, 0, 0> >&"
+                        "name": "t_ParEntries",
+                        "type": "unsigned int",
+                        "description": "number of parallelly processed entries in the packed input vector stream"
                     },
                     {
-                        "name": "size",
-                        "direction": "in",
-                        "type": "uint64_t"
+                        "name": "t_IndexType",
+                        "type": "typename",
+                        "description": "the datatype of the index"
                     }
                 ],
-                    "target_domain": "PL",
-                    "visible": false
-            }
+                "ports": [
+                    {
+                        "name": "p_n",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "input",
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_y",
+                        "direction": "output",
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
-            "api_name": "xf::data_mover::PreloadableBram",
-            "target_domain": "PL",
+            "api_name": "xf::blas::dot",
             "spec": {
-                "schema": "vitis_library_api_spec_schema-1.0",
-                "api_name": "xf::data_mover::PreloadableBram",
-                "display_name": "PreloadableBram",
-                "brief": "Store constant stream to RAM.",
-                "lifecycle_status": "production",
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::dot",
+                "display_name": "dot",
+                "brief": "dot function that returns the dot product of vector x and y.",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "xf_data_mover/preloadable_ram.hpp"
-                    ],
-                "search_paths": [
-                    "L1/include"
-                    ],
-                "source_file_name": "L1/tests/preloadable_ram/bram/test_preloadable_ram.cpp",
-                "parameters": [
-                {
-                    "name": "WS",
-                    "type": "int",
-                    "description": " width of BRAM, same with width of AXI stream to AIE",
-                    "minimum": "32",
-                    "maximum": "128",
-                    "enum": [
-                        "128",
-                    "64",
-                    "32"
-                        ]
-                },
-                {
-                    "name": "DM",
-                    "type": "int",
-                    "description": "depth of BRAM"
-                }
+                    "dot.hpp"
                 ],
-                    "ports": [
+                "search_paths": [
+                    "L1/include/hw",
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
                     {
-                        "name": "is",
-                        "direction": "in",
-                        "type": "hls::stream<ConstData::type>&"
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
                     },
                     {
-                        "name": "os",
-                        "direction": "out",
-                        "type": "hls::stream<ap_axiu<WS, 0, 0, 0> >&"
+                        "name": "t_LogParEntries",
+                        "type": "unsigned int",
+                        "description": "log2 of the number of parallelly processed entries in the input vector"
                     },
                     {
-                        "name": "cs",
-                        "direction": "in",
-                        "type": "hls::stream<ap_axiu<WS, 0, 0, 0> >&"
-                    },
-                    {
-                        "name": "os",
-                        "direction": "out",
-                        "type": "hls::stream<xf::data_mover::CheckResult::type>&"
-                    },
-                    {
-                        "name": "sz",
-                        "direction": "in",
-                        "type": "const uint64_t"
+                        "name": "t_IndexType",
+                        "type": "typename",
+                        "description": "the datatype of the index"
                     }
                 ],
-                    "target_domain": "PL",
-                    "visible": false
-            }
+                "ports": [
+                    {
+                        "name": "p_n",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "input",
+                        "type": "hls::stream< typename WideType< t_DataType,(1<< t_LogParEntries)>::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_y",
+                        "direction": "input",
+                        "type": "hls::stream< typename WideType< t_DataType,(1<< t_LogParEntries)>::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_res",
+                        "direction": "output",
+                        "type": "t_DataType &"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
-            "api_name": "xf::data_mover::PreloadableUram",
-            "target_domain": "PL",
+            "api_name": "xf::blas::gbmv",
             "spec": {
-                "schema": "vitis_library_api_spec_schema-1.0",
-                "api_name": "xf::data_mover::PreloadableUram",
-                "display_name": "PreloadableUram",
-                "brief": "Store constant stream to RAM.",
-                "lifecycle_status": "production",
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::gbmv",
+                "display_name": "gbmv",
+                "brief": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "xf_data_mover/preloadable_ram.hpp"
-                    ],
-                "search_paths": [
-                    "L1/include"
-                    ],
-                "source_file_name": "L1/tests/preloadable_ram/uram/test_preloadable_ram.cpp",
-                "parameters": [
-                {
-                    "name": "WS",
-                    "type": "int",
-                    "description": " width of URAM, same with width of AXI stream to AIE",
-                    "minimum": "32",
-                    "maximum": "128",
-                    "enum": [
-                        "128",
-                    "64",
-                    "32"
-                        ]
-                },
-                {
-                    "name": "DM",
-                    "type": "int",
-                    "description": "depth of URAM"
-                }
+                    "gbmv.hpp"
                 ],
-                    "ports": [
+                "search_paths": [
+                    "L1/include/hw",
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
                     {
-                        "name": "is",
-                        "direction": "in",
-                        "type": "hls::stream<ConstData::type>&"
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
                     },
                     {
-                        "name": "os",
-                        "direction": "out",
-                        "type": "hls::stream<ap_axiu<WS, 0, 0, 0> >&"
+                        "name": "t_ParEntries",
+                        "type": "unsigned int",
+                        "description": "the number of parallelly processed entries in the input vector"
                     },
                     {
-                        "name": "cs",
-                        "direction": "in",
-                        "type": "hls::stream<ap_axiu<WS, 0, 0, 0> >&"
+                        "name": "t_MaxRows",
+                        "type": "unsigned int",
+                        "description": "the maximum size of buffers for output vector"
                     },
                     {
-                        "name": "os",
-                        "direction": "ret",
-                        "type": "hls::stream<xf::data_mover::CheckResult::type>&"
+                        "name": "t_IndexType",
+                        "type": "typename",
+                        "description": "the datatype of the index"
                     },
                     {
-                        "name": "sz",
-                        "direction": "in",
-                        "type": "const uint64_t"
+                        "name": "t_MacType",
+                        "type": "typename",
+                        "description": "the datatype of the output stream"
                     }
                 ],
-                    "target_domain": "PL",
-                    "visible": false
-            }
+                "ports": [
+                    {
+                        "name": "p_m",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_n",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_kl",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_ku",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_A",
+                        "direction": "input",
+                        "type": "hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "input",
+                        "type": "hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_y",
+                        "direction": "output",
+                        "type": "hls::stream<typename WideType<t_MacType, t_ParEntries>::t_TypeInt>&"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
-            "api_name": "xf::data_mover::readConst",
-            "target_domain": "PL",
+            "api_name": "xf::blas::gbmv",
             "spec": {
-                "schema": "vitis_library_api_spec_schema-1.0",
-                "api_name": "xf::data_mover::readConst",
-                "display_name": "readConst",
-                "brief": "Read constant data from AXI master port to initilization stream.",
-                "lifecycle_status": "production",
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::gbmv",
+                "display_name": "gbmv",
+                "brief": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "xf_data_mover/read_const.hpp"
-                    ],
-                "search_paths": [
-                    "L1/include"
-                    ],
-                "source_file_name": "L1/tests/read_const/test_read_const.cpp",
-                "parameters": [
-                {
-                    "name": "Tm",
-                    "type": "typename",
-                    "description": "the type of pointer"
-                },
-                {
-                    "name": "Ts",
-                    "type": "typename",
-                    "description": "the type of stream"
-                },
-                {
-                    "name": "Tz",
-                    "type": "typename",
-                    "description": "the type of size"
-                }
+                    "gbmv.hpp"
                 ],
-                    "ports": [
+                "search_paths": [
+                    "L1/include/hw",
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
                     {
-                        "name": "mm",
-                        "direction": "in",
-                        "type": "Tm&"
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
                     },
                     {
-                        "name": "cs",
-                        "direction": "out",
-                        "type": "Ts"
+                        "name": "t_ParEntries",
+                        "type": "unsigned int",
+                        "description": "the number of parallelly processed entries in the input vector"
                     },
                     {
-                        "name": "sz",
-                        "direction": "in",
-                        "type": "Tz"
+                        "name": "t_MaxRows",
+                        "type": "unsigned int",
+                        "description": "the maximum size of buffers for output vector"
+                    },
+                    {
+                        "name": "t_IndexType",
+                        "type": "typename",
+                        "description": "the datatype of the index"
+                    },
+                    {
+                        "name": "t_MacType",
+                        "type": "typename",
+                        "description": "the datatype of the output stream"
                     }
                 ],
-                    "target_domain": "PL",
-                    "visible": false
-            }
+                "ports": [
+                    {
+                        "name": "p_m",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_n",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_kl",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_ku",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_alpha",
+                        "direction": "input",
+                        "type": "t_DataType"
+                    },
+                    {
+                        "name": "p_M",
+                        "direction": "input",
+                        "type": "hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "input",
+                        "type": "hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_beta",
+                        "direction": "input",
+                        "type": "t_DataType"
+                    },
+                    {
+                        "name": "p_y",
+                        "direction": "input",
+                        "type": "hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_yr",
+                        "direction": "output",
+                        "type": "hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>&"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
-            "api_name": "xf::data_mover::uram_to_axis",
-            "target_domain": "PL",
+            "api_name": "xf::blas::gemm",
             "spec": {
-                "schema": "vitis_library_api_spec_schema-1.0",
-                "api_name": "xf::data_mover::uram_to_axis",
-                "display_name": "uram_to_axis",
-                "brief": "read data from URAM and forward to AXI-stream.",
-                "lifecycle_status": "production",
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::gemm",
+                "display_name": "gemm",
+                "brief": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "xf_data_mover/dm_4d_uram.hpp"
-                    ],
-                "search_paths": [
-                    "L1/include"
-                    ],
-                "source_file_name": "L1/tests/2s_4d_read_uram/tb.cpp",
-                "parameters": [
-                {
-                    "name": "W",
-                    "type": "int",
-                    "description": "width of AXI-master/URAM/AXI-stream port"
-                },
-                {
-                    "name": "D",
-                    "type": "int",
-                    "description": "depth of external URAM"
-                }
+                    "gemm.hpp"
                 ],
-                    "ports": [
+                "search_paths": [
+                    "L1/include/hw",
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
                     {
-                        "name": "waddr_strm",
-                        "direction": "in",
-                        "type": "hls::stream<ap_uint<32> >&"
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
                     },
                     {
-                        "name": "wdata_strm",
-                        "direction": "in",
-                        "type": "hls::stream<ap_uint<W> >&"
+                        "name": "t_KBufferDim",
+                        "type": "unsigned int",
+                        "description": " "
                     },
                     {
-                        "name": "pattern_buf",
-                        "direction": "in",
-                        "type": "ap_uint<32>*"
-                    },
-                    {
-                        "name": "pattern_id",
-                        "direction": "in",
-                        "type": "hls::stream<ap_uint<8> >&"
-                    },
-                    {
-                        "name": "o_ack",
-                        "direction": "out",
-                        "type": "hls::stream<ap_uint<8> >&"
-                    },
-                    {
-                        "name": "to_strm",
-                        "direction": "out",
-                        "type": "hls::stream<ap_axiu<W, 0, 0, 0> >&"
+                        "name": "t_ParEntries",
+                        "type": "unsigned int",
+                        "description": "the number of parallelly processed entries in the input vector"
                     }
                 ],
-                    "target_domain": "PL",
-                    "visible": false
-            }
+                "ports": [
+                    {
+                        "name": "p_m",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_n",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_k",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_A",
+                        "direction": "input",
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_B",
+                        "direction": "input",
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_C",
+                        "direction": "output",
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
-            "api_name": "xf::data_mover::StaticRom",
-            "target_domain": "PL",
+            "api_name": "xf::blas::gemv",
             "spec": {
-                "schema": "vitis_library_api_spec_schema-1.0",
-                "api_name": "xf::data_mover::StaticRom",
-                "display_name": "StaticRom",
-                "brief": "Send data from ROM to AXI stream.",
-                "lifecycle_status": "production",
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::gemv",
+                "display_name": "gemv",
+                "brief": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "xf_data_mover/static_rom.hpp"
-                    ],
-                "search_paths": [
-                    "L1/include"
-                    ],
-                "source_file_name": "L1/tests/static_rom/test_static_rom.cpp",
-                "parameters": [
-                {
-                    "name": "WS",
-                    "type": "int",
-                    "description": "width of ROM, same with width of AXI stream to AIE",
-                    "minimum": "32",
-                    "maximum": "128",
-                    "enum": [
-                        "128",
-                    "64",
-                    "32"
-                        ]
-                },
-                {
-                    "name": "DM",
-                    "type": "int",
-                    "description": "depth of ROM"
-                }
+                    "gemv.hpp"
                 ],
-                    "ports": [
+                "search_paths": [
+                    "L1/include/hw",
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
                     {
-                        "name": "os",
-                        "direction": "out",
-                        "type": "hls::stream<ap_axiu<WS, 0, 0, 0> >&"
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
                     },
                     {
-                        "name": "cs",
-                        "direction": "in",
-                        "type": "hls::stream<ap_axiu<WS, 0, 0, 0> >&"
+                        "name": "t_LogParEntries",
+                        "type": "unsigned int",
+                        "description": "log2 of the number of parallelly processed entries in the input vector"
                     },
                     {
-                        "name": "rs",
-                        "direction": "in",
-                        "type": "hls::stream<CheckResult::type>&"
-                    },
-                    {
-                        "name": "sz",
-                        "direction": "in",
-                        "type": "const uint64_t"
+                        "name": "t_IndexType",
+                        "type": "typename",
+                        "description": "the datatype of the index"
                     }
                 ],
-                    "target_domain": "PL",
-                    "visible": false
-            }
+                "ports": [
+                    {
+                        "name": "p_m",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_n",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_alpha",
+                        "direction": "input",
+                        "type": "t_DataType"
+                    },
+                    {
+                        "name": "p_M",
+                        "direction": "input",
+                        "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "input",
+                        "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_beta",
+                        "direction": "input",
+                        "type": "t_DataType"
+                    },
+                    {
+                        "name": "p_y",
+                        "direction": "input",
+                        "type": "hls::stream<typename WideType<t_DataType, 1>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_yr",
+                        "direction": "output",
+                        "type": "hls::stream<typename WideType<t_DataType, 1>::t_TypeInt>&"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
-            "api_name": "xf::data_mover::storeStreamToMaster",
-            "target_domain": "PL",
+            "api_name": "xf::blas::nrm2",
             "spec": {
-                "schema": "vitis_library_api_spec_schema-1.0",
-                "api_name": "xf::data_mover::storeStreamToMaster",
-                "display_name": "storeStreamToMaster",
-                "brief": "Read from AXI stream, and send data to AXI master.",
-                "lifecycle_status": "production",
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::nrm2",
+                "display_name": "nrm2",
+                "brief": "nrm2 function that returns the Euclidean norm of the vector x.",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "xf_data_mover/store_stream_to_master.hpp"
-                    ],
-                "search_paths": [
-                    "L1/include"
-                    ],
-                "source_file_name": "L1/tests/store_stream_to_master/test_store_stream_to_master.cpp",
-                "parameters": [
-                {
-                    "name": "WM",
-                    "type": "int",
-                    "description": "width of AXI master, expected that the size is aligned with (WM/8)"
-                },
-                {
-                    "name": "WS",
-                    "type": "int",
-                    "description": "width of AXI stream, expected that the size is aligned with (WS/8) "
-                },
-                {
-                    "name": "BLEN",
-                    "type": "int",
-                    "description": "burst length when writing to AXI master",
-                    "enum": [
-                        "32"
-                        ]
-                }
+                    "nrm2.hpp"
                 ],
-                    "ports": [
+                "search_paths": [
+                    "L1/include/hw",
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
                     {
-                        "name": "s",
-                        "direction": "in",
-                        "type": "hls::stream<ap_axiu<WS, 0, 0, 0> >&"
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
                     },
                     {
-                        "name": "mm",
-                        "direction": "in",
-                        "type": "ap_uint<WM>*"
+                        "name": "t_LogParEntries",
+                        "type": "unsigned int",
+                        "description": "log2 of the number of parallelly processed entries in the input vector"
                     },
                     {
-                        "name": "size",
-                        "direction": "in",
-                        "type": "uint64_t"
-                    },
-                    {
-                        "name": "vld_str",
-                        "direction": "out",
-                        "type": "hls::stream<ap_uint<1> >&"
-                    },
-                    {
-                        "name": "cntData",
-                        "direction": "out",
-                        "type": "uint64_t*"
+                        "name": "t_IndexType",
+                        "type": "typename",
+                        "description": "the datatype of the index"
                     }
                 ],
-                    "target_domain": "PL",
-                    "visible": false
-            }
+                "ports": [
+                    {
+                        "name": "p_n",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "input",
+                        "type": "hls::stream< typename WideType< t_DataType,(1<< t_LogParEntries)>::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_res",
+                        "direction": "output",
+                        "type": "t_DataType &"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
-            "api_name": "xf::data_mover::writeResult",
-            "target_domain": "PL",
+            "api_name": "xf::blas::scal",
             "spec": {
-                "schema": "vitis_library_api_spec_schema-1.0",
-                "api_name": "xf::data_mover::writeResult",
-                "display_name": "writeResult",
-                "brief": "Write CheckResult to AXI master port.",
-                "lifecycle_status": "production",
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::scal",
+                "display_name": "scal",
+                "brief": "scal function that compute X = alpha * X",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "xf_data_mover/write_result.hpp"
-                    ],
-                "search_paths": [
-                    "L1/include"
-                    ],
-                "source_file_name": "L1/tests/write_result/test_write_result.cpp",
-                "parameters": [
-                {
-                    "name": "Ts",
-                    "type": "typename",
-                    "description": "the type of CheckResult stream."
-                },
-                {
-                    "name": "Tm",
-                    "type": "typename",
-                    "description": "the type of CheckResult pointer."
-                }
+                    "scal.hpp"
                 ],
-                    "ports": [
+                "search_paths": [
+                    "L1/include/hw",
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
                     {
-                        "name": "rs",
-                        "direction": "in",
-                        "type": "Ts*"
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
                     },
                     {
-                        "name": "rm",
-                        "direction": "out",
-                        "type": "Tm*"
+                        "name": "t_ParEntries",
+                        "type": "unsigned int",
+                        "description": "number of parallelly processed entries in the packed input vector stream"
+                    },
+                    {
+                        "name": "t_IndexType",
+                        "type": "typename",
+                        "description": "the datatype of the index"
                     }
                 ],
-                    "target_domain": "PL",
-                    "visible": false
-            }
+                "ports": [
+                    {
+                        "name": "p_n",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_alpha",
+                        "direction": "input",
+                        "type": "t_DataType"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "input",
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_res",
+                        "direction": "output",
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
+        },
+        {
+            "api_name": "xf::blas::swap",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::swap",
+                "display_name": "swap",
+                "brief": "swap function that swap vector x and y",
+                "target_domain": "PL",
+                "header_file_name": [
+                    "swap.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw",
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
+                    },
+                    {
+                        "name": "t_ParEntries",
+                        "type": "unsigned int",
+                        "description": "number of parallelly processed entries in the packed input vector stream"
+                    },
+                    {
+                        "name": "t_IndexType",
+                        "type": "typename",
+                        "description": "the datatype of the index"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "p_n",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "input",
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_y",
+                        "direction": "input",
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_xRes",
+                        "direction": "output",
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_yRes",
+                        "direction": "output",
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
+        },
+        {
+            "api_name": "xf::blas::symv",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::symv",
+                "display_name": "symv",
+                "brief": "",
+                "target_domain": "PL",
+                "header_file_name": [
+                    "symv.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw",
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
+                    },
+                    {
+                        "name": "t_LogParEntries",
+                        "type": "unsigned int",
+                        "description": "log2 of the number of parallelly processed entries in the input vector"
+                    },
+                    {
+                        "name": "t_IndexType",
+                        "type": "typename",
+                        "description": "the datatype of the index"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "p_n",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_alpha",
+                        "direction": "input",
+                        "type": "t_DataType"
+                    },
+                    {
+                        "name": "p_M",
+                        "direction": "input",
+                        "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "input",
+                        "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_beta",
+                        "direction": "input",
+                        "type": "t_DataType"
+                    },
+                    {
+                        "name": "p_y",
+                        "direction": "input",
+                        "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_yr",
+                        "direction": "output",
+                        "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
+        },
+        {
+            "api_name": "xf::blas::trmv",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::trmv",
+                "display_name": "trmv",
+                "brief": "",
+                "target_domain": "PL",
+                "header_file_name": [
+                    "trmv.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw",
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
+                    },
+                    {
+                        "name": "t_LogParEntries",
+                        "type": "unsigned int",
+                        "description": "log2 of the number of parallelly processed entries in the input vector"
+                    },
+                    {
+                        "name": "t_IndexType",
+                        "type": "typename",
+                        "description": "the datatype of the index"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "p_uplo",
+                        "direction": "input",
+                        "type": "bool"
+                    },
+                    {
+                        "name": "p_n",
+                        "direction": "input",
+                        "type": "unsigned int"
+                    },
+                    {
+                        "name": "p_alpha",
+                        "direction": "input",
+                        "type": "t_DataType"
+                    },
+                    {
+                        "name": "p_M",
+                        "direction": "input",
+                        "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "input",
+                        "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_beta",
+                        "direction": "input",
+                        "type": "t_DataType"
+                    },
+                    {
+                        "name": "p_y",
+                        "direction": "input",
+                        "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_yr",
+                        "direction": "output",
+                        "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         }
     ]
 }

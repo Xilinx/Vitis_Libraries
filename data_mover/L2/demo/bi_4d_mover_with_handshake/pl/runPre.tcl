@@ -1,3 +1,0 @@
-config_interface -m_axi_conservative_mode=0
-config_export -deadlock_detection none
-set_param hls.enable_multiple_burst_maxi_ports_in_same_bundle true
