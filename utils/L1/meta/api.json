@@ -48,47 +48,47 @@
                 "ports": [
                     {
                         "name": "rbuf",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "ap_uint< _WAxi > *"
                     },
                     {
                         "name": "ostrm0",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream< _TStrm0 > &"
                     },
                     {
                         "name": "e_ostrm0",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "ostrm1",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream< _TStrm1 > &"
                     },
                     {
                         "name": "e_ostrm1",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "ostrm2",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream< _TStrm2 > &"
                     },
                     {
                         "name": "e_ostrm2",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "const int len[3], const int offset[3]"
                     },
                     {
                         "name": "len",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "const int[3],"
                     },
                     {
                         "name": "offset",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "const int"
                     }
                 ]
@@ -132,22 +132,22 @@
                 "ports": [
                     {
                         "name": "rbuf",
-                        "direction": "",
+                        "direction": "input",
                         "type": "ap_uint< _WAxi > *"
                     },
                     {
                         "name": "num",
-                        "direction": "",
+                        "direction": "input",
                         "type": "const int"
                     },
                     {
                         "name": "ostrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream< _TStrm > &"
                     },
                     {
                         "name": "e_ostrm",
-                        "direction": "",
+                        "direction": "output",
                         "type": "hls::stream<bool>&"
                     }
                 ]
@@ -191,27 +191,27 @@
                 "ports": [
                     {
                         "name": "rbuf",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "ap_uint< _WAxi > *"
                     },
                     {
                         "name": "ostrm",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream< _TStrm > &"
                     },
                     {
                         "name": "e_ostrm",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "len",
-                        "direction": "out",
+                        "direction": "input",
                         "type": "const int"
                     },
                     {
                         "name": "offset",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "const int"
                     }
                 ]
@@ -238,7 +238,7 @@
                 "parameters": [
                     {
                         "name": "S",
-                        "type": "MuxSide",
+                        "type": "int",
                         "description": "side of FIFO, must be provide by user."
                     },
                     {
@@ -289,32 +289,32 @@
                 "ports": [
                     {
                         "name": "select_cfg",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< _NStrm > > &"
                     },
                     {
                         "name": "istrms",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<_WIn> >"
                     },
                     {
                         "name": "e_istrm",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "ostrm",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<_WIn * _NStrm> >&"
                     },
                     {
                         "name": "e_ostrm",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "alg",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "LSBSideT"
                     }
                 ]
@@ -353,12 +353,12 @@
                 "ports": [
                     {
                         "name": "istrms",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "hls::stream< _TIn >"
                     },
                     {
                         "name": "e_istrms",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "hls::stream<bool>"
                     }
                 ]
@@ -397,22 +397,22 @@
                 "ports": [
                     {
                         "name": "istrm",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "hls::stream< _TIn > &"
                     },
                     {
                         "name": "e_istrm",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "ostrms",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream< _TIn >"
                     },
                     {
                         "name": "e_ostrms",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream<bool>"
                     }
                 ]
@@ -457,27 +457,27 @@
                 "ports": [
                     {
                         "name": "istrms",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "hls::stream<ap_uint<_WInStrm> >"
                     },
                     {
                         "name": "e_istrms",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "hls::stream<bool>"
                     },
                     {
                         "name": "ostrm",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<_WOutStrm> >&"
                     },
                     {
                         "name": "e_ostrm",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "alg",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "LoadBalanceT"
                     }
                 ]
@@ -522,27 +522,27 @@
                 "ports": [
                     {
                         "name": "istrm",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< _WInStrm > > &"
                     },
                     {
                         "name": "e_istrm",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "ostrms",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<_WOutStrm> >"
                     },
                     {
                         "name": "e_ostrms",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream<bool>"
                     },
                     {
                         "name": "alg",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "LoadBalanceT"
                     }
                 ]
@@ -581,27 +581,27 @@
                 "ports": [
                     {
                         "name": "order_cfg",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "hls::stream< int > &"
                     },
                     {
                         "name": "istrm",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "hls::stream< _TIn > &"
                     },
                     {
                         "name": "e_istrm",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "ostrm",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream< _TIn > &"
                     },
                     {
                         "name": "e_ostrm",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream<bool>&"
                     }
                 ]
@@ -645,27 +645,27 @@
                 "ports": [
                     {
                         "name": "order_cfg",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< 8 *_ONstrm > > &"
                     },
                     {
                         "name": "istrms",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "hls::stream<_TIn>"
                     },
                     {
                         "name": "e_istrm",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "ostrms",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream<_TIn>"
                     },
                     {
                         "name": "e_ostrm",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream<bool>&"
                     }
                 ]
@@ -709,27 +709,27 @@
                 "ports": [
                     {
                         "name": "istrm",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< _WIn > > &"
                     },
                     {
                         "name": "e_istrm",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "ostrms",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream<ap_uint<_WOut> >"
                     },
                     {
                         "name": "e_ostrm",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "alg",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "LSBSideT"
                     }
                 ]
@@ -768,22 +768,22 @@
                 "ports": [
                     {
                         "name": "istrms",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "hls::stream<_TIn>"
                     },
                     {
                         "name": "e_istrms",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "hls::stream<bool>"
                     },
                     {
                         "name": "ostrms",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream<_TIn>"
                     },
                     {
                         "name": "e_ostrm",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream<bool>&"
                     }
                 ]
@@ -827,17 +827,17 @@
                 "ports": [
                     {
                         "name": "wbuf",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "ap_uint< _WAxi > *"
                     },
                     {
                         "name": "istrm",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "hls::stream< ap_uint< _WStrm > > &"
                     },
                     {
                         "name": "e_istrm",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "hls::stream<bool>&"
                     }
                 ]
