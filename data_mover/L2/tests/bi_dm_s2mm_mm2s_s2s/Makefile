@@ -1,0 +1,424 @@
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# vitis makefile-generator v2.0.12
+
+############################## Help Section ##############################
+.PHONY: help
+
+help::
+	$(ECHO) "Makefile Usage:"
+	$(ECHO) "  make all TARGET=<hw_emu/hw> PLATFORM=<FPGA platform>"
+	$(ECHO) "      Command to generate the design for specified Target and Shell."
+	$(ECHO) ""
+	$(ECHO) "  make run TARGET=<hw_emu/hw> PLATFORM=<FPGA platform>"
+	$(ECHO) "      Command to run application in emulation."
+	$(ECHO) ""
+	$(ECHO) "  NOTE: For embedded platform the following setup steps are required:"
+	$(ECHO) "      a.If the platform and common-image are downloaded from Xilinx Download Center(Suggested):"
+	$(ECHO) "        Run the sdk.sh script from the common-image directory to install sysroot using the command : ./sdk.sh -y -d ./ -p "
+	$(ECHO) "        Unzip the rootfs file : gunzip ./rootfs.ext4.gz"
+	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
+	$(ECHO) "      b.User could also define SYSROOT, K_IMAGE and ROOTFS by themselves: "
+	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
+	$(ECHO) "        export K_IMAGE=< path-to-Image-files >"
+	$(ECHO) "        export ROOTFS=< path-to-rootfs >"
+	$(ECHO) ""
+	$(ECHO) "  make clean"
+	$(ECHO) "      Command to remove the generated non-hardware files."
+	$(ECHO) ""
+	$(ECHO) "  make cleanall"
+	$(ECHO) "      Command to remove all the generated files."
+	$(ECHO) ""
+
+############################## Setting up Project Variables ##############################
+
+MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L2/*}')
+CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
+XFLIB_DIR = $(XF_PROJ_ROOT)
+EDF_SCRIPT := $(XFLIB_DIR)/scripts/edf
+VITIS_LIB_ROOT = $(dir $(XF_PROJ_ROOT))
+export XF_PROJ_ROOT
+export VITIS_LIB_ROOT
+
+# setting default value
+TARGET ?= hw_emu
+PARAMS ?= single_port
+PARAMS_FILE ?= config_params.json 
+
+#setting PLATFORM
+ifeq ($(PLATFORM),)
+PLATFORM := $(DEVICE)
+endif
+ifeq ($(PLATFORM),)
+PLATFORM := vck190_base
+endif
+
+# add warnning for sw_emu
+ifeq ($(TARGET),sw_emu)
+$(error Error: The sw_emu target is no longer supported starting from 2025.1.)
+endif
+# #################### Checking if PLATFORM in whitelist ############################
+PLATFORM_ALLOWLIST += vck190_base
+PLATFORM_BLOCKLIST += 
+
+# #################### EDF (Embedded Device Flow) platforms ##########################
+EDF_BOARDS := vck190
+
+include ./utils.mk
+
+# EDF board settings
+ifeq ($(EDF_BOARD), vck190)
+EDF_TOOLCHAIN_DIR   := amd-cortexa72-common_meta-edf-app-sdk
+EDF_QEMU_PREBUILT   := amd-cortexa72-common_vck190_qemu_prebuilt
+EDF_BOOT_BIN        := BOOT-versal-vck190-multidomain.bin
+EDF_WIC_SUFFIX      := wic.qemu-sd
+EDF_FLASH_BIN       := qemu-qspi.bin
+EDF_BOOT_MEDIA      := sd
+EDF_GUEST_DEV       := /dev/mmcblk0p2
+endif
+TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
+TEMP_REPORT_DIR := $(CUR_DIR)/reports/_x.$(TARGET).$(PLATFORM_NAME)
+BUILD_DIR := build_dir.$(TARGET).$(PLATFORM_NAME)
+ifneq ($(RESULT_DIR),)
+BUILD_DIR = $(RESULT_DIR)
+endif
+BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(PLATFORM_NAME)
+EMCONFIG := $(BUILD_DIR)/emconfig.json
+XCLBIN_DIR := $(CUR_DIR)/$(BUILD_DIR)
+export XCL_BINDIR = $(XCLBIN_DIR)
+
+EXE_FILE_DEPS :=
+BINARY_CONTAINERS_DEPS :=
+RUN_DEPS :=
+
+# get global setting
+ifeq ($(HOST_ARCH), x86)
+CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
+LDFLAGS += -pthread -L$(XILINX_XRT)/lib -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -Wl,--as-needed -lOpenCL -lxrt_coreutil -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel 
+VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
+VPP_LDFLAGS += --optimize 2 -R 2 
+else ifeq ($(HOST_ARCH), aarch64)
+CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
+LDFLAGS += -pthread -L$(SYSROOT)/usr/lib -Wl,--as-needed -lxilinxopencl -lxrt_coreutil 
+VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
+VPP_LDFLAGS += --optimize 2 -R 2 
+endif
+CXXFLAGS += $(EXTRA_CXXFLAGS)
+VPP_FLAGS += $(EXTRA_VPP_FLAGS)
+
+########################## Setting up Host Variables ##########################
+
+#Inclue Required Host Source Files
+HOST_SRCS += sw/test.cpp 
+CXXFLAGS +=  -I sw -I $(XFLIB_DIR)/L1/include
+CXXFLAGS += -std=c++17 -g
+
+# workaround for opencv
+ifeq (,$(findstring opencv,$(CXXFLAGS)))
+CXXFLAGS += $(XRT_CXXFLAGS)
+endif
+
+EXE_NAME := test.exe
+EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
+EXE_FILE_DEPS := $(HOST_SRCS) $(INSTANCE_FILES)  $(EXE_FILE_DEPS)
+
+HOST_ARGS := $(BUILD_DIR)/data_mover.xclbin
+ifneq ($(HOST_ARCH), x86)
+PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
+endif
+
+########################## Kernel compiler global settings ##########################
+VPP_FLAGS +=   --hls.pre_tcl pl/runPre.tcl
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include
+VPP_LDFLAGS +=   -g --config $(CUR_DIR)/system.cfg
+
+######################### binary container global settings ##########################
+VPP_FLAGS_bi_dm_4d_hsk += --hls.clock 300000000:bi_dm_4d_hsk
+VPP_FLAGS_s2mm_mp += --hls.clock 300000000:s2mm_mp
+VPP_FLAGS_mm2s_mp += --hls.clock 300000000:mm2s_mp
+ifneq ($(HOST_ARCH_temp), x86)
+VPP_LDFLAGS_data_mover += --clock.defaultFreqHz 250000000
+else
+VPP_LDFLAGS_data_mover += --kernel_frequency 250
+endif
+
+ifneq ($(PACKAGE_NEEDED), on)
+BINARY_CONTAINERS += $(BUILD_DIR)/data_mover.xclbin
+else
+BINARY_CONTAINERS += $(BUILD_DIR)/data_mover_pkg.$(LINK_TARGET_FMT)
+BINARY_CONTAINERS_PKG += $(BUILD_DIR)/data_mover.xclbin
+BINARY_NAME := data_mover
+endif
+
+# ################ Setting Rules for Binary Containers (Building Kernels) ################
+
+$(TEMP_DIR)/bi_dm_4d_hsk.xo: pl/bi_dm_4d_hsk.cpp 
+	$(ECHO) "Compiling Kernel: bi_dm_4d_hsk"
+	mkdir -p $(TEMP_DIR)
+	$(VPP) -c $(VPP_FLAGS_bi_dm_4d_hsk) $(VPP_FLAGS) -k bi_dm_4d_hsk -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+BINARY_CONTAINER_data_mover_OBJS += $(TEMP_DIR)/bi_dm_4d_hsk.xo
+$(TEMP_DIR)/s2mm_mp.xo: pl/s2mm_mp.cpp 
+	$(ECHO) "Compiling Kernel: s2mm_mp"
+	mkdir -p $(TEMP_DIR)
+	$(VPP) -c $(VPP_FLAGS_s2mm_mp) $(VPP_FLAGS) -k s2mm_mp -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+BINARY_CONTAINER_data_mover_OBJS += $(TEMP_DIR)/s2mm_mp.xo
+$(TEMP_DIR)/mm2s_mp.xo: pl/mm2s_mp.cpp 
+	$(ECHO) "Compiling Kernel: mm2s_mp"
+	mkdir -p $(TEMP_DIR)
+	$(VPP) -c $(VPP_FLAGS_mm2s_mp) $(VPP_FLAGS) -k mm2s_mp -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+BINARY_CONTAINER_data_mover_OBJS += $(TEMP_DIR)/mm2s_mp.xo
+
+BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_data_mover_OBJS) 
+$(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
+	mkdir -p $(BUILD_DIR)
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/data_mover $(VPP_LDFLAGS)  $(VPP_LDFLAGS_data_mover) $(AIE_LDFLAGS)   -o $@ $^
+
+############################## Setting Rules for Host (Building Host Executable) ##############################
+$(EXE_FILE): $(EXE_FILE_DEPS)
+	mkdir -p $(BUILD_DIR)
+ifeq ($(EDF_FLOW), on)
+	unset LD_LIBRARY_PATH; \
+	source $(EDF_TOOLCHAIN_SETUP); \
+	export LOPPER_DTC_FLAGS="-b 0 -@"; \
+	echo "INFO: Compiling host with EDF toolchain: $(EDF_TOOLCHAIN_DIR)"; \
+	$$CXX $$CXXFLAGS -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^) $(CXXFLAGS) $(LDFLAGS) $$LDFLAGS
+else
+	$(CXX) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^) $(CXXFLAGS) $(LDFLAGS)
+endif
+
+$(EMCONFIG):
+	emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
+
+############################## Package final xclbin or sd_card folder (for embedded) ##############################
+# AIE_ON_X86 Flow
+ifeq ($(pcie_versal), on)
+	@echo "### ***** running AIE ON_X86 ***** ###"
+	${VPP} -p $(VPP_PACKAGE) -t ${TARGET} -f ${XPLATFORM} ${AIE_CONTAINER} ${BINARY_CONTAINERS} -o $(BINARY_CONTAINERS_PKG) --package.boot_mode ospi
+	@echo "### ***** xclbin generation done! ***** ###"
+endif
+
+ifeq ($(SD_CARD_NEEDED), on)
+RUN_SCRIPT := $(BUILD_DIR)/run_script.sh
+$(RUN_SCRIPT):
+	rm -rf $(RUN_SCRIPT)
+	@echo 'export LD_LIBRARY_PATH=/mnt:/tmp${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}} ' >> $(RUN_SCRIPT)
+	@echo 'export XILINX_VITIS=/mnt' >> $(RUN_SCRIPT)
+	@echo 'export XILINX_XRT=/usr' >> $(RUN_SCRIPT)
+ifneq ($(filter hw_emu, $(TARGET)),)
+	@echo 'export XCL_EMULATION_MODE=$(TARGET)' >> $(RUN_SCRIPT)
+endif
+	@echo 'if [ -f platform_desc.txt  ]; then' >> $(RUN_SCRIPT)
+	@echo '        cp platform_desc.txt /etc/xocl.txt' >> $(RUN_SCRIPT)
+	@echo 'fi' >> $(RUN_SCRIPT)
+ifeq ($(EDF_FLOW), on)
+	@echo 'export PATH=$$PATH:/sbin' >> $(RUN_SCRIPT)
+# load the PL only when the platform ships an overlay
+	@echo 'if [ -f $(EDF_PL_NAME).dtbo ]; then' >> $(RUN_SCRIPT)
+	@echo '        echo "INFO: Load the pdi and dtbo using fpgautil"' >> $(RUN_SCRIPT)
+	@echo '        fpgautil -b $(EDF_PL_NAME).pdi -o $(EDF_PL_NAME).dtbo' >> $(RUN_SCRIPT)
+	@echo 'fi' >> $(RUN_SCRIPT)
+endif
+	@echo './$(EXE_NAME) $(PKG_HOST_ARGS)' >> $(RUN_SCRIPT)
+	@echo 'return_code=$$?' >> $(RUN_SCRIPT)
+	@echo 'if [ $$return_code -ne 0 ]; then' >> $(RUN_SCRIPT)
+	@echo '        echo "ERROR: TEST FAILED, RC=$$return_code "' >> $(RUN_SCRIPT)
+	@echo 'else' >> $(RUN_SCRIPT)
+	@echo '        echo "INFO: TEST PASSED, RC=0 "' >> $(RUN_SCRIPT)
+	@echo 'fi' >> $(RUN_SCRIPT)
+	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
+	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
+DATA_FILE := $(custom_data_file)
+DATA_DIR := $(custom_data_dir)
+DATA_FILE := $(strip $(DATA_FILE))
+DATA_DIR := $(strip $(DATA_DIR))
+SD_FILES += $(RUN_SCRIPT)
+SD_FILES += $(EXE_FILE)
+SD_FILES += $(EMCONFIG)
+SD_FILES += xrt.ini
+SD_FILES += $(DATA_FILE)# where define DATAFILE in json
+SD_FILES_WITH_PREFIX = $(foreach sd_file,$(SD_FILES), $(if $(filter $(sd_file),$(wildcard $(sd_file))), --package.sd_file $(sd_file)))
+SD_DIRS_WITH_PREFIX = $(foreach sd_dir,$(DATA_DIR),--package.sd_dir $(sd_dir))
+PACKAGE_FILES := $(BINARY_CONTAINERS)
+PACKAGE_FILES += $(AIE_CONTAINER)
+PACKAGE_DIR := $(CUR_DIR)/package_$(TARGET)
+PACKAGE_DIR_HW := $(CUR_DIR)/package.$(TARGET)
+EDF_PACKAGE_OUT := $(PACKAGE_DIR)/sd_card
+EDF_PL_NAME := $(basename $(notdir $(BINARY_CONTAINERS_PKG)))
+EDF_PL_DTBO := $(EDF_PACKAGE_OUT)/$(EDF_PL_NAME).dtbo
+EDF_PL_PDI  := $(EDF_PACKAGE_OUT)/$(EDF_PL_NAME).pdi
+$(PACKAGE_DIR): host xclbin $(RUN_SCRIPT) $(EMCONFIG) check_kimage check_rootfs check_edf
+	@echo "Generating sd_card folder...."
+	mkdir -p $(PACKAGE_DIR)
+	chmod a+rx $(BUILD_DIR)/run_script.sh
+# 0. EDF flow
+ifeq ($(EDF_FLOW), on)
+ifneq ($(filter hw_emu, $(TARGET)),)
+	bash $(EDF_SCRIPT)/edf_pre_package_cleanup.sh $(PACKAGE_DIR)
+endif
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir $(EDF_PACKAGE_OUT)
+ifeq ($(TARGET), hw)
+# stage the application as plain files, v++ needs a rootfs to do it
+	@for f in $(SD_FILES) $(BINARY_CONTAINERS_PKG); do \
+	   [ -e "$$f" ] || { echo "WARNING: skip missing: $$f"; continue; }; \
+	   cp -Lf "$$f" $(EDF_PACKAGE_OUT)/ && echo "INFO: staged $$(basename $$f)"; \
+	 done
+	@for d in $(DATA_DIR); do \
+	   [ -e "$$d" ] || { echo "WARNING: skip missing: $$d"; continue; }; \
+	   cp -Lrf "$${d%/}" $(EDF_PACKAGE_OUT)/ && echo "INFO: staged $$(basename $${d%/})"; \
+	 done
+	@[ -f $(EDF_PACKAGE_OUT)/BOOT.bin ] || for c in $(EDF_PACKAGE_OUT)/../_x/package/BOOT.bin \
+	   $(EDF_PACKAGE_OUT)/../../_x/package/BOOT.bin $(EDF_PACKAGE_OUT)/boot.bin; do \
+	   [ -f "$$c" ] && cp -f "$$c" $(EDF_PACKAGE_OUT)/BOOT.bin && echo "INFO: staged BOOT.bin from $$c" && break; \
+	 done; \
+	 [ -f $(EDF_PACKAGE_OUT)/BOOT.bin ] || { echo "ERROR: v++ package emitted no BOOT.bin in $(EDF_PACKAGE_OUT)"; exit 1; }
+else
+# hw_emu boots the WIC inside the QEMU prebuilt, inject the application into it
+	bash $(EDF_SCRIPT)/edf_hw_emu_prepare.sh $(PACKAGE_DIR) $(EDF_PACKAGE_OUT)
+	bash $(EDF_SCRIPT)/edf_wic_deploy.sh $(BINARY_CONTAINERS_PKG) $(EXE_FILE) $(EDF_PL_DTBO) $(EDF_PL_PDI) $(RUN_SCRIPT) $(EDF_PACKAGE_OUT) "$(DATA_DIR)" $(EMCONFIG) xrt.ini $(DATA_FILE)
+endif
+else
+# 1. DFX HW Flow
+ifeq ($(dfx_hw), on)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p $(PACKAGE_FILES) $(VPP_PACKAGE) -o $(BINARY_CONTAINERS_PKG)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(PACKAGE_DIR) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
+endif
+# 2. General Embeded flow
+ifeq ($(dfx_hw), off)
+ifeq ($(pcie_versal), off)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(PACKAGE_DIR) --package.rootfs $(ROOTFS) --package.generate_sdcard --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
+endif
+endif
+endif
+	@ln -sfn $(PACKAGE_DIR) $(PACKAGE_DIR_HW)
+	@echo "### ***** sd_card generation done! ***** ###"
+
+.PHONY: sd_card
+sd_card: $(PACKAGE_DIR)
+endif
+
+############################## Setting Essential Checks and Building Rules ##############################
+RUN_DEPS += host xclbin $(EMCONFIG)
+ifeq ($(SD_CARD_NEEDED), on)
+RUN_DEPS += $(PACKAGE_DIR)
+endif
+
+.PHONY: mkflag all run
+mkflag:
+	mkdir -p $(BUILD_DIR)
+	rm -rf $(BUILD_DIR)/makefile_args.txt
+	@for var in $(MAKEFLAGS); do echo $$var >> $(BUILD_DIR)/makefile_args.txt; done
+
+all: check_device check_vpp check_platform check_edf mkflag $(RUN_DEPS)
+
+run: all
+#hw_emu
+ifneq (,$(filter hw_emu, $(TARGET)))
+ifeq ($(HOST_ARCH), x86)
+ifeq ($(pcie_versal), on)
+	cp $(AIE_WORK_DIR)/reports/dma_lock_report.json ./
+	cp $(AIE_WORK_DIR)/ps/c_rts/aie_control_config.json ./
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(BINARY_CONTAINERS_PKG) $(HOST_ARGS) 
+	
+else
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(BINARY_CONTAINERS_PKG) $(HOST_ARGS) 
+	
+endif
+else
+	@echo $(RUN_DEPS)
+ifeq ($(EDF_FLOW), on)
+	@echo "INFO: Running hw_emu (linux_edf)"
+	bash $(EDF_SCRIPT)/edf_pre_package_cleanup.sh $(PACKAGE_DIR) kill-only
+	cd ${PACKAGE_DIR} && bash $(EDF_SCRIPT)/hw_emu_run.sh linux_edf ${PACKAGE_DIR} $(RUN_SCRIPT) 2>&1 | tee qemu_output.log; exit $${PIPESTATUS[0]}
+else
+	@echo "INFO: Running hw_emu (legacy)"
+	cd ${PACKAGE_DIR} && bash $(EDF_SCRIPT)/hw_emu_run.sh legacy ${PACKAGE_DIR} $(RUN_SCRIPT) 2>&1 | tee qemu_output.log; exit $${PIPESTATUS[0]}
+endif
+	@grep -qE 'TEST PASSED|Test passed\.' $(PACKAGE_DIR)/qemu_output.log \
+	  || { echo "ERROR: no TEST PASSED in $(PACKAGE_DIR)/qemu_output.log"; exit 1; }
+	
+endif
+endif
+#hw
+ifeq ($(TARGET), hw)
+ifeq ($(HOST_ARCH), x86)
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	$(EXE_FILE) $(HOST_ARGS) 
+	
+else
+	$(ECHO) "Please copy the content of sd_card folder and data to an SD Card and run on the board"
+endif
+endif
+
+############################## Setting Targets ##############################
+
+.PHONY: clean cleanall emconfig valid_params
+emconfig: $(EMCONFIG)
+
+.PHONY: host
+ifeq ($(HOST_ARCH), x86)
+host: check_xrt   $(EXE_FILE)
+else
+host: check_sysroot   $(EXE_FILE)
+endif
+
+.PHONY: xclbin
+ifeq ($(HOST_ARCH), x86)
+xclbin: check_vpp check_xrt  $(BINARY_CONTAINERS)
+else
+xclbin: check_vpp check_sysroot  $(BINARY_CONTAINERS)
+endif
+
+#################### Parameterized File Generation ##########################
+
+GENERATED_FILES += pl/bi_dm_4d_hsk.cpp
+pl/bi_dm_4d_hsk.cpp:  $(XFLIB_DIR)/L2/meta/bi_dm_4d_hsk.json
+	$(VITIS_PYTHON3) $(XFLIB_DIR)/scripts/instance_generator.py -o pl/bi_dm_4d_hsk.cpp --param-set $(PARAMS) --param-file $(PARAMS_FILE) --spec "$(XFLIB_DIR)/L2/meta/bi_dm_4d_hsk.json" --api "xf::data_mover::bi_dm_4d_hsk"
+GENERATED_FILES += pl/mm2s_mp.cpp
+pl/mm2s_mp.cpp:  $(XFLIB_DIR)/L2/meta/mm2s_mp.json
+	$(VITIS_PYTHON3) $(XFLIB_DIR)/scripts/instance_generator.py -o pl/mm2s_mp.cpp --param-set $(PARAMS) --param-file $(PARAMS_FILE) --spec "$(XFLIB_DIR)/L2/meta/mm2s_mp.json" --api "xf::data_mover::mm2s_mp"
+GENERATED_FILES += pl/s2mm_mp.cpp
+pl/s2mm_mp.cpp:  $(XFLIB_DIR)/L2/meta/s2mm_mp.json
+	$(VITIS_PYTHON3) $(XFLIB_DIR)/scripts/instance_generator.py -o pl/s2mm_mp.cpp --param-set $(PARAMS) --param-file $(PARAMS_FILE) --spec "$(XFLIB_DIR)/L2/meta/s2mm_mp.json" --api "xf::data_mover::s2mm_mp"
+GENERATED_FILES += system.cfg
+system.cfg: test_gen.py 
+	$(VITIS_PYTHON3) $(XFLIB_DIR)/scripts/instance_generator.py -o system.cfg --param-set $(PARAMS) --param-file $(PARAMS_FILE) --file "test_gen.py" --func "write_system_cfg"
+
+.PHONY: valid_params gen_instances
+
+valid_params:
+	$(VITIS_PYTHON3) $(XFLIB_DIR)/scripts/instance_generator.py --valid-params --param-set $(PARAMS) --param-file $(PARAMS_FILE) --spec "$(XFLIB_DIR)/L2/meta/bi_dm_4d_hsk.json" --api "xf::data_mover::bi_dm_4d_hsk"
+	$(VITIS_PYTHON3) $(XFLIB_DIR)/scripts/instance_generator.py --valid-params --param-set $(PARAMS) --param-file $(PARAMS_FILE) --spec "$(XFLIB_DIR)/L2/meta/mm2s_mp.json" --api "xf::data_mover::mm2s_mp"
+	$(VITIS_PYTHON3) $(XFLIB_DIR)/scripts/instance_generator.py --valid-params --param-set $(PARAMS) --param-file $(PARAMS_FILE) --spec "$(XFLIB_DIR)/L2/meta/s2mm_mp.json" --api "xf::data_mover::s2mm_mp"
+
+gen_instances: $(GENERATED_FILES)
+
+############################## Cleaning Rules ##############################
+cleanh:
+	-$(RMDIR) $(EXE_FILE)  vitis_* TempConfig system_estimate.xtxt *.rpt .run/  $(INST_TB_FILES)
+	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj*  bin* *.csv *.jpg *.jpeg *.png *.db
+
+cleank:
+	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
+	-$(RMDIR) _x_temp.* _x* $(INST_FILES)
+
+cleanall: cleanh cleank
+	-$(RMDIR) $(BUILD_DIR)  emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_* package.* $(BUILD_DIR)/run_script.sh .ipcache *.str
+	-$(RMDIR)  $(AIE_WORK_DIR) $(AIE_PKG_DIR) $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
+	-$(RMDIR)  *.html $(GENERATED_FILES)
+
+clean: cleanh

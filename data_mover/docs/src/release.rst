@@ -2,35 +2,22 @@
 
 .. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
-.. meta::
-   :keywords: BLAS, Library, Vitis BLAS Library, linear algebra, Subroutines
-   :description: Vitis BLAS library release notes.
-   :xlnxdocumentclass: Document
-   :xlnxdocumenttype: Tutorials
-
 .. _release_note:
 
-Release Note
-============
+=============
+Release Notes
+=============
 
 .. toctree::
    :hidden:
    :maxdepth: 1
 
-2020.1
--------
+.. note:: Known Issues
 
-The 1.0 release introduces HLS primitives for Basic Linear Algebra Subroutines (BLAS) operations. These primitives are implemented with HLS::stream interfaces to allow them to operate in parallel with other hardware components. 
+   * A Jinja2 template is used to generate the source code of the data mover. When running on RHEL 9.x, it fails. A fix is planned for the next release.
+   * ``L2/demo/4d_mover_with_handshake``, ``L2/demo/bi_4d_mover_with_handshake``, and ``L2/tests/bi_dm_s2mm_mm2s_s2s`` encountered a deadlock issue. A fix is planned for the next release.
 
-2021.1
--------
+2023.1
+======
 
-The 2021.1 release introduces L2 kernels for GEMM and GEMV. It also introduces L3 APIs based on the XRT Native APIs.
-
-2024.1
--------
-
-The example design of L3/benchmarks/gemm/memKernel are deprecated and removed.
-
-
-The helper function of "xfblasGetByAddress" has been removed, due to deprecate of xrt api of "xclUnmgdPread"
+All Data Mover designs were migrated from the utils library. A 4D Data Mover with internal URAM buffer support and a tile-based descriptor was also added.

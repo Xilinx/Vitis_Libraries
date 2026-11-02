@@ -1,0 +1,10 @@
+{
+  "dual_port": {
+    "S_WIDTH": 32,
+    "NUM_PORTS": 2
+  },
+  "single_port": {
+    "S_WIDTH": 64,
+    "NUM_PORTS": 1
+  }
+}

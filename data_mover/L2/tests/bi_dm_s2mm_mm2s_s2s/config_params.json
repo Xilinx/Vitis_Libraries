@@ -1,0 +1,9 @@
+{
+	"single_port": {
+		"NUM_PORTS": 1,
+		"S_WIDTH": 64,
+		"C_DEPTH": 65536,
+		"MM_OUTSTANDING": 16,
+		"MM_BURST_LEN": 32
+	}
+}
