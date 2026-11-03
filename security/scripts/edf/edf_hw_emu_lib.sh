@@ -211,7 +211,7 @@ install_boot_image() {
 
 ensure_vpp_boot_bin_in_sd_card() {
   local pkg="$1" sd="$2" src
-  if is_segmented_xsa; then
+  if is_segmented_xsa && ! find_vpp_boot_bin "${sd}" >/dev/null && ! find_vpp_boot_bin "${pkg}" >/dev/null; then
     log_info "segmented XSA: no v++ boot binary to stage, keeping the EDF one"
     return 0
   fi
@@ -226,7 +226,7 @@ ensure_vpp_boot_bin_in_sd_card() {
 # linux_edf: the v++ BOOT.bin replaces the EDF one, then goes to the boot media.
 install_vpp_boot() {
   local sd="$1" vpp_boot
-  if is_segmented_xsa; then
+  if is_segmented_xsa && ! find_vpp_boot_bin "${sd}" >/dev/null; then
     log_info "segmented XSA: keeping the EDF boot image, the PL arrives as a pdi/dtbo overlay"
     return 0
   fi
