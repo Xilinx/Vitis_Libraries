@@ -17,8 +17,6 @@
 #define _SOLVERLIB_QRD_HH_REF_TRAITS_HPP_
 
 #include "fir_ref_utils.hpp"
-#include "single_mul_ref_out_types.hpp"
-#include "single_mul_ref_acc_types.hpp"
 
 namespace xf {
 namespace solver {

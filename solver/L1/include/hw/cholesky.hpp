@@ -18,12 +18,21 @@
 /**
  * @file cholesky.hpp
  * @brief This file contains cholesky functions
- *   - cholesky                 : Entry point function
+ *   - cholesky                : Entry point function
  *   - choleskyTop             : Top level function that selects implementation architecture and internal types based
- * on a traits class.
- *   - choleskyBasic           : Basic implementation requiring lower resource
- *   - choleskyAlt             : Lower latency architecture requiring more resources
- *   - choleskyAlt2            : Further improved latency architecture requiring higher resource
+ *                               on a traits class.
+ *   - choleskyBasic           : Basic implementation (ARCH=0). Simple, sequential column-by-column reference
+ *                               design; fewest DSPs of the three architectures.
+ *   - choleskyAlt             : Balanced implementation (ARCH=1) with lower latency than choleskyBasic,
+ *                               requiring only modestly more resource.
+ *   - choleskyAlt2            : Lowest-latency, highest-resource architecture (ARCH=2). Fastest option at
+ *                               small/moderate matrix size; resource usage scales up as matrix size grows,
+ *                               and timing may not close at larger sizes.
+ *
+ * All three architectures share a square root back end selected on the element type; see
+ * choleskyMathOps below.  The diagonal needs both sqrt(x) and 1/sqrt(x), and evaluating them as two
+ * independent operators dominates the critical path, so only the reciprocal is computed and the
+ * root is recovered from it where that is profitable.
  */
 
 #ifndef _XF_SOLVER_CHOLESKY_HPP_

@@ -3,11 +3,9 @@
     "description": "Jacobi based Eigen Value Decomposition for symmetric matrix",
     "flow": "system",
     "platform_allowlist": [
-        "vck190"
+        "vck190_base"
     ],
-    "platform_blocklist": [
-        "zc"
-    ],
+    "platform_blocklist": [],
     "platform_properties": {},
     "launch": [
         {
@@ -80,8 +78,8 @@
                 "index": 0,
                 "dependency": [],
                 "max_memory_MB": {
-                    "vitis_hw_build": 40960,
-                    "vitis_hw_emu": 28672,
+                    "vitis_hw_build": 8192,
+                    "vitis_hw_emu": 16384,
                     "vitis_hw_run": 10240
                 },
                 "max_time_min": {

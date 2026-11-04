@@ -315,29 +315,36 @@ def generate_graph(graphname, args):
     TP_SUBST_TYPE = args["TP_SUBST_TYPE"]
     TP_L_LEADING = args["TP_L_LEADING"]
     TP_GRID_DIM = args["TP_GRID_DIM"]
+    TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
+    TP_DIAG_INV = args["TP_DIAG_INV"]
 
     subst_type_str = "xf::solver::aie::substitution::subst_type::FWD" if TP_SUBST_TYPE == 0 else "xf::solver::aie::substitution::subst_type::BWD"
 
     code = f"""
 class {graphname} : public adf::graph {{
 public:
-    adf::port<input> in_L;
-    adf::port<input> in_y;
-    adf::port<output> out_x;
+    static constexpr unsigned int kNumKernels = {TP_GRID_DIM} * ({TP_GRID_DIM} + 1) / 2;
+    std::array<adf::port<input>, kNumKernels> L_in;
+    std::array<adf::port<input>, kNumKernels> y_in;
+    std::array<adf::port<output>, {TP_GRID_DIM}> x_out;
 
     xf::solver::aie::substitution::substitution_graph<
         {TT_DATA},
         {TP_DIM},
         {subst_type_str},
         {TP_L_LEADING},
-        {TP_GRID_DIM}
+        {TP_GRID_DIM},
+        {TP_NUM_FRAMES},
+        {TP_DIAG_INV}
     > substitution;
 
     {graphname}() : substitution() {{
+        for (int i = 0; i < kNumKernels; i++) {{
+            adf::connect<> net_in_L(L_in[i], substitution.L_in[i]);
+            adf::connect<> net_in_y(y_in[i], substitution.y_in[i]);
+        }}
         for (int i = 0; i < {TP_GRID_DIM}; i++) {{
-            adf::connect<> net_in_L(in_L[i], substitution.L_in[i]);
-            adf::connect<> net_in_y(in_y[i], substitution.y_in[i]);
-            adf::connect<> net_out_x(substitution.x_out[i], out_x[i]);
+            adf::connect<> net_out_x(substitution.x_out[i], x_out[i]);
         }}
     }}
 }};

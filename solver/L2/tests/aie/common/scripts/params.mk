@@ -14,11 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+AIESIMFLAGS += --display-run-interval=1000000
+
+#Adding extra parameters
 ifneq (,$(findstring VCD,$(PARAMS)))
 	AIESIMFLAGS += --dump-vcd ${UUT_KERNEL}_sim --simulation-cycle-timeout=100000
 endif
 
-CLEANUP_AFTER_TEST := 0
-ifneq (,$(findstring CLEAN,$(PARAMS)))
-    CLEANUP_AFTER_TEST := 1
-endif
+CLEAN_TEST := $(shell $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/parse_clean_test.py '$(PARAMS_FILE)' '$(PARAMS)')

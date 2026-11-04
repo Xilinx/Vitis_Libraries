@@ -1,0 +1,101 @@
+# mp_pseudoinverse_svd functional checkin suite
+#
+# Goal: verify the Moore-Penrose pseudoinverse A^+ = V * S^+ * U^H
+#       against the Gauss-Jordan reference (A^H*A)^-1 * A^H across all
+#       supported AIE architectures and data types.
+#
+# Coverage:
+# - DATA_TYPE: float, cfloat
+# - DIM_ROWS x DIM_COLS: 8x4, 16x4, 32x8, 64x8, 64x16
+# - PASSES: 5
+# - PASSES_SSR: 1, 5, 6 (including a dedicated finalize-only stage)
+# - CASC_LEN: 1 (only supported value)
+# - AIE variants: 1 (AIE1), 2 (AIE-ML), 22 (AIE-MLv2)
+#
+# Architecture support:
+#   AIE1 (AIE_VARIANT=1) uses the xf::dsp mmul-intrinsic matrix_mult_graph.
+#   AIE-ML (AIE_VARIANT=2) and AIE-MLv2 (AIE_VARIANT=22) use
+#   matrix_mult_vecapi_graph instead (dev/xf_solver/L1/include/aie/
+#   matrix_mult_vecapi.hpp) -- a vector-API fallback with no mmul intrinsic,
+#   selected automatically in mp_pseudoinverse_svd_graph.hpp by architecture.
+#   This is needed because the xf::dsp matrix_mult_graph has no mmul
+#   hardware tiling for float (AIE-ML) or cfloat (AIE-ML, AIE-MLv2) -- see
+#   matrix_mult_tiling_scheme.hpp.
+#
+# Constraints:
+#  - DIM_ROWS must be >= DIM_COLS  (valid overdetermined system)
+#  - DIM_COLS must be even          (Jacobi schedule requirement)
+#  - DIM_ROWS must be a multiple of 8 for float, 4 for cfloat
+#    (one vector = kVecSize samples in the AIE architecture)
+#  - CASC_LEN must be 1
+#
+# Note: TARGET is not specified here; the runmake framework supplies it.
+
+# ============================================================
+# Single-kernel baseline: float, small matrix
+# ============================================================
+make all DATA_TYPE=float  DIM_ROWS=8  DIM_COLS=4  PASSES=5 CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05 
+make all DATA_TYPE=cfloat DIM_ROWS=8  DIM_COLS=4  PASSES=5 CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05 
+
+# ============================================================
+# Larger matrices: float
+# ============================================================
+make all DATA_TYPE=float  DIM_ROWS=16  DIM_COLS=4  PASSES=5 CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=float  DIM_ROWS=32  DIM_COLS=8  PASSES=5 CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=float  DIM_ROWS=64  DIM_COLS=8  PASSES=5 CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=float  DIM_ROWS=64  DIM_COLS=16 PASSES=5 CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05
+
+# ============================================================
+# Larger matrices: cfloat
+# ============================================================
+make all DATA_TYPE=cfloat DIM_ROWS=16  DIM_COLS=4  PASSES=5 CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=cfloat DIM_ROWS=32  DIM_COLS=8  PASSES=5 CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=cfloat DIM_ROWS=64  DIM_COLS=8  PASSES=5 CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05
+
+# ============================================================
+# Diagnostic: STIM_TYPE=1 (real matrix wrapped as cfloat)
+#
+# Input A has zero imaginary parts.  The pseudoinverse of a real matrix
+# is also real (imaginary=0).  Any non-zero imaginary component in the
+# UUT output indicates a bug in the cfloat arithmetic path — most likely
+# the conjugation step in MatMul2 (TP_CONJ_B).
+#
+# These tests are the simplest cfloat RCA stimulus: both the reference
+# and the expected UUT output can be verified by inspection of imaginary
+# parts without any numerical tolerance.
+# ============================================================
+make all DATA_TYPE=cfloat DIM_ROWS=8   DIM_COLS=4  PASSES=5 CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05 STIM_TYPE=1
+make all DATA_TYPE=cfloat DIM_ROWS=16  DIM_COLS=4  PASSES=5 CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05 STIM_TYPE=1
+
+# ============================================================
+# AIE-ML (AIE_VARIANT=2): matrix_mult_vecapi_graph fallback path
+# ============================================================
+make all DATA_TYPE=float  DIM_ROWS=8   DIM_COLS=8  PASSES=5 CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05 
+make all DATA_TYPE=float  DIM_ROWS=16  DIM_COLS=8  PASSES=5 CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05 
+make all DATA_TYPE=float  DIM_ROWS=16  DIM_COLS=16 PASSES=5 CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05 
+make all DATA_TYPE=float  DIM_ROWS=32  DIM_COLS=8  PASSES=5 CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05 
+make all DATA_TYPE=float  DIM_ROWS=64  DIM_COLS=8  PASSES=5 CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05 
+make all DATA_TYPE=cfloat DIM_ROWS=8   DIM_COLS=8  PASSES=5 CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05 
+make all DATA_TYPE=cfloat DIM_ROWS=16  DIM_COLS=16 PASSES=5 CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05 
+make all DATA_TYPE=cfloat DIM_ROWS=32  DIM_COLS=8  PASSES=5 CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05 
+make all DATA_TYPE=cfloat DIM_ROWS=64  DIM_COLS=8  PASSES=5 CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05 
+
+# ============================================================
+# AIE-MLv2 (AIE_VARIANT=22): matrix_mult_vecapi_graph fallback path
+# ============================================================
+make all DATA_TYPE=float  DIM_ROWS=8   DIM_COLS=8  PASSES=5 CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=float  DIM_ROWS=16  DIM_COLS=8  PASSES=5 CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=float  DIM_ROWS=16  DIM_COLS=16 PASSES=5 CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=float  DIM_ROWS=32  DIM_COLS=8  PASSES=5 CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=float  DIM_ROWS=64  DIM_COLS=8  PASSES=5 CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=cfloat DIM_ROWS=8   DIM_COLS=8  PASSES=5 CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=cfloat DIM_ROWS=16  DIM_COLS=16 PASSES=5 CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=cfloat DIM_ROWS=16  DIM_COLS=8  PASSES=5 CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=cfloat DIM_ROWS=32  DIM_COLS=8  PASSES=5 CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=cfloat DIM_ROWS=64  DIM_COLS=8  PASSES=5 CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05
+
+# ============================================================
+# Internal SVD pass-pipeline coverage
+# ============================================================
+make all DATA_TYPE=float  DIM_ROWS=32 DIM_COLS=8 PASSES=5 PASSES_SSR=[1,5,6] CASC_LEN=1 AIE_VARIANT=[1,2,22] DIFF_TOLERANCE=0.05 NITER=6
+make all DATA_TYPE=cfloat DIM_ROWS=32 DIM_COLS=8 PASSES=5 PASSES_SSR=[1,5,6] CASC_LEN=1 AIE_VARIANT=[1,2,22] DIFF_TOLERANCE=0.05 NITER=6

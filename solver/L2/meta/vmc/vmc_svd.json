@@ -1,0 +1,89 @@
+{
+    "low_level_file": "svd.json",
+    "ip_name": "vmc_svd",
+    "block_info": {
+        "label": "SVD",
+        "description": "Singular Value Decomposition block targeted for AI Engines."
+    },
+    "parameters": [
+        {
+            "key": "AIE_VARIANT",
+            "name": "AIE_VARIANT",
+            "description": "Specifies the device type: 1-AIE, 2-AIE-ML, 22-AIE-ML-V2",
+            "default": 1,
+            "label": "AIE Variant:",
+            "tablabel": "Main",
+            "visible": "off",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TT_DATA",
+            "name": "data_type",
+            "description": "describes the data type of samples in input matrix ",
+            "default": "float",
+            "label": "Input data type:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TP_DIM_ROWS",
+            "name": "row_dimension",
+            "description": "Number of rows in the input matrix.",
+            "default": 8,
+            "label": "Rows of matrix:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_DIM_COLS",
+            "name": "cols_dimension",
+            "description": "Number of columns in the input matrix.",
+            "default": 2,
+            "label": "Columns of matrix:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_CASC_LEN",
+            "name": "casc_length",
+            "description": "Number of kernels the SVD will be split over to support larger matrix sizes.",
+            "default": 1,
+            "label": "Number of cascade stages:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_PASSES",
+            "name": "num_passes",
+            "description": "Number of Jacobi sweep passes to perform. More passes improve accuracy at the cost of additional cycles.",
+            "default": 1,
+            "label": "Number of Jacobi sweep passes:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+        "key": "TP_PASSES_SSR",
+        "name": "num_passes_ssr",
+        "description": "Number of pass-pipeline stages. Values up to TP_PASSES must divide TP_PASSES evenly. TP_PASSES + 1 creates TP_PASSES one-pass stages followed by a dedicated zero-pass finalization stage..",
+        "default": 1,
+        "label": "Number of Jacobi sweep passes ssr:",
+        "tablabel": "Main",
+        "parameterType": "edit"
+        },
+        {
+        "key": "TP_DIAG_INV",
+        "name": "inversion_diag",
+        "description": "Outputs singular values when set to 0 (default), or reciprocal singular values when set to 1.",
+        "default": false,
+        "label": "Provide diagonal elements inverse",
+        "tablabel": "Main",
+        "parameterType": "checkbox"
+        }
+        
+    ],
+    "generator": {
+        "file": "vmc_svd.py",
+        "function": "vmc_generate_graph"
+    }
+    
+}

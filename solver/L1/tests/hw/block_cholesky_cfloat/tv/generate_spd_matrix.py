@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (C) 2025-2025, Advanced Micro Devices, Inc.
+# Copyright (C) 2025-2026, Advanced Micro Devices, Inc.
 # SPDX-License-Identifier: Apache-2.0
 #
 # Generate Hermitian positive-definite complex<float>-compatible test matrix A

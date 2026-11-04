@@ -40,6 +40,9 @@ sys.path.insert(0, include_path)
 TP_CASC_LEN_min = 1
 TP_CASC_LEN_max = 16
 
+# S contains real singular values, matching T_outSDataType in svd.hpp.
+TT_OUT_S = "float"
+
 def fn_kernel_vec_size(TT_DATA):
     # The current SVD kernel keeps a fixed logical vector width for metadata and
     # legality checks: 8 lanes for float, 4 lanes for cfloat. This is deliberate.
@@ -50,19 +53,43 @@ def fn_kernel_vec_size(TT_DATA):
     return 4 if TT_DATA == "cfloat" else 8
 
 
-def fn_estimated_kernel_data_bytes(TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_CASC_LEN):
-    vec_size = fn_kernel_vec_size(TT_DATA)
+def fn_kernel_store_align(AIE_VARIANT, TT_DATA):
+    return com.k_max_read_write_bytes[AIE_VARIANT] // com.fn_size_by_byte(TT_DATA)
+
+
+def fn_kernel_local_bytes(AIE_VARIANT, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_CASC_LEN):
+    """Per-kernel local buffer sizes in bytes (In, U, S, V, scratch)."""
+    vec_size_io = fn_kernel_vec_size(TT_DATA)
+    store_align = fn_kernel_store_align(AIE_VARIANT, TT_DATA)
     cols_sched = TP_DIM_COLS + (TP_DIM_COLS % 2)
-    cols_padded = int(com.CEIL(cols_sched, vec_size))
+    cols_padded = int(com.CEIL(cols_sched, store_align))
     pairs_per_set = cols_sched // 2
+    padded_pairs_per_set = int(com.CEIL(pairs_per_set, vec_size_io))
 
     local_in_bytes = (TP_DIM_ROWS * TP_DIM_COLS // TP_CASC_LEN) * com.fn_size_by_byte(TT_DATA)
     local_u_bytes = (TP_DIM_ROWS * cols_padded // TP_CASC_LEN) * com.fn_size_by_byte(TT_DATA)
-    local_s_bytes = cols_padded * 4
+    local_s_bytes = cols_padded * com.fn_size_by_byte(TT_OUT_S)
     local_v_bytes = cols_padded * cols_padded * com.fn_size_by_byte(TT_DATA)
-    local_scratch_bytes = 7 * pairs_per_set * 4
+    SCRATCH_ARRAYS_PER_PAIR = 7  # dotII, dotJJ, dotIJ, c_arr, s_arr, phase_real, phase_imag
+    local_scratch_bytes = SCRATCH_ARRAYS_PER_PAIR * padded_pairs_per_set * com.fn_size_by_byte("float")
 
+    return local_in_bytes, local_u_bytes, local_s_bytes, local_v_bytes, local_scratch_bytes
+
+
+def fn_estimated_kernel_data_bytes(AIE_VARIANT, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_CASC_LEN):
+    local_in_bytes, local_u_bytes, local_s_bytes, local_v_bytes, local_scratch_bytes = fn_kernel_local_bytes(
+        AIE_VARIANT, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_CASC_LEN
+    )
     return local_in_bytes + local_u_bytes + local_s_bytes + local_v_bytes + local_scratch_bytes
+
+
+def fn_later_stage_kernel_data_bytes(AIE_VARIANT, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_CASC_LEN):
+    # TP_PASSES_SSR > 1 introduces later-stage kernels that hold a distinct U/S/V
+    # input buffer set plus a distinct U/S/V output buffer set simultaneously.
+    _, local_u_bytes, local_s_bytes, local_v_bytes, local_scratch_bytes = fn_kernel_local_bytes(
+        AIE_VARIANT, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_CASC_LEN
+    )
+    return 2 * (local_u_bytes + local_s_bytes + local_v_bytes) + local_scratch_bytes
 
 
 #######################################################
@@ -119,24 +146,41 @@ def validate_TT_DATA(args):
 # Limit (for now) to a max of 128. min is 2. Does not need to be a multiple of vector size.
 # Independent of TP_DIM_ROWS — evaluated first in the dependency tree.
 def update_TP_DIM_COLS(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
+    TT_DATA = args["TT_DATA"]
+
     if "TP_DIM_COLS" in args and args["TP_DIM_COLS"]:
         TP_DIM_COLS = int(args["TP_DIM_COLS"])
     else:
         TP_DIM_COLS = 0
 
-    return fn_update_tp_dim_cols(TP_DIM_COLS)
+    return fn_update_tp_dim_cols(AIE_VARIANT, TT_DATA, TP_DIM_COLS)
 
 
-def fn_update_tp_dim_cols(TP_DIM_COLS):
+def fn_max_dim_cols(AIE_VARIANT, TT_DATA):
+    """Largest TP_DIM_COLS for which some TP_DIM_ROWS/TP_CASC_LEN combination fits in
+    data memory. Probes at the minimum legal TP_DIM_ROWS (fn_kernel_vec_size), since the
+    V-matrix term dominates the memory formula and does not depend on TP_DIM_ROWS."""
+    TP_DIM_COLS_min = 2
+    TP_DIM_ROWS_min = fn_kernel_vec_size(TT_DATA)
+    for TP_DIM_COLS in range(128, TP_DIM_COLS_min - 1, -1):
+        if fn_has_valid_casc_len(AIE_VARIANT, TT_DATA, TP_DIM_ROWS_min, TP_DIM_COLS):
+            return TP_DIM_COLS
+
+
+def fn_update_tp_dim_cols(AIE_VARIANT, TT_DATA, TP_DIM_COLS):
     # Min is 2. Does not need to be a multiple of vector size.
     TP_DIM_COLS_min = 2
-    # Hard max limit of 128 for now
-    TP_DIM_COLS_max = 128
+    # Hard cap of 128, further limited by feasibility (see fn_max_dim_cols).
+    TP_DIM_COLS_max = min(128, fn_max_dim_cols(AIE_VARIANT, TT_DATA))
 
     param_dict = {}
     param_dict.update({"name": "TP_DIM_COLS"})
     param_dict.update({"minimum": TP_DIM_COLS_min})
     param_dict.update({"maximum": TP_DIM_COLS_max})
+
+    if TP_DIM_COLS != 0:
+        param_dict.update({"actual": com.CLIP(TP_DIM_COLS, TP_DIM_COLS_min, TP_DIM_COLS_max)})
 
     return param_dict
 
@@ -180,6 +224,9 @@ def fn_update_tp_dim_rows(AIE_VARIANT, TT_DATA, TP_DIM_COLS, TP_DIM_ROWS):
     TP_DIM_ROWS_max = int(
         math.floor((BUFFER_SIZE * TP_CASC_LEN_max) / (com.fn_size_by_byte(TT_DATA) * TP_DIM_COLS))
     )
+    # Floor to a multiple of vector size so a later clip-then-round-to-nearest can
+    # never land above this value.
+    TP_DIM_ROWS_max = int(com.FLOOR(TP_DIM_ROWS_max, TP_DIM_ROWS_min))
 
     param_dict = {}
     param_dict.update({"name": "TP_DIM_ROWS"})
@@ -187,9 +234,9 @@ def fn_update_tp_dim_rows(AIE_VARIANT, TT_DATA, TP_DIM_COLS, TP_DIM_ROWS):
     param_dict.update({"maximum": TP_DIM_ROWS_max})
 
     if TP_DIM_ROWS != 0:
-        # Round to nearest multiple of vector size
-        if (TP_DIM_ROWS % TP_DIM_ROWS_min) != 0:
-            TP_DIM_ROWS = int(com.CEIL(TP_DIM_ROWS, TP_DIM_ROWS_min))
+        # Clip to range then round to the nearest multiple of vector size.
+        TP_DIM_ROWS = com.CLIP(TP_DIM_ROWS, TP_DIM_ROWS_min, TP_DIM_ROWS_max)
+        TP_DIM_ROWS = int(com.ROUND_TO_NEAREST_MULTIPLE(TP_DIM_ROWS, TP_DIM_ROWS_min))
 
         # Ensure the value has at least one valid TP_CASC_LEN; if not, search nearby
         if not fn_has_valid_casc_len(AIE_VARIANT, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS):
@@ -231,7 +278,7 @@ def fn_has_valid_casc_len(AIE_VARIANT, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS):
         if (
             TP_DIM_ROWS % c == 0
             and (TP_DIM_ROWS // c) % vec_size == 0
-            and fn_estimated_kernel_data_bytes(TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, c) <= BUFFER_SIZE
+            and fn_estimated_kernel_data_bytes(AIE_VARIANT, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, c) <= BUFFER_SIZE
         ):
             return True
     return False
@@ -297,7 +344,7 @@ def fn_update_tp_casc_len(AIE_VARIANT, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_CAS
         for c in range(TP_CASC_LEN_min, casc_len_max + 1)
         if TP_DIM_ROWS % c == 0
         and (TP_DIM_ROWS // c) % vec_size == 0
-        and fn_estimated_kernel_data_bytes(TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, c) <= BUFFER_SIZE
+        and fn_estimated_kernel_data_bytes(AIE_VARIANT, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, c) <= BUFFER_SIZE
     ]
 
     param_dict = {}
@@ -361,19 +408,76 @@ def validate_TP_PASSES(args):
     return com.validate_range(range_TP_PASSES, "TP_PASSES", TP_PASSES)
 
 
+#######################################################
+######## TP_PASSES_SSR Updater and Validator ##########
+#######################################################
+def update_TP_PASSES_SSR(args):
+    AIE_VARIANT = args["AIE_VARIANT"]
+    TT_DATA = args["TT_DATA"]
+    TP_DIM_ROWS = int(args["TP_DIM_ROWS"])
+    TP_DIM_COLS = int(args["TP_DIM_COLS"])
+    TP_CASC_LEN = int(args["TP_CASC_LEN"])
+    TP_PASSES = int(args["TP_PASSES"])
+    TP_PASSES_SSR = int(args["TP_PASSES_SSR"]) if args.get("TP_PASSES_SSR") else 1
+    legal_set = [v for v in range(1, TP_PASSES + 1) if TP_PASSES % v == 0]
+    # Once every Jacobi pass already has its own stage, allow one additional
+    # stage dedicated to normalization, sorting, and V compaction.
+    legal_set.append(TP_PASSES + 1)
+
+    # TP_DIM_ROWS/TP_DIM_COLS/TP_CASC_LEN were only validated against the TP_PASSES_SSR==1
+    # memory shape. TP_PASSES_SSR > 1 introduces later-stage kernels needing 2*(U+S+V);
+    # exclude it from the legal set if that would overflow data memory.
+    BUFFER_SIZE = com.k_data_memory_bytes[AIE_VARIANT]
+    if fn_later_stage_kernel_data_bytes(AIE_VARIANT, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_CASC_LEN) > BUFFER_SIZE:
+        legal_set = [v for v in legal_set if v == 1]
+
+    param_dict = {"name": "TP_PASSES_SSR", "enum": legal_set}
+    if TP_PASSES_SSR in legal_set:
+        param_dict["actual"] = TP_PASSES_SSR
+    else:
+        param_dict["actual"] = min(legal_set, key=lambda x: abs(x - TP_PASSES_SSR))
+    return param_dict
+
+
+def validate_TP_PASSES_SSR(args):
+    TP_PASSES_SSR = int(args["TP_PASSES_SSR"])
+    legal_set = update_TP_PASSES_SSR(args)["enum"]
+    if TP_PASSES_SSR != 1 and legal_set == [1]:
+        return com.isError(
+            f"TP_PASSES_SSR = {TP_PASSES_SSR} would exceed data memory for this "
+            f"TP_DIM_ROWS/TP_DIM_COLS/TP_CASC_LEN combination; only TP_PASSES_SSR = 1 fits. "
+            f"Reduce TP_DIM_ROWS/TP_DIM_COLS or increase TP_CASC_LEN to allow TP_PASSES_SSR > 1."
+        )
+    return com.validate_legal_set(legal_set, "TP_PASSES_SSR", TP_PASSES_SSR)
+
+
+#######################################################
+########## TP_DIAG_INV Updater and Validator ##########
+#######################################################
+def update_TP_DIAG_INV(args):
+    return {"name": "TP_DIAG_INV", "enum": [0, 1]}
+
+
+def validate_TP_DIAG_INV(args):
+    return com.validate_legal_set([0, 1], "TP_DIAG_INV", args["TP_DIAG_INV"])
+
+
 def info_ports(args):
     """Standard function creating a static dictionary of information
     for upper software to correctly connect the IP.
     Some IP has a configurable number of ports according to parameter set,
     so port information has to be implemented as a function"""
+    AIE_VARIANT = args["AIE_VARIANT"]
     TT_DATA = args["TT_DATA"]
     TP_DIM_ROWS = args["TP_DIM_ROWS"]
     TP_DIM_COLS = args["TP_DIM_COLS"]
     TP_CASC_LEN = args["TP_CASC_LEN"]
 
-    vec_size = fn_kernel_vec_size(TT_DATA)
+    # Port/buffer sizes must match the graph's kStoreCols (store-alignment padding),
+    # not the IO stream width -- these diverge on AIE22 (AIE_MLv2).
+    store_align = fn_kernel_store_align(AIE_VARIANT, TT_DATA)
     cols_sched = TP_DIM_COLS + (TP_DIM_COLS % 2)
-    cols_padded = int(com.CEIL(cols_sched, vec_size))
+    cols_padded = int(com.CEIL(cols_sched, store_align))
 
     TP_WINDOW_VSIZE_A = (TP_DIM_ROWS * TP_DIM_COLS) // TP_CASC_LEN
     TP_WINDOW_VSIZE_U = (TP_DIM_ROWS * cols_padded) // TP_CASC_LEN
@@ -382,7 +486,7 @@ def info_ports(args):
 
     portsInA = com.get_port_info("in", "in", TT_DATA, TP_WINDOW_VSIZE_A, TP_CASC_LEN, 0, com.API_BUFFER)
     portsOutU = com.get_port_info("outU", "out", TT_DATA, TP_WINDOW_VSIZE_U, TP_CASC_LEN, 0, com.API_BUFFER)
-    portsOutS = com.get_port_info("outS", "out", TT_DATA, TP_WINDOW_VSIZE_S, TP_CASC_LEN, 0, com.API_BUFFER)
+    portsOutS = com.get_port_info("outS", "out", TT_OUT_S, TP_WINDOW_VSIZE_S, TP_CASC_LEN, 0, com.API_BUFFER)
     portsOutV = com.get_port_info("outV", "out", TT_DATA, TP_WINDOW_VSIZE_V, TP_CASC_LEN, 0, com.API_BUFFER)
 
     return portsInA + portsOutU + portsOutS + portsOutV
@@ -399,6 +503,8 @@ def generate_graph(graphname, args):
     TP_DIM_COLS = args["TP_DIM_COLS"]
     TP_PASSES = args["TP_PASSES"]
     TP_CASC_LEN = args["TP_CASC_LEN"]
+    TP_PASSES_SSR = args["TP_PASSES_SSR"]
+    TP_DIAG_INV = args["TP_DIAG_INV"]
 
     # Use formatted multi-line string to avoid a lot of \n and \t
     code = f"""
@@ -418,11 +524,12 @@ public:
     {TP_DIM_ROWS}, //TP_DIM_ROWS
     {TP_DIM_COLS}, //TP_DIM_COLS
     {TP_PASSES}, //TP_PASSES
-    {TP_CASC_LEN} //TP_CASC_LEN
+    {TP_CASC_LEN}, //TP_CASC_LEN
+    {TP_PASSES_SSR}, //TP_PASSES_SSR
+    {TP_DIAG_INV} //TP_DIAG_INV
   > svd;
 
   {graphname}() : svd() {{
-    adf::kernel *svd_kernels = svd.getKernels();
 
     for (int i=0; i < TP_CASC_LEN; i++) {{
       adf::connect<> net_in(in[i], svd.in[i]);
@@ -445,6 +552,8 @@ public:
         "L1/src/aie",
         "L1/tests/aie/inc",
         "L1/tests/aie/src",
+        "../xf_dsp/L1/include/aie",
+        "../xf_dsp/L2/include/aie",
     ]
 
     return out

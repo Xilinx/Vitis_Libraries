@@ -25,11 +25,13 @@ and therefore must be suitable for the aie compiler graph-level compilation.
 
 #include "device_defs.h"
 #include "fir_utils.hpp"
-#include "single_mul_out_types.hpp"
-#include "single_mul_acc_types.hpp"
 #include "aie_api/aie_adf.hpp"
 #include <adf.h>
 #include "qrd_traits.hpp"
+
+// Enable split-accumulator reductions and single-invsqrt normalization on
+// AIE-ML, where this fast path improves QoR.
+#define XF_SOLVER_QRD_USE_AIE_ML_REDUCTION_FAST_PATH (__AIE_ARCH__ == 20)
 
 namespace xf {
 namespace solver {
@@ -101,6 +103,40 @@ INLINE_DECL void calc_sqrt<cfloat>(cfloat val, cfloat& val_sqrt) {
     val_sqrt.real = hw_sqrt(val.real);
 #endif
     val_sqrt.imag = 0;
+}
+
+// Compute both the column norm ||v|| and its reciprocal 1/||v|| from val = v.v
+// using a SINGLE reciprocal-sqrt plus one multiply, replacing the previous
+// sqrt() followed by a separate reciprocal inv(). This removes one scalar
+// reciprocal from the per-column Q-normalisation critical path.
+//   norm_inv = rsqrt(v.v) = 1/||v||      (direct, one transcendental)
+//   norm     = (v.v) * norm_inv = ||v||  (one multiply -> R diagonal)
+// On AIE-ML (non-native) the multiply uses hw_mul, so the returned norm is
+// bit-identical to the previous hw_sqrt(val) result; only the reciprocal path
+// changes (a direct rsqrt instead of inv(sqrt(.))), which is also more accurate.
+template <typename T_DATA>
+INLINE_DECL void calc_norm_and_inv(T_DATA val, T_DATA& norm, T_DATA& norm_inv) {
+#if __USES_NATIVE_SQRT_FUNC__
+    norm_inv = ::aie::invsqrt(val); // native scalar rsqrt (AIE1, AIE-MLv2)
+    norm = val * norm_inv;          // ||v||; native scalar multiply
+#else
+    norm_inv = hw_invsqrt(val);   // AIE-ML: ~12-bit approx + 1 Newton-Raphson step
+    norm = hw_mul(val, norm_inv); // ||v||; bit-identical to old hw_sqrt(val)
+#endif
+}
+
+template <>
+INLINE_DECL void calc_norm_and_inv<cfloat>(cfloat val, cfloat& norm, cfloat& norm_inv) {
+// v.v is real for a Hermitian inner product; operate on the real part only.
+#if __USES_NATIVE_SQRT_FUNC__
+    norm_inv.real = ::aie::invsqrt(val.real);
+    norm.real = val.real * norm_inv.real;
+#else
+    norm_inv.real = hw_invsqrt(val.real);
+    norm.real = hw_mul(val.real, norm_inv.real);
+#endif
+    norm.imag = 0;
+    norm_inv.imag = 0;
 }
 }
 }

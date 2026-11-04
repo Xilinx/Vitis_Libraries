@@ -19,6 +19,45 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+2026.2
+------
+
+* **Cholesky** - Production status.
+* **QRD** - Production status.
+* **QRD_HH** - 2026.1 EA library element now in Production
+* **SVD** - 2026.1 EA library element now in Production
+* **Substitution** - 2026.1 EA library element now in Production
+* **Eigenvalue** - New EA library element.
+* **LS_Cholesky_Solver** - New EA library element.
+* **MP_Pseudoinverse** - New EA library element.
+
++---------------------------------------+-----------------------------------------------------------------------------+
+| **Function**                          | **Namespace and class name**                                                |
++=======================================+=============================================================================+
+| Cholesky                              |  xf::solver::aie::cholesky_graph                                            |
++---------------------------------------+-----------------------------------------------------------------------------+
+| QRD                                   |  xf::solver::aie::qrd_graph                                                 |
++---------------------------------------+-----------------------------------------------------------------------------+
+| QRD_HH                                |  xf::solver::aie::qrd_hh_graph                                              |
++---------------------------------------+-----------------------------------------------------------------------------+
+| SVD                                   |  xf::solver::aie::svd::svd_graph                                            |
++---------------------------------------+-----------------------------------------------------------------------------+
+| Substitution                          |  xf::solver::aie::substitution::substitution_graph                          |
++---------------------------------------+-----------------------------------------------------------------------------+
+| LS_Cholesky_Solver                    |  xf::solver::aie::ls_cholesky_solver::ls_cholesky_solver_graph              |
++---------------------------------------+-----------------------------------------------------------------------------+
+| MP_Pseudoinverse_svd                  |  xf::solver::aie::mp_pseudoinverse_svd::mp_pseudoinverse_svd_graph          |
++---------------------------------------+-----------------------------------------------------------------------------+
+| Eigenvalue                            |  xf::solver::aie::eigenvalue::eigenvalue_graph                              |
++---------------------------------------+-----------------------------------------------------------------------------+
+
+The SVD element behaviour has changed. In 2026.1 the V output was compressed (rearranged) prior to output. Now this
+output follows the general alignment conventions. For details see the section on SVD.
+
+The SVD graph adds the ``TP_PASSES_SSR`` template parameter, which splits the Jacobi passes across pipelined stages, and the
+``TP_DIAG_INV`` template parameter, which selects reciprocal singular values at the output.
+  
+
 2026.1
 ------
 

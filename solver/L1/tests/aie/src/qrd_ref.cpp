@@ -47,7 +47,6 @@ void qrd_ref<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN>::qrd
     array_row original_vector;
     array_row project_vector;
 
-    array_row a_mat[TP_DIM_COLS];
     array_row v_mat[TP_DIM_COLS];
     array_row q_mat[TP_DIM_COLS];
     array_col r_mat[TP_DIM_COLS];
@@ -72,11 +71,11 @@ void qrd_ref<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN>::qrd
                 dA_in = *inPtrA++;
                 original_vector[row] = dA_in;
             }
-            a_mat[col] = original_vector;
             v_mat[col] = original_vector;
 
             for (unsigned int col_pre = 0; col_pre < col; col_pre++) {
-                dot_product_val = arrOps_row.calc_dot_product(q_mat[col_pre], a_mat[col]);
+                // MGS: project the running (partially orthogonalized) vector, not the original column
+                dot_product_val = arrOps_row.calc_dot_product(q_mat[col_pre], v_mat[col]);
                 r_mat[col][col_pre] = dot_product_val;
                 project_vector = arrOps_row.mul_const_arr(r_mat[col][col_pre], q_mat[col_pre]);
                 v_mat[col] = arrOps_row.sub_arrays(v_mat[col], project_vector);

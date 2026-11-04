@@ -35,7 +35,11 @@
 #define UUT_GRAPH cholesky_graph
 #endif
 
+#if defined(USING_UUT) && USING_UUT == 1
+#include "cholesky_native_generated_graph/cholesky_generated_graph.h"
+#else
 #include QUOTE(UUT_GRAPH.hpp)
+#endif
 
 using namespace adf;
 
@@ -69,9 +73,9 @@ class test_graph : public graph {
         printf("kNumKernels     = %d \n", kNumKernels);
         printf("========================\n");
 
-#ifdef USING_UUT
+#if defined(USING_UUT) && USING_UUT == 1
         // Cholesky sub-graph
-        solverlib::cholesky::UUT_GRAPH<DATA_TYPE, DIM_SIZE, NUM_FRAMES, GRID_DIM, CASC_LEN, DIAG_INV> choleskyGraph;
+        cholesky_native_generated_graph choleskyGraph;
 
         int portIdx = 0;
         for (int y = 0; y < GRID_DIM; y++) {

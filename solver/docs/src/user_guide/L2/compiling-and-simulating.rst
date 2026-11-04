@@ -277,11 +277,113 @@ For the Cholesky library element, use the following list of configurable paramet
     | CASC_LEN               |    unsigned    |    1           | The number of kernels chained in sequence      |
     |                        |                |                | to pipeline the cholesky operation in time.    |
     +------------------------+----------------+----------------+------------------------------------------------+
+    | DIAG_INV               |    unsigned    |    0           | 0 = normal processing                          |
+    |                        |                |                | 1 = the output is provided with inverted (1/x) |
+    |                        |                |                | diagonal elements which eliminates redundant   |
+    |                        |                |                | operations when chained with the Substitution  |
+    |                        |                |                | for Least Squares Solving.                     |
+    |                        |                |                | Note: not intended for explicit use. Use the   |
+    |                        |                |                | LS_Cholesky_Solver IP for such a use case.     |
+    +------------------------+----------------+----------------+------------------------------------------------+
     | NITER                  |    unsigned    |    4           | See :ref:`SOLVER_COMMON_CONFIG_PARAMETERS`     |
     |                        |                |                |                                                |
     +------------------------+----------------+----------------+------------------------------------------------+
     | STIM_TYPE              |    unsigned    |    0           | See :ref:`SOLVER_COMMON_CONFIG_PARAMETERS`     |
     |                        |                |                |                                                |
+    +------------------------+----------------+----------------+------------------------------------------------+
+
+.. note:: Given parameter values are subject to checks early in compilation to ensure support.
+
+.. _SOLVER_CONFIGURATION_PARAMETERS_EIGENVALUE:
+
+Eigenvalue configuration parameters
+-----------------------------------
+
+For the Eigenvalue library element, use the following list of configurable parameters and default values.
+
+.. table:: Eigenvalue configuration parameters
+
+    +------------------------+----------------+----------------+------------------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                                  |
+    +========================+================+================+================================================+
+    | DATA_TYPE              |    typename    |    cfloat      | Data Type.                                     |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | DIM_SIZE               |    unsigned    |    4           | The dimension size of the square matrix.       |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | PASSES                 |    unsigned    |    20          | The maximum number of QR sweep iterations      |
+    |                        |                |                | (terminates early on convergence).             |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | CASC_LEN               |    unsigned    |    1           | The number of cascaded kernels. Must be 1.     |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | NITER                  |    unsigned    |    6           | See :ref:`SOLVER_COMMON_CONFIG_PARAMETERS`     |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | DATA_SEED              |    unsigned    |    1           | See :ref:`SOLVER_COMMON_CONFIG_PARAMETERS`     |
+    +------------------------+----------------+----------------+------------------------------------------------+
+
+.. note:: Given parameter values are subject to checks early in compilation to ensure support.
+
+.. _SOLVER_CONFIGURATION_PARAMETERS_LS_CHOLESKY_SOLVER:
+
+LS Cholesky Solver configuration parameters
+-------------------------------------------
+
+For the LS_Cholesky_Solver library element, use the following list of configurable parameters and default values.
+
+.. table:: LS Cholesky Solver configuration parameters
+
+    +------------------------+----------------+----------------+------------------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                                  |
+    +========================+================+================+================================================+
+    | DATA_TYPE              |    typename    |    float       | Data Type.                                     |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | DIM_SIZE               |    unsigned    |    8           | The dimension size of the matrix.              |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | NUM_FRAMES             |    unsigned    |    1           | Number of frames in a window.                  |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | GRID_DIM               |    unsigned    |    1           | The dimension size of the grid of kernels      |
+    |                        |                |                | used to break up a matrix. Must be 1.          |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | CASC_LEN               |    unsigned    |    1           | The number of kernels chained in sequence      |
+    |                        |                |                | to pipeline the Cholesky stage in time.        |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | NITER                  |    unsigned    |    1           | See :ref:`SOLVER_COMMON_CONFIG_PARAMETERS`     |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | DATA_SEED              |    unsigned    |    1           | See :ref:`SOLVER_COMMON_CONFIG_PARAMETERS`     |
+    +------------------------+----------------+----------------+------------------------------------------------+
+
+.. note:: Given parameter values are subject to checks early in compilation to ensure support.
+
+.. _SOLVER_CONFIGURATION_PARAMETERS_MP_PSEUDOINVERSE_SVD:
+
+MP Pseudoinverse configuration parameters
+-----------------------------------------
+
+For the Moore-Penrose Pseudoinverse library element, use the following list of configurable parameters and default values.
+
+.. table:: MP Pseudoinverse configuration parameters
+
+    +------------------------+----------------+----------------+------------------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                                  |
+    +========================+================+================+================================================+
+    | DATA_TYPE              |    typename    |    cfloat      | Data Type.                                     |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | DIM_ROWS               |    unsigned    |    4           | Row dimension of the input matrix.             |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | DIM_COLS               |    unsigned    |    4           | Column dimension of the input matrix.          |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | PASSES                 |    unsigned    |    3           | The number of Jacobi sweep passes in the       |
+    |                        |                |                | internal SVD.                                  |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | PASSES_SSR             |    unsigned    |    1           | The number of pass-pipeline stages in the      |
+    |                        |                |                | internal SVD.                                  |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | CASC_LEN               |    unsigned    |    1           | The number of cascaded kernels. Must be 1.     |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | NITER                  |    unsigned    |    6           | See :ref:`SOLVER_COMMON_CONFIG_PARAMETERS`     |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | STIM_TYPE              |    unsigned    |    0           | See :ref:`SOLVER_COMMON_CONFIG_PARAMETERS`     |
+    +------------------------+----------------+----------------+------------------------------------------------+
+    | DATA_SEED              |    unsigned    |    1           | See :ref:`SOLVER_COMMON_CONFIG_PARAMETERS`     |
     +------------------------+----------------+----------------+------------------------------------------------+
 
 .. note:: Given parameter values are subject to checks early in compilation to ensure support.

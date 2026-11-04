@@ -49,56 +49,57 @@ INLINE_DECL float getScalarAsType(float& val) {
     return val;
 }
 
-template <typename TT>
-INLINE_DECL::aie::accum<accType_t<TT>, fnVecSampleNum<TT>()> msc_with_conj(
-    typename ::aie::accum<accType_t<TT>, fnVecSampleNum<TT>()>& accum,
-    typename DATA_VECT_T(TT) & diagRowVect,
-    typename DATA_VECT_T(TT) & diagColVect,
+template <typename TT, unsigned int kVecSampleNum>
+INLINE_DECL::aie::accum<accType_t<TT>, kVecSampleNum> msc_with_conj(
+    typename ::aie::accum<accType_t<TT>, kVecSampleNum>& accum,
+    typename DATA_VECT_T(TT, kVecSampleNum) & diagRowVect,
+    typename DATA_VECT_T(TT, kVecSampleNum) & diagColVect,
     int& k) {
-    return ::aie::msc(accum, ::aie::op_conj(diagRowVect[k]), diagColVect);
-};
-template <>
-INLINE_DECL::aie::accum<accType_t<float>, fnVecSampleNum<float>()> msc_with_conj(
-    typename ::aie::accum<accType_t<float>, fnVecSampleNum<float>()>& accum,
-    typename DATA_VECT_T(float) & diagRowVect,
-    typename DATA_VECT_T(float) & diagColVect,
-    int& k) {
-    return ::aie::msc(accum, diagRowVect[k], diagColVect);
+    if
+        constexpr(isComplex<TT>()) { return ::aie::msc(accum, ::aie::op_conj(diagRowVect[k]), diagColVect); }
+    else {
+        return ::aie::msc(accum, diagRowVect[k], diagColVect);
+    }
 };
 
-template <typename TT>
+template <typename TT, unsigned int kVecSampleNum>
 INLINE_DECL void writeScalarToPort(output_stream<TT>* __restrict(&port), TT& scalar) {
     writeincr(port, scalar);
 };
-template <typename TT>
+template <typename TT, unsigned int kVecSampleNum>
 INLINE_DECL void writeScalarToPort(output_cascade<TT>* __restrict(&port), TT& scalar) {
-    using dataVect_t = ::aie::vector<TT, fnVecSampleNum<TT>()>;
+    using dataVect_t = ::aie::vector<TT, kVecSampleNum>;
     dataVect_t packetVect;
     packetVect[0] = scalar;
     writeincr(port, packetVect);
 };
 
-template <typename TT>
+template <typename TT, unsigned int kVecSampleNum>
 INLINE_DECL TT readScalarFromPort(input_stream<TT>* __restrict(&port)) {
     return readincr(port);
 };
-template <typename TT>
+template <typename TT, unsigned int kVecSampleNum>
 INLINE_DECL TT readScalarFromPort(input_cascade<TT>* __restrict(&port)) {
-    using dataVect_t = ::aie::vector<TT, fnVecSampleNum<TT>()>;
-    dataVect_t packetVector = readincr_v<fnVecSampleNum<TT>()>(port);
+    using dataVect_t = ::aie::vector<TT, kVecSampleNum>;
+    dataVect_t packetVector = readincr_v<kVecSampleNum>(port);
     return packetVector[0];
 };
 
-template <typename TT, unsigned int kNumVecsPerDim>
+template <typename TT, unsigned int kNumVecsPerDim, unsigned int kVecSampleNum>
 INLINE_DECL void matrixBlockEliminations(
-    DATA_VECT_T(TT) * __restrict(&diagColPtr), // These multiply together and could come from different tiles.
-    DATA_VECT_T(TT) * __restrict(&diagRowPtr),
-    DATA_VECT_T(TT) * __restrict(&inPtr)) {
-    constexpr unsigned int kVecSampleNum = fnVecSampleNum<TT>();
+    DATA_VECT_T(TT, kVecSampleNum) *
+        __restrict(&diagColPtr), // These multiply together and could come from different tiles.
+    DATA_VECT_T(TT, kVecSampleNum) * __restrict(&diagRowPtr),
+    DATA_VECT_T(TT, kVecSampleNum) * __restrict(&inPtr)) {
+    constexpr unsigned int kNumAccs = fnNumAccs<TT>();
     using dataVect_t = ::aie::vector<TT, kVecSampleNum>;
     using dataAcc_t = ::aie::accum<accType_t<TT>, kVecSampleNum>;
-    DATA_VECT_T(TT)* __restrict readPtr = inPtr;
-    dataAcc_t accum;
+    DATA_VECT_T(TT, kVecSampleNum)* __restrict readPtr = inPtr;
+    // Per-k accumulators make independence across unrolled k-iterations explicit to the
+    // scheduler. The count is capped at the device's float/cfloat accumulator budget
+    // (fnNumAccs) so the array fits the register file - critical on AIE1 where float
+    // accumulators share the vector registers with data.
+    dataAcc_t accums[kNumAccs];
 
     for (int j = 0; j < kNumVecsPerDim; j++) chess_prepare_for_pipelining chess_loop_count(kNumVecsPerDim) {
             unsigned int vectBlockIdx = j * kVecSampleNum * kNumVecsPerDim;
@@ -110,8 +111,11 @@ INLINE_DECL void matrixBlockEliminations(
 #pragma unroll(kVecSampleNum)
                     for (int k = 0; k < kVecSampleNum; k++) {
                         unsigned int vectIdx = vectBlockIdx + k * kNumVecsPerDim;
+                        // k % kNumAccs is compile-time per unrolled iteration; each accumulator slot
+                        // is loaded and stored within one k-iteration, so cycling is correctness-safe.
+                        dataAcc_t& accum = accums[k % kNumAccs];
                         accum.from_vector(readPtr[vectIdx]);
-                        accum = msc_with_conj<TT>(accum, diagRowVect, diagColVect, k);
+                        accum = msc_with_conj<TT, kVecSampleNum>(accum, diagRowVect, diagColVect, k);
                         inPtr[vectIdx] = accum.template to_vector<TT>();
                     }
                     vectBlockIdx++;
@@ -119,34 +123,44 @@ INLINE_DECL void matrixBlockEliminations(
         }
 };
 
-template <typename TT, unsigned int kNumVecsPerDim>
+template <typename TT, unsigned int kNumVecsPerDim, unsigned int kVecSampleNum>
 INLINE_DECL void colBlockEliminations(
-    DATA_VECT_T(TT) * __restrict(&diagColPtr), // These multiply together and could come from different tiles.
-    DATA_VECT_T(TT) * __restrict(&diagRowPtr),
-    DATA_VECT_T(TT) * __restrict(&inPtr),
+    DATA_VECT_T(TT, kVecSampleNum) *
+        __restrict(&diagColPtr), // These multiply together and could come from different tiles.
+    DATA_VECT_T(TT, kVecSampleNum) * __restrict(&diagRowPtr),
+    DATA_VECT_T(TT, kVecSampleNum) * __restrict(&inPtr),
     int& colStart,
     int& rowStart) {
-    constexpr unsigned int kVecSampleNum = fnVecSampleNum<TT>();
+    constexpr unsigned int kNumAccs = fnNumAccs<TT>();
     using dataVect_t = ::aie::vector<TT, kVecSampleNum>;
     using dataAcc_t = ::aie::accum<accType_t<TT>, kVecSampleNum>;
 
-    DATA_VECT_T(TT)* __restrict readPtr = inPtr;
+    DATA_VECT_T(TT, kVecSampleNum)* __restrict readPtr = inPtr;
     dataVect_t diagRowVect = diagRowPtr[colStart];
-    dataAcc_t accum;
+    // Per-k accumulators: each k-iteration operates on a distinct vectIdx — no cross-k
+    // dependency. Capped at the device's float/cfloat accumulator budget (fnNumAccs) so the
+    // array fits the register file - critical on AIE1 where float accumulators share the
+    // vector registers with data.
+    dataAcc_t accums[kNumAccs];
     unsigned int vectBlockIdx = colStart * kVecSampleNum * kNumVecsPerDim + rowStart;
 
-    for (int i = rowStart; i < kNumVecsPerDim; i++) { // ! not pipelineable
-        dataVect_t diagColVect = diagColPtr[i];
+    // i-iterations access disjoint inPtr locations (vectBlockIdx advances by 1 per i),
+    // so there is no cross-iteration data dependency and the loop is pipelineable.
+    for (int i = rowStart; i < kNumVecsPerDim; i++) chess_prepare_for_pipelining {
+            dataVect_t diagColVect = diagColPtr[i];
 
 #pragma unroll(kVecSampleNum)
-        for (int k = 0; k < kVecSampleNum; k++) {
-            unsigned int vectIdx = vectBlockIdx + k * kNumVecsPerDim;
-            accum.from_vector(readPtr[vectIdx]);
-            accum = msc_with_conj<TT>(accum, diagRowVect, diagColVect, k);
-            inPtr[vectIdx] = accum.template to_vector<TT>();
+            for (int k = 0; k < kVecSampleNum; k++) {
+                unsigned int vectIdx = vectBlockIdx + k * kNumVecsPerDim;
+                // k % kNumAccs is compile-time per unrolled iteration; each accumulator slot
+                // is loaded and stored within one k-iteration, so cycling is correctness-safe.
+                dataAcc_t& accum = accums[k % kNumAccs];
+                accum.from_vector(readPtr[vectIdx]);
+                accum = msc_with_conj<TT, kVecSampleNum>(accum, diagRowVect, diagColVect, k);
+                inPtr[vectIdx] = accum.template to_vector<TT>();
+            }
+            vectBlockIdx++;
         }
-        vectBlockIdx++;
-    }
 };
 }
 }

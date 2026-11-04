@@ -1,0 +1,6 @@
+
+# Combined pass-pipeline and reciprocal-singular-value coverage
+
+# Direct throughput comparison: unsplit -> balanced split -> one pass per
+# stage -> one pass per stage plus a dedicated finalize-only stage.
+make all  DATA_TYPE=float  DIM_ROWS=64 DIM_COLS=8 PASSES=4 PASSES_SSR=[1,5] SORT=1 CASC_LEN=1 AIE_VARIANT=[1,2,22]

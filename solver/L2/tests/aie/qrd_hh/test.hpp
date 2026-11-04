@@ -36,7 +36,11 @@
 #define UUT_GRAPH qrd_hh_graph
 #endif
 
+#if defined(USING_UUT) && USING_UUT == 1
+#include "qrd_hh_native_generated_graph/qrd_hh_generated_graph.h"
+#else
 #include QUOTE(UUT_GRAPH.hpp)
+#endif
 
 using namespace adf;
 
@@ -70,13 +74,17 @@ class test_graph : public graph {
         printf("DIM_Q_LEADING     = %d \n", DIM_Q_LEADING);
         printf("DIM_R_LEADING     = %d \n", DIM_R_LEADING);
 
-        // Hadamard sub-graph
+// Hadamard sub-graph
+#if defined(USING_UUT) && USING_UUT == 1
+        qrd_hh_native_generated_graph qrd_hh_graph;
+#else
         solverlib::qrd_hh::UUT_GRAPH<DATA_TYPE, DIM_ROWS, DIM_COLS, NUM_FRAMES, CASC_LEN, DIM_A_LEADING, DIM_Q_LEADING,
                                      DIM_R_LEADING>
             qrd_hh_graph;
+#endif
 
 // Make connections
-#ifdef USING_UUT
+#if defined(USING_UUT) && USING_UUT == 1
         for (int i = 0; i < CASC_LEN; i++) {
             unsigned int kRrowsDistributed = i * (DIM_ROWS / CASC_LEN);
             bool routEn = (kRrowsDistributed < DIM_COLS);

@@ -18,6 +18,9 @@ The SolverLib consists of the following solver elements:
    :maxdepth: 2
 
    Cholesky <func-cholesky.rst>
+   Eigenvalue <func-eigenvalue.rst>
+   Least Squares Cholesky Solver <func-ls_cholesky_solver.rst>
+   Moore Penrose Pseudoinverse via SVD <func-mp_pseudoinverse_svd.rst>
    QRD <func-qrd.rst>
    QRD Householder <func-qrd_hh.rst>
    Substitution <func-substitution.rst>

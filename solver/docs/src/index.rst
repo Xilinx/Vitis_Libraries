@@ -59,6 +59,10 @@ The AMD Vitis AI Engine Solver library encapsulates several solver algorithms, o
    * Singular Value Decomposition (one-sided Jacobi with parallel-pairs schedule)
 * Linear system solving
    * Substitution (forward and backward)
+   * Least squares solver using Cholesky decomposition
+   * Moore-Penrose pseudoinverse using SVD
+* Eigenvalue solver
+   * Eigenvalues of a square matrix (Hessenberg reduction and QR iteration)
 
 .. toctree::
    :caption: Introduction
@@ -90,9 +94,12 @@ The AMD Vitis AI Engine Solver library encapsulates several solver algorithms, o
 
    API Reference Overview <user_guide/L2/api-reference.rst>
    Cholesky <rst/group_cholesky_graph.rst>
-   Substitution <rst/group_substitution_graph.rst>
+   Eigenvalue <rst/group_eigenvalue_graph.rst>
+   Least Squares Cholesky Solver <rst/group_ls_cholesky_solver.rst>
+   Moore Penrose Pseudoinverse <rst/group_mp_pseudoinverse_svd_graph.rst>
    QRD <rst/group_qrd_graph.rst>
    QRD_HH <rst/group_qrd_hh_graph.rst>
+   Substitution <rst/group_substitution_graph.rst>
    SVD <rst/group_svd_graph.rst>
 
 

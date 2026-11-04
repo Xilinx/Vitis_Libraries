@@ -59,15 +59,10 @@ void cholesky_ref<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_DIAG_INV>::cholesky_main(in
             }
         }
 
-        // Copying over only the vectors which will be processed by the UUT...
-        for (int i = 0; i < TP_DIM; i += kVecSampleNum) {
-            for (int j = i; j < TP_DIM; j += kVecSampleNum) {
-                // Populating in kVecSampleNum * kVecSampleNum blocks...
-                for (int m = i; m < i + kVecSampleNum; m++) {
-                    for (int n = j; n < j + kVecSampleNum; n++) {
-                        outPtr[IDX(m, n)] = inPtr[IDX(m, n)];
-                    }
-                }
+        // Copying to output buffer...
+        for (int i = 0; i < TP_DIM; i++) {
+            for (int j = 0; j < TP_DIM; j++) {
+                outPtr[IDX(i, j)] = inPtr[IDX(i, j)];
             }
         }
 
@@ -78,4 +73,4 @@ void cholesky_ref<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_DIAG_INV>::cholesky_main(in
 };
 }
 }
-} // closing namespace xf::dsp::aie::cholesky
+} // closing namespace xf::solver::aie::cholesky

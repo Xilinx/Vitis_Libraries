@@ -1,5 +1,5 @@
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -66,6 +66,7 @@ AIE_PKG_DIR ?= Work
 
 # Setting customized_params in aiecompiler
 
+    
 DSP_DIR ?= ../dsp
 
 ############################ setting AIE Compiler ###########################
@@ -87,7 +88,7 @@ AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work
 AIE_PKG_DIR = $(AIE_WORK_DIR)
 
-AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/$(DSP_DIR)/L1/include/aie -I $(XFLIB_DIR)/$(DSP_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/$(DSP_DIR)/L2/include/aie -I $(XFLIB_DIR)/$(DSP_DIR)/L2/tests/aie/common/inc -I $(CUR_DIR)
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/$(DSP_DIR)/L1/include/aie -I $(XFLIB_DIR)/$(DSP_DIR)/L1/src/aie -I $(XFLIB_DIR)/$(DSP_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/$(DSP_DIR)/L2/include/aie -I $(XFLIB_DIR)/$(DSP_DIR)/L2/tests/aie/common/inc -I $(CUR_DIR)
 
 AIE_CXXFLAGS +=  --aie.Xchess=llvm.xargs=-std=c++2a 
 
@@ -97,7 +98,7 @@ AIESIMFLAGS += $(EXTRA_AIESIMFLAGS)
 $(AIE_CONTAINER):  $(XFLIB_DIR)/L2/examples/docs_examples/test_all.cpp 
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
-	$(VPP) -c --mode aie $(AIE_CXXFLAGS) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^)
+	$(VPP) -c --mode aie $(AIE_CXXFLAGS) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^) 
 
 ############################## Setting Essential Checks and Building Rules ##############################
 ifneq (,$(filter x86sim aiesim, $(TARGET)))

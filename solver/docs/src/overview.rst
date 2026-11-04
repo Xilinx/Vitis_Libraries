@@ -18,7 +18,7 @@
 Library Overview
 =================
 
-AMD Vitis |trade| Solver Library provides a collection of matrix decomposition operations, linear solvers, and eigenvalue solvers on PL and AI Engine：
+AMD Vitis |trade| Solver Library provides a collection of matrix decomposition operations, linear solvers, and eigenvalue solvers on PL and AI Engine:
  
 PL Solver library
 -----------------
@@ -29,7 +29,7 @@ Currently the AMD Vitis PL Solver library includes the following operations for 
    * Cholesky decomposition for symmetric positive definite matrix
    * LU decomposition without pivoting and with partial pivoting
    * QR decomposition for general matrix
-   * SVD decomposition (single value decomposition) for symmetric matrix and non-symmetric matrix (Jacobi method)
+   * SVD decomposition (singular value decomposition) for symmetric matrix and non-symmetric matrix (Jacobi method)
  
 * Linear solver
    * Tridiagonal linear solver (Parallel cyclic reduction method)
@@ -53,6 +53,10 @@ Currently, the AMD Vitis AIE Solver Library provides the following operations on
    * Singular Value Decomposition (one-sided Jacobi with parallel-pairs schedule)
 * Linear system solving
    * Substitution (forward and backward)
+   * Least squares solver using Cholesky decomposition
+   * Moore-Penrose pseudoinverse using SVD
+* Eigenvalue solver
+   * Eigenvalues of a square matrix (Hessenberg reduction and QR iteration)
 
 Requirements
 ------------
@@ -60,7 +64,7 @@ Requirements
 Software requirements
 ~~~~~~~~~~~~~~~~~~~~~
 * This library is designed to work with AMD Vitis |trade|, and therefore inherits the system requirements of Vitis and XRT.
-* Supported operating systems are: RHEL 8.10, 9.6, 9.7, 10.0, and 10.1, Ubuntu 22.04.5 LTS, Ubuntu 24.04.2 LTS, and 24.04.3 LTS, as well as AlmaLinux OS ver. 8.10, 9.6, 9.7, 10.0 and 10.1, Rocky 8.10, 9.6, 9.7, 10.0 and 10.1.
+* Supported operating systems are: RHEL 8.10, 9.6, 9.7, 9.8, 10.0, 10.1, and 10.2, Ubuntu 22.04.5 LTS, Ubuntu 24.04.2 LTS, 24.04.3 LTS, and 24.04.4 LTS, Ubuntu 26.04 LTS, as well as AlmaLinux OS ver. 8.10, 9.6, 9.7, 9.8, 10.0, 10.1 and 10.2, Rocky 8.10, 9.6, 9.7, 9.8, 10.0, 10.1 and 10.2.
 
 Hardware requirements
 ~~~~~~~~~~~~~~~~~~~~~

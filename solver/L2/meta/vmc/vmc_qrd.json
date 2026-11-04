@@ -1,0 +1,122 @@
+{
+    "low_level_file": "qrd.json",
+    "ip_name": "vmc_qrd",
+    "block_info": {
+        "label": "QRD",
+        "description": "QR Decomposition block targeted for AI Engines using the modified Gram-Schmidt process."
+    },
+    "parameters": [
+        {
+            "key": "AIE_VARIANT",
+            "name": "AIE_VARIANT",
+            "description": "Specifies the device type: 1-AIE, 2-AIE-ML, 22-AIE-ML-V2",
+            "default": 1,
+            "label": "AIE Variant:",
+            "tablabel": "Main",
+            "visible": "off",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TT_DATA",
+            "name": "data_type",
+            "description": "Type of individual data samples of the input matrix.",
+            "default": "float",
+            "label": "Input data type:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TP_DIM_ROWS",
+            "name": "row_dimension",
+            "description": "Number of rows in the input matrix.",
+            "default": 8,
+            "label": "Rows of matrix:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_DIM_COLS",
+            "name": "cols_dimension",
+            "description": "Number of columns in the input matrix.",
+            "default": 8,
+            "label": "Columns of matrix:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_NUM_FRAMES",
+            "name": "num_frames",
+            "description": "Number of matrices to decompose per call to the kernel.",
+            "default": 1,
+            "label": "Number of frames:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_CASC_LEN",
+            "name": "casc_length",
+            "description": "Number of kernels to be used to split up and cascade the workload.",
+            "default": 1,
+            "label": "Number of cascade stages:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_DIM_A_LEADING",
+            "name": "dim_a_leading",
+            "description": "Describes which dimension of the Matrix A input data is contigious in memory. TP_DIM_A_LEADING=1 is row major, and TP_DIM_A_LEADING=0 is column major.",
+            "default": 1,
+            "enum": [
+                0,
+                1
+            ],
+            "enum_str": [
+                "Column-major(0)",
+                "Row-major(1)"
+            ],
+            "label": "A input leading dimension:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TP_DIM_Q_LEADING",
+            "name": "dim_q_leading",
+            "description": "Describes which dimension of the Matrix Q output data is contigious in memory. TP_DIM_Q_LEADING=1 is row major, and TP_DIM_Q_LEADING=0 is column major.",
+            "default": 1,
+            "enum": [
+                0,
+                1
+            ],
+            "enum_str": [
+                "Column-major(0)",
+                "Row-major(1)"
+            ],
+            "label": "Q output leading dimension:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TP_DIM_R_LEADING",
+            "name": "dim_r_leading",
+            "description": "Describes which dimension of the Matrix R output data is contigious in memory. TP_DIM_R_LEADING=1 is row major, and TP_DIM_R_LEADING=0 is column major.",
+            "default": 1,
+            "enum": [
+                0,
+                1
+            ],
+            "enum_str": [
+                "Column-major(0)",
+                "Row-major(1)"
+            ],
+            "label": "R output leading dimension:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        }
+        
+    ],
+    "generator": {
+        "file": "vmc_qrd.py",
+        "function": "vmc_generate_graph"
+    }
+    
+}

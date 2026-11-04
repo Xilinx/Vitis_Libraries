@@ -94,11 +94,11 @@ Cascading increases the maximum supported matrix size by distributing the per-ke
 Output Buffers and Port Connectivity
 --------------------------------------
 
-Each ``outU[k]`` port carries a unique row partition of ``U`` and must be consumed independently. The buffer holds ``TP_DIM_ROWS / TP_CASC_LEN`` rows; the column stride is padded beyond ``TP_DIM_COLS`` for alignment. Only the first ``TP_DIM_COLS`` columns of each row contain valid data.
+Each ``outU[k]`` port carries a unique row partition of ``U`` and must be consumed independently. The buffer holds ``TP_DIM_ROWS / TP_CASC_LEN`` rows; the column stride is padded beyond ``TP_DIM_COLS`` for alignment (up to a multiple of the memory access size). Only the first ``TP_DIM_COLS`` columns of each row contain valid data. This dimension is also padded up to be a multiple of the memory access size so that even after a transpose, the matrix within can be accessed conveniently in a vectorized fashion.
 
-All ``outS`` ports carry identical data and the buffer holds ``TP_DIM_COLS`` valid singular values followed by padding. Only one port needs to be consumed, but all must be connected.
+All ``outS`` ports carry identical data and the buffer holds ``TP_DIM_COLS`` valid singular values followed by padding up to a multiple of the memory access size. Only one port needs to be consumed, but all must be connected.
 
-All ``outV`` ports carry identical data. The valid ``V`` matrix occupies the first ``TP_DIM_COLS`` x ``TP_DIM_COLS`` elements of the buffer; any remaining elements should be discarded. Only one port needs to be consumed, but all must be connected.
+All ``outV`` ports carry identical data. The valid ``V`` matrix occupies the first ``TP_DIM_COLS`` (rounded up to a multiple of the memory access size) x ``TP_DIM_COLS`` (rounded up to a multipled of the memory access size)  elements of the buffer.
 
 Constraints
 ===========

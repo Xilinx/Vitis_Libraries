@@ -972,6 +972,11 @@
                     },
                     {
                         "type": "unsigned int",
+                        "name": "TP_CASC_LEN",
+                        "description": "describes the depth of the cascade chain to increase throughput."
+                    },
+                    {
+                        "type": "unsigned int",
                         "name": "TP_DIAG_INV",
                         "description": "Whether to apply diagonal inversion."
                     }
@@ -1269,6 +1274,16 @@
                         "type": "unsigned int",
                         "name": "TP_CASC_LEN",
                         "description": "selects the number of kernels the SVD will be split over in series."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_PASSES_SSR",
+                        "description": "selects the number of pass-pipeline stages. For values in the range [1, TP_PASSES], TP_PASSES must be evenly divisible by TP_PASSES_SSR and each stage performs TP_PASSES / TP_PASSES_SSR Jacobi passes. The additional value TP_PASSES + 1 is also legal. In that mode the first TP_PASSES stages perform one Jacobi pass each and the last stage performs no Jacobi pass; it is dedicated to singular-value extraction, U normalization, U/S/V sorting, and V compaction. This extra stage is intended as a final throughput optimization after the Jacobi loop has already been maximally distributed with TP_PASSES_SSR = TP_PASSES."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIAG_INV",
+                        "description": "selects singular values (0, default) or reciprocal singular values (1)."
                     }
                 ],
                 "header_file_name": [
@@ -1300,7 +1315,191 @@
                 ],
                 "schema": "vitis_libraries_api_list_schema-1.0"
             }
+        },
+        {
+            "api_name": "xf::solver::aie::eigenvalue::eigenvalue_graph",
+            "target_domain": "AIE",
+            "spec": {
+                "brief": "Eigenvalues of a square matrix A, via QR iteration.",
+                "search_paths": [
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
+                ],
+                "visible": true,
+                "target_domain": "AIE",
+                "display_name": "eigenvalue_graph",
+                "parameters": [
+                    {
+                        "type": "typename",
+                        "name": "TT_DATA",
+                        "description": "Scalar data type: float or cfloat. TT_DATA=float is only valid for matrices whose eigenvalues are all real (e.g. symmetric/normal matrices) -- see eig_qr.hpp."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIM",
+                        "description": "Dimension of the square matrix A (= number of eigenvalues)."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_PASSES",
+                        "description": "Maximum number of QR sweep iterations (with early exit once all eigenvalues have deflated). More passes improve convergence at the cost of latency."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_CASC_LEN",
+                        "description": "Must be 1."
+                    }
+                ],
+                "header_file_name": [
+                    "eigenvalue_graph.hpp"
+                ],
+                "instance": "class",
+                "api_name": "xf::solver::aie::eigenvalue::eigenvalue_graph",
+                "ports": [
+                    {
+                        "direction": "input",
+                        "type": "input_port xf::solver::aie::eigenvalue::eigenvalue_graph< TT_DATA, TP_DIM, TP_PASSES, TP_CASC_LEN >::in",
+                        "name": "in"
+                    },
+                    {
+                        "direction": "output",
+                        "type": "output_port xf::solver::aie::eigenvalue::eigenvalue_graph< TT_DATA, TP_DIM, TP_PASSES, TP_CASC_LEN >::out",
+                        "name": "out"
+                    }
+                ],
+                "schema": "vitis_libraries_api_list_schema-1.0"
+            }
+        },
+        {
+            "api_name": "xf::solver::aie::ls_cholesky_solver::ls_cholesky_solver_graph",
+            "target_domain": "AIE",
+            "spec": {
+                "brief": "This class solves the linear system Ax = y for x, where A is a symmetric positive definite (SPD) square matrix.",
+                "search_paths": [
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
+                ],
+                "visible": true,
+                "target_domain": "AIE",
+                "display_name": "ls_cholesky_solver_graph",
+                "parameters": [
+                    {
+                        "type": "typename",
+                        "name": "TT_DATA",
+                        "description": "describes the type of individual data samples. Must be one of: float, cfloat."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIM",
+                        "description": "describes the length of one dimension of the square matrix A, in samples."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_NUM_FRAMES",
+                        "description": "describes the number of matrices/vectors to process per invocation."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_GRID_DIM",
+                        "description": "describes the tiling dimension used to divide the matrix across kernels. The number of A_in/y_in port tiles is TP_GRID_DIM*(TP_GRID_DIM+1)/2."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_CASC_LEN",
+                        "description": "describes the cascade depth of the internal Cholesky stage."
+                    }
+                ],
+                "header_file_name": [
+                    "ls_cholesky_solver_graph.hpp"
+                ],
+                "instance": "class",
+                "api_name": "xf::solver::aie::ls_cholesky_solver::ls_cholesky_solver_graph",
+                "ports": [
+                    {
+                        "direction": "input",
+                        "type": "port_array<input, TP_GRID_DIM * (TP_GRID_DIM + 1) / 2> xf::solver::aie::ls_cholesky_solver::ls_cholesky_solver_graph< TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_CASC_LEN >::A_in",
+                        "name": "A_in"
+                    },
+                    {
+                        "direction": "input",
+                        "type": "port_array<input, TP_GRID_DIM * (TP_GRID_DIM + 1) / 2> xf::solver::aie::ls_cholesky_solver::ls_cholesky_solver_graph< TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_CASC_LEN >::y_in",
+                        "name": "y_in"
+                    },
+                    {
+                        "direction": "output",
+                        "type": "port_array<output, TP_GRID_DIM> xf::solver::aie::ls_cholesky_solver::ls_cholesky_solver_graph< TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_CASC_LEN >::x_out",
+                        "name": "x_out"
+                    }
+                ],
+                "schema": "vitis_libraries_api_list_schema-1.0"
+            }
+        },
+        {
+            "api_name": "xf::solver::aie::mp_pseudoinverse_svd::mp_pseudoinverse_svd_graph",
+            "target_domain": "AIE",
+            "spec": {
+                "brief": "Moore-Penrose pseudoinverse of a matrix A.",
+                "search_paths": [
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
+                ],
+                "visible": true,
+                "target_domain": "AIE",
+                "display_name": "mp_pseudoinverse_svd_graph",
+                "parameters": [
+                    {
+                        "type": "typename",
+                        "name": "TT_DATA",
+                        "description": "Scalar data type: float or cfloat."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIM_ROWS",
+                        "description": "Number of rows of A."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIM_COLS",
+                        "description": "Number of columns of A (= number of singular values)."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_PASSES",
+                        "description": "Number of Jacobi sweep passes in the SVD (more = higher accuracy)."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_CASC_LEN",
+                        "description": "Must be 1."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_PASSES_SSR",
+                        "description": "Number of pass-pipeline stages in the internal SVD."
+                    }
+                ],
+                "header_file_name": [
+                    "mp_pseudoinverse_svd_graph.hpp"
+                ],
+                "instance": "class",
+                "api_name": "xf::solver::aie::mp_pseudoinverse_svd::mp_pseudoinverse_svd_graph",
+                "ports": [
+                    {
+                        "direction": "input",
+                        "type": "input_port xf::solver::aie::mp_pseudoinverse_svd::mp_pseudoinverse_svd_graph< TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CASC_LEN, TP_PASSES_SSR >::in",
+                        "name": "in"
+                    },
+                    {
+                        "direction": "output",
+                        "type": "output_port xf::solver::aie::mp_pseudoinverse_svd::mp_pseudoinverse_svd_graph< TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CASC_LEN, TP_PASSES_SSR >::out",
+                        "name": "out"
+                    }
+                ],
+                "schema": "vitis_libraries_api_list_schema-1.0"
+            }
         }
-
     ]
 }

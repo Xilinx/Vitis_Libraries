@@ -26,8 +26,6 @@ and therefore must be suitable for the aie compiler graph-level compilation.
 #include <array>
 #include "device_defs.h"
 #include "fir_utils.hpp"
-#include "single_mul_out_types.hpp"
-#include "single_mul_acc_types.hpp"
 
 using namespace ::xf::dsp::aie;
 
@@ -51,6 +49,18 @@ template <>
 INLINE_DECL constexpr bool fnCheckDataType<cfloat>() {
     return true;
 };
+
+// accumulator type for TT_DATA x TT_DATA products (only float and cfloat are supported)
+template <typename TT>
+struct acc_t {
+    using type = accfloat;
+};
+template <>
+struct acc_t<cfloat> {
+    using type = caccfloat;
+};
+template <typename TT>
+using accType_t = typename acc_t<TT>::type;
 
 template <typename TT_DATA, unsigned int TP_DIM_ROWS, unsigned int TP_DIM_COLS, unsigned int TP_NUM_FRAMES>
 INLINE_DECL constexpr bool fnCheckBufferSize() {

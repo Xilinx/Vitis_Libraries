@@ -33,6 +33,7 @@ NUM_OF_SAMPLES = $(shell echo $$(( $(NUM_PORTS) * $(INPUT_WINDOW_VSIZE) )) )
 LAST_PORT = $(shell echo $$(( $(GRID_DIM) - 1 )))_$(shell echo $$(( $(GRID_DIM) - 1 )))
 DATA_SEED ?= 0
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
+STATUS_JSON = ./logs/status_$(UUT_KERNEL)_$(PARAMS).json
 SPLIT_ZIP_FILE ?=
 
 TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" | head -n 1)
@@ -70,11 +71,16 @@ diff:
 	if [ "$(DIAG_INV)" = "0" ]; then \
 		$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/validation_tests/test_cholesky.py --A ./data/input.txt --L ./data/ref_output.txt --dim_size $(DIM_SIZE) --data_type $(DATA_TYPE) --num_frames $(NUM_FRAMES) --niter $(NITER) --model_ut "Ref"; \
 	fi
+	$(VITIS_PYTHON3) $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py functional_check $(STATUS_JSON) ./logs/diff.txt
 
 get_status:
 	tclsh $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP) $(EXTRA_PARAM_MAP)
+	$(VITIS_PYTHON3) $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py init $(STATUS_JSON) UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP) $(EXTRA_PARAM_MAP)
+
+get_memory:
+	$(VITIS_PYTHON3) $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py harvest $(STATUS_JSON) $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts Work
 
 get_latency:
 	sh $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT)
-
 	$(VITIS_PYTHON3) $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/get_qor.py -t_in_file T_input_$(LAST_PORT).txt -t_out_file uut_output_$(LAST_PORT).txt -status_file_dir $(STATUS_FILE) -num_of_samples $(NUM_OF_SAMPLES) -niter $(NITER) -use_outputs_if_no_inputs False -casc_len $(CASC_LEN) -aiesim_out_dir ./aiesimulator_output -ip cholesky
+	$(VITIS_PYTHON3) $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py qor $(STATUS_JSON) Work $(NITER) $(NUM_FRAMES) T_input_ uut_output_ 64 $(DATA_TYPE) --verbose

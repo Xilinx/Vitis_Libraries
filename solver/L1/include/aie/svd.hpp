@@ -32,8 +32,6 @@ Graph-scoped scratch buffer avoids stack spilling for working arrays.
 
 #include "svd_traits.hpp"
 #include "aie_api/aie.hpp"
-#include "single_mul_out_types.hpp"
-#include "single_mul_acc_types.hpp"
 
 using namespace adf;
 namespace xf {
@@ -115,6 +113,7 @@ template <typename TT_DATA,
           unsigned int TP_DIM_COLS,
           unsigned int TP_PASSES,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_DIAG_INV,
           unsigned int TP_KERNEL_POSITION>
 class SVDecomposition {
    public:
@@ -142,6 +141,7 @@ template <typename TT_DATA,
           unsigned int TP_DIM_COLS,
           unsigned int TP_PASSES,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_DIAG_INV,
           unsigned int TP_KERNEL_POSITION>
 class SVDecomposition_First {
    public:
@@ -171,6 +171,7 @@ template <typename TT_DATA,
           unsigned int TP_DIM_COLS,
           unsigned int TP_PASSES,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_DIAG_INV,
           unsigned int TP_KERNEL_POSITION>
 class SVDecomposition_Middle {
    public:
@@ -200,6 +201,7 @@ template <typename TT_DATA,
           unsigned int TP_DIM_COLS,
           unsigned int TP_PASSES,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_DIAG_INV,
           unsigned int TP_KERNEL_POSITION>
 class SVDecomposition_Last {
    public:
@@ -214,6 +216,173 @@ class SVDecomposition_Last {
     }
 
     void svdMain(input_buffer<TT_DATA>& __restrict inWindow,
+                 input_stream<TT_DATA>* inStream,
+                 output_buffer<TT_DATA>& __restrict outUWindow,
+                 output_buffer<T_outSDataType>& __restrict outSWindow,
+                 output_buffer<TT_DATA>& __restrict outVWindow,
+                 output_stream<TT_DATA>* outStream);
+};
+
+// =====================================================================
+// Pass-pipelined kernels (TP_PASSES_SSR): each kernel executes exactly ONE
+// Jacobi sweep over the FULL matrix (no row split) and forwards U/V to the
+// next kernel via plain window buffers (no stream/ring). Structurally
+// identical regardless of pipeline position, so — unlike the row-cascade
+// kernels above — no TP_CASC_LEN/TP_KERNEL_POSITION template parameters are
+// needed. These helpers are also reused by svd_graph's TP_CASC_LEN=1
+// pass-pipeline stages.
+// =====================================================================
+
+// First pass kernel: initializes U/V from the raw input matrix, then runs one sweep.
+template <typename TT_DATA, unsigned int TP_DIM_ROWS, unsigned int TP_DIM_COLS>
+class SVDecomposition_PassFirst {
+   public:
+    static constexpr unsigned int kScratchSize = SvdScratchSize<TT_DATA, TP_DIM_COLS>::kSize;
+    float (&scratchBuf)[kScratchSize];
+
+    SVDecomposition_PassFirst(float (&buf)[kScratchSize]) : scratchBuf(buf) {}
+
+    static void registerKernelClass() {
+        REGISTER_FUNCTION(SVDecomposition_PassFirst::svdMain);
+        REGISTER_PARAMETER(scratchBuf);
+    }
+
+    void svdMain(input_buffer<TT_DATA>& __restrict inWindow,
+                 output_buffer<TT_DATA>& __restrict outUWindow,
+                 output_buffer<TT_DATA>& __restrict outVWindow);
+};
+
+// Middle pass kernel: copies incoming U/V state into its working buffers, runs one
+// sweep, forwards the result.
+template <typename TT_DATA, unsigned int TP_DIM_ROWS, unsigned int TP_DIM_COLS>
+class SVDecomposition_PassMiddle {
+   public:
+    static constexpr unsigned int kScratchSize = SvdScratchSize<TT_DATA, TP_DIM_COLS>::kSize;
+    float (&scratchBuf)[kScratchSize];
+
+    SVDecomposition_PassMiddle(float (&buf)[kScratchSize]) : scratchBuf(buf) {}
+
+    static void registerKernelClass() {
+        REGISTER_FUNCTION(SVDecomposition_PassMiddle::svdMain);
+        REGISTER_PARAMETER(scratchBuf);
+    }
+
+    void svdMain(input_buffer<TT_DATA>& __restrict inUWindow,
+                 input_buffer<TT_DATA>& __restrict inVWindow,
+                 output_buffer<TT_DATA>& __restrict outUWindow,
+                 output_buffer<TT_DATA>& __restrict outVWindow);
+};
+
+// Finalize kernel: no sweep. Normalizes U, extracts S, sorts, compacts V.
+template <typename TT_DATA, unsigned int TP_DIM_ROWS, unsigned int TP_DIM_COLS>
+class SVDecomposition_PassFinalize {
+   public:
+    static void registerKernelClass() { REGISTER_FUNCTION(SVDecomposition_PassFinalize::svdMain); }
+
+    void svdMain(input_buffer<TT_DATA>& __restrict inUWindow,
+                 input_buffer<TT_DATA>& __restrict inVWindow,
+                 output_buffer<TT_DATA>& __restrict outUWindow,
+                 output_buffer<T_outSDataType>& __restrict outSWindow,
+                 output_buffer<TT_DATA>& __restrict outVWindow);
+};
+
+// =====================================================================
+// Two-dimensional pass/cascade kernels.
+//
+// A pass stage contains TP_CASC_LEN row-partitioned kernels connected in
+// the same reduction ring as the legacy cascade. Adjacent pass stages are
+// connected by U/S/V windows. TP_STAGE_PASSES sweeps are executed by each
+// stage; only the last stage performs normalization/sorting/compaction.
+// =====================================================================
+template <typename TT_DATA,
+          unsigned int TP_DIM_ROWS,
+          unsigned int TP_DIM_COLS,
+          unsigned int TP_STAGE_PASSES,
+          unsigned int TP_DIAG_INV,
+          bool TP_FINAL_STAGE>
+class SVDecomposition_2D_RawSingle {
+   public:
+    static constexpr unsigned int kScratchSize = SvdScratchSize<TT_DATA, TP_DIM_COLS>::kSize;
+    float (&scratchBuf)[kScratchSize];
+    SVDecomposition_2D_RawSingle(float (&buf)[kScratchSize]) : scratchBuf(buf) {}
+    static void registerKernelClass() {
+        REGISTER_FUNCTION(SVDecomposition_2D_RawSingle::svdMain);
+        REGISTER_PARAMETER(scratchBuf);
+    }
+    void svdMain(input_buffer<TT_DATA>& __restrict inWindow,
+                 output_buffer<TT_DATA>& __restrict outUWindow,
+                 output_buffer<T_outSDataType>& __restrict outSWindow,
+                 output_buffer<TT_DATA>& __restrict outVWindow);
+};
+
+template <typename TT_DATA,
+          unsigned int TP_DIM_ROWS,
+          unsigned int TP_DIM_COLS,
+          unsigned int TP_STAGE_PASSES,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_DIAG_INV,
+          bool TP_FINAL_STAGE>
+class SVDecomposition_2D_RawCasc {
+   public:
+    static constexpr unsigned int kScratchSize = SvdScratchSize<TT_DATA, TP_DIM_COLS>::kSize;
+    float (&scratchBuf)[kScratchSize];
+    SVDecomposition_2D_RawCasc(float (&buf)[kScratchSize]) : scratchBuf(buf) {}
+    static void registerKernelClass() {
+        REGISTER_FUNCTION(SVDecomposition_2D_RawCasc::svdMain);
+        REGISTER_PARAMETER(scratchBuf);
+    }
+    void svdMain(input_buffer<TT_DATA>& __restrict inWindow,
+                 input_stream<TT_DATA>* inStream,
+                 output_buffer<TT_DATA>& __restrict outUWindow,
+                 output_buffer<T_outSDataType>& __restrict outSWindow,
+                 output_buffer<TT_DATA>& __restrict outVWindow,
+                 output_stream<TT_DATA>* outStream);
+};
+
+template <typename TT_DATA,
+          unsigned int TP_DIM_ROWS,
+          unsigned int TP_DIM_COLS,
+          unsigned int TP_STAGE_PASSES,
+          unsigned int TP_DIAG_INV,
+          bool TP_FINAL_STAGE>
+class SVDecomposition_2D_StateSingle {
+   public:
+    static constexpr unsigned int kScratchSize = SvdScratchSize<TT_DATA, TP_DIM_COLS>::kSize;
+    float (&scratchBuf)[kScratchSize];
+    SVDecomposition_2D_StateSingle(float (&buf)[kScratchSize]) : scratchBuf(buf) {}
+    static void registerKernelClass() {
+        REGISTER_FUNCTION(SVDecomposition_2D_StateSingle::svdMain);
+        REGISTER_PARAMETER(scratchBuf);
+    }
+    void svdMain(input_buffer<TT_DATA>& __restrict inUWindow,
+                 input_buffer<T_outSDataType>& __restrict inSWindow,
+                 input_buffer<TT_DATA>& __restrict inVWindow,
+                 output_buffer<TT_DATA>& __restrict outUWindow,
+                 output_buffer<T_outSDataType>& __restrict outSWindow,
+                 output_buffer<TT_DATA>& __restrict outVWindow);
+};
+
+template <typename TT_DATA,
+          unsigned int TP_DIM_ROWS,
+          unsigned int TP_DIM_COLS,
+          unsigned int TP_STAGE_PASSES,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_DIAG_INV,
+          bool TP_FINAL_STAGE>
+class SVDecomposition_2D_StateCasc {
+   public:
+    static constexpr unsigned int kScratchSize = SvdScratchSize<TT_DATA, TP_DIM_COLS>::kSize;
+    float (&scratchBuf)[kScratchSize];
+    SVDecomposition_2D_StateCasc(float (&buf)[kScratchSize]) : scratchBuf(buf) {}
+    static void registerKernelClass() {
+        REGISTER_FUNCTION(SVDecomposition_2D_StateCasc::svdMain);
+        REGISTER_PARAMETER(scratchBuf);
+    }
+    void svdMain(input_buffer<TT_DATA>& __restrict inUWindow,
+                 input_buffer<T_outSDataType>& __restrict inSWindow,
+                 input_buffer<TT_DATA>& __restrict inVWindow,
                  input_stream<TT_DATA>* inStream,
                  output_buffer<TT_DATA>& __restrict outUWindow,
                  output_buffer<T_outSDataType>& __restrict outSWindow,

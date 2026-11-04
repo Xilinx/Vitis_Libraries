@@ -1,0 +1,158 @@
+{
+    "schema": "vitis_library_api_spec_schema-1.0",
+    "api_name": "xf::solver::aie::ls_cholesky_solver::ls_cholesky_solver_graph",
+    "display_name": "ls_cholesky_solver_graph",
+    "header_file_name": "ls_cholesky_solver_graph.hpp",
+    "search_paths": [
+        "L1/include/aie",
+        "L1/src/aie",
+        "L1/tests/aie/inc",
+        "L1/tests/aie/src",
+        "L2/include/aie",
+        "L2/tests/aie/common/inc"
+    ],
+    "parameters": [
+        {
+            "name": "AIE_VARIANT",
+            "type": "uint",
+            "description": "specifies the device type",
+            "updater": {
+                "file": "ls_cholesky_solver.py",
+                "function": "update_AIE_VARIANT",
+                "args": []
+            },
+            "validator": {
+                "file": "ls_cholesky_solver.py",
+                "function": "validate_AIE_VARIANT",
+                "args": []
+            }
+        },
+        {
+            "name": "TT_DATA",
+            "description": "The type of individual data samples input to port.",
+            "type": "typename",
+            "enum": [
+                "float",
+                "cfloat"
+            ],
+            "updater": {
+                "file": "ls_cholesky_solver.py",
+                "function": "update_TT_DATA",
+                "args": [
+                    "AIE_VARIANT"
+                ]
+            },
+            "validator": {
+                "file": "ls_cholesky_solver.py",
+                "function": "validate_TT_DATA",
+                "args": [
+                    "AIE_VARIANT"
+                ]
+            }
+        },
+        {
+            "name": "TP_GRID_DIM",
+            "description": "The dimension size of the grid of kernels used to break up a matrix. Only 1 is supported.",
+            "type": "uint",
+            "test_max": 1,
+            "updater": {
+                "file": "ls_cholesky_solver.py",
+                "function": "update_TP_GRID_DIM",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA"
+                ]
+            },
+            "validator": {
+                "file": "ls_cholesky_solver.py",
+                "function": "validate_TP_GRID_DIM",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA"
+                ]
+            }
+        },
+        {
+            "name": "TP_DIM",
+            "description": "The dimension size of the square matrix A.",
+            "type": "uint",
+            "updater": {
+                "file": "ls_cholesky_solver.py",
+                "function": "update_TP_DIM",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_GRID_DIM"
+                ]
+            },
+            "validator": {
+                "file": "ls_cholesky_solver.py",
+                "function": "validate_TP_DIM",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_GRID_DIM"
+                ]
+            }
+        },
+        {
+            "name": "TP_NUM_FRAMES",
+            "description": "The number of matrices/vectors to process per invocation.",
+            "type": "uint",
+            "updater": {
+                "file": "ls_cholesky_solver.py",
+                "function": "update_TP_NUM_FRAMES",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_GRID_DIM",
+                    "TP_DIM"
+                ]
+            },
+            "validator": {
+                "file": "ls_cholesky_solver.py",
+                "function": "validate_TP_NUM_FRAMES",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_GRID_DIM",
+                    "TP_DIM"
+                ]
+            }
+        },
+        {
+            "name": "TP_CASC_LEN",
+            "description": "The number of kernels to be used to split up and cascade the workload of the internal Cholesky stage.",
+            "type": "uint",
+            "test_max": 10,
+            "updater": {
+                "file": "ls_cholesky_solver.py",
+                "function": "update_TP_CASC_LEN",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_GRID_DIM",
+                    "TP_DIM"
+                ]
+            },
+            "validator": {
+                "file": "ls_cholesky_solver.py",
+                "function": "validate_TP_CASC_LEN",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_GRID_DIM",
+                    "TP_DIM"
+                ]
+            }
+        }
+    ],
+    "ports": {
+        "file": "ls_cholesky_solver.py",
+        "function": "info_ports"
+    },
+    "generator": {
+        "file": "ls_cholesky_solver.py",
+        "function": "generate_graph"
+    }
+}

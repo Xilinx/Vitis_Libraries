@@ -106,6 +106,20 @@ The following is an example of load-splitting for a 32x32 matrix with a cascade 
     | #projections | 120 | 111 | 120 | 145 |
     +--------------+-----+-----+-----+-----+
 
+Data Layout and Row-Major Support
+-----------------------------------
+
+By default, input and output buffers use **column-major** layout. Row-major layout can be enabled independently for each buffer via the tiling template parameters:
+
+- ``TP_DIM_A_LEADING = 1`` — input matrix :math:`A` is supplied in row-major order.
+- ``TP_DIM_Q_LEADING = 1`` — output matrix :math:`Q` is returned in row-major order.
+- ``TP_DIM_R_LEADING = 1`` — output matrix :math:`R` is returned in row-major order.
+
+Set these to ``0`` (the default) for column-major operation.
+
+.. note::
+   Row-major tiling for ``cfloat`` data is not supported on AIE devices. For ``cfloat`` on AIE, all leading-dimension parameters must be set to ``0``.
+
 Padding
 -------
 
@@ -116,9 +130,9 @@ If a float input matrix of 5x5 is to be processed, the user must set ``TP_DIM_RO
 Constraints
 -----------
 
-Input matrix data must be provided in column-major form. The input matrix is assumed to be full rank for the QR decomposition to be valid.
+Input matrix data must be provided in column-major form by default. The input matrix is assumed to be full rank for the QR decomposition to be valid.
 
-The ``float`` data type supports row-major operation, but the ``cfloat`` data type supports only column-major operation. To enable row-major data reads and writes, set the ``DIM_A_LEADING``, ``DIM_Q_LEADING``, and ``DIM_R_LEADING`` template parameters to 1.
+The ``float`` data type supports row-major operation, but the ``cfloat`` data type supports only column-major operation. To enable row-major data reads and writes, set the ``TP_DIM_A_LEADING``, ``TP_DIM_Q_LEADING``, and ``TP_DIM_R_LEADING`` template parameters to 1. See "Data Layout and Row-Major Support" above for details.
 
 
 Code Example

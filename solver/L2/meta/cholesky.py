@@ -123,7 +123,8 @@ def update_TP_DIM(args):
     return fn_update_TP_DIM(AIE_VARIANT, TT_DATA, TP_GRID_DIM, TP_DIM)
 
 def fn_update_TP_DIM(AIE_VARIANT, TT_DATA, TP_GRID_DIM, TP_DIM):
-    kVecSampleNum = com.fnVecSampleNumMax(AIE_VARIANT, TT_DATA)
+    kKernelDim = TP_DIM // TP_GRID_DIM
+    kVecSampleNum = com.fnVecSampleNumGCD(AIE_VARIANT, TT_DATA, kKernelDim)
     io_samples_max_per_tile = com.k_data_memory_bytes[AIE_VARIANT] // com.sizeof(TT_DATA)
     max_dim_per_tile = com.FLOOR( int(sqrt(io_samples_max_per_tile)), kVecSampleNum )
     io_dim_min = TP_GRID_DIM * kVecSampleNum
@@ -147,11 +148,11 @@ def validate_TP_DIM(args):
     return fn_validate_dim_size(AIE_VARIANT, TT_DATA, TP_GRID_DIM, TP_DIM)
 
 def fn_validate_dim_size(AIE_VARIANT, TT_DATA, TP_GRID_DIM, TP_DIM):
-    kVecSampleNum = com.fnVecSampleNumMax(AIE_VARIANT, TT_DATA)
     kKernelDim = TP_DIM // TP_GRID_DIM
+    kVecSampleNum = com.fnVecSampleNumGCD(AIE_VARIANT, TT_DATA, kKernelDim)
 
-    if kKernelDim % kVecSampleNum != 0:
-        return com.isError("TP_DIM / TP_GRID_DIM should be a multiple of vecSampleNum.")
+    if kVecSampleNum == False:
+        return com.isError("TP_DIM / TP_GRID_DIM should be a multiple of minimum samples per vector.")
     if TP_DIM % TP_GRID_DIM != 0:
         return com.isError("TP_DIM must be a multiple of TP_GRID_DIM.")
     else:
@@ -273,24 +274,25 @@ def info_ports(args):
     TP_DIM = args["TP_DIM"]
     TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
     TP_GRID_DIM = args["TP_GRID_DIM"]
+    num_port_kernels = TP_GRID_DIM * (TP_GRID_DIM + 1) // 2
 
     portsIn = get_port_info(
         portname="in",
         dir="in",
         dataType=TT_DATA,
-        dim=TP_DIM,
+        dim=TP_DIM // TP_GRID_DIM,
         numFrames=TP_NUM_FRAMES,
         apiType="window",
-        vectorLength=TP_GRID_DIM * TP_GRID_DIM,
+        vectorLength=num_port_kernels,
     )
     portsOut = get_port_info(
         portname="out",
         dir="out",
         dataType=TT_DATA,
-        dim=TP_DIM,
+        dim=TP_DIM // TP_GRID_DIM,
         numFrames=TP_NUM_FRAMES,
         apiType="window",
-        vectorLength=TP_GRID_DIM * TP_GRID_DIM,
+        vectorLength=num_port_kernels,
     )
     return portsIn + portsOut
 
@@ -306,27 +308,29 @@ def generate_graph(graphname, args):
     TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
     TP_GRID_DIM = args["TP_GRID_DIM"]
     TP_CASC_LEN = args["TP_CASC_LEN"]
+    TP_DIAG_INV = args["TP_DIAG_INV"]
+    num_port_kernels = TP_GRID_DIM * (TP_GRID_DIM + 1) // 2
 
     # Use formatted multi-line string to avoid a lot of \n and \t
     code = f"""
 class {graphname} : public adf::graph {{
 public:
-  std::array<adf::port<input>, {TP_GRID_DIM * TP_GRID_DIM}> in;
-  std::array<adf::port<output>, {TP_GRID_DIM * TP_GRID_DIM}> out;
+  std::array<adf::port<input>, {num_port_kernels}> in;
+  std::array<adf::port<output>, {num_port_kernels}> out;
 
-  xf::dsp::aie::cholesky::cholesky_graph<
+  xf::solver::aie::cholesky::cholesky_graph<
     {TT_DATA}, //TT_DATA
     {TP_DIM}, //TP_DIM
     {TP_NUM_FRAMES}, //TP_NUM_FRAMES
     {TP_GRID_DIM}, //TP_GRID_DIM
     {TP_CASC_LEN}, //TP_CASC_LEN
+    {TP_DIAG_INV} //TP_DIAG_INV
   > cholesky;
 
   {graphname}() : cholesky() {{
-    adf::kernel *cholesky_kernels = cholesky.getKernels();
-    for (int i=0; i < {TP_GRID_DIM * TP_GRID_DIM}; i++) {{
+    for (int i=0; i < {num_port_kernels}; i++) {{
       adf::connect<> net_in(in[i], cholesky.in[i]);
-      adf::connect<> net_out(cholesky.out[0], out[i]);
+      adf::connect<> net_out(cholesky.out[i], out[i]);
     }}
   }}
 }};
@@ -342,6 +346,8 @@ public:
         "L1/src/aie",
         "L1/tests/aie/inc",
         "L1/tests/aie/src",
+        "../xf_dsp/L1/include/aie",
+        "../xf_dsp/L2/include/aie",
     ]
 
     return out

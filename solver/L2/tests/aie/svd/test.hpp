@@ -35,8 +35,18 @@ svd graph class.
 #ifndef UUT_GRAPH
 #define UUT_GRAPH svd_graph
 #endif
+#ifndef PASSES_SSR
+#define PASSES_SSR 1
+#endif
+#ifndef DIAG_INV
+#define DIAG_INV 0
+#endif
 
+#if defined(USING_UUT) && USING_UUT == 1
+#include "svd_native_generated_graph/svd_generated_graph.h"
+#else
 #include QUOTE(UUT_GRAPH.hpp)
+#endif
 
 using namespace adf;
 
@@ -65,6 +75,8 @@ class test_graph : public graph {
         printf("Dimension (rows)            = %d \n", DIM_ROWS);
         printf("Dimension (columns)            = %d \n", DIM_COLS);
         printf("Passes            = %d \n", PASSES);
+        printf("Pass pipeline len = %d \n", PASSES_SSR);
+        printf("Diagonal inverse    = %d \n", DIAG_INV);
         printf("Cascade len           = %d \n", CASC_LEN);
         printf("Number of inputs      = %d \n", CASC_LEN);
         printf("Number of outputs     = %d (U/S/V x CASC_LEN) \n", 3 * CASC_LEN);
@@ -75,7 +87,12 @@ class test_graph : public graph {
 
         printf("========================\n");
 
-        xf::solver::aie::svd::UUT_GRAPH<DATA_TYPE, DIM_ROWS, DIM_COLS, PASSES, CASC_LEN> svd_graph;
+#if defined(USING_UUT) && USING_UUT == 1
+        svd_native_generated_graph svd_graph;
+#else
+        xf::solver::aie::svd::UUT_GRAPH<DATA_TYPE, DIM_ROWS, DIM_COLS, PASSES, CASC_LEN, PASSES_SSR, DIAG_INV>
+            svd_graph;
+#endif
 
         for (int i = 0; i < CASC_LEN; i++) {
             std::string filenameIn = QUOTE(INPUT_FILE);

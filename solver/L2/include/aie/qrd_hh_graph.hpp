@@ -110,6 +110,18 @@ class create_casc_kernel_recur_qrd {
  *         call to this function.
  * @tparam TP_CASC_LEN selects the number of kernels the QRD will be split over to accomplish
  *         higher matrix sizes.
+ * @tparam TP_DIM_A_LEADING selects the leading dimension of the input matrix A. \n
+ *         When set to 0 (default), matrix A is read in column-major order. \n
+ *         When set to 1, matrix A is read in row-major order. \n
+ *         Row-major is not supported for the cfloat data type.
+ * @tparam TP_DIM_Q_LEADING selects the leading dimension of the output matrix Q. \n
+ *         When set to 0 (default), matrix Q is written in column-major order. \n
+ *         When set to 1, matrix Q is written in row-major order. \n
+ *         Row-major is not supported for the cfloat data type.
+ * @tparam TP_DIM_R_LEADING selects the leading dimension of the output matrix R. \n
+ *         When set to 0 (default), matrix R is written in column-major order. \n
+ *         When set to 1, matrix R is written in row-major order. \n
+ *         Row-major is not supported for the cfloat data type.
  **/
 
 template <typename TT_DATA,
@@ -195,14 +207,10 @@ class qrd_hh_graph : public graph {
     * No arguments required.
     **/
     kernel m_kernels[TP_CASC_LEN];
-    // kernel m_qkernels[TP_CASC_LEN];
-
     /**
      * Access function to get pointer to kernel.
      **/
-
-    kernel* getKernelsR() { return m_kernels; };
-    // kernel* getKernelsQ() { return m_qkernels; };
+    kernel* getKernels() { return m_kernels; };
 
     /**
      * @brief This is the constructor function for the qrd_hh graph.

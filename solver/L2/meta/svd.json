@@ -50,6 +50,7 @@
             "name": "TP_DIM_COLS",
             "description": "Column dimension of the input matrix.",
             "type": "uint",
+            "test_max": 512,
             "updater": {
                 "file": "svd.py",
                 "function": "update_TP_DIM_COLS",
@@ -65,6 +66,7 @@
             "name": "TP_DIM_ROWS",
             "description": "Row dimension of the input matrix.",
             "type": "uint",
+            "test_max": 512,
             "updater": {
                 "file": "svd.py",
                 "function": "update_TP_DIM_ROWS",
@@ -88,6 +90,7 @@
             "name": "TP_CASC_LEN",
             "description": "The number of cascaded kernels to be used to perform the function.",
             "type": "uint",
+            "test_max": 10,
             "validator": {
                 "file": "svd.py",
                 "function": "validate_TP_CASC_LEN",
@@ -103,6 +106,7 @@
             "name": "TP_PASSES",
             "description": "The number of operations per call to the kernel.",
             "type": "uint",
+            "test_max": 6,
             "updater": {
                 "file": "svd.py",
                 "function": "update_TP_PASSES",
@@ -113,7 +117,51 @@
                 "function": "validate_TP_PASSES",
                 "args": []
             }
-        }  
+        },
+        {
+            "name": "TP_PASSES_SSR",
+            "description": "Number of pass-pipeline stages. Values up to TP_PASSES must divide TP_PASSES evenly. TP_PASSES + 1 creates TP_PASSES one-pass stages followed by a dedicated zero-pass finalization stage.",
+            "type": "uint",
+            "updater": {
+                "file": "svd.py",
+                "function": "update_TP_PASSES_SSR",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_DIM_ROWS",
+                    "TP_DIM_COLS",
+                    "TP_CASC_LEN",
+                    "TP_PASSES"
+                ]
+            },
+            "validator": {
+                "file": "svd.py",
+                "function": "validate_TP_PASSES_SSR",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA",
+                    "TP_DIM_ROWS",
+                    "TP_DIM_COLS",
+                    "TP_CASC_LEN",
+                    "TP_PASSES"
+                ]
+            }
+        },
+        {
+            "name": "TP_DIAG_INV",
+            "description": "Outputs singular values when set to 0 (default), or reciprocal singular values when set to 1.",
+            "type": "uint",
+            "updater": {
+                "file": "svd.py",
+                "function": "update_TP_DIAG_INV",
+                "args": []
+            },
+            "validator": {
+                "file": "svd.py",
+                "function": "validate_TP_DIAG_INV",
+                "args": []
+            }
+        }
     ],
     "ports": {
         "file": "svd.py",

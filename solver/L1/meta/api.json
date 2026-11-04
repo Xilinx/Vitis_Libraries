@@ -10,6 +10,7 @@
                 "display_name": "qrd",
                 "brief": "PL kernel for QR decomposition cfloat version.",
                 "lifecycle_status": "production",
+                "target_domain": "PL",
                 "header_file_name": [
                     "qrd.hpp"
                 ],
@@ -18,13 +19,14 @@
                     "L1/include/hw"
                 ],
                 "source_file_name": "L1/tests/qrd/src/qrd.cpp",
+                "instance": "function",
                 "parameters": [
                     {
                         "name": "RowsA",
                         "type": "int",
                         "description": "Row numbers of matrix A",
-                        "minimum": "8",
-                        "maximum": "1024",
+                        "minimum": 8,
+                        "maximum": 1024,
                         "enum": [
                             "1024",
                             "512",
@@ -35,8 +37,8 @@
                         "name": "ColsA",
                         "type": "int",
                         "description": "Column numbers of matrix A",
-                        "minimum": "2",
-                        "maximum": "256",
+                        "minimum": 2,
+                        "maximum": 256,
                         "enum": [
                             "256",
                             "128",
@@ -47,8 +49,8 @@
                         "name": "PowUnroll",
                         "type": "int",
                         "description": "Power2 of RowsA Size, default power2(10) = 1024",
-                        "minimum": "1",
-                        "maximum": "10",
+                        "minimum": 1,
+                        "maximum": 10,
                         "enum": [
                             "10",
                             "9",
@@ -58,8 +60,8 @@
                     {
                         "name": "PowFoldRow",
                         "type": "int",
-                        "minimum": "2",
-                        "maximum": "2",
+                        "minimum": 2,
+                        "maximum": 2,
                         "enum": [
                             "2"
                         ],
@@ -68,8 +70,8 @@
                     {
                         "name": "PowNCU",
                         "type": "int",
-                        "minimum": "1",
-                        "maximum": "5",
+                        "minimum": 1,
+                        "maximum": 5,
                         "enum": [
                             "5",
                             "2",
@@ -94,7 +96,7 @@
                     },
                     {
                         "name": "R_strm",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream<hls::x_complex<T> >&"
                     }
                 ],
@@ -111,6 +113,7 @@
                 "display_name": "qrd_float",
                 "brief": "PL kernel for QR decomposition float version.",
                 "lifecycle_status": "production",
+                "target_domain": "PL",
                 "header_file_name": [
                     "qrdfloat.hpp"
                 ],
@@ -119,13 +122,14 @@
                     "L1/include/hw"
                 ],
                 "source_file_name": "L1/tests/qrd_float/src/qrd.cpp",
+                "instance": "function",
                 "parameters": [
                     {
                         "name": "RowsA",
                         "type": "int",
                         "description": "Row numbers of matrix A",
-                        "minimum": "8",
-                        "maximum": "1024",
+                        "minimum": 8,
+                        "maximum": 1024,
                         "enum": [
                             "1024",
                             "512",
@@ -136,8 +140,8 @@
                         "name": "ColsA",
                         "type": "int",
                         "description": "Column numbers of matrix A",
-                        "minimum": "2",
-                        "maximum": "256",
+                        "minimum": 2,
+                        "maximum": 256,
                         "enum": [
                             "256",
                             "128",
@@ -148,8 +152,8 @@
                         "name": "PowUnroll",
                         "type": "int",
                         "description": "Power2 of RowsA Size, default power2(10) = 1024",
-                        "minimum": "1",
-                        "maximum": "10",
+                        "minimum": 1,
+                        "maximum": 10,
                         "enum": [
                             "10",
                             "9",
@@ -159,8 +163,8 @@
                     {
                         "name": "PowFoldRow",
                         "type": "int",
-                        "minimum": "2",
-                        "maximum": "2",
+                        "minimum": 2,
+                        "maximum": 2,
                         "enum": [
                             "2"
                         ],
@@ -169,8 +173,8 @@
                     {
                         "name": "PowNCU",
                         "type": "int",
-                        "minimum": "1",
-                        "maximum": "5",
+                        "minimum": 1,
+                        "maximum": 5,
                         "enum": [
                             "5",
                             "2",
@@ -195,7 +199,7 @@
                     },
                     {
                         "name": "R_strm",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "hls::stream<T >&"
                     }
                 ],
@@ -671,6 +675,7 @@
                 "display_name": "cholesky",
                 "brief": "PL kernel for cholesky decomposition.",
                 "lifecycle_status": "production",
+                "target_domain": "PL",
                 "header_file_name": [
                     "cholesky.hpp"
                 ],
@@ -678,6 +683,7 @@
                     "L1/include/hw"
                 ],
                 "source_file_name": "L1/tests/cholesky/kernel/kernel_cholesky_0.cpp",
+                "instance": "function",
                 "parameters": [
                     {
                         "name": "LowerTriangularL",
@@ -688,8 +694,8 @@
                         "name": "RowsColsA",
                         "type": "int",
                         "description": "Defines the matrix dimensions",
-                        "minimum": "3",
-                        "maximum": "64"
+                        "minimum": 3,
+                        "maximum": 64
                     },
                     {
                         "name": "InputType",
@@ -736,6 +742,7 @@
                 "display_name": "choleskyInverse",
                 "brief": "PL kernel for choleskyInverse.",
                 "lifecycle_status": "production",
+                "target_domain": "PL",
                 "header_file_name": [
                     "cholesky_inverse.hpp"
                 ],
@@ -744,13 +751,14 @@
                     "L1/include/hw"
                 ],
                 "source_file_name": "L1/tests/cholesky_inverse/kernel/kernel_cholesky_inverse_0.cpp",
+                "instance": "function",
                 "parameters": [
                     {
                         "name": "RowsColsA",
                         "type": "int",
                         "description": "Defines the matrix dimensions",
-                        "minimum": "3",
-                        "maximum": "64"
+                        "minimum": 3,
+                        "maximum": 64
                     },
                     {
                         "name": "InputType",
@@ -1354,6 +1362,7 @@
                 "display_name": "qrInverse",
                 "brief": "PL kernel for qrInverse.",
                 "lifecycle_status": "production",
+                "target_domain": "PL",
                 "header_file_name": [
                     "qr_inverse.hpp"
                 ],
@@ -1362,13 +1371,14 @@
                     "L1/include/hw"
                 ],
                 "source_file_name": "L1/tests/qr_inverse/kernel/kernel_qr_inverse_0.cpp",
+                "instance": "function",
                 "parameters": [
                     {
                         "name": "RowsColsA",
                         "type": "int",
                         "description": "Defines the matrix dimensions",
-                        "minimum": "3",
-                        "maximum": "64"
+                        "minimum": 3,
+                        "maximum": 64
                     },
                     {
                         "name": "InputType",
@@ -2119,20 +2129,21 @@
                     "L1/include/hw"
                 ],
                 "source_file_name": "L1/tests/svd/kernel/kernel_svd_0.cpp",
+                "instance": "function",
                 "parameters": [
                     {
                         "name": "RowsA",
                         "type": "int",
                         "description": "Defines the matrix dimensions",
-                        "minimum": "3",
-                        "maximum": "64"
+                        "minimum": 3,
+                        "maximum": 64
                     },
                     {
                         "name": "ColsA",
                         "type": "int",
                         "description": "Defines the matrix Column dimension",
-                        "minimum": "3",
-                        "maximum": "64"
+                        "minimum": 3,
+                        "maximum": 64
                     },
                     {
                         "name": "InputType",
@@ -2196,6 +2207,7 @@
                     "L1/include/hw"
                 ],
                 "source_file_name": "L1/tests/hw/cholesky_cfloat/kernel/kernel_cholesky_cfloat_0.cpp",
+                "instance": "function",
                 "parameters": [
                     {
                         "name": "LowerTriangularL",
@@ -2210,8 +2222,8 @@
                         "name": "DIM",
                         "type": "int",
                         "description": "Defines the dimension of Hermitian/symmetric positive matrix",
-                        "minimum": "4",
-                        "maximum": "512"
+                        "minimum": 4,
+                        "maximum": 512
                     },
                     {
                         "name": "InputType",
@@ -2261,13 +2273,14 @@
                     "L1/include/hw"
                 ],
                 "source_file_name": "L1/tests/hw/block_cholesky_cfloat/kernel/kernel_block_cholesky_cfloat_0.cpp",
+                "instance": "function",
                 "parameters": [
                     {
                         "name": "N",
                         "type": "int",
                         "description": "Defines the input matrix dimension. Supported configurations are 128 and 256.",
-                        "minimum": "128",
-                        "maximum": "256",
+                        "minimum": 128,
+                        "maximum": 256,
                         "enum": [
                             "256",
                             "128"
@@ -2277,8 +2290,8 @@
                         "name": "B",
                         "type": "int",
                         "description": "Defines the square block size used by the blocked Cholesky algorithm.",
-                        "minimum": "32",
-                        "maximum": "32",
+                        "minimum": 32,
+                        "maximum": 32,
                         "enum": [
                             "32"
                         ]
@@ -2287,7 +2300,7 @@
                 "ports": [
                     {
                         "name": "A",
-                        "direction": "input/output",
+                        "direction": "inout",
                         "type": "std::complex<float> A[N][N]"
                     }
                 ],
@@ -2310,62 +2323,63 @@
                     "L1/include/hw"
                 ],
                 "source_file_name": "L1/tests/hw/matrixMultiply_cfloat/kernel/kernel_matrixMultiply_cfloat_0.cpp",
+                "instance": "function",
                 "parameters": [
                     {
                         "name": "RowsA",
                         "type": "int",
                         "description": "Defines the matrixA rows number",
-                        "minimum": "4",
-                        "maximum": "512"
+                        "minimum": 4,
+                        "maximum": 512
                     },
                     {
                         "name": "ColsA",
                         "type": "int",
                         "description": "Defines the matrixA columns number",
-                        "minimum": "4",
-                        "maximum": "512"
+                        "minimum": 4,
+                        "maximum": 512
                     },
                     {
                         "name": "RowsB",
                         "type": "int",
                         "description": "Defines the matrixB rows number",
-                        "minimum": "4",
-                        "maximum": "512"
+                        "minimum": 4,
+                        "maximum": 512
                     },
                     {
                         "name": "ColsB",
                         "type": "int",
                         "description": "Defines the matrixB columns number",
-                        "minimum": "4",
-                        "maximum": "512"
+                        "minimum": 4,
+                        "maximum": 512
                     },
                     {
                         "name": "RowsC",
                         "type": "int",
                         "description": "Defines the matrixC rows number",
-                        "minimum": "4",
-                        "maximum": "512"
+                        "minimum": 4,
+                        "maximum": 512
                     },
                     {
                         "name": "ColsC",
                         "type": "int",
                         "description": "Defines the matrixC columns number",
-                        "minimum": "4",
-                        "maximum": "512"
+                        "minimum": 4,
+                        "maximum": 512
                     },
                     {
                         "name": "TILE_SIZE",
                         "type": "int",
                         "description": "Defines the dimensition of blocks in the block matrix multiplication algorithm",
-                        "minimum": "4",
-                        "maximum": "32"
+                        "minimum": 4,
+                        "maximum": 32
                     },
                     {
                         "name": "BLK",
                         "type": "int",
                         "description": "Defines the number of rows when loading matrix input memory",
-                        "minimum": "4",
-                        "maximum": "512"
+                        "minimum": 4,
+                        "maximum": 512
                     },
                     {
                         "name": "InputType",
@@ -2420,34 +2434,35 @@
                     "L1/include/hw"
                 ],
                 "source_file_name": "L1/tests/hw/gemv_cfloat/kernel/kernel_gemv_cfloat_0.cpp",
+                "instance": "function",
                 "parameters": [
                     {
                         "name": "RowsA",
                         "type": "int",
                         "description": "Defines the matrixA rows number",
-                        "minimum": "4",
-                        "maximum": "512"
+                        "minimum": 4,
+                        "maximum": 512
                     },
                     {
                         "name": "ColsA",
                         "type": "int",
                         "description": "Defines the matrixA columns number",
-                        "minimum": "4",
-                        "maximum": "512"
+                        "minimum": 4,
+                        "maximum": 512
                     },
                     {
                         "name": "BR",
                         "type": "int",
                         "description": "Defines the rows number of block matrix in the block matrix vector multiplication algorithm",
-                        "minimum": "4",
-                        "maximum": "32"
+                        "minimum": 4,
+                        "maximum": 32
                     },
                     {
                         "name": "BC",
                         "type": "int",
                         "description": "Defines the columns number of block matrix in the block matrix vector multiplication algorithm",
-                        "minimum": "4",
-                        "maximum": "512"
+                        "minimum": 4,
+                        "maximum": 512
                     },
                     {
                         "name": "InputType",

@@ -1,0 +1,1 @@
+make all AIE_VARIANT=[1] DATA_TYPE=[float,cfloat] TP_DIM=[2,4,6,8,10,12] TP_NUM_FRAMES=[1] GRID_DIM=[1,2,3,4] CASC_LEN=[1] NITER=6 TARGET=[x86sim,hw]

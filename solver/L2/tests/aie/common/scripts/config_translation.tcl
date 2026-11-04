@@ -60,6 +60,7 @@ proc get_param_map {libElement} {
         "DIM_SIZE_A" "TP_DIM_A"
         "DIM_SIZE_B" "TP_DIM_B"
         "PASSES" "TP_PASSES"
+        "PASSES_SSR" "TP_PASSES_SSR"
         "P_SHIFT" "TP_SHIFT"
         "P_ROUND_MODE" "TP_RND"
         "P_DIM_A_LEADING" "TP_DIM_A_LEADING"
@@ -132,6 +133,7 @@ proc get_param_map {libElement} {
         "L_LEADING" "TP_L_LEADING"
         "DIAG_INV" "TP_DIAG_INV"
         "SORT" "TP_SORT"
+        "CC_TOLERANCE" ""
     }
     return $param_map
 }

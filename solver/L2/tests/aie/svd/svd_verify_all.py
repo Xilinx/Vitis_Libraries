@@ -18,28 +18,6 @@ import argparse
 from pathlib import Path
 
 
-def get_padded_dims(cols, data_type, aie_variant=1):
-    """Compute internal padding dimensions matching the kernel.
-
-    The kernel uses two internal column counts:
-      cols_sched:  next even number >= cols
-      cols_padded: next multiple of kVecSize >= cols_sched
-
-    On AIE22 (aie_variant >= 22) the IO vector width is 512-bit, so
-    kVecSize doubles: 16 for float, 8 for cfloat.  S and U outputs are
-    padded to cols_padded; V is always compacted to cols x cols.
-    Output files contain padded data. The true TP_DIM_COLS values are in the
-    first cols columns/entries; the rest is padding (zeros / identity).
-    """
-    if aie_variant >= 22:
-        vec_size = 8 if data_type == 'cfloat' else 16
-    else:
-        vec_size = 4 if data_type == 'cfloat' else 8
-    cols_sched = cols + (cols % 2)
-    cols_padded = ((cols_sched + vec_size - 1) // vec_size) * vec_size
-    return cols_padded
-
-
 def read_config(config_path):
     """Read configuration from JSON file"""
     with open(config_path, 'r') as f:
@@ -51,6 +29,7 @@ def read_config(config_path):
         'rows': params['TP_DIM_ROWS'],
         'cols': params['TP_DIM_COLS'],
         'passes': params['TP_PASSES'],
+        'diag_inv': int(params.get('TP_DIAG_INV', 0)),
         'aie_variant': params.get('AIE_VARIANT', 1),
     }
 
@@ -123,8 +102,10 @@ def verify_svd(name, U, S, V, A_original, config, verbose=True):
         print(f"    Reconstruction: Frobenius={error_fro:.6e}, Max={error_max:.6e}, Rel={error_pct:.4f}%")
     
     # Check orthogonality: U^H * U ≈ I (conjugate transpose for complex)
-    # Use actual matrix column count (may differ from config['cols'] for economy SVD)
-    U_orth = np.linalg.norm(U.conj().T @ U - np.eye(U.shape[1]), 'fro')
+    # Only the first U_rank columns of U can be orthonormal; when rows < cols
+    # the rest are zero-padding.
+    U_rank = min(U.shape[0], U.shape[1])
+    U_orth = np.linalg.norm(U[:, :U_rank].conj().T @ U[:, :U_rank] - np.eye(U_rank), 'fro')
     V_orth = np.linalg.norm(V.conj().T @ V - np.eye(V.shape[1]), 'fro')
     
     if verbose:
@@ -191,6 +172,9 @@ def main():
                         help='V orthogonality threshold (default: 0.01). '
                              'Relax to ~0.05 for AIE-ML/AIE22 where 14-bit hardware '
                              'invsqrt causes accumulated V orthogonality error.')
+    parser.add_argument('--u_orth_tolerance', type=float, default=0.1,
+                        help='U orthogonality threshold for TP_PASSES>=2 (default: 0.1). '
+                             'Loose because convergence also depends on matrix size, not just passes.')
     args = parser.parse_args()
     
     base_dir = Path(args.base_dir)
@@ -218,18 +202,12 @@ def main():
     # For cfloat: files contain pairs of floats (real, imag) per element
     # Read as float32, then view as complex64
     file_dtype = np.float32  # Files always contain float32 values
-    matrix_dtype = np.complex64 if is_complex else np.float32
     # Number of float32 values per matrix element
     floats_per_elem = 2 if is_complex else 1
     
-    # Compute padded dimensions (must match kernel's internal padding)
-    cols_padded = get_padded_dims(cols, config['data_type'], config.get('aie_variant', 1))
-
     print(f"\nConfiguration: {rows}x{cols}, dtype={config['data_type']}, "
           f"complex={is_complex}, passes={config['passes']}")
-    if cols_padded != cols:
-        print(f"  Padding: cols_padded={cols_padded}")
-    
+
     # Read ALL data from files (concatenated across iterations)
     all_input_raw = read_all_data(data_dir / 'input.txt', file_dtype)
     all_U_raw = read_all_data(data_dir / 'uut_output_U.txt', file_dtype)
@@ -257,16 +235,13 @@ def main():
         all_U = all_U_raw
         all_V = all_V_raw
     
-    # Sizes in ELEMENTS (not floats)
-    # Output files use PADDED sizes (all buffers use cols_padded for DMA alignment).
-    # We extract the true sub-blocks below.
-    U_size_padded = rows * cols_padded     # Padded U output per iteration
-    S_size_padded = cols_padded            # Padded S output per iteration
-    V_size_padded = cols * cols            # V is always compacted to TP_DIM_COLS x TP_DIM_COLS
-    U_size = rows * cols                   # True input size per iteration
-    
-    # Infer niter from file sizes if possible (use padded size since output files are padded)
-    inferred_niter = len(all_U) // U_size_padded
+    # Sizes in ELEMENTS (not floats). Output files are true, unpadded size.
+    U_size = rows * cols   # U/input size per iteration
+    S_size = cols          # S size per iteration
+    V_size = cols * cols   # V size per iteration
+
+    # Infer niter from file sizes if possible
+    inferred_niter = len(all_U) // U_size
     if niter == 1 and inferred_niter > 1:
         print(f"\n  ℹ️  Detected {inferred_niter} iterations from file size, using --niter={niter}")
     
@@ -279,30 +254,43 @@ def main():
         print(f"ITERATION {it+1}/{niter}")
         print("="*70)
         
-        # Extract this iteration's data
-        # Input uses true size; outputs use padded sizes, then extract true sub-blocks.
+        # Extract this iteration's data (files are true, unpadded size)
         A_flat = extract_iteration(all_input, it, U_size)
         A = A_flat.reshape((rows, cols), order='F')
-        
-        # U: padded to rows × cols_padded, extract first cols columns
-        U_flat_padded = extract_iteration(all_U, it, U_size_padded)
-        U_uut_padded = U_flat_padded.reshape((rows, cols_padded), order='F')
-        U_uut = U_uut_padded[:, :cols]
-        
-        # S: padded to cols_padded, extract first cols values
-        S_uut_padded = extract_iteration(all_S, it, S_size_padded)
-        S_uut = S_uut_padded[:cols]
-        
-        # V: always compacted to cols × cols by the kernel (see svd.cpp V compaction step)
-        V_flat = extract_iteration(all_V, it, V_size_padded)
+
+        U_flat = extract_iteration(all_U, it, U_size)
+        U_uut = U_flat.reshape((rows, cols), order='F')
+
+        S_encoded = extract_iteration(all_S, it, S_size)
+        # TP_DIAG_INV=1 emits reciprocal singular values. Convert them back to
+        # sigma for reconstruction and comparison while preserving zeros.
+        if config['diag_inv']:
+            S_uut = np.divide(1.0, S_encoded, out=np.zeros_like(S_encoded), where=S_encoded > 0)
+        else:
+            S_uut = S_encoded
+
+        V_flat = extract_iteration(all_V, it, V_size)
         V_uut = V_flat.reshape((cols, cols), order='F')
-        
+
         U_uut_sorted, S_uut_sorted, V_uut_sorted = U_uut, S_uut, V_uut
+        if config['diag_inv']:
+            print(f"  UUT reciprocal singular values:      {S_encoded}")
         print(f"  UUT singular values (sorted):        {S_uut}")
         
         # Compute NumPy reference for this iteration
         # np.linalg.svd returns (U, S, V^H), so V = (V^H)^H = conj(V^H).T
-        U_np, S_np, Vt_np = np.linalg.svd(A, full_matrices=False)
+        if rows >= cols:
+            # Standard case: economy SVD already gives cols singular values/
+            # U columns and a cols x cols V, matching the kernel's shapes.
+            U_np, S_np, Vt_np = np.linalg.svd(A, full_matrices=False)
+        else:
+            # Wide matrix (rows < cols): pad U/S with zeros to match the
+            # kernel's rows x cols U and length-cols S buffers.
+            U_np_r, S_np_r, Vt_np = np.linalg.svd(A, full_matrices=True)
+            S_np = np.zeros(cols, dtype=S_np_r.dtype)
+            S_np[:rows] = S_np_r
+            U_np = np.zeros((rows, cols), dtype=U_np_r.dtype)
+            U_np[:, :rows] = U_np_r
         V_np = Vt_np.conj().T  # Works for both real (.conj() is no-op) and complex
         
         print(f"  NumPy singular values:               {S_np}")
@@ -325,35 +313,27 @@ def main():
         #   2. S non-negativity
         s_nonneg = np.all(S_uut_sorted >= 0)
         #   3. V orthonormality: V^T·V ≈ I (V is built from rotations on Identity → always good)
+        #      NOTE: weak alone -- V starts at Identity, so a sweep that never rotates
+        #      anything still passes this trivially. See U_orth below for the real check.
         v_orth_pass = uut_metrics['V_orth'] < args.v_orth_tolerance
-        
-        iter_pass = recon_pass and s_nonneg and v_orth_pass
-        
-        # U orthonormality: WARNING only (not a hard fail)
-        # U orthonormality depends on convergence (number of passes):
-        #   - Perfect (converged):  < 1e-06  (machine precision for float32)
-        #   - Good (3+ passes):     < 1e-03
-        #   - Acceptable (2 pass):  < 0.1
-        #   - Poor (1 pass):        ~1.0-3.0  (expected, not a bug)
-        # V orthonormality is always near-perfect (~1e-07) because V starts as
-        # Identity and Givens rotations preserve orthonormality exactly.
+
+        # U orthonormality: hard fail. U starts non-orthogonal (raw/normalized input
+        # columns), so it's the metric that actually distinguishes "converged" from
+        # "sweep never rotated anything" (~0.7-3.0).
         u_orth_val = uut_metrics['U_orth']
-        if u_orth_val < 1e-3:
-            u_orth_status = "✓ excellent"
-        elif u_orth_val < 0.1:
-            u_orth_status = "~ acceptable"
-        else:
-            u_orth_status = f"⚠ poor (needs more passes)"
-        
+        u_orth_pass = u_orth_val < args.u_orth_tolerance
+
+        iter_pass = recon_pass and s_nonneg and v_orth_pass and u_orth_pass
+
         checks = []
         checks.append(f"recon={'✓' if recon_pass else '✗'} {uut_metrics['error_pct']:.4f}%")
         checks.append(f"S≥0={'✓' if s_nonneg else '✗'}")
         checks.append(f"V_orth={'✓' if v_orth_pass else '✗'} {uut_metrics['V_orth']:.2e}")
-        
+        checks.append(f"U_orth={'✓' if u_orth_pass else '✗'} {u_orth_val:.2e}")
+
         status = "✅ PASS" if iter_pass else "❌ FAIL"
         print(f"  Iteration {it+1}: {status}  [{', '.join(checks)}]")
-        print(f"    U_orth={u_orth_val:.2e} ({u_orth_status})")
-        
+
         if not iter_pass:
             overall_pass = False
         
@@ -362,30 +342,9 @@ def main():
             'uut_metrics': uut_metrics,
             'np_metrics': np_metrics,
             'comparison': comp,
-            'passed': iter_pass
+            'passed': iter_pass,
+            'u_orth_pass': u_orth_pass,
         })
-    
-    print(f"\n{'='*70}")
-    print(f"Writing UUT outputs (overwriting files)")
-    print("="*70)
-    
-    sorted_U_all = []
-    sorted_S_all = []
-    sorted_V_all = []
-    
-    for it in range(niter):
-        U_flat_padded = extract_iteration(all_U, it, U_size_padded)
-        U_uut = U_flat_padded.reshape((rows, cols_padded), order='F')[:, :cols]
-        S_uut_padded = extract_iteration(all_S, it, S_size_padded)
-        S_uut = S_uut_padded[:cols]
-        V_flat_padded = extract_iteration(all_V, it, V_size_padded)
-        V_uut = V_flat_padded.reshape((cols, cols), order='F')
-        
-        U_s, S_s, V_s = U_uut, S_uut, V_uut  # always sorted by kernel
-        
-        sorted_U_all.extend(U_s.flatten(order='F'))
-        sorted_S_all.extend(S_s)
-        sorted_V_all.extend(V_s.flatten(order='F'))
     
     # Helper to write array as floats (handles complex by splitting to real/imag pairs)
     def flatten_to_floats(arr):
@@ -398,30 +357,7 @@ def main():
             return flat
         else:
             return np.array(arr, dtype=np.float32)
-    
-    u_floats = flatten_to_floats(sorted_U_all)
-    s_floats = np.array(sorted_S_all, dtype=np.float32)  # S is always real
-    v_floats = flatten_to_floats(sorted_V_all)
-    
-    with open(data_dir / 'uut_output_U.txt', 'w') as f:
-        for i in range(0, len(u_floats), 2):
-            chunk = u_floats[i:i+2]
-            f.write(' '.join([f'{v:.9e}' for v in chunk]) + ' \n')
-    
-    with open(data_dir / 'uut_output_S.txt', 'w') as f:
-        for i in range(0, len(s_floats), 2):
-            chunk = s_floats[i:i+2]
-            f.write(' '.join([f'{v:.9e}' for v in chunk]) + ' \n')
-    
-    with open(data_dir / 'uut_output_V.txt', 'w') as f:
-        for i in range(0, len(v_floats), 2):
-            chunk = v_floats[i:i+2]
-            f.write(' '.join([f'{v:.9e}' for v in chunk]) + ' \n')
-    
-    print(f"  ✓ uut_output_U.txt")
-    print(f"  ✓ uut_output_S.txt")
-    print(f"  ✓ uut_output_V.txt")
-    
+
     # Write NumPy reference for ALL iterations (concatenated)
     np_U_all = []
     np_S_all = []
@@ -485,7 +421,8 @@ def main():
             f.write(f"  UUT_VS_NUMPY_S_REL_PCT: {r['comparison']['s_rel_pct']:.6f}\n")
             f.write(f"  UUT_VS_NUMPY_U_REL_PCT: {r['comparison']['U_rel_pct']:.6f}\n")
             f.write(f"  UUT_VS_NUMPY_V_REL_PCT: {r['comparison']['V_rel_pct']:.6f}\n")
-            f.write(f"  UUT_ORTHOGONALITY_U: {r['uut_metrics']['U_orth']:.6e}\n")
+            f.write(f"  UUT_ORTHOGONALITY_U: {r['uut_metrics']['U_orth']:.6e} "
+                    f"({'pass' if r['u_orth_pass'] else 'FAIL'})\n")
             f.write(f"  UUT_ORTHOGONALITY_V: {r['uut_metrics']['V_orth']:.6e}\n")
             f.write(f"  RESULT: {'pass' if r['passed'] else 'fail'}\n\n")
         

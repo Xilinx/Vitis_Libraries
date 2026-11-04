@@ -164,7 +164,9 @@ class cholesky_grid_recur {
  * @tparam TP_GRID_DIM describes the length of one dimension of the tiling scheme used to divide up the input matrix. \n
  *         This allows support for larger matrices than can fit on a single kernel. \n
  *         The number of kernels is TP_GRID_DIM * (TP_GRID_DIM+1) / 2. \n
- * @tparam TP_CASC_LEN describes the depth of the cascade chain to increase throughput.
+ * @tparam TP_CASC_LEN describes the depth of the cascade chain to increase throughput. \n
+ * @tparam TP_DIAG_INV describes whether to perform diagonal inversion which can improve performance when chained with
+ *         a Substitution that expects an inverted input. Must be either 0 or 1. \n
  **/
 template <typename TT_DATA,
           unsigned int TP_DIM,
@@ -180,13 +182,14 @@ class cholesky_graph : public graph {
     */
     static constexpr unsigned int kTotalMatrixSize = TP_DIM * TP_DIM;
     static constexpr unsigned int kKernelDim = TP_DIM / TP_GRID_DIM;
+    static constexpr unsigned int kVecSampleNum = fnVecSampleNumGCD<TT_DATA, kKernelDim>();
     static constexpr unsigned int kNumPortKernels = TP_GRID_DIM * (TP_GRID_DIM + 1) / 2;
     static constexpr unsigned int kKernelMatrixSize = kKernelDim * kKernelDim;
 
     static_assert(std::is_same<TT_DATA, float>::value || std::is_same<TT_DATA, cfloat>::value,
                   "ERROR: TP_DATA must be either float or cfloat.");
-    static_assert(kKernelDim % fnVecSampleNum<TT_DATA>() == 0,
-                  "ERROR: kKernelDim must be a multiple of number of samples that can fit in a vector.");
+    static_assert(kKernelDim % kVecSampleNum == 0,
+                  "ERROR: kKernelDim must be a multiple of number of samples in a vector.");
     static_assert(
         kKernelMatrixSize* TP_NUM_FRAMES * sizeof(TT_DATA) <= __DATA_MEM_BYTES__,
         "ERROR: kKernelMatrixSize * TP_NUM_FRAMES * sizeof(TT_DATA) must be less than or equal to __DATA_MEM_BYTES__.");
@@ -236,14 +239,23 @@ class cholesky_graph : public graph {
      *     ←-----------------------→
      *        TP_CASC_LEN (Z-axis)
      **/
+    // The square XY layout is retained for backward compatibility with code that indexes kernels as [x][y][z].
+    // Only the lower-triangular XY positions are populated. A future incompatible API could flatten the first two
+    // dimensions to kNumPortKernels and avoid reserving the permanently unused upper-triangular positions.
     kernel m_kernels[TP_GRID_DIM][TP_GRID_DIM][TP_CASC_LEN];
     int depthMap[TP_GRID_DIM][TP_GRID_DIM];
     int activeGridOffsets[TP_CASC_LEN];
     /**
-    * Access function to get pointer to kernel (or first kernel in a chained configuration).
+    * Access function to the first kernel in the contiguous, row-major storage.
+    *
+    * @warning Flat pointer arithmetic depends on the toolchain preserving the contiguous layout of this
+    * multidimensional array. It also exposes reserved entries: upper-triangular XY positions are never populated,
+    * and cascade entries at or beyond depthMap[x][y] may be unused. Callers must not dereference those entries.
+    * Prefer direct [x][y][z] indexing when the logical coordinates are known.
+    *
     * No arguments required.
     **/
-    kernel* getKernels() { return m_kernels; };
+    kernel* getKernels() { return &m_kernels[0][0][0]; };
 
     /**
      * @brief This is the constructor function for the cholesky graph.

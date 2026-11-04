@@ -33,6 +33,7 @@ DIM_Q_LEADING ?= 0
 DIM_R_LEADING ?= 0
 
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
+STATUS_JSON = ./logs/status_$(UUT_KERNEL)_$(PARAMS).json
 PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) DATA_TYPE $(DATA_TYPE) DIM_ROWS $(DIM_ROWS) DIM_COLS $(DIM_COLS) NUM_FRAMES $(NUM_FRAMES) CASC_LEN $(CASC_LEN) DIM_A_LEADING $(DIM_A_LEADING) DIM_Q_LEADING $(DIM_Q_LEADING) DIM_R_LEADING $(DIM_R_LEADING)
 
 TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" | head -n 1)
@@ -90,12 +91,18 @@ get_diff:
 
 	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/validation_tests/test_qrd.py --A ./data/input_A.txt --Q ./data/ref_output_Q.txt --R ./data/ref_output_R.txt --dim_rows $(DIM_ROWS) --dim_cols $(DIM_COLS) --data_type $(DATA_TYPE) --dim_a_leading $(DIM_A_LEADING) --dim_q_leading $(DIM_Q_LEADING) --dim_r_leading $(DIM_R_LEADING) --num_frames $(NUM_FRAMES) --niter $(NITER) --model_ut "Ref"
 	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/validation_tests/test_qrd.py --A ./data/input_A.txt --Q ./data/uut_output_Q.txt --R ./data/ref_output_R.txt --dim_rows $(DIM_ROWS) --dim_cols $(DIM_COLS) --data_type $(DATA_TYPE) --dim_a_leading $(DIM_A_LEADING) --dim_q_leading $(DIM_Q_LEADING) --dim_r_leading $(DIM_R_LEADING)  --num_frames $(NUM_FRAMES) --niter $(NITER) --model_ut "UUT"
+	$(VITIS_PYTHON3) $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py functional_check $(STATUS_JSON) ./logs/diff.txt
 
 get_status:
 	tclsh $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)
+	$(VITIS_PYTHON3) $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py init $(STATUS_JSON) UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP) NITER $(NITER)
+
+get_memory:
+	$(VITIS_PYTHON3) $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py harvest $(STATUS_JSON) $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts Work
 
 get_latency:
 	$(VITIS_PYTHON3) $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/get_qor.py -t_in_file T_input_A_0.txt -t_out_file uut_output_Q_0.txt -status_file_dir $(STATUS_FILE) -num_of_samples $(WINDOW_VSIZE_Q) -niter $(NITER) -use_outputs_if_no_inputs False -casc_len $(CASC_LEN) -aiesim_out_dir ./aiesimulator_output -ip qrd
+	$(VITIS_PYTHON3) $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py qor $(STATUS_JSON) Work $(NITER) $(NUM_FRAMES) T_input_A_ uut_output_Q_ 64 $(DATA_TYPE) --verbose
 
 
 

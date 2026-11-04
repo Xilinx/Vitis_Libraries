@@ -13,6 +13,9 @@ API Reference Overview
 For all library elements, the recommended approach is to instantiate each library unit as a subgraph within your graph. Graph declarations are located in ``L2/include/aie/``. This section describes each library element's interface, including configuration parameters, constructor arguments, and ports.
 
 - `Cholesky <../../rst/group_cholesky_graph.html>`_
+- `Eigenvalue <../../rst/group_eigenvalue_graph.html>`_
+- `Least Squares Cholesky Solver <../../rst/group_ls_cholesky_solver_graph.html>`_
+- `Moore Penrose Pseudoinverse SVD<../../rst/group_mp_pseudoinverse_svd_graph.html>`_
 - `QRD <../../rst/group_qrd_graph.html>`_
 - `QRD_HH <../../rst/group_qrd_hh_graph.html>`_
 - `Substitution <../../rst/group_substitution_graph.html>`_

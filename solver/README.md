@@ -70,6 +70,6 @@ For more details of the Graph library, please refer to [Vitis Solver Library Doc
 
 ## License
 
- Copyright © 2019–2026 Advanced Micro Devices, Inc
+ Copyright (C) 2019-2026, Advanced Micro Devices, Inc.
 
 Terms and Conditions <https://www.amd.com/en/corporate/copyright>

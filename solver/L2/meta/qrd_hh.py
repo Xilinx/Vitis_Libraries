@@ -250,9 +250,11 @@ def update_TP_CASC_LEN(args):
     TP_DIM_ROWS = args["TP_DIM_ROWS"]
     TP_DIM_COLS = args["TP_DIM_COLS"]    
     TP_NUM_FRAMES = args["TP_NUM_FRAMES"]    
-    return fn_update_tp_casc_len(AIE_VARIANT, TT_DATA,  TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES)
+    TP_CASC_LEN = args["TP_CASC_LEN"] if "TP_CASC_LEN" in args and args["TP_CASC_LEN"] else 0
 
-def fn_update_tp_casc_len(AIE_VARIANT, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES):
+    return fn_update_tp_casc_len(AIE_VARIANT, TT_DATA,  TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN)
+
+def fn_update_tp_casc_len(AIE_VARIANT, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN):
 
     buffer_size= com.k_data_memory_bytes[AIE_VARIANT]
     buffer_size_sample = int(
@@ -274,6 +276,8 @@ def fn_update_tp_casc_len(AIE_VARIANT, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM
     param_dict = {}
     param_dict.update({"name": "TP_CASC_LEN"})
     param_dict.update({"enum": TP_CASC_LEN_legal_set})
+    param_dict.update({"actual": com.GET_CLOSEST(TP_CASC_LEN, TP_CASC_LEN_legal_set),})
+    
 
     return param_dict
 
@@ -473,6 +477,8 @@ def generate_graph(graphname, args):
     TP_DIM_A_LEADING = args["TP_DIM_A_LEADING"]
     TP_DIM_Q_LEADING = args["TP_DIM_Q_LEADING"]
     TP_DIM_R_LEADING = args["TP_DIM_R_LEADING"]
+    row_per_kernel = (TP_DIM_ROWS + TP_CASC_LEN - 1) // TP_CASC_LEN
+    casc_num_r = (TP_DIM_COLS + row_per_kernel - 1) // row_per_kernel
 
 
     # Use formatted multi-line string to avoid a lot of \n and \t
@@ -480,18 +486,17 @@ def generate_graph(graphname, args):
 class {graphname} : public adf::graph {{
 public:
   static constexpr unsigned int TP_CASC_LEN = {TP_CASC_LEN};
-  static constexpr unsigned int row_per_kernel = ceil({TP_DIM_ROWS}/TP_CASC_LEN);
-  static constexpr unsigned int casc_num_r = ceil({TP_DIM_COLS}/row_per_kernel);
+  static constexpr unsigned int row_per_kernel = {row_per_kernel};
+  static constexpr unsigned int casc_num_r = {casc_num_r};
 
   template <typename dir>
   using casc_port_array = std::array<adf::port<dir>, TP_CASC_LEN>;
-  using casc_port_array_r = std::array<adf::port<dir>, casc_num_r>;
 
   casc_port_array<input> inA;
   casc_port_array<output> outQ;
   casc_port_array<output> outR;
 
-  xf::dsp::aie::qrd_hh::qrd_hh_graph<
+  xf::solver::aie::qrd_hh::qrd_hh_graph<
     {TT_DATA}, //TT_DATA
     {TP_DIM_ROWS}, //TP_DIM_ROWS
     {TP_DIM_COLS}, //TP_DIM_COLS
@@ -503,15 +508,14 @@ public:
   > qrd_hh;
 
   {graphname}() : qrd_hh() {{
-    adf::kernel *qrd_hh_kernels = qrd_hh.getKernels();
 
     for (int i=0; i < TP_CASC_LEN; i++) {{
       unsigned int kRrowsDistributed = i*({int(TP_DIM_ROWS/TP_CASC_LEN)});
       bool routEn = (kRrowsDistributed < {TP_DIM_COLS});
 
       adf::connect<> net_in(inA[i], qrd_hh.inA[i]);
-      adf::connect<> net_out(qrd_hh.outQ[i], outQ[i]);
-      if (routEn) {{adf::connect<> net_out(qrd_hh.outR[i], outR[i]);}}
+      adf::connect<> net_outQ(qrd_hh.outQ[i], outQ[i]);
+      if (routEn) {{adf::connect<> net_outR(qrd_hh.outR[i], outR[i]);}}
     }}
   }}
 
@@ -528,6 +532,8 @@ public:
         "L1/src/aie",
         "L1/tests/aie/inc",
         "L1/tests/aie/src",
+        "../xf_dsp/L1/include/aie",
+        "../xf_dsp/L2/include/aie",
     ]
 
     return out

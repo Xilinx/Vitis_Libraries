@@ -25,8 +25,6 @@ and therefore must be suitable for the aie compiler graph-level compilation.
 
 #include "device_defs.h"
 #include "fir_utils.hpp"
-#include "single_mul_out_types.hpp"
-#include "single_mul_acc_types.hpp"
 #include "aie_api/aie_adf.hpp"
 #include <adf.h>
 #include "qrd_hh_traits.hpp"
@@ -133,28 +131,28 @@ INLINE_DECL void mul_scalars<cfloat>(cfloat a, cfloat b, cfloat& val_out) {
 }
 
 template <typename T_A>
-INLINE_DECL void mul_vectors(::aie::accum<accTypeMult_t<T_A, T_A>, kMaxReadInBytes / sizeof(T_A)>& acc,
+INLINE_DECL void mul_vectors(::aie::accum<accType_t<T_A>, kMaxReadInBytes / sizeof(T_A)>& acc,
                              ::aie::vector<T_A, kMaxReadInBytes / sizeof(T_A)> va,
                              ::aie::vector<T_A, kMaxReadInBytes / sizeof(T_A)> vb) {
     acc = ::aie::mul(va, vb);
 }
 
 template <>
-INLINE_DECL void mul_vectors<cfloat>(::aie::accum<accTypeMult_t<cfloat, cfloat>, kMaxReadInBytes / sizeof(cfloat)>& acc,
+INLINE_DECL void mul_vectors<cfloat>(::aie::accum<accType_t<cfloat>, kMaxReadInBytes / sizeof(cfloat)>& acc,
                                      ::aie::vector<cfloat, kMaxReadInBytes / sizeof(cfloat)> va,
                                      ::aie::vector<cfloat, kMaxReadInBytes / sizeof(cfloat)> vb) {
     acc = ::aie::mul(::aie::op_conj(va), vb);
 }
 
 template <typename T_A>
-INLINE_DECL void mac_vectors(::aie::accum<accTypeMult_t<T_A, T_A>, kMaxReadInBytes / sizeof(T_A)>& acc,
+INLINE_DECL void mac_vectors(::aie::accum<accType_t<T_A>, kMaxReadInBytes / sizeof(T_A)>& acc,
                              ::aie::vector<T_A, kMaxReadInBytes / sizeof(T_A)> va,
                              ::aie::vector<T_A, kMaxReadInBytes / sizeof(T_A)> vb) {
     acc = ::aie::mac(acc, va, vb);
 }
 
 template <>
-INLINE_DECL void mac_vectors<cfloat>(::aie::accum<accTypeMult_t<cfloat, cfloat>, kMaxReadInBytes / sizeof(cfloat)>& acc,
+INLINE_DECL void mac_vectors<cfloat>(::aie::accum<accType_t<cfloat>, kMaxReadInBytes / sizeof(cfloat)>& acc,
                                      ::aie::vector<cfloat, kMaxReadInBytes / sizeof(cfloat)> va,
                                      ::aie::vector<cfloat, kMaxReadInBytes / sizeof(cfloat)> vb) {
     acc = ::aie::mac(acc, ::aie::op_conj(va), vb);

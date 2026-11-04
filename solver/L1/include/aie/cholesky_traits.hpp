@@ -18,6 +18,9 @@
 
 #include "device_defs.h"
 
+// Enable independent accumulators across unrolled elimination iterations.
+#define XF_SOLVER_CHOLESKY_USE_MULTI_ACCUMULATOR_ELIMINATIONS 0
+
 /*
 This file contains sets of overloaded, templatized and specialized templatized functions which
 encapsulate properties of the intrinsics used by the main kernal class. Specifically,
@@ -30,12 +33,23 @@ namespace solver {
 namespace aie {
 namespace cholesky {
 
-#define IDX(i, j) (i) * kNumVecsPerDim + (j)                    // 2D indexing for 1D inputs.
-#define DATA_VECT_T(TT) ::aie::vector<TT, fnVecSampleNum<TT>()> // Shortcut for defining vectors.
+#define IDX(i, j) (i) * kNumVecsPerDim + (j)                            // 2D indexing for 1D inputs.
+#define DATA_VECT_T(TT, kVecSampleNum) ::aie::vector<TT, kVecSampleNum> // Shortcut for defining vectors.
 
+// Number of distinct accumulators to use in unrolled k-loops. Bounded by the device's
+// floating-point accumulator budget (see __MAX_FLOAT_ACCS__/__MAX_CFLOAT_ACCS__ in
+// device_defs.h), but never more than the vector sample count. On AIE1 this keeps the
+// accumulator array small enough to fit the vector registers shared with data; on
+// AIE-ML/MLv2 the dedicated accumulator file is large, so the full sample count is used.
 template <typename TT>
-INLINE_DECL constexpr unsigned int fnVecSampleNum() {
-    return __MAX_READ_WRITE__ / 8 / sizeof(TT);
+INLINE_DECL constexpr unsigned int fnNumAccs() {
+#if XF_SOLVER_CHOLESKY_USE_MULTI_ACCUMULATOR_ELIMINATIONS
+    constexpr unsigned int kVecSampleNum = fnVecSampleNum<TT>();
+    constexpr unsigned int kMaxAccs = isComplex<TT>() ? __MAX_CFLOAT_ACCS__ : __MAX_FLOAT_ACCS__;
+    return (kVecSampleNum < kMaxAccs) ? kVecSampleNum : kMaxAccs;
+#else
+    return 1;
+#endif
 }
 
 template <typename TT>

@@ -1,0 +1,80 @@
+{
+    "low_level_file": "cholesky.json",
+    "ip_name": "vmc_cholesky",
+    "block_info": {
+        "label": "Cholesky",
+        "description": "Cholesky decomposition block targeted for AI Engines."
+    },
+    "parameters": [
+        {
+            "key": "AIE_VARIANT",
+            "name": "AIE_VARIANT",
+            "description": "Specifies the device type: 1-AIE, 2-AIE-ML, 22-AIE-ML-V2",
+            "default": 1,
+            "label": "AIE Variant:",
+            "tablabel": "Main",
+            "visible": "off",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TT_DATA",
+            "name": "data_type",
+            "description": "Type of idividual data samples of the input matrix ",
+            "default": "float",
+            "label": "Input data type:",
+            "tablabel": "Main",
+            "parameterType": "popup"
+        },
+        {
+            "key": "TP_DIM",
+            "name": "dim_matrix",
+            "description": "Length of one dimension of the matrix.",
+            "default": 16,
+            "label": "Length of matrix dimension:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_GRID_DIM",
+            "name": "grid_dimension",
+            "description": "Length of one dimension of the tiling scheme used to divide up the input matrix. This allows support for larger matrices than can fit on a single kernel. ",
+            "default": 1,
+            "label": "Length of tile dimension:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_NUM_FRAMES",
+            "name": "num_frames",
+            "description": "Number of matrices to decompose per call to the kernel.",
+            "default": 1,
+            "label": "Number of frames:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_CASC_LEN",
+            "name": "casc_length",
+            "description": "Number of kernels to be used to split up and cascade the workload.",
+            "default": 1,
+            "label": "Number of cascade stages:",
+            "tablabel": "Main",
+            "parameterType": "edit"
+        },
+        {
+            "key": "TP_DIAG_INV",
+            "name": "inversion_diag",
+            "description": "A specialization of the Cholesky which eliminates redundant calculations when used in series with the Substiution core (inversion_diag set to 0).",
+            "default": false,
+            "label": "Provide diagonal elements inverse",
+            "tablabel": "Main",
+            "parameterType": "checkbox"
+        }
+        
+    ],
+    "generator": {
+        "file": "vmc_cholesky.py",
+        "function": "vmc_generate_graph"
+    }
+    
+}

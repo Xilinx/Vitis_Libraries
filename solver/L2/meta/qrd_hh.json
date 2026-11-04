@@ -1,6 +1,6 @@
 {
     "schema": "vitis_library_api_spec_schema-1.0",
-    "api_name": "xf::dsp::aie::qrd_hh::qrd_hh_graph",
+    "api_name": "xf::solver::aie::qrd_hh::qrd_hh_graph",
     "display_name": "qrd_hh_graph",
     "header_file_name": "qrd_hh_graph.hpp",
     "search_paths": [
@@ -50,6 +50,7 @@
             "name": "TP_DIM_ROWS",
             "description": "Row dimension of the input matrix.",
             "type": "uint",
+            "test_max": 1024,
             "updater": {
                 "file": "qrd_hh.py",
                 "function": "update_TP_DIM_ROWS",
@@ -71,6 +72,7 @@
             "name": "TP_DIM_COLS",
             "description": "Column dimension of the input matrix.",
             "type": "uint",
+            "test_max": 1024,
             "updater": {
                 "file": "qrd_hh.py",
                 "function": "update_TP_DIM_COLS",
@@ -94,6 +96,7 @@
             "name": "TP_NUM_FRAMES",
             "description": "The number of operations per call to the kernel.",
             "type": "uint",
+            "test_max": 8,
             "updater": {
                 "file": "qrd_hh.py",
                 "function": "update_TP_NUM_FRAMES",
@@ -119,6 +122,7 @@
             "name": "TP_CASC_LEN",
             "description": "The number of cascaded kernels to be used to perform the function.",
             "type": "uint",
+            "test_max": 10,
             "validator": {
                 "file": "qrd_hh.py",
                 "function": "validate_TP_CASC_LEN",

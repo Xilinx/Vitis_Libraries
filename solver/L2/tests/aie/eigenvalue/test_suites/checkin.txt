@@ -1,0 +1,84 @@
+# Shared PR/nightly suite for eigenvalue (merged checkin + qor, duplicates removed).
+# Each case is selected for both x86sim and aiesim by the shared checkin selectors.
+# Control parameters and NITER do not count toward coverage; highest observed NITER wins.
+
+# ---- from checkin.txt ----
+# eigenvalue functional checkin suite
+#
+# Goal: verify the eigenvalues of a square matrix A, computed via Hessenberg
+#       reduction + shifted/deflated iterative QR, against a plain unshifted
+#       QR-algorithm reference across all supported AIE architectures and
+#       data types.
+#
+# Coverage:
+# - DATA_TYPE: float (symmetric input, real eigenvalues only -- see the
+#   library documentation for why), cfloat (general complex input)
+# - DIM_SIZE (square matrix dimension): 4, 8, 16 for cfloat; 8, 16, 32 for float
+# - PASSES: scaled roughly with matrix size (more eigenvalues to deflate
+#   needs a larger shared iteration budget)
+# - CASC_LEN: 1 (only supported value)
+# - AIE variants: 1 (AIE1), 2 (AIE-ML), 22 (AIE-MLv2)
+#
+# Constraints:
+#  - DIM_SIZE must be a multiple of 8 for float, 4 for cfloat (internal vector size)
+#  - DIM_SIZE must be in [8, 32] for float, [4, 16] for cfloat (per-tile memory limit)
+#  - CASC_LEN must be 1
+#
+# Note: TARGET is not specified here; the runmake framework supplies it.
+# ============================================================
+# AIE1 -- cfloat, small to large
+# ============================================================
+make all DATA_TYPE=cfloat DIM_SIZE=4  PASSES=20 CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=cfloat DIM_SIZE=8  PASSES=30 CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=cfloat DIM_SIZE=16 PASSES=50 CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05
+# ============================================================
+# AIE1 -- float (symmetric input, real eigenvalues), small to large
+# ============================================================
+make all DATA_TYPE=float DIM_SIZE=8  PASSES=30 CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=float DIM_SIZE=16 PASSES=50 CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=float DIM_SIZE=32 PASSES=100 CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05
+# ============================================================
+# AIE-ML (AIE_VARIANT=2)
+# ============================================================
+make all DATA_TYPE=cfloat DIM_SIZE=4  PASSES=20 CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=cfloat DIM_SIZE=8  PASSES=30 CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=cfloat DIM_SIZE=16 PASSES=50 CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=float  DIM_SIZE=8  PASSES=30 CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=float  DIM_SIZE=16 PASSES=50 CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=float  DIM_SIZE=32 PASSES=100 CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05
+# ============================================================
+# AIE-MLv2 (AIE_VARIANT=22)
+# ============================================================
+make all DATA_TYPE=cfloat DIM_SIZE=4  PASSES=20 CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=cfloat DIM_SIZE=8  PASSES=30 CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=cfloat DIM_SIZE=16 PASSES=50 CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=float  DIM_SIZE=8  PASSES=30 CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=float  DIM_SIZE=16 PASSES=50 CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05
+make all DATA_TYPE=float  DIM_SIZE=32 PASSES=100 CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05
+
+# ---- from qor.txt ----
+# eigenvalue QoR sweep
+#
+# Goal: measure compile-time/throughput across the supported matrix-size and
+# AIE-variant space. Uses TARGET=hw (aiesim) via the runmake framework.
+#
+# NITER=6 is made explicit below (rather than relying on the runmake
+# framework's default) since some QoR metrics (e.g. Initiation Interval) only
+# become valid once the core reaches steady state -- typically >=4 iterations.
+# NITER=6 is a starting default, not yet confirmed to reach steady state for
+# every config here (some larger/higher-PASSES configs may need more).
+# ============================================================
+# AIE1
+# ============================================================
+make all DATA_TYPE=cfloat DIM_SIZE=12 PASSES=40  CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05 NITER=6
+make all DATA_TYPE=float  DIM_SIZE=24 PASSES=75  CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05 NITER=6
+# ============================================================
+# AIE-ML (AIE_VARIANT=2)
+# ============================================================
+make all DATA_TYPE=cfloat DIM_SIZE=12 PASSES=40  CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05 NITER=6
+make all DATA_TYPE=float  DIM_SIZE=24 PASSES=75  CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05 NITER=6
+# ============================================================
+# AIE-MLv2 (AIE_VARIANT=22)
+# ============================================================
+make all DATA_TYPE=cfloat DIM_SIZE=12 PASSES=40  CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05 NITER=6
+make all DATA_TYPE=float  DIM_SIZE=24 PASSES=75  CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05 NITER=6

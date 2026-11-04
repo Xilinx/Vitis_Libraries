@@ -21,6 +21,9 @@
 #include "test_svd.hpp"
 #include "test_qrd_hh.hpp"
 #include "test_substitution.hpp"
+#include "test_ls_cholesky_solver.hpp"
+#include "test_mp_pseudoinverse.hpp"
+#include "test_eigenvalue.hpp"
 
 using namespace adf;
 using namespace ::xf::dsp::aie;
@@ -31,12 +34,18 @@ using namespace ::xf::dsp::aie;
 #define NUM_IP_SVD 1
 #define NUM_IP_QRD_HH 1
 #define NUM_IP_SUBSTITUTION 2
+#define NUM_IP_LS_CHOLESKY_SOLVER 2
+#define NUM_IP_MP_PSEUDOINVERSE_SVD 1
+#define NUM_IP_EIGENVALUE 1
 
 #define NUM_OP_CHOLESKY 1
 #define NUM_OP_QRD 2
 #define NUM_OP_SVD 3
 #define NUM_OP_QRD_HH 2
 #define NUM_OP_SUBSTITUTION 1
+#define NUM_OP_LS_CHOLESKY_SOLVER 1
+#define NUM_OP_MP_PSEUDOINVERSE_SVD 1
+#define NUM_OP_EIGENVALUE 1
 
 template <unsigned int elem_start, unsigned int num_ports, unsigned int NUM_IP_ALL, typename plioType>
 void createPLIOFileConnections(std::array<plioType, NUM_IP_ALL>& plioPorts,
@@ -55,10 +64,12 @@ namespace all_example_solver {
 
 class test_example : public graph {
    public:
-    static constexpr unsigned int NUM_IP_ALL =
-        NUM_IP_CHOLESKY + NUM_IP_QRD + NUM_IP_SVD + NUM_IP_QRD_HH + NUM_IP_SUBSTITUTION;
-    static constexpr unsigned int NUM_OP_ALL =
-        NUM_OP_CHOLESKY + NUM_OP_QRD + NUM_OP_SVD + NUM_OP_QRD_HH + NUM_OP_SUBSTITUTION;
+    static constexpr unsigned int NUM_IP_ALL = NUM_IP_CHOLESKY + NUM_IP_QRD + NUM_IP_SVD + NUM_IP_QRD_HH +
+                                               NUM_IP_SUBSTITUTION + NUM_IP_LS_CHOLESKY_SOLVER +
+                                               NUM_IP_MP_PSEUDOINVERSE_SVD + NUM_IP_EIGENVALUE;
+    static constexpr unsigned int NUM_OP_ALL = NUM_OP_CHOLESKY + NUM_OP_QRD + NUM_OP_SVD + NUM_OP_QRD_HH +
+                                               NUM_OP_SUBSTITUTION + NUM_OP_LS_CHOLESKY_SOLVER +
+                                               NUM_OP_MP_PSEUDOINVERSE_SVD + NUM_OP_EIGENVALUE;
 
     std::array<input_plio, NUM_IP_ALL> in;
     std::array<output_plio, NUM_OP_ALL> out;
@@ -68,6 +79,9 @@ class test_example : public graph {
     qrd_hh_example::test_qrd_hh uut_qrd_hh;
     svd_example::test_svd uut_svd;
     substitution_example::test_substitution uut_substitution;
+    ls_cholesky_solver_example::test_ls_cholesky_solver uut_ls_cholesky_solver;
+    mp_pseudoinverse_example::test_mp_pseudoinverse uut_mp_pseudoinverse_svd;
+    eigenvalue_example::test_eigenvalue uut_eigenvalue;
 
     test_example() {
         // create input file connections - first template argument indicates first index of plio port for this library
@@ -77,6 +91,10 @@ class test_example : public graph {
         createPLIOFileConnections<2, NUM_IP_SVD, NUM_IP_ALL>(in, "input", "svd", "in");
         createPLIOFileConnections<3, NUM_IP_QRD_HH, NUM_IP_ALL>(in, "input", "qrd", "in");
         createPLIOFileConnections<4, NUM_IP_SUBSTITUTION, NUM_IP_ALL>(in, "input", "substitution", "in");
+        createPLIOFileConnections<6, NUM_IP_LS_CHOLESKY_SOLVER, NUM_IP_ALL>(in, "input", "ls_cholesky_solver", "in");
+        createPLIOFileConnections<8, NUM_IP_MP_PSEUDOINVERSE_SVD, NUM_IP_ALL>(in, "input", "mp_pseudoinverse_svd",
+                                                                              "in");
+        createPLIOFileConnections<9, NUM_IP_EIGENVALUE, NUM_IP_ALL>(in, "input", "eigenvalue", "in");
 
         // create output file connections
         createPLIOFileConnections<0, NUM_OP_CHOLESKY, NUM_OP_ALL>(out, "output", "cholesky", "out");
@@ -84,6 +102,10 @@ class test_example : public graph {
         createPLIOFileConnections<3, NUM_OP_SVD, NUM_OP_ALL>(out, "output", "svd", "out");
         createPLIOFileConnections<6, NUM_OP_QRD_HH, NUM_OP_ALL>(out, "output", "qrd_hh", "out");
         createPLIOFileConnections<8, NUM_OP_SUBSTITUTION, NUM_OP_ALL>(out, "output", "substitution", "out");
+        createPLIOFileConnections<9, NUM_OP_LS_CHOLESKY_SOLVER, NUM_OP_ALL>(out, "output", "ls_cholesky_solver", "out");
+        createPLIOFileConnections<10, NUM_OP_MP_PSEUDOINVERSE_SVD, NUM_OP_ALL>(out, "output", "mp_pseudoinverse_svd",
+                                                                               "out");
+        createPLIOFileConnections<11, NUM_OP_EIGENVALUE, NUM_OP_ALL>(out, "output", "eigenvalue", "out");
 
         // wire up cholesky testbench
         connect<>(in[0].out[0], uut_cholesky.in);
@@ -109,6 +131,19 @@ class test_example : public graph {
         connect<>(in[4].out[0], uut_substitution.L_in);
         connect<>(in[5].out[0], uut_substitution.y_in);
         connect<>(uut_substitution.x_out, out[8].in[0]);
+
+        // wire up ls_cholesky_solver testbench
+        connect<>(in[6].out[0], uut_ls_cholesky_solver.A_in);
+        connect<>(in[7].out[0], uut_ls_cholesky_solver.y_in);
+        connect<>(uut_ls_cholesky_solver.x_out, out[9].in[0]);
+
+        // wire up mp_pseudoinverse_svd testbench
+        connect<>(in[8].out[0], uut_mp_pseudoinverse_svd.in);
+        connect<>(uut_mp_pseudoinverse_svd.out, out[10].in[0]);
+
+        // wire up eigenvalue testbench
+        connect<>(in[9].out[0], uut_eigenvalue.in);
+        connect<>(uut_eigenvalue.out, out[11].in[0]);
     };
 };
 };

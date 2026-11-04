@@ -1,6 +1,6 @@
 {
     "schema": "vitis_library_api_spec_schema-1.0",
-    "api_name": "xf::dsp::aie::qrd::qrd_graph",
+    "api_name": "xf::solver::aie::qrd::qrd_graph",
     "display_name": "qrd_graph",
     "header_file_name": "qrd_graph.hpp",
     "search_paths": [

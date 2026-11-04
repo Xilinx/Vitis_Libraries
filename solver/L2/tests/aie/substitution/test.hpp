@@ -6,7 +6,6 @@
 #include <array>
 #include <cstdio>
 #include "uut_config.h"
-#include "substitution_graph.hpp"
 
 #define Q(x) #x
 #define QUOTE(x) Q(x)
@@ -15,7 +14,11 @@
 #define UUT_GRAPH substitution_graph
 #endif
 
+#if USING_UUT == 1
+#include "substitution_native_generated_graph/substitution_generated_graph.h"
+#else
 #include QUOTE(UUT_GRAPH.hpp)
+#endif
 
 using namespace adf;
 
@@ -49,9 +52,7 @@ class test_graph : public adf::graph {
         printf("kNumKernels  = %d \n", kNumKernels);
 
         // Instantiate the substitution graph
-        xf::solver::aie::substitution::UUT_GRAPH<DATA_TYPE, DIM_SIZE, SUBST_TYPE, L_LEADING, GRID_DIM, NUM_FRAMES,
-                                                 DIAG_INV>
-            dut_graph;
+        substitution_native_generated_graph dut_graph;
 
         int portIdx = 0;
         for (int y = 0; y < GRID_DIM; y++) {

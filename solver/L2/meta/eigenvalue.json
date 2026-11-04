@@ -1,0 +1,109 @@
+{
+    "schema": "vitis_library_api_spec_schema-1.0",
+    "api_name": "xf::solver::aie::eigenvalue::eigenvalue_graph",
+    "display_name": "eigenvalue_graph",
+    "header_file_name": "eigenvalue_graph.hpp",
+    "search_paths": [
+        "L1/include/aie",
+        "L1/src/aie",
+        "L1/tests/aie/inc",
+        "L1/tests/aie/src",
+        "L2/include/aie",
+        "L2/tests/aie/common/inc"
+    ],
+    "parameters": [
+        {
+            "name": "AIE_VARIANT",
+            "description": "Specifies the device type (AIE1, AIE-ML, AIE-MLv2).",
+            "type": "uint",
+            "updater": {
+                "file": "eigenvalue.py",
+                "function": "update_AIE_VARIANT",
+                "args": []
+            },
+            "validator": {
+                "file": "eigenvalue.py",
+                "function": "validate_AIE_VARIANT",
+                "args": []
+            }
+        },
+        {
+            "name": "TT_DATA",
+            "description": "The type of individual data samples input to port in (matrix A). Must be float or cfloat. TT_DATA=float is only valid for matrices whose eigenvalues are all real (e.g. symmetric/normal matrices).",
+            "type": "typename",
+            "enum": [
+                "cfloat",
+                "float"
+            ],
+            "updater": {
+                "file": "eigenvalue.py",
+                "function": "update_TT_DATA",
+                "args": []
+            },
+            "validator": {
+                "file": "eigenvalue.py",
+                "function": "validate_TT_DATA",
+                "args": []
+            }
+        },
+        {
+            "name": "TP_DIM",
+            "description": "The dimension size of the square input matrix A (= number of eigenvalues). Must be a multiple of the internal vector size (8 for float, 4 for cfloat), in [8, 32] for float or [4, 16] for cfloat.",
+            "type": "uint",
+            "updater": {
+                "file": "eigenvalue.py",
+                "function": "update_TP_DIM",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA"
+                ]
+            },
+            "validator": {
+                "file": "eigenvalue.py",
+                "function": "validate_TP_DIM",
+                "args": [
+                    "AIE_VARIANT",
+                    "TT_DATA"
+                ]
+            }
+        },
+        {
+            "name": "TP_CASC_LEN",
+            "description": "Cascade length. Must be 1; support for TP_CASC_LEN > 1 is reserved for a future release.",
+            "type": "uint",
+            "updater": {
+                "file": "eigenvalue.py",
+                "function": "update_TP_CASC_LEN",
+                "args": []
+            },
+            "validator": {
+                "file": "eigenvalue.py",
+                "function": "validate_TP_CASC_LEN",
+                "args": []
+            }
+        },
+        {
+            "name": "TP_PASSES",
+            "description": "Maximum number of QR sweep iterations performed by the internal iterative-QR eigenvalue extraction kernel (with early exit once all eigenvalues have deflated). More passes improve convergence at the cost of higher latency. Range: [1, 100].",
+            "type": "uint",
+            "updater": {
+                "file": "eigenvalue.py",
+                "function": "update_TP_PASSES",
+                "args": []
+            },
+            "validator": {
+                "file": "eigenvalue.py",
+                "function": "validate_TP_PASSES",
+                "args": []
+            }
+        }
+    ],
+    "ports": {
+        "file": "eigenvalue.py",
+        "function": "info_ports"
+    },
+    "generator": {
+        "file": "eigenvalue.py",
+        "function": "generate_graph"
+    }
+}

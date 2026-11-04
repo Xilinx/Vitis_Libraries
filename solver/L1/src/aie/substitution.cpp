@@ -133,39 +133,38 @@ INLINE_DECL void substitution_base<TT_DATA,
                     else {
                         looplim = kEndCol / m_kvecSampleNum;
                     }
+                    // Initialize pLlocal once per i-iteration; the p-loop advances it by exactly
+                    // m_kvecSampleNum*kVecPerRow per k, so it naturally tracks to the next k's start.
+                    // This eliminates the index-multiply recomputation inside the k-loop.
+                    pLlocal = pL + (i - kStartRow / m_kvecSampleNum);
                     for (int k = kStartCol / m_kvecSampleNum; k < looplim;
                          k++) { // for each column chunk in the vertical chunk
-                        if (k < kEndCol / m_kvecSampleNum) {
-                            pLlocal = &pL[((k - kStartCol / m_kvecSampleNum) * m_kvecSampleNum) * kVecPerRow +
-                                          (i - kStartRow / m_kvecSampleNum)];
-                            if ((k < kStartRow / m_kvecSampleNum) &&
-                                (i == kStartRow / m_kvecSampleNum)) { // x from higher kernel
-                                xVec = readincr_v<m_kvecSampleNum, aie_stream_resource_in::a>(input_params.in_x);
-                                xStore[k - kStartCol / m_kvecSampleNum] = xVec;
-                            } else {
-                                // x from local output
-                                if
-                                    constexpr(TP_X == TP_Y) { xVec = pXv[k - kStartCol / m_kvecSampleNum]; }
-                                else {
-                                    xVec = xStore[k - kStartCol / m_kvecSampleNum];
-                                }
-                            }
-#pragma unroll m_kvecSampleNum
-                            for (int p = 0; p < m_kvecSampleNum;
-                                 p++) { // row within a block. chess pipelining and chess_loop_range(m_kvecSampleNum,)
-                                        // is slower than unroll here
-                                lVec = *pLlocal;
-                                pLlocal += kVecPerRow;
-                                acc = ::aie::mac(acc, lVec, xVec.get(p));
+                        // k < looplim <= kEndCol/m_kvecSampleNum always, so the original guard is redundant.
+                        if ((k < kStartRow / m_kvecSampleNum) &&
+                            (i == kStartRow / m_kvecSampleNum)) { // x from higher kernel
+                            xVec = readincr_v<m_kvecSampleNum, aie_stream_resource_in::a>(input_params.in_x);
+                            xStore[k - kStartCol / m_kvecSampleNum] = xVec;
+                        } else {
+                            // x from local output
+                            if
+                                constexpr(TP_X == TP_Y) { xVec = pXv[k - kStartCol / m_kvecSampleNum]; }
+                            else {
+                                xVec = xStore[k - kStartCol / m_kvecSampleNum];
                             }
                         }
-                        if
-                            constexpr(TP_X < TP_Y) {
-                                if (k == kEndCol / m_kvecSampleNum - 1) {
-                                    writeincr<acc_t, m_kvecSampleNum>(output_params.out_pp, acc);
-                                }
-                            } // if TP_X<TP_Y
-                    }         // k  loop
+#pragma unroll m_kvecSampleNum
+                        for (int p = 0; p < m_kvecSampleNum;
+                             p++) { // row within a block. chess pipelining and chess_loop_range(m_kvecSampleNum,) is
+                                    // slower than unroll here
+                            lVec = *pLlocal;
+                            pLlocal += kVecPerRow;
+                            acc = ::aie::mac(acc, lVec, xVec.get(p));
+                        }
+                    } // k  loop
+                    if
+                        constexpr(TP_X < TP_Y) {
+                            writeincr<acc_t, m_kvecSampleNum>(output_params.out_pp, acc);
+                        } // if TP_X<TP_Y
 
                     // diagonal handling
                     if
@@ -226,13 +225,20 @@ INLINE_DECL void substitution_base<TT_DATA,
                 else {
                     acc = readincr_v<m_kvecSampleNum, acc_t>(input_params.in_pp);
                 }
+                // Initialize pLlocal at the highest k and step it back (by 2 k-blocks per iteration)
+                // to avoid the index-multiply recomputation inside the k-loop.
+                // The p-loop advances pLlocal forward by m_kvecSampleNum*kVecPerRow; we then subtract
+                // 2*m_kvecSampleNum*kVecPerRow to land at the start of the previous k.
+                // For diagonal kernels (TP_X==TP_Y) that skip k<=i iterations, we also subtract
+                // one k-block per skipped k to keep the pointer consistent.
+                pLlocal =
+                    pL +
+                    ((kEndCol / m_kvecSampleNum - 1 - kStartCol / m_kvecSampleNum) * m_kvecSampleNum) * kVecPerRow +
+                    (i - kStartRow / m_kvecSampleNum);
                 for (int k = (kEndCol / m_kvecSampleNum) - 1; k + 1 >= kStartCol / m_kvecSampleNum + 1;
                      k--) {                     // for each column chunk in the vertical chunk, backwards
                     if (TP_X < TP_Y || k > i) { // Off-diagonal kernels process the whole rectangle, diagonal kernels
                                                 // process the upper triangle.
-                        pLlocal = &pL[((k - kStartCol / m_kvecSampleNum) * m_kvecSampleNum) * kVecPerRow +
-                                      (i - kStartRow / m_kvecSampleNum)];
-
                         if
                             constexpr(TP_X < TP_Y) { // This kernel is off-diagonal, it consumes x from stream
                                 if (i ==
@@ -259,8 +265,13 @@ INLINE_DECL void substitution_base<TT_DATA,
                                 acc = ::aie::mac(acc, lVec, xVec.get(p));
                             }
                         } // p loop
-                    }     // TP_X < TP_Y || k > i
-                }         // k loop
+                        // Step back 2 k-blocks: undo the p-loop's forward advance and move to the previous k.
+                        pLlocal -= 2 * (int)(m_kvecSampleNum * kVecPerRow);
+                    } else { // TP_X < TP_Y || k > i
+                        // Diagonal kernel skipping k<=i: maintain pLlocal by stepping back one k-block.
+                        pLlocal -= m_kvecSampleNum * kVecPerRow;
+                    }
+                } // k loop
                 if
                     constexpr(TP_X < TP_Y) { // Off-diagonal kernels write to the pp-cascade.
                         writeincr<acc_t, m_kvecSampleNum>(output_params.out_pp, acc);

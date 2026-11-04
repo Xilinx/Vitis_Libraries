@@ -10,7 +10,8 @@ Supports arbitrary TP_DIM_COLS (including odd and non-multiple-of-kVecSize).
 The kernel internally pads columns:
   cols_even:  next even number >= TP_DIM_COLS  (for parallel pairs schedule)
   cols_padded: next multiple of kVecSize       (for V SIMD alignment)
-Output files use padded sizes. The verify script extracts true sub-blocks.
+Padding is stripped here; output files (uut_output_{U,S,V}.txt) are true,
+unpadded size.
 
 Usage:
     python3 stitch_outputs.py --rows <TP_DIM_ROWS> --cols <TP_DIM_COLS> \\
@@ -33,8 +34,8 @@ def get_padded_dims(cols, data_type, aie_variant=1):
 
     kStoreAlign is 256-bit on AIE1/AIE-ML (vec_size 8/4) but 512-bit on
     AIE22 (vec_size 16/8). This matches fnVecStoreAlign() in svd_traits.hpp.
-    S and U outputs are padded to cols_padded; V is always compacted to
-    cols x cols by the kernel before output.
+    U, S, and V outputs are all padded to cols_padded; V is output in its
+    full cols_padded × cols_padded padded column-major layout.
     """
     if aie_variant >= 22:
         vec_size = 8 if data_type == 'cfloat' else 16
@@ -73,17 +74,17 @@ def stitch_matrix_outputs(data_dir, matrix_name, rows, cols, casc_len, niter, dt
                           floats_per_elem=1):
     """
     Stitch matrix outputs (U or V) from cascaded kernels
-    
+
     For column-major data with card-cutting:
     - Each kernel holds rows_per_kernel consecutive rows of each column
     - rows_per_kernel = rows / casc_len
     - Data is interleaved: kernel 0 has rows [0:rows_per_kernel] of all columns,
       kernel 1 has rows [rows_per_kernel:2*rows_per_kernel] of all columns, etc.
-    
+
     For cfloat data, each matrix element is stored as 2 consecutive float32 values
     (real, imag), so floats_per_elem=2. All index arithmetic operates on float32
     counts, not element counts.
-    
+
     Args:
         data_dir: Directory containing output files
         matrix_name: 'U' or 'V'
@@ -93,12 +94,12 @@ def stitch_matrix_outputs(data_dir, matrix_name, rows, cols, casc_len, niter, dt
         niter: Number of iterations
         dtype: Data type (np.float32 or np.float64)
         floats_per_elem: Number of float32 values per matrix element (1 for float, 2 for cfloat)
-    
+
     Returns:
         Stitched matrix data as flattened array (column-major, in float32 values)
     """
     rows_per_kernel = rows // casc_len
-    
+
     # Load all kernel outputs
     # Format: uut_output_<matrix_name>_<k>_0.txt where k is the cascade index
     kernel_data = []
@@ -106,17 +107,17 @@ def stitch_matrix_outputs(data_dir, matrix_name, rows, cols, casc_len, niter, dt
         filepath = data_dir / f'uut_output_{matrix_name}_0_{k}.txt'
         data = read_data_file(filepath, dtype)
         kernel_data.append(data)
-    
+
     # Stitch the data
     # Each kernel has: rows_per_kernel * cols * floats_per_elem * niter float samples
     # We need to interleave them to reconstruct the full matrix
     stitched_data = []
-    
+
     # Number of float32 values per kernel per iteration
     floats_per_kernel_per_iter = rows_per_kernel * cols * floats_per_elem
     # Number of float32 values per column-chunk per kernel
     floats_per_col_chunk = rows_per_kernel * floats_per_elem
-    
+
     for iter_idx in range(niter):
         # For each iteration, reconstruct the full matrix
         for col in range(cols):
@@ -128,10 +129,10 @@ def stitch_matrix_outputs(data_dir, matrix_name, rows, cols, casc_len, niter, dt
                 column_offset = col * floats_per_col_chunk
                 start_idx = kernel_offset + column_offset
                 end_idx = start_idx + floats_per_col_chunk
-                
+
                 # Extract this kernel's portion of the column
                 stitched_data.extend(kernel_data[k][start_idx:end_idx])
-    
+
     return np.array(stitched_data, dtype=dtype)
 
 
@@ -151,9 +152,40 @@ def stitch_vector_outputs(data_dir, niter, cols, dtype):
     """
     filepath = data_dir / f'uut_output_S_0_0.txt'
     s_data = read_data_file(filepath, dtype)
-    
+
     # S contains cols values per iteration, for niter iterations
     return s_data[:cols * niter]
+
+
+def _as_elements(float_data, is_complex):
+    """View raw float32 data as complex64 (2 floats/elem) or leave as float32."""
+    if is_complex:
+        assert float_data.dtype == np.float32, "complex view requires float32 data"
+        return float_data.view(np.complex64)
+    return float_data
+
+
+def _as_floats(element_data, is_complex, dtype):
+    """Inverse of _as_elements: view complex64 back to interleaved float32."""
+    return element_data.view(np.float32).astype(dtype) if is_complex else element_data
+
+
+def truncate_matrix_to_true_cols(data, n_rows, n_rows_padded, n_cols_padded, cols, niter, is_complex, dtype):
+    """Drop padding columns (and rows, if n_rows_padded != n_rows) from a stitched
+    U/V matrix (n_rows_padded x n_cols_padded), per iteration."""
+    elems = _as_elements(data, is_complex)
+    per_iter = n_rows_padded * n_cols_padded
+    out = []
+    for it in range(niter):
+        block = elems[it * per_iter:(it + 1) * per_iter].reshape((n_rows_padded, n_cols_padded), order='F')
+        out.append(block[:n_rows, :cols].flatten(order='F'))
+    return _as_floats(np.concatenate(out), is_complex, dtype)
+
+
+def truncate_vector_to_true_cols(s_data, cols_padded, cols, niter):
+    """Drop padding entries from a stitched S vector, per iteration (S is always real)."""
+    s_data = s_data[:cols_padded * niter].reshape((niter, cols_padded))
+    return s_data[:, :cols].flatten()
 
 
 def main():
@@ -229,8 +261,8 @@ Example:
     # All output buffers are multiples of 16 bytes for DMA alignment on AIE1.
     U_per_kernel_per_iter = rows_per_kernel * cols_padded * floats_per_elem
     S_per_kernel_per_iter = cols_padded
-    # V is always compacted to cols x cols by the kernel (see svd.cpp V compaction step)
-    V_per_kernel_per_iter = cols_padded * cols_padded * floats_per_elem  # full kStoreCols² output
+    # V is padded to cols_padded × cols_padded (full kStoreCols² output)
+    V_per_kernel_per_iter = cols_padded * cols_padded * floats_per_elem
     
     print(f"\nExpected samples per file (per kernel, per iter -> total with NITER={args.niter}):")
     print(f"  U per kernel:  {U_per_kernel_per_iter} x {args.niter} = {U_per_kernel_per_iter * args.niter}")
@@ -239,7 +271,7 @@ Example:
     print(f"\nExpected stitched output sizes (all iters, padded):")
     print(f"  U stitched:    {args.rows * cols_padded} x {args.niter} = {args.rows * cols_padded * args.niter}")
     print(f"  S stitched:    {cols_padded} x {args.niter} = {cols_padded * args.niter}")
-    print(f"  V stitched:    {args.cols * args.cols} x {args.niter} = {args.cols * args.cols * args.niter} (compacted cols x cols)")
+    print(f"  V stitched:    {cols_padded * cols_padded} x {args.niter} = {cols_padded * cols_padded * args.niter} (padded cols_padded x cols_padded)")
     
     # Validate actual file sizes
     for k in range(args.casc_len):
@@ -282,50 +314,52 @@ Example:
             print(f"  {data_dir / f}")
         return 1
 
-    # Stitch U matrix (using cols_padded for DMA-aligned output)
+    # Stitch U matrix (at cols_padded, the real on-disk layout), then drop padding
+    # columns so the written file is the true rows x cols matrix.
     print(f"\nStitching U matrix ({args.rows}x{cols_padded}, floats_per_elem={floats_per_elem})...")
     U_stitched = stitch_matrix_outputs(
         data_dir, 'U', args.rows, cols_padded, args.casc_len, args.niter, dtype,
         floats_per_elem=floats_per_elem
     )
+    U_true = truncate_matrix_to_true_cols(
+        U_stitched, args.rows, args.rows, cols_padded, args.cols, args.niter, is_complex, dtype
+    )
     output_U_path = data_dir / 'uut_output_U.txt'
-    write_data_file(output_U_path, U_stitched)
-    print(f"  ✓ Written to {output_U_path}")
+    write_data_file(output_U_path, U_true)
+    print(f"  ✓ Written to {output_U_path} ({args.rows}x{args.cols}, true size)")
 
-    # V matrix: kernel compacts V to cols×cols at the start of a kStoreCols×kStoreCols
-    # buffer. The port outputs kStoreCols×kStoreCols per iteration; extract only the
-    # first cols×cols compact block from each iteration's worth of output.
-    print(f"\nCopying V matrix ({args.cols}x{args.cols}, compacted from {cols_padded}x{cols_padded}) from kernel 0...")
+    # V matrix: read the padded cols_padded x cols_padded output from kernel 0 and
+    # drop the padding rows/cols so the written file is the true cols x cols matrix.
+    print(f"\nReading V matrix ({cols_padded}x{cols_padded}, padded) from kernel 0...")
     V_filepath = data_dir / 'uut_output_V_0_0.txt'
-    V_data_raw = read_data_file(V_filepath, dtype)
-    v_full_per_iter = cols_padded * cols_padded * floats_per_elem   # full output per iter
-    v_compact_per_iter = args.cols * args.cols * floats_per_elem    # compact block per iter
-    V_data = np.concatenate([
-        V_data_raw[it * v_full_per_iter : it * v_full_per_iter + v_compact_per_iter]
-        for it in range(args.niter)
-    ])
+    V_data = read_data_file(V_filepath, dtype)
+    V_true = truncate_matrix_to_true_cols(
+        V_data, args.cols, cols_padded, cols_padded, args.cols, args.niter, is_complex, dtype
+    )
     output_V_path = data_dir / 'uut_output_V.txt'
-    write_data_file(output_V_path, V_data)
-    print(f"  ✓ Written to {output_V_path}")
+    write_data_file(output_V_path, V_true)
+    print(f"  ✓ Written to {output_V_path} ({args.cols}x{args.cols}, true size)")
 
-    # S vector (cols_padded values per iteration, identical on all kernels)
+    # S vector (cols_padded values per iteration, identical on all kernels), then
+    # drop padding entries so the written file has the true cols values.
     print(f"\nReading S vector ({cols_padded} values per iter) from kernel 0...")
     S_stitched = stitch_vector_outputs(
         data_dir, args.niter, cols_padded, dtype
     )
+    S_true = truncate_vector_to_true_cols(S_stitched, cols_padded, args.cols, args.niter)
     output_S_path = data_dir / 'uut_output_S.txt'
-    write_data_file(output_S_path, S_stitched)
-    print(f"  ✓ Written to {output_S_path}")
-    
+    write_data_file(output_S_path, S_true)
+    print(f"  ✓ Written to {output_S_path} ({args.cols} values per iter, true size)")
+
     print("\n" + "="*70)
     print("✅ Stitching completed successfully!")
     print("="*70)
-    print(f"\nOutput files (padded sizes, verify script extracts true {args.cols}-col sub-blocks):")
+    print(f"\nOutput files (true, unpadded sizes):")
     print(f"  {output_U_path}")
     print(f"  {output_S_path}")
     print(f"  {output_V_path}")
     print("="*70)
-    
+
     return 0
 
 

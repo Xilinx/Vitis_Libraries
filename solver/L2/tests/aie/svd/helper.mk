@@ -44,8 +44,9 @@ endif
 IN_WINDOW_VSIZE     := $(shell echo $$(( $(DIM_ROWS) * $(DIM_COLS) )))
 NO_PAD_WINDOW_VSIZE := $(shell echo $$(( $(DIM_ROWS) * $(DIM_COLS) )))
 
-PARAM_MAP = DATA_TYPE $(DATA_TYPE) DIM_ROWS $(DIM_ROWS) DIM_COLS $(DIM_COLS) PASSES $(PASSES) CASC_LEN $(CASC_LEN) AIE_VARIANT $(AIE_VARIANT)
+PARAM_MAP = DATA_TYPE $(DATA_TYPE) DIM_ROWS $(DIM_ROWS) DIM_COLS $(DIM_COLS) PASSES $(PASSES) PASSES_SSR $(PASSES_SSR) CASC_LEN $(CASC_LEN) AIE_VARIANT $(AIE_VARIANT) DIAG_INV $(DIAG_INV)
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
+STATUS_JSON = ./logs/status_$(UUT_KERNEL)_$(PARAMS).json
 
 TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" | head -n 1)
 VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3
@@ -83,15 +84,16 @@ get_diff:
                           --casc_len $(CASC_LEN) --niter $(NITER) \
                           --data_dir ./data --data_type $(DATA_TYPE) --aie_variant $(AIE_VARIANT)
 	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/svd/svd_verify_all.py . --niter $(NITER) --recon_tolerance $(RECON_TOLERANCE) --v_orth_tolerance $(V_ORTH_TOLERANCE)
-# 	cat ./data/uut_output_U.txt ./data/uut_output_S.txt ./data/uut_output_V.txt > ./data/uut_output.txt
-# 	cat ./data/numpy_output_U.txt ./data/numpy_output_S.txt ./data/numpy_output_V.txt > ./data/numpy_output.txt
-# 	tclsh $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/numpy_output.txt ./logs/diff.txt $(DIFF_TOLERANCE)
-# 	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/validation_tests/test_svd.py --A ./data/input.txt --U ./data/uut_output_U.txt --S ./data/uut_output_S.txt --V ./data/uut_output_V.txt --dim_rows $(DIM_ROWS) --dim_cols $(DIM_COLS) --data_type $(DATA_TYPE) --niter $(NITER)
+	$(VITIS_PYTHON3) $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py functional_check $(STATUS_JSON) ./logs/diff.txt
 
 get_status:
+	$(VITIS_PYTHON3) $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py init $(STATUS_JSON) UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP) NITER $(NITER)
 	tclsh $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)  SINGLE_BUF $(SINGLE_BUF)
+
+get_memory:
+	$(VITIS_PYTHON3) $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py harvest $(STATUS_JSON) $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts Work
 
 get_qor:
 # 	sh $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT)
-
 	$(VITIS_PYTHON3) $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/get_qor.py -t_in_file T_input_0_0.txt -t_out_file uut_output_V_0_0.txt -status_file_dir $(STATUS_FILE) -num_of_samples $(NO_PAD_WINDOW_VSIZE) -niter $(NITER) -use_outputs_if_no_inputs False -casc_len $(CASC_LEN) -aiesim_out_dir ./aiesimulator_output -ip svdMain
+	$(VITIS_PYTHON3) $(DSP_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py qor $(STATUS_JSON) Work $(NITER) 1 T_input_ uut_output_V_ 64 $(DATA_TYPE) --verbose

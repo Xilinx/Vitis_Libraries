@@ -58,9 +58,10 @@ template <typename TT_DATA,
           unsigned int TP_DIM_COLS,
           unsigned int TP_PASSES,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_DIAG_INV,
           unsigned int TP_KERNEL_POSITION>
 NOINLINE_DECL void
-SVDecomposition<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CASC_LEN, TP_KERNEL_POSITION>::svdMain(
+SVDecomposition<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CASC_LEN, TP_DIAG_INV, TP_KERNEL_POSITION>::svdMain(
     input_buffer<TT_DATA>& __restrict inWindow,
     output_buffer<TT_DATA>& __restrict outUWindow,
     output_buffer<T_outSDataType>& __restrict outSWindow,
@@ -171,8 +172,8 @@ SVDecomposition<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CASC_LEN, TP_KE
                 vec_t* jPtr = U + j * kVecsPerUCol;
 
                 float raw_real, raw_imag;
-                computePairDots<TT_DATA, kVecSizeComp, kIsComplex>(iPtr, jPtr, dotII[p], dotJJ[p], raw_real, raw_imag,
-                                                                   kVecsPerUCol);
+                computePairDots<TT_DATA, kVecSizeComp, kIsComplex, kVecsPerUCol>(iPtr, jPtr, dotII[p], dotJJ[p],
+                                                                                 raw_real, raw_imag);
 
                 if
                     constexpr(kIsComplex) {
@@ -234,11 +235,41 @@ SVDecomposition<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CASC_LEN, TP_KE
                 normSq = norm_c.real;
             }
         else {
+#if XF_SOLVER_SVD_USE_SPLIT_ACCUMULATOR_REDUCTIONS
+            // Split-accumulator (N=2): two independent accumulators break the
+            // single fpmac feedback recurrence, raising ILP so the compiler can
+            // hide MAC latency. Scalar remainder handles odd kVecsPerUCol.
+            constexpr bool haveAcc1 = (kVecsPerUCol > 1);
+            acc_t nacc0 = ::aie::mul_square(colPtr[0]);
+            acc_t nacc1;
+            int v = 1;
+            if
+                constexpr(haveAcc1) {
+                    nacc1 = ::aie::mul_square(colPtr[1]);
+                    v = 2;
+                }
+            for (; v + 1 < (int)kVecsPerUCol; v += 2) chess_prepare_for_pipelining {
+                    nacc0 = ::aie::mac_square(nacc0, colPtr[v]);
+                    nacc1 = ::aie::mac_square(nacc1, colPtr[v + 1]);
+                }
+            for (; v < (int)kVecsPerUCol; v++) {
+                nacc0 = ::aie::mac_square(nacc0, colPtr[v]);
+            }
+            if
+                constexpr(haveAcc1) {
+                    auto nv = ::aie::add(nacc0.template to_vector<float>(), nacc1.template to_vector<float>());
+                    normSq = ::aie::reduce_add(nv);
+                }
+            else {
+                normSq = ::aie::reduce_add(nacc0.template to_vector<float>());
+            }
+#else
             acc_t nacc = ::aie::mul_square(colPtr[0]);
             for (int v = 1; v < kVecsPerUCol; v++) {
                 nacc = ::aie::mac_square(nacc, colPtr[v]);
             }
             normSq = ::aie::reduce_add(nacc.template to_vector<float>());
+#endif
         }
         float sigma = hw_sqrt(normSq);
         S[col] = sigma;
@@ -255,15 +286,17 @@ SVDecomposition<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CASC_LEN, TP_KE
 
     // Sort real columns only; phantom columns are zero and naturally trail any real sigma.
     sortSingularValues<TT_DATA, kVecSizeComp>(S, U, V, TP_DIM_COLS, kVecsPerUCol, kVecsPerVCol);
+
     if
-        constexpr(kStoreCols > TP_DIM_COLS) {
-            TT_DATA* Vscalar_out = (TT_DATA*)outVWindow.data();
-            for (int col = 0; col < (int)TP_DIM_COLS; col++) {
-                for (int row = 0; row < (int)TP_DIM_COLS; row++) {
-                    Vscalar_out[col * TP_DIM_COLS + row] = Vscalar_out[col * kStoreCols + row];
-                }
+        constexpr(TP_DIAG_INV) {
+            for (int col = 0; col < (int)kStoreCols; col++) {
+                S[col] = hw_lt(kEpsilon, S[col]) ? hw_inv(S[col]) : 0.0f;
             }
         }
+    // V remains in its kStoreCols x kStoreCols padded column-major layout.
+    // MatMul1 in mp_pseudoinverse_graph reads V as kStoreCols x kStoreCols col-major,
+    // which matches this layout. Padding columns/rows contribute zero to the result
+    // since the corresponding S^-1 diagonal entries are zero.
 }
 
 //-----------------------------------------------------------------------------------------------------
@@ -442,8 +475,13 @@ template <typename TT_DATA,
           unsigned int TP_DIM_COLS,
           unsigned int TP_PASSES,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_KERNEL_POSITION>
+          unsigned int TP_DIAG_INV,
+          unsigned int TP_KERNEL_POSITION,
+          bool TP_INIT_RAW = true,
+          bool TP_FINALIZE = true>
 NOINLINE_DECL void svdCascadedMain(input_buffer<TT_DATA>& __restrict inWindow,
+                                   input_buffer<T_outSDataType>* __restrict inSWindow,
+                                   input_buffer<TT_DATA>* __restrict inVWindow,
                                    input_stream<TT_DATA>* inStream,
                                    output_buffer<TT_DATA>& __restrict outUWindow,
                                    output_buffer<T_outSDataType>& __restrict outSWindow,
@@ -491,7 +529,7 @@ NOINLINE_DECL void svdCascadedMain(input_buffer<TT_DATA>& __restrict inWindow,
     vec_t* V = (vec_t*)outVWindow.data();
     TT_DATA* Vscalar = (TT_DATA*)outVWindow.data();
     T_outSDataType* __restrict S = (T_outSDataType*)outSWindow.data();
-    vec_t* __restrict A_in = (vec_t*)inWindow.data();
+    vec_t* __restrict U_in = (vec_t*)inWindow.data();
 
     // Compile-time pair organization (uses kSchedCols, always even)
     constexpr auto& pairs = ParallelPairSets<kSchedCols>::pairs;
@@ -514,30 +552,49 @@ NOINLINE_DECL void svdCascadedMain(input_buffer<TT_DATA>& __restrict inWindow,
     };
 
     // --------------------------------------------------
-    // Initialize: Copy local A partition to U, zero-pad phantom columns
+    // Initialize the first pass stage from A, or restore U/S/V state from
+    // the preceding pass stage.
     // --------------------------------------------------
-    for (int i = 0; i < kLocalInputSize / kVecSizeComp; i++) {
-        U[i] = A_in[i];
-    }
-    // Zero-pad schedule/storage phantom columns
-    for (int col = TP_DIM_COLS; col < (int)kStoreCols; col++) {
-        for (int v = 0; v < (int)kVecsPerUCol; v++) {
-            U[col * kVecsPerUCol + v] = ::aie::zeros<TT_DATA, kVecSizeComp>();
+    if
+        constexpr(TP_INIT_RAW) {
+            for (int i = 0; i < kLocalInputSize / kVecSizeComp; i++) {
+                U[i] = U_in[i];
+            }
+            for (int col = TP_DIM_COLS; col < (int)kStoreCols; col++) {
+                for (int v = 0; v < (int)kVecsPerUCol; v++) {
+                    U[col * kVecsPerUCol + v] = ::aie::zeros<TT_DATA, kVecSizeComp>();
+                }
+            }
+
+            for (int v = 0; v < (int)(kStoreCols * kStoreCols / kVecSizeComp); v++) {
+                V[v] = ::aie::zeros<TT_DATA, kVecSizeComp>();
+            }
+            for (int col = 0; col < (int)kStoreCols; col++) {
+                if
+                    constexpr(kIsComplex) { Vscalar[col * kStoreCols + col] = TT_DATA{1.0f, 0.0f}; }
+                else {
+                    Vscalar[col * kStoreCols + col] = 1.0f;
+                }
+                S[col] = 0.0f;
+            }
         }
+    else {
+        vec_t* __restrict V_in = (vec_t*)inVWindow->data();
+        T_outSDataType* __restrict S_in = (T_outSDataType*)inSWindow->data();
+        for (int i = 0; i < (int)(kStoreCols * kVecsPerUCol); i++) U[i] = U_in[i];
+        for (int i = 0; i < (int)(kStoreCols * kVecsPerVCol); i++) V[i] = V_in[i];
+        for (int col = 0; col < (int)kStoreCols; col++) S[col] = S_in[col];
     }
 
-    // Initialize full V to identity (kStoreCols x kStoreCols)
-    // Zero entire V buffer via vectorised store, then set diagonal to 1.
-    for (int v = 0; v < (int)(kStoreCols * kStoreCols / kVecSizeComp); v++) {
-        V[v] = ::aie::zeros<TT_DATA, kVecSizeComp>();
-    }
-    for (int col = 0; col < (int)kStoreCols; col++) {
-        if
-            constexpr(kIsComplex) { Vscalar[col * kStoreCols + col] = TT_DATA{1.0f, 0.0f}; }
-        else {
-            Vscalar[col * kStoreCols + col] = 1.0f;
+    if
+        constexpr(TP_FINALIZE) {
+            // The final stage overwrites S below. Keeping the staged copy until
+            // then makes every pass-stage edge structurally identical.
+            for (int col = 0; col < (int)kStoreCols; col++) {
+                if
+                    constexpr(TP_INIT_RAW) { S[col] = 0.0f; }
+            }
         }
-    }
 
     // --------------------------------------------------
     // Working arrays in DATA MEMORY (not stack) to avoid register spilling.
@@ -568,8 +625,8 @@ NOINLINE_DECL void svdCascadedMain(input_buffer<TT_DATA>& __restrict inWindow,
                 vec_t* jPtr = U + j * kVecsPerUCol;
 
                 float raw_real, raw_imag;
-                computePairDots<TT_DATA, kVecSizeComp, kIsComplex>(iPtr, jPtr, dotII[p], dotJJ[p], raw_real, raw_imag,
-                                                                   kVecsPerUCol);
+                computePairDots<TT_DATA, kVecSizeComp, kIsComplex, kVecsPerUCol>(iPtr, jPtr, dotII[p], dotJJ[p],
+                                                                                 raw_real, raw_imag);
 
                 if
                     constexpr(kIsComplex) {
@@ -634,80 +691,105 @@ NOINLINE_DECL void svdCascadedMain(input_buffer<TT_DATA>& __restrict inWindow,
         } // end setIdx
     }     // end pass
 
-    // --------------------------------------------------
-    // Finalize: Compute singular values via stream accumulation
-    // Loop over kStoreCols columns (includes schedule/storage phantom columns).
-    // --------------------------------------------------
-    chess_memory_fence();
-    for (int col = 0; col < (int)kStoreCols; col++) {
-        vec_t* colPtr = U + col * kVecsPerUCol;
-        float localNorm;
-        if
-            constexpr(kIsComplex) {
-                using cacc_t = ::aie::accum<caccfloat, kVecSizeComp>;
-                cacc_t cacc = ::aie::mul(::aie::op_conj(colPtr[0]), colPtr[0]);
-                for (int v = 1; v < kVecsPerUCol; v++) {
-                    cacc = ::aie::mac(cacc, ::aie::op_conj(colPtr[v]), colPtr[v]);
-                }
-                cfloat norm_c = ::aie::reduce_add(cacc.template to_vector<cfloat>());
-                localNorm = norm_c.real;
-            }
-        else {
-            acc_t acc = ::aie::mul_square(colPtr[0]);
-            for (int v = 1; v < kVecsPerUCol; v++) {
-                acc = ::aie::mac_square(acc, colPtr[v]);
-            }
-            localNorm = ::aie::reduce_add(acc.template to_vector<float>());
-        }
-
-        // Forward accumulate norms
-        if
-            constexpr(isFirst) { streamWrite(localNorm); }
-        else {
-            float accNorm = hw_add(localNorm, streamRead());
-            if
-                constexpr(!isLast) { streamWrite(accNorm); }
-            else {
-                float sigma = hw_sqrt(accNorm);
-                S[col] = sigma;
-                streamWrite(sigma);
-            }
-        }
-    }
-
-    // Backward broadcast of singular values
-    chess_memory_fence();
     if
-        constexpr(!isLast) {
+        constexpr(TP_FINALIZE) {
+            // --------------------------------------------------
+            // Finalize: Compute singular values via stream accumulation
+            // Loop over kStoreCols columns (includes schedule/storage phantom columns).
+            // --------------------------------------------------
+            chess_memory_fence();
             for (int col = 0; col < (int)kStoreCols; col++) {
-                float sigma = streamRead();
-                S[col] = sigma;
+                vec_t* colPtr = U + col * kVecsPerUCol;
+                float localNorm;
                 if
-                    constexpr(TP_KERNEL_POSITION < TP_CASC_LEN - 2) { streamWrite(sigma); }
-            }
-        }
+                    constexpr(kIsComplex) {
+                        using cacc_t = ::aie::accum<caccfloat, kVecSizeComp>;
+                        cacc_t cacc = ::aie::mul(::aie::op_conj(colPtr[0]), colPtr[0]);
+                        for (int v = 1; v < kVecsPerUCol; v++) {
+                            cacc = ::aie::mac(cacc, ::aie::op_conj(colPtr[v]), colPtr[v]);
+                        }
+                        cfloat norm_c = ::aie::reduce_add(cacc.template to_vector<cfloat>());
+                        localNorm = norm_c.real;
+                    }
+                else {
+#if XF_SOLVER_SVD_USE_SPLIT_ACCUMULATOR_REDUCTIONS
+                    // Split-accumulator (N=2): see svdMain finalize for rationale.
+                    constexpr bool haveAcc1 = (kVecsPerUCol > 1);
+                    acc_t acc0 = ::aie::mul_square(colPtr[0]);
+                    acc_t acc1;
+                    int v = 1;
+                    if
+                        constexpr(haveAcc1) {
+                            acc1 = ::aie::mul_square(colPtr[1]);
+                            v = 2;
+                        }
+                    for (; v + 1 < (int)kVecsPerUCol; v += 2) chess_prepare_for_pipelining {
+                            acc0 = ::aie::mac_square(acc0, colPtr[v]);
+                            acc1 = ::aie::mac_square(acc1, colPtr[v + 1]);
+                        }
+                    for (; v < (int)kVecsPerUCol; v++) {
+                        acc0 = ::aie::mac_square(acc0, colPtr[v]);
+                    }
+                    if
+                        constexpr(haveAcc1) {
+                            auto nv = ::aie::add(acc0.template to_vector<float>(), acc1.template to_vector<float>());
+                            localNorm = ::aie::reduce_add(nv);
+                        }
+                    else {
+                        localNorm = ::aie::reduce_add(acc0.template to_vector<float>());
+                    }
+#else
+                    acc_t acc = ::aie::mul_square(colPtr[0]);
+                    for (int v = 1; v < kVecsPerUCol; v++) {
+                        acc = ::aie::mac_square(acc, colPtr[v]);
+                    }
+                    localNorm = ::aie::reduce_add(acc.template to_vector<float>());
+#endif
+                }
 
-    // Normalize local U partition (guard against zero sigma from phantom columns)
-    for (int col = 0; col < (int)kStoreCols; col++) {
-        vec_t* colPtr = U + col * kVecsPerUCol;
-        float invSigma = hw_lt(kEpsilon, S[col]) ? hw_inv(S[col]) : 0.0f;
-        for (int v = 0; v < kVecsPerUCol; v++) {
-            colPtr[v] = ::aie::mul(colPtr[v], invSigma);
-        }
-    }
-
-    // Sort real columns only; phantom columns are zero and naturally trail any real sigma.
-    sortSingularValues<TT_DATA, kVecSizeComp>(S, U, V, TP_DIM_COLS, kVecsPerUCol, kVecsPerVCol);
-
-    // Compact V in-place (see svdMain for rationale).
-    if
-        constexpr(kStoreCols > TP_DIM_COLS) {
-            TT_DATA* Vscalar_out = (TT_DATA*)outVWindow.data();
-            for (int col = 0; col < (int)TP_DIM_COLS; col++) {
-                for (int row = 0; row < (int)TP_DIM_COLS; row++) {
-                    Vscalar_out[col * TP_DIM_COLS + row] = Vscalar_out[col * kStoreCols + row];
+                // Forward accumulate norms
+                if
+                    constexpr(isFirst) { streamWrite(localNorm); }
+                else {
+                    float accNorm = hw_add(localNorm, streamRead());
+                    if
+                        constexpr(!isLast) { streamWrite(accNorm); }
+                    else {
+                        float sigma = hw_sqrt(accNorm);
+                        S[col] = sigma;
+                        streamWrite(sigma);
+                    }
                 }
             }
+
+            // Backward broadcast of singular values
+            chess_memory_fence();
+            if
+                constexpr(!isLast) {
+                    for (int col = 0; col < (int)kStoreCols; col++) {
+                        float sigma = streamRead();
+                        S[col] = sigma;
+                        if
+                            constexpr(TP_KERNEL_POSITION < TP_CASC_LEN - 2) { streamWrite(sigma); }
+                    }
+                }
+
+            // Normalize local U partition (guard against zero sigma from phantom columns)
+            for (int col = 0; col < (int)kStoreCols; col++) {
+                vec_t* colPtr = U + col * kVecsPerUCol;
+                float invSigma = hw_lt(kEpsilon, S[col]) ? hw_inv(S[col]) : 0.0f;
+                for (int v = 0; v < kVecsPerUCol; v++) {
+                    colPtr[v] = ::aie::mul(colPtr[v], invSigma);
+                }
+            }
+
+            // Sort real columns only; phantom columns are zero and naturally trail any real sigma.
+            sortSingularValues<TT_DATA, kVecSizeComp>(S, U, V, TP_DIM_COLS, kVecsPerUCol, kVecsPerVCol);
+
+            // V remains in its kStoreCols x kStoreCols padded column-major layout.
+            // MatMul1 in mp_pseudoinverse_graph reads V as kStoreCols x kStoreCols col-major,
+            // which matches this layout. Padding columns/rows contribute zero to the result
+            // since the corresponding S^-1 diagonal entries are zero.
         }
 }
 
@@ -720,17 +802,18 @@ template <typename TT_DATA,
           unsigned int TP_DIM_COLS,
           unsigned int TP_PASSES,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_DIAG_INV,
           unsigned int TP_KERNEL_POSITION>
 NOINLINE_DECL void
-SVDecomposition_First<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CASC_LEN, TP_KERNEL_POSITION>::svdMain(
-    input_buffer<TT_DATA>& __restrict inWindow,
-    input_stream<TT_DATA>* inStream,
-    output_buffer<TT_DATA>& __restrict outUWindow,
-    output_buffer<T_outSDataType>& __restrict outSWindow,
-    output_buffer<TT_DATA>& __restrict outVWindow,
-    output_stream<TT_DATA>* outStream) {
-    svdCascadedMain<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CASC_LEN, TP_KERNEL_POSITION>(
-        inWindow, inStream, outUWindow, outSWindow, outVWindow, outStream, this->scratchBuf);
+SVDecomposition_First<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CASC_LEN, TP_DIAG_INV, TP_KERNEL_POSITION>::
+    svdMain(input_buffer<TT_DATA>& __restrict inWindow,
+            input_stream<TT_DATA>* inStream,
+            output_buffer<TT_DATA>& __restrict outUWindow,
+            output_buffer<T_outSDataType>& __restrict outSWindow,
+            output_buffer<TT_DATA>& __restrict outVWindow,
+            output_stream<TT_DATA>* outStream) {
+    svdCascadedMain<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CASC_LEN, TP_DIAG_INV, TP_KERNEL_POSITION>(
+        inWindow, nullptr, nullptr, inStream, outUWindow, outSWindow, outVWindow, outStream, this->scratchBuf);
 }
 
 template <typename TT_DATA,
@@ -738,17 +821,18 @@ template <typename TT_DATA,
           unsigned int TP_DIM_COLS,
           unsigned int TP_PASSES,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_DIAG_INV,
           unsigned int TP_KERNEL_POSITION>
 NOINLINE_DECL void
-SVDecomposition_Middle<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CASC_LEN, TP_KERNEL_POSITION>::svdMain(
-    input_buffer<TT_DATA>& __restrict inWindow,
-    input_stream<TT_DATA>* inStream,
-    output_buffer<TT_DATA>& __restrict outUWindow,
-    output_buffer<T_outSDataType>& __restrict outSWindow,
-    output_buffer<TT_DATA>& __restrict outVWindow,
-    output_stream<TT_DATA>* outStream) {
-    svdCascadedMain<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CASC_LEN, TP_KERNEL_POSITION>(
-        inWindow, inStream, outUWindow, outSWindow, outVWindow, outStream, this->scratchBuf);
+SVDecomposition_Middle<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CASC_LEN, TP_DIAG_INV, TP_KERNEL_POSITION>::
+    svdMain(input_buffer<TT_DATA>& __restrict inWindow,
+            input_stream<TT_DATA>* inStream,
+            output_buffer<TT_DATA>& __restrict outUWindow,
+            output_buffer<T_outSDataType>& __restrict outSWindow,
+            output_buffer<TT_DATA>& __restrict outVWindow,
+            output_stream<TT_DATA>* outStream) {
+    svdCascadedMain<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CASC_LEN, TP_DIAG_INV, TP_KERNEL_POSITION>(
+        inWindow, nullptr, nullptr, inStream, outUWindow, outSWindow, outVWindow, outStream, this->scratchBuf);
 }
 
 template <typename TT_DATA,
@@ -756,17 +840,335 @@ template <typename TT_DATA,
           unsigned int TP_DIM_COLS,
           unsigned int TP_PASSES,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_DIAG_INV,
           unsigned int TP_KERNEL_POSITION>
 NOINLINE_DECL void
-SVDecomposition_Last<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CASC_LEN, TP_KERNEL_POSITION>::svdMain(
+SVDecomposition_Last<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CASC_LEN, TP_DIAG_INV, TP_KERNEL_POSITION>::
+    svdMain(input_buffer<TT_DATA>& __restrict inWindow,
+            input_stream<TT_DATA>* inStream,
+            output_buffer<TT_DATA>& __restrict outUWindow,
+            output_buffer<T_outSDataType>& __restrict outSWindow,
+            output_buffer<TT_DATA>& __restrict outVWindow,
+            output_stream<TT_DATA>* outStream) {
+    svdCascadedMain<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CASC_LEN, TP_DIAG_INV, TP_KERNEL_POSITION>(
+        inWindow, nullptr, nullptr, inStream, outUWindow, outSWindow, outVWindow, outStream, this->scratchBuf);
+}
+
+//-----------------------------------------------------------------------------------------------------
+// Pass-pipelined kernels (TP_PASSES_SSR)
+//
+// Each kernel holds the FULL matrix (no row split) and runs exactly one Jacobi sweep, forwarding
+// U/V to the next kernel via plain window buffers. No stream/ring, no partial-dot-product reduction
+// — every dot product is already local since the whole matrix is present.
+//-----------------------------------------------------------------------------------------------------
+
+template <typename TT_DATA, unsigned int TP_DIM_ROWS, unsigned int TP_DIM_COLS>
+NOINLINE_DECL void SVDecomposition_PassFirst<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS>::svdMain(
     input_buffer<TT_DATA>& __restrict inWindow,
-    input_stream<TT_DATA>* inStream,
+    output_buffer<TT_DATA>& __restrict outUWindow,
+    output_buffer<TT_DATA>& __restrict outVWindow) {
+    static constexpr bool kIsComplex = fnIsComplexDataType<TT_DATA>();
+    static constexpr unsigned int kVecSizeIO = fnVecSampleNumIO<TT_DATA>();
+    static constexpr unsigned int kVecSizeCompRaw = fnVecSampleNum<TT_DATA>();
+
+    static constexpr unsigned int kSchedCols = TP_DIM_COLS + (TP_DIM_COLS % 2);
+    static constexpr unsigned int kStoreAlign = fnVecStoreAlign<TT_DATA>();
+    static constexpr unsigned int kStoreCols = ((kSchedCols + kStoreAlign - 1) / kStoreAlign) * kStoreAlign;
+
+    static constexpr unsigned int kVecSizeComp =
+        (kStoreCols % kVecSizeCompRaw == 0 && TP_DIM_ROWS % kVecSizeCompRaw == 0) ? kVecSizeCompRaw : kVecSizeIO;
+
+    static constexpr int kPairsPerSet = kSchedCols / 2;
+    static constexpr int kNumSets = kSchedCols - 1;
+    static constexpr unsigned int kVecsPerUCol = TP_DIM_ROWS / kVecSizeComp;
+    static constexpr unsigned int kVecsPerVCol = kStoreCols / kVecSizeComp;
+
+    using vec_t = ::aie::vector<TT_DATA, kVecSizeComp>;
+
+    // NOTE: V and Vscalar alias the same buffer, so neither may be marked __restrict.
+    vec_t* __restrict U = (vec_t*)outUWindow.data();
+    vec_t* V = (vec_t*)outVWindow.data();
+    TT_DATA* Vscalar = (TT_DATA*)outVWindow.data();
+    vec_t* __restrict A_in = (vec_t*)inWindow.data();
+
+    constexpr auto& pairs = ParallelPairSets<kSchedCols>::pairs;
+
+    initUVIdentity<TT_DATA, kVecSizeComp, kIsComplex>(A_in, U, V, Vscalar, TP_DIM_COLS, kStoreCols, kVecsPerUCol,
+                                                      kVecsPerVCol);
+
+    static constexpr unsigned int kScratchStride = SvdScratchSize<TT_DATA, TP_DIM_COLS>::kPaddedPairsPerSet;
+    float* dotII = this->scratchBuf;
+    float* dotJJ = dotII + kScratchStride;
+    float* dotIJ = dotJJ + kScratchStride;
+    float* c_arr = dotIJ + kScratchStride;
+    float* s_arr = c_arr + kScratchStride;
+    float* phase_real = s_arr + kScratchStride;
+    float* phase_imag = phase_real + kScratchStride;
+
+    runJacobiSweep<TT_DATA, kVecSizeComp, kIsComplex, kPairsPerSet, kVecsPerUCol, kVecsPerVCol>(
+        U, V, dotII, dotJJ, dotIJ, c_arr, s_arr, phase_real, phase_imag, pairs, kNumSets);
+}
+
+template <typename TT_DATA, unsigned int TP_DIM_ROWS, unsigned int TP_DIM_COLS>
+NOINLINE_DECL void SVDecomposition_PassMiddle<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS>::svdMain(
+    input_buffer<TT_DATA>& __restrict inUWindow,
+    input_buffer<TT_DATA>& __restrict inVWindow,
+    output_buffer<TT_DATA>& __restrict outUWindow,
+    output_buffer<TT_DATA>& __restrict outVWindow) {
+    static constexpr bool kIsComplex = fnIsComplexDataType<TT_DATA>();
+    static constexpr unsigned int kVecSizeIO = fnVecSampleNumIO<TT_DATA>();
+    static constexpr unsigned int kVecSizeCompRaw = fnVecSampleNum<TT_DATA>();
+
+    static constexpr unsigned int kSchedCols = TP_DIM_COLS + (TP_DIM_COLS % 2);
+    static constexpr unsigned int kStoreAlign = fnVecStoreAlign<TT_DATA>();
+    static constexpr unsigned int kStoreCols = ((kSchedCols + kStoreAlign - 1) / kStoreAlign) * kStoreAlign;
+
+    static constexpr unsigned int kVecSizeComp =
+        (kStoreCols % kVecSizeCompRaw == 0 && TP_DIM_ROWS % kVecSizeCompRaw == 0) ? kVecSizeCompRaw : kVecSizeIO;
+
+    static constexpr int kPairsPerSet = kSchedCols / 2;
+    static constexpr int kNumSets = kSchedCols - 1;
+    static constexpr unsigned int kVecsPerUCol = TP_DIM_ROWS / kVecSizeComp;
+    static constexpr unsigned int kVecsPerVCol = kStoreCols / kVecSizeComp;
+
+    using vec_t = ::aie::vector<TT_DATA, kVecSizeComp>;
+
+    vec_t* __restrict Uin = (vec_t*)inUWindow.data();
+    vec_t* __restrict Vin = (vec_t*)inVWindow.data();
+    // NOTE: V aliases no other pointer here, but is left non-__restrict for consistency
+    // with the other kernel entry points (applyGivensRotations takes it as such).
+    vec_t* __restrict U = (vec_t*)outUWindow.data();
+    vec_t* V = (vec_t*)outVWindow.data();
+
+    constexpr auto& pairs = ParallelPairSets<kSchedCols>::pairs;
+
+    // Copy incoming U/V state (already padded to kStoreCols by the upstream kernel)
+    // into this kernel's own working (output) buffers.
+    for (unsigned int i = 0; i < kStoreCols * kVecsPerUCol; i++) {
+        U[i] = Uin[i];
+    }
+    for (unsigned int i = 0; i < kStoreCols * kVecsPerVCol; i++) {
+        V[i] = Vin[i];
+    }
+
+    static constexpr unsigned int kScratchStride = SvdScratchSize<TT_DATA, TP_DIM_COLS>::kPaddedPairsPerSet;
+    float* dotII = this->scratchBuf;
+    float* dotJJ = dotII + kScratchStride;
+    float* dotIJ = dotJJ + kScratchStride;
+    float* c_arr = dotIJ + kScratchStride;
+    float* s_arr = c_arr + kScratchStride;
+    float* phase_real = s_arr + kScratchStride;
+    float* phase_imag = phase_real + kScratchStride;
+
+    runJacobiSweep<TT_DATA, kVecSizeComp, kIsComplex, kPairsPerSet, kVecsPerUCol, kVecsPerVCol>(
+        U, V, dotII, dotJJ, dotIJ, c_arr, s_arr, phase_real, phase_imag, pairs, kNumSets);
+}
+
+template <typename TT_DATA, unsigned int TP_DIM_ROWS, unsigned int TP_DIM_COLS>
+NOINLINE_DECL void SVDecomposition_PassFinalize<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS>::svdMain(
+    input_buffer<TT_DATA>& __restrict inUWindow,
+    input_buffer<TT_DATA>& __restrict inVWindow,
     output_buffer<TT_DATA>& __restrict outUWindow,
     output_buffer<T_outSDataType>& __restrict outSWindow,
-    output_buffer<TT_DATA>& __restrict outVWindow,
-    output_stream<TT_DATA>* outStream) {
-    svdCascadedMain<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_PASSES, TP_CASC_LEN, TP_KERNEL_POSITION>(
-        inWindow, inStream, outUWindow, outSWindow, outVWindow, outStream, this->scratchBuf);
+    output_buffer<TT_DATA>& __restrict outVWindow) {
+    static constexpr bool kIsComplex = fnIsComplexDataType<TT_DATA>();
+    static constexpr unsigned int kVecSizeIO = fnVecSampleNumIO<TT_DATA>();
+    static constexpr unsigned int kVecSizeCompRaw = fnVecSampleNum<TT_DATA>();
+
+    static constexpr unsigned int kSchedCols = TP_DIM_COLS + (TP_DIM_COLS % 2);
+    static constexpr unsigned int kStoreAlign = fnVecStoreAlign<TT_DATA>();
+    static constexpr unsigned int kStoreCols = ((kSchedCols + kStoreAlign - 1) / kStoreAlign) * kStoreAlign;
+
+    static constexpr unsigned int kVecSizeComp =
+        (kStoreCols % kVecSizeCompRaw == 0 && TP_DIM_ROWS % kVecSizeCompRaw == 0) ? kVecSizeCompRaw : kVecSizeIO;
+
+    static constexpr unsigned int kVecsPerUCol = TP_DIM_ROWS / kVecSizeComp;
+    static constexpr unsigned int kVecsPerVCol = kStoreCols / kVecSizeComp;
+
+    using vec_t = ::aie::vector<TT_DATA, kVecSizeComp>;
+
+    vec_t* __restrict Uin = (vec_t*)inUWindow.data();
+    vec_t* __restrict Vin = (vec_t*)inVWindow.data();
+    // NOTE: V and the S/U buffers are independent windows; V is left non-__restrict
+    // for consistency with finalizeSVD's aliasing contract (matches svdMain finalize).
+    vec_t* __restrict U = (vec_t*)outUWindow.data();
+    vec_t* V = (vec_t*)outVWindow.data();
+    T_outSDataType* __restrict S = (T_outSDataType*)outSWindow.data();
+
+    // Copy incoming U/V state into this kernel's own working (output) buffers.
+    for (unsigned int i = 0; i < kStoreCols * kVecsPerUCol; i++) {
+        U[i] = Uin[i];
+    }
+    for (unsigned int i = 0; i < kStoreCols * kVecsPerVCol; i++) {
+        V[i] = Vin[i];
+    }
+
+    finalizeSVD<TT_DATA, kVecSizeComp, kIsComplex, kVecsPerUCol, kVecsPerVCol>(U, V, S, TP_DIM_COLS, kStoreCols);
+}
+
+template <typename TT_DATA,
+          unsigned int TP_DIM_ROWS,
+          unsigned int TP_DIM_COLS,
+          unsigned int TP_STAGE_PASSES,
+          unsigned int TP_DIAG_INV,
+          bool TP_INIT_RAW,
+          bool TP_FINAL_STAGE>
+NOINLINE_DECL void svd2DSingleMain(input_buffer<TT_DATA>& __restrict inUWindow,
+                                   input_buffer<T_outSDataType>* __restrict inSWindow,
+                                   input_buffer<TT_DATA>* __restrict inVWindow,
+                                   output_buffer<TT_DATA>& __restrict outUWindow,
+                                   output_buffer<T_outSDataType>& __restrict outSWindow,
+                                   output_buffer<TT_DATA>& __restrict outVWindow,
+                                   float* __restrict scratchBuf) {
+    static constexpr bool kIsComplex = fnIsComplexDataType<TT_DATA>();
+    static constexpr unsigned int kVecSizeIO = fnVecSampleNumIO<TT_DATA>();
+    static constexpr unsigned int kVecSizeCompRaw = fnVecSampleNum<TT_DATA>();
+    static constexpr unsigned int kSchedCols = TP_DIM_COLS + (TP_DIM_COLS % 2);
+    static constexpr unsigned int kStoreAlign = fnVecStoreAlign<TT_DATA>();
+    static constexpr unsigned int kStoreCols = ((kSchedCols + kStoreAlign - 1) / kStoreAlign) * kStoreAlign;
+    static constexpr unsigned int kVecSizeComp =
+        (kStoreCols % kVecSizeCompRaw == 0 && TP_DIM_ROWS % kVecSizeCompRaw == 0) ? kVecSizeCompRaw : kVecSizeIO;
+    static constexpr int kPairsPerSet = kSchedCols / 2;
+    static constexpr int kNumSets = kSchedCols - 1;
+    static constexpr unsigned int kVecsPerUCol = TP_DIM_ROWS / kVecSizeComp;
+    static constexpr unsigned int kVecsPerVCol = kStoreCols / kVecSizeComp;
+    static constexpr unsigned int kScratchStride = SvdScratchSize<TT_DATA, TP_DIM_COLS>::kPaddedPairsPerSet;
+
+    using vec_t = ::aie::vector<TT_DATA, kVecSizeComp>;
+    vec_t* __restrict Uin = (vec_t*)inUWindow.data();
+    vec_t* __restrict U = (vec_t*)outUWindow.data();
+    vec_t* V = (vec_t*)outVWindow.data();
+    TT_DATA* Vscalar = (TT_DATA*)outVWindow.data();
+    T_outSDataType* __restrict S = (T_outSDataType*)outSWindow.data();
+    constexpr auto& pairs = ParallelPairSets<kSchedCols>::pairs;
+
+    if
+        constexpr(TP_INIT_RAW) {
+            initUVIdentity<TT_DATA, kVecSizeComp, kIsComplex>(Uin, U, V, Vscalar, TP_DIM_COLS, kStoreCols, kVecsPerUCol,
+                                                              kVecsPerVCol);
+            for (int col = 0; col < (int)kStoreCols; col++) S[col] = 0.0f;
+        }
+    else {
+        vec_t* __restrict Vin = (vec_t*)inVWindow->data();
+        T_outSDataType* __restrict Sin = (T_outSDataType*)inSWindow->data();
+        for (int i = 0; i < (int)(kStoreCols * kVecsPerUCol); i++) U[i] = Uin[i];
+        for (int i = 0; i < (int)(kStoreCols * kVecsPerVCol); i++) V[i] = Vin[i];
+        for (int col = 0; col < (int)kStoreCols; col++) S[col] = Sin[col];
+    }
+
+    float* dotII = scratchBuf;
+    float* dotJJ = dotII + kScratchStride;
+    float* dotIJ = dotJJ + kScratchStride;
+    float* c_arr = dotIJ + kScratchStride;
+    float* s_arr = c_arr + kScratchStride;
+    float* phase_real = s_arr + kScratchStride;
+    float* phase_imag = phase_real + kScratchStride;
+
+    for (int pass = 0; pass < (int)TP_STAGE_PASSES; pass++) {
+        runJacobiSweep<TT_DATA, kVecSizeComp, kIsComplex, kPairsPerSet, kVecsPerUCol, kVecsPerVCol>(
+            U, V, dotII, dotJJ, dotIJ, c_arr, s_arr, phase_real, phase_imag, pairs, kNumSets);
+    }
+    if
+        constexpr(TP_FINAL_STAGE) {
+            finalizeSVD<TT_DATA, kVecSizeComp, kIsComplex, kVecsPerUCol, kVecsPerVCol>(U, V, S, TP_DIM_COLS,
+                                                                                       kStoreCols);
+            if
+                constexpr(TP_DIAG_INV) {
+                    for (int col = 0; col < (int)kStoreCols; col++) {
+                        S[col] = hw_lt(kEpsilon, S[col]) ? hw_inv(S[col]) : 0.0f;
+                    }
+                }
+        }
+}
+
+template <typename TT_DATA,
+          unsigned int TP_DIM_ROWS,
+          unsigned int TP_DIM_COLS,
+          unsigned int TP_STAGE_PASSES,
+          unsigned int TP_DIAG_INV,
+          bool TP_FINAL_STAGE>
+NOINLINE_DECL void
+SVDecomposition_2D_RawSingle<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_STAGE_PASSES, TP_DIAG_INV, TP_FINAL_STAGE>::svdMain(
+    input_buffer<TT_DATA>& __restrict inWindow,
+    output_buffer<TT_DATA>& __restrict outUWindow,
+    output_buffer<T_outSDataType>& __restrict outSWindow,
+    output_buffer<TT_DATA>& __restrict outVWindow) {
+    svd2DSingleMain<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_STAGE_PASSES, TP_DIAG_INV, true, TP_FINAL_STAGE>(
+        inWindow, nullptr, nullptr, outUWindow, outSWindow, outVWindow, this->scratchBuf);
+}
+
+template <typename TT_DATA,
+          unsigned int TP_DIM_ROWS,
+          unsigned int TP_DIM_COLS,
+          unsigned int TP_STAGE_PASSES,
+          unsigned int TP_DIAG_INV,
+          bool TP_FINAL_STAGE>
+NOINLINE_DECL void
+SVDecomposition_2D_StateSingle<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_STAGE_PASSES, TP_DIAG_INV, TP_FINAL_STAGE>::
+    svdMain(input_buffer<TT_DATA>& __restrict inUWindow,
+            input_buffer<T_outSDataType>& __restrict inSWindow,
+            input_buffer<TT_DATA>& __restrict inVWindow,
+            output_buffer<TT_DATA>& __restrict outUWindow,
+            output_buffer<T_outSDataType>& __restrict outSWindow,
+            output_buffer<TT_DATA>& __restrict outVWindow) {
+    svd2DSingleMain<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_STAGE_PASSES, TP_DIAG_INV, false, TP_FINAL_STAGE>(
+        inUWindow, &inSWindow, &inVWindow, outUWindow, outSWindow, outVWindow, this->scratchBuf);
+}
+
+template <typename TT_DATA,
+          unsigned int TP_DIM_ROWS,
+          unsigned int TP_DIM_COLS,
+          unsigned int TP_STAGE_PASSES,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_DIAG_INV,
+          bool TP_FINAL_STAGE>
+NOINLINE_DECL void
+SVDecomposition_2D_RawCasc<TT_DATA,
+                           TP_DIM_ROWS,
+                           TP_DIM_COLS,
+                           TP_STAGE_PASSES,
+                           TP_CASC_LEN,
+                           TP_KERNEL_POSITION,
+                           TP_DIAG_INV,
+                           TP_FINAL_STAGE>::svdMain(input_buffer<TT_DATA>& __restrict inWindow,
+                                                    input_stream<TT_DATA>* inStream,
+                                                    output_buffer<TT_DATA>& __restrict outUWindow,
+                                                    output_buffer<T_outSDataType>& __restrict outSWindow,
+                                                    output_buffer<TT_DATA>& __restrict outVWindow,
+                                                    output_stream<TT_DATA>* outStream) {
+    svdCascadedMain<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_STAGE_PASSES, TP_CASC_LEN, TP_DIAG_INV, TP_KERNEL_POSITION,
+                    true, TP_FINAL_STAGE>(inWindow, nullptr, nullptr, inStream, outUWindow, outSWindow, outVWindow,
+                                          outStream, this->scratchBuf);
+}
+
+template <typename TT_DATA,
+          unsigned int TP_DIM_ROWS,
+          unsigned int TP_DIM_COLS,
+          unsigned int TP_STAGE_PASSES,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_DIAG_INV,
+          bool TP_FINAL_STAGE>
+NOINLINE_DECL void
+SVDecomposition_2D_StateCasc<TT_DATA,
+                             TP_DIM_ROWS,
+                             TP_DIM_COLS,
+                             TP_STAGE_PASSES,
+                             TP_CASC_LEN,
+                             TP_KERNEL_POSITION,
+                             TP_DIAG_INV,
+                             TP_FINAL_STAGE>::svdMain(input_buffer<TT_DATA>& __restrict inUWindow,
+                                                      input_buffer<T_outSDataType>& __restrict inSWindow,
+                                                      input_buffer<TT_DATA>& __restrict inVWindow,
+                                                      input_stream<TT_DATA>* inStream,
+                                                      output_buffer<TT_DATA>& __restrict outUWindow,
+                                                      output_buffer<T_outSDataType>& __restrict outSWindow,
+                                                      output_buffer<TT_DATA>& __restrict outVWindow,
+                                                      output_stream<TT_DATA>* outStream) {
+    svdCascadedMain<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_STAGE_PASSES, TP_CASC_LEN, TP_DIAG_INV, TP_KERNEL_POSITION,
+                    false, TP_FINAL_STAGE>(inUWindow, &inSWindow, &inVWindow, inStream, outUWindow, outSWindow,
+                                           outVWindow, outStream, this->scratchBuf);
 }
 
 } // namespace svd

@@ -9,12 +9,12 @@
         "NUM_FRAMES": "1",
         "DIAG_INV": "0",
         "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.05",
-        "CC_TOLERANCE": "0.05",
+        "DIFF_TOLERANCE": "0.01",
+        "CC_TOLERANCE": "0.01",
         "NITER": "1",
         "DATA_SEED": "1"
     },
-    "test_2_1_float_8_0_0_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_7_1_float_8_0_0_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "8",
@@ -29,7 +29,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_1_float_8_0_0_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_7_1_float_8_0_0_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "8",
@@ -44,7 +44,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_1_float_8_0_1_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_7_1_float_8_0_1_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "8",
@@ -59,7 +59,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_1_float_8_0_1_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_7_1_float_8_0_1_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "8",
@@ -74,7 +74,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_1_float_8_1_0_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_7_1_float_8_1_0_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "8",
@@ -89,7 +89,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_1_float_8_1_0_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_7_1_float_8_1_0_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "8",
@@ -104,7 +104,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_1_float_8_1_1_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_7_1_float_8_1_1_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "8",
@@ -119,7 +119,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_1_float_8_1_1_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_7_1_float_8_1_1_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "8",
@@ -134,7 +134,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_1_float_24_0_0_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_7_1_float_24_0_0_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "24",
@@ -149,7 +149,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_1_float_24_0_0_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_7_1_float_24_0_0_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "24",
@@ -164,7 +164,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_1_float_24_0_1_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_7_1_float_24_0_1_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "24",
@@ -179,7 +179,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_1_float_24_0_1_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_7_1_float_24_0_1_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "24",
@@ -194,7 +194,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_1_float_24_1_0_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_7_1_float_24_1_0_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "24",
@@ -209,7 +209,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_1_float_24_1_0_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_7_1_float_24_1_0_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "24",
@@ -224,7 +224,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_1_float_24_1_1_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_7_1_float_24_1_1_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "24",
@@ -239,7 +239,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_1_float_24_1_1_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_7_1_float_24_1_1_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "24",
@@ -254,7 +254,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_1_float_64_0_0_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_7_1_float_64_0_0_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -269,7 +269,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_1_float_64_0_0_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_7_1_float_64_0_0_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -284,7 +284,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_1_float_64_0_1_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_7_1_float_64_0_1_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -299,7 +299,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_1_float_64_0_1_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_7_1_float_64_0_1_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -314,7 +314,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_1_float_64_1_0_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_7_1_float_64_1_0_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -329,7 +329,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_1_float_64_1_0_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_7_1_float_64_1_0_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -344,7 +344,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_1_float_64_1_1_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_7_1_float_64_1_1_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -359,7 +359,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_1_float_64_1_1_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_7_1_float_64_1_1_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -374,7 +374,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_2_float_8_0_0_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_7_2_float_8_0_0_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "8",
@@ -389,7 +389,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_2_float_8_0_0_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_7_2_float_8_0_0_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "8",
@@ -404,7 +404,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_2_float_8_0_1_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_7_2_float_8_0_1_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "8",
@@ -419,7 +419,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_2_float_8_0_1_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_7_2_float_8_0_1_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "8",
@@ -434,7 +434,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_2_float_8_1_0_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_7_2_float_8_1_0_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "8",
@@ -449,7 +449,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_2_float_8_1_0_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_7_2_float_8_1_0_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "8",
@@ -464,7 +464,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_2_float_8_1_1_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_7_2_float_8_1_1_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "8",
@@ -479,7 +479,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_2_float_8_1_1_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_7_2_float_8_1_1_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "8",
@@ -494,7 +494,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_2_float_24_0_0_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_7_2_float_24_0_0_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "24",
@@ -509,7 +509,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_2_float_24_0_0_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_7_2_float_24_0_0_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "24",
@@ -524,7 +524,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_2_float_24_0_1_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_7_2_float_24_0_1_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "24",
@@ -539,7 +539,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_2_float_24_0_1_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_7_2_float_24_0_1_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "24",
@@ -554,7 +554,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_2_float_24_1_0_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_7_2_float_24_1_0_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "24",
@@ -569,7 +569,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_2_float_24_1_0_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_7_2_float_24_1_0_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "24",
@@ -584,7 +584,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_2_float_24_1_1_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_7_2_float_24_1_1_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "24",
@@ -599,7 +599,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_2_float_24_1_1_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_7_2_float_24_1_1_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "24",
@@ -614,7 +614,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_2_float_64_0_0_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_7_2_float_64_0_0_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -629,7 +629,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_2_float_64_0_0_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_7_2_float_64_0_0_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -644,7 +644,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_2_float_64_0_1_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_7_2_float_64_0_1_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -659,7 +659,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_2_float_64_0_1_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_7_2_float_64_0_1_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -674,7 +674,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_2_float_64_1_0_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_7_2_float_64_1_0_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -689,7 +689,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_2_float_64_1_0_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_7_2_float_64_1_0_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -704,7 +704,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_2_float_64_1_1_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_7_2_float_64_1_1_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -719,7 +719,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_2_2_float_64_1_1_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_7_2_float_64_1_1_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -734,7 +734,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_1_cfloat_4_0_1_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_8_1_cfloat_4_0_1_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "4",
@@ -749,7 +749,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_1_cfloat_4_0_1_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_8_1_cfloat_4_0_1_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "4",
@@ -764,7 +764,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_1_cfloat_4_1_1_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_8_1_cfloat_4_1_1_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "4",
@@ -779,7 +779,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_1_cfloat_4_1_1_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_8_1_cfloat_4_1_1_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "4",
@@ -794,7 +794,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_1_cfloat_12_0_1_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_8_1_cfloat_12_0_1_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "12",
@@ -809,7 +809,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_1_cfloat_12_0_1_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_8_1_cfloat_12_0_1_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "12",
@@ -824,7 +824,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_1_cfloat_12_1_1_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_8_1_cfloat_12_1_1_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "12",
@@ -839,7 +839,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_1_cfloat_12_1_1_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_8_1_cfloat_12_1_1_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "12",
@@ -854,7 +854,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_1_cfloat_32_0_1_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_8_1_cfloat_32_0_1_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "32",
@@ -869,7 +869,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_1_cfloat_32_0_1_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_8_1_cfloat_32_0_1_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "32",
@@ -884,7 +884,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_1_cfloat_32_1_1_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_8_1_cfloat_32_1_1_1_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "32",
@@ -899,7 +899,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_1_cfloat_32_1_1_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_8_1_cfloat_32_1_1_1_1_1_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "32",
@@ -914,7 +914,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_2_cfloat_4_0_1_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_8_2_cfloat_4_0_1_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "4",
@@ -929,7 +929,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_2_cfloat_4_0_1_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_8_2_cfloat_4_0_1_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "4",
@@ -944,7 +944,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_2_cfloat_4_1_1_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_8_2_cfloat_4_1_1_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "4",
@@ -959,7 +959,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_2_cfloat_4_1_1_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_8_2_cfloat_4_1_1_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "4",
@@ -974,7 +974,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_2_cfloat_12_0_1_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_8_2_cfloat_12_0_1_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "12",
@@ -989,7 +989,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_2_cfloat_12_0_1_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_8_2_cfloat_12_0_1_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "12",
@@ -1004,7 +1004,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_2_cfloat_12_1_1_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_8_2_cfloat_12_1_1_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "12",
@@ -1019,7 +1019,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_2_cfloat_12_1_1_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_8_2_cfloat_12_1_1_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "12",
@@ -1034,7 +1034,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_2_cfloat_32_0_1_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_8_2_cfloat_32_0_1_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "32",
@@ -1049,7 +1049,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_2_cfloat_32_0_1_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_8_2_cfloat_32_0_1_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "32",
@@ -1064,7 +1064,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_2_cfloat_32_1_1_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_8_2_cfloat_32_1_1_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "32",
@@ -1079,7 +1079,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_2_cfloat_32_1_1_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_8_2_cfloat_32_1_1_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "32",
@@ -1094,7 +1094,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_4_2_cfloat_4_0_0_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_9_2_cfloat_4_0_0_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "4",
@@ -1109,7 +1109,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_4_2_cfloat_4_0_0_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_9_2_cfloat_4_0_0_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "4",
@@ -1124,7 +1124,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_4_2_cfloat_4_1_0_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_9_2_cfloat_4_1_0_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "4",
@@ -1139,7 +1139,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_4_2_cfloat_4_1_0_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_9_2_cfloat_4_1_0_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "4",
@@ -1154,7 +1154,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_4_2_cfloat_12_0_0_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_9_2_cfloat_12_0_0_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "12",
@@ -1169,7 +1169,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_4_2_cfloat_12_0_0_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_9_2_cfloat_12_0_0_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "12",
@@ -1184,7 +1184,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_4_2_cfloat_12_1_0_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_9_2_cfloat_12_1_0_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "12",
@@ -1199,7 +1199,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_4_2_cfloat_12_1_0_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_9_2_cfloat_12_1_0_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "12",
@@ -1214,7 +1214,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_4_2_cfloat_32_0_0_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_9_2_cfloat_32_0_0_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "32",
@@ -1229,7 +1229,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_4_2_cfloat_32_0_0_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_9_2_cfloat_32_0_0_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "32",
@@ -1244,7 +1244,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_4_2_cfloat_32_1_0_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_9_2_cfloat_32_1_0_1_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "32",
@@ -1259,7 +1259,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_4_2_cfloat_32_1_0_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_9_2_cfloat_32_1_0_1_1_1_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "32",
@@ -1274,7 +1274,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_22_float_16_0_0_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_10_22_float_16_0_0_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "16",
@@ -1289,7 +1289,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_22_float_16_0_0_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_10_22_float_16_0_0_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "16",
@@ -1304,7 +1304,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_22_float_16_0_1_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_10_22_float_16_0_1_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "16",
@@ -1319,7 +1319,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_22_float_16_0_1_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_10_22_float_16_0_1_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "16",
@@ -1334,7 +1334,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_22_float_16_1_0_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_10_22_float_16_1_0_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "16",
@@ -1349,7 +1349,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_22_float_16_1_0_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_10_22_float_16_1_0_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "16",
@@ -1364,7 +1364,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_22_float_16_1_1_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_10_22_float_16_1_1_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "16",
@@ -1379,7 +1379,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_22_float_16_1_1_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_10_22_float_16_1_1_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "16",
@@ -1394,7 +1394,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_22_float_48_0_0_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_10_22_float_48_0_0_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "48",
@@ -1409,7 +1409,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_22_float_48_0_0_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_10_22_float_48_0_0_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "48",
@@ -1424,7 +1424,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_22_float_48_0_1_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_10_22_float_48_0_1_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "48",
@@ -1439,7 +1439,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_22_float_48_0_1_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_10_22_float_48_0_1_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "48",
@@ -1454,7 +1454,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_22_float_48_1_0_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_10_22_float_48_1_0_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "48",
@@ -1469,7 +1469,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_22_float_48_1_0_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_10_22_float_48_1_0_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "48",
@@ -1484,7 +1484,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_22_float_48_1_1_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_10_22_float_48_1_1_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "48",
@@ -1499,7 +1499,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_22_float_48_1_1_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_10_22_float_48_1_1_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "48",
@@ -1514,7 +1514,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_22_float_64_0_0_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_10_22_float_64_0_0_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -1529,7 +1529,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_22_float_64_0_0_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_10_22_float_64_0_0_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -1544,7 +1544,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_22_float_64_0_1_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_10_22_float_64_0_1_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -1559,7 +1559,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_22_float_64_0_1_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_10_22_float_64_0_1_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -1574,7 +1574,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_22_float_64_1_0_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_10_22_float_64_1_0_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -1589,7 +1589,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_22_float_64_1_0_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_10_22_float_64_1_0_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -1604,7 +1604,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_22_float_64_1_1_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_10_22_float_64_1_1_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -1619,7 +1619,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_22_float_64_1_1_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_10_22_float_64_1_1_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -1634,7 +1634,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_6_22_cfloat_8_0_0_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_11_22_cfloat_8_0_0_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "8",
@@ -1649,7 +1649,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_6_22_cfloat_8_0_0_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_11_22_cfloat_8_0_0_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "8",
@@ -1664,7 +1664,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_6_22_cfloat_8_0_1_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_11_22_cfloat_8_0_1_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "8",
@@ -1679,7 +1679,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_6_22_cfloat_8_0_1_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_11_22_cfloat_8_0_1_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "8",
@@ -1694,7 +1694,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_6_22_cfloat_8_1_0_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_11_22_cfloat_8_1_0_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "8",
@@ -1709,7 +1709,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_6_22_cfloat_8_1_0_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_11_22_cfloat_8_1_0_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "8",
@@ -1724,7 +1724,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_6_22_cfloat_8_1_1_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_11_22_cfloat_8_1_1_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "8",
@@ -1739,7 +1739,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_6_22_cfloat_8_1_1_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_11_22_cfloat_8_1_1_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "8",
@@ -1754,7 +1754,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_6_22_cfloat_24_0_0_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_11_22_cfloat_24_0_0_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "24",
@@ -1769,7 +1769,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_6_22_cfloat_24_0_0_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_11_22_cfloat_24_0_0_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "24",
@@ -1784,7 +1784,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_6_22_cfloat_24_0_1_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_11_22_cfloat_24_0_1_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "24",
@@ -1799,7 +1799,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_6_22_cfloat_24_0_1_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_11_22_cfloat_24_0_1_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "24",
@@ -1814,7 +1814,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_6_22_cfloat_24_1_0_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_11_22_cfloat_24_1_0_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "24",
@@ -1829,7 +1829,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_6_22_cfloat_24_1_0_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_11_22_cfloat_24_1_0_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "24",
@@ -1844,7 +1844,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_6_22_cfloat_24_1_1_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_11_22_cfloat_24_1_1_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "24",
@@ -1859,7 +1859,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_6_22_cfloat_24_1_1_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_11_22_cfloat_24_1_1_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "24",
@@ -1874,7 +1874,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_6_22_cfloat_32_0_0_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_11_22_cfloat_32_0_0_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "32",
@@ -1889,7 +1889,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_6_22_cfloat_32_0_0_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_11_22_cfloat_32_0_0_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "32",
@@ -1904,7 +1904,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_6_22_cfloat_32_0_1_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_11_22_cfloat_32_0_1_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "32",
@@ -1919,7 +1919,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_6_22_cfloat_32_0_1_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_11_22_cfloat_32_0_1_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "32",
@@ -1934,7 +1934,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_6_22_cfloat_32_1_0_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_11_22_cfloat_32_1_0_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "32",
@@ -1949,7 +1949,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_6_22_cfloat_32_1_0_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_11_22_cfloat_32_1_0_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "32",
@@ -1964,7 +1964,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_6_22_cfloat_32_1_1_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_11_22_cfloat_32_1_1_1_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "32",
@@ -1979,7 +1979,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_6_22_cfloat_32_1_1_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_11_22_cfloat_32_1_1_1_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "32",
@@ -1994,7 +1994,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_8_1_float_256_0_0_4_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_12_1_float_256_0_0_4_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "256",
@@ -2009,7 +2009,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_8_1_float_256_0_1_4_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_12_1_float_256_0_1_4_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "256",
@@ -2024,7 +2024,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_8_1_float_256_1_0_4_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_12_1_float_256_1_0_4_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "256",
@@ -2039,7 +2039,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_8_1_float_256_1_1_4_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_12_1_float_256_1_1_4_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "256",
@@ -2054,7 +2054,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_9_2_cfloat_128_0_0_4_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_13_2_cfloat_128_0_0_4_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "128",
@@ -2069,7 +2069,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_9_2_cfloat_128_0_1_4_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_13_2_cfloat_128_0_1_4_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "128",
@@ -2084,7 +2084,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_9_2_cfloat_128_1_0_4_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_13_2_cfloat_128_1_0_4_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "128",
@@ -2099,7 +2099,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_9_2_cfloat_128_1_1_4_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_13_2_cfloat_128_1_1_4_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "128",
@@ -2114,7 +2114,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_10_1_float_24_0_1_3_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_14_1_float_24_0_1_3_1_0_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "24",
@@ -2129,7 +2129,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_10_2_float_24_0_1_3_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_14_2_float_24_0_1_3_1_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "24",
@@ -2144,7 +2144,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_11_1_float_24_0_1_3_3_0_6_0_01_0_01_1_aie1_hw_checkin": {
+    "test_15_1_float_24_0_1_3_3_0_6_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "24",
@@ -2159,7 +2159,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_11_2_float_24_0_1_3_3_0_6_0_01_0_01_1_aie2_hw_checkin": {
+    "test_15_2_float_24_0_1_3_3_0_6_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "24",
@@ -2174,7 +2174,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_13_22_float_256_0_0_4_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_16_22_float_256_0_0_4_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "256",
@@ -2189,7 +2189,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_13_22_float_256_0_1_4_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_16_22_float_256_0_1_4_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "256",
@@ -2204,7 +2204,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_13_22_float_256_1_0_4_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_16_22_float_256_1_0_4_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "256",
@@ -2219,7 +2219,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_13_22_float_256_1_1_4_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_16_22_float_256_1_1_4_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "256",
@@ -2234,7 +2234,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_14_22_cfloat_64_0_1_4_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_17_22_cfloat_64_0_1_4_1_0_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "64",
@@ -2249,7 +2249,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_14_22_cfloat_64_0_1_4_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
+    "test_17_22_cfloat_64_0_1_4_1_1_6_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "64",
@@ -2264,22 +2264,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_3_1_float_8_0_1_1_6_1_0_0_01_0_01_1_aie1_hw_qor": {
-        "AIE_VARIANT": "1",
-        "DATA_TYPE": "float",
-        "DIM_SIZE": "8",
-        "SUBST_TYPE": "0",
-        "L_LEADING": "1",
-        "GRID_DIM": "1",
-        "NITER": "6",
-        "NUM_FRAMES": "1",
-        "DIAG_INV": "0",
-        "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
-        "DATA_SEED": "1"
-    },
-    "test_4_1_float_16_0_1_1_6_1_0_0_01_0_01_1_aie1_hw_qor": {
+    "test_22_1_float_16_0_1_1_6_1_0_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "16",
@@ -2294,37 +2279,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_5_1_float_64_0_1_1_6_1_0_0_01_0_01_1_aie1_hw_qor": {
-        "AIE_VARIANT": "1",
-        "DATA_TYPE": "float",
-        "DIM_SIZE": "64",
-        "SUBST_TYPE": "0",
-        "L_LEADING": "1",
-        "GRID_DIM": "1",
-        "NITER": "6",
-        "NUM_FRAMES": "1",
-        "DIAG_INV": "0",
-        "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
-        "DATA_SEED": "1"
-    },
-    "test_6_1_cfloat_4_0_1_1_6_1_0_0_01_0_01_1_aie1_hw_qor": {
-        "AIE_VARIANT": "1",
-        "DATA_TYPE": "cfloat",
-        "DIM_SIZE": "4",
-        "SUBST_TYPE": "0",
-        "L_LEADING": "1",
-        "GRID_DIM": "1",
-        "NITER": "6",
-        "NUM_FRAMES": "1",
-        "DIAG_INV": "0",
-        "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
-        "DATA_SEED": "1"
-    },
-    "test_7_1_cfloat_8_0_1_1_6_1_0_0_01_0_01_1_aie1_hw_qor": {
+    "test_23_1_cfloat_8_0_1_1_6_1_0_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "8",
@@ -2339,22 +2294,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_8_1_cfloat_32_0_1_1_6_1_0_0_01_0_01_1_aie1_hw_qor": {
-        "AIE_VARIANT": "1",
-        "DATA_TYPE": "cfloat",
-        "DIM_SIZE": "32",
-        "SUBST_TYPE": "0",
-        "L_LEADING": "1",
-        "GRID_DIM": "1",
-        "NITER": "6",
-        "NUM_FRAMES": "1",
-        "DIAG_INV": "0",
-        "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
-        "DATA_SEED": "1"
-    },
-    "test_10_1_float_16_0_1_2_6_1_0_0_01_0_01_1_aie1_hw_qor": {
+    "test_24_1_float_16_0_1_2_6_1_0_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "16",
@@ -2369,22 +2309,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_11_1_float_24_0_1_3_6_1_0_0_01_0_01_1_aie1_hw_qor": {
-        "AIE_VARIANT": "1",
-        "DATA_TYPE": "float",
-        "DIM_SIZE": "24",
-        "SUBST_TYPE": "0",
-        "L_LEADING": "1",
-        "GRID_DIM": "3",
-        "NITER": "6",
-        "NUM_FRAMES": "1",
-        "DIAG_INV": "0",
-        "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
-        "DATA_SEED": "1"
-    },
-    "test_12_1_float_32_0_1_4_6_1_0_0_01_0_01_1_aie1_hw_qor": {
+    "test_25_1_float_32_0_1_4_6_1_0_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "32",
@@ -2399,7 +2324,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_13_1_float_32_0_1_2_6_1_0_0_01_0_01_1_aie1_hw_qor": {
+    "test_26_1_float_32_0_1_2_6_1_0_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "32",
@@ -2414,7 +2339,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_14_1_float_48_0_1_2_6_1_0_0_01_0_01_1_aie1_hw_qor": {
+    "test_27_1_float_48_0_1_2_6_1_0_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "48",
@@ -2429,22 +2354,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_17_1_float_8_1_0_1_6_1_0_0_01_0_01_1_aie1_hw_qor": {
-        "AIE_VARIANT": "1",
-        "DATA_TYPE": "float",
-        "DIM_SIZE": "8",
-        "SUBST_TYPE": "1",
-        "L_LEADING": "0",
-        "GRID_DIM": "1",
-        "NITER": "6",
-        "NUM_FRAMES": "1",
-        "DIAG_INV": "0",
-        "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
-        "DATA_SEED": "1"
-    },
-    "test_18_1_float_16_1_0_1_6_1_0_0_01_0_01_1_aie1_hw_qor": {
+    "test_29_1_float_16_1_0_1_6_1_0_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "float",
         "DIM_SIZE": "16",
@@ -2459,22 +2369,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_19_1_float_64_1_0_1_6_1_0_0_01_0_01_1_aie1_hw_qor": {
-        "AIE_VARIANT": "1",
-        "DATA_TYPE": "float",
-        "DIM_SIZE": "64",
-        "SUBST_TYPE": "1",
-        "L_LEADING": "0",
-        "GRID_DIM": "1",
-        "NITER": "6",
-        "NUM_FRAMES": "1",
-        "DIAG_INV": "0",
-        "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
-        "DATA_SEED": "1"
-    },
-    "test_20_1_cfloat_4_1_0_1_6_1_0_0_01_0_01_1_aie1_hw_qor": {
+    "test_30_1_cfloat_4_1_0_1_6_1_0_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "4",
@@ -2489,7 +2384,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_21_1_cfloat_8_1_0_1_6_1_0_0_01_0_01_1_aie1_hw_qor": {
+    "test_31_1_cfloat_8_1_0_1_6_1_0_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "8",
@@ -2504,7 +2399,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_22_1_cfloat_32_1_0_1_6_1_0_0_01_0_01_1_aie1_hw_qor": {
+    "test_32_1_cfloat_32_1_0_1_6_1_0_0_01_0_01_1_aie1_hw_checkin": {
         "AIE_VARIANT": "1",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "32",
@@ -2519,22 +2414,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_26_2_float_8_0_1_1_6_1_0_0_01_0_01_1_aie2_hw_qor": {
-        "AIE_VARIANT": "2",
-        "DATA_TYPE": "float",
-        "DIM_SIZE": "8",
-        "SUBST_TYPE": "0",
-        "L_LEADING": "1",
-        "GRID_DIM": "1",
-        "NITER": "6",
-        "NUM_FRAMES": "1",
-        "DIAG_INV": "0",
-        "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
-        "DATA_SEED": "1"
-    },
-    "test_27_2_float_16_0_1_1_6_1_0_0_01_0_01_1_aie2_hw_qor": {
+    "test_35_2_float_16_0_1_1_6_1_0_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "16",
@@ -2549,37 +2429,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_28_2_float_64_0_1_1_6_1_0_0_01_0_01_1_aie2_hw_qor": {
-        "AIE_VARIANT": "2",
-        "DATA_TYPE": "float",
-        "DIM_SIZE": "64",
-        "SUBST_TYPE": "0",
-        "L_LEADING": "1",
-        "GRID_DIM": "1",
-        "NITER": "6",
-        "NUM_FRAMES": "1",
-        "DIAG_INV": "0",
-        "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
-        "DATA_SEED": "1"
-    },
-    "test_29_2_cfloat_4_0_1_1_6_1_0_0_01_0_01_1_aie2_hw_qor": {
-        "AIE_VARIANT": "2",
-        "DATA_TYPE": "cfloat",
-        "DIM_SIZE": "4",
-        "SUBST_TYPE": "0",
-        "L_LEADING": "1",
-        "GRID_DIM": "1",
-        "NITER": "6",
-        "NUM_FRAMES": "1",
-        "DIAG_INV": "0",
-        "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
-        "DATA_SEED": "1"
-    },
-    "test_30_2_cfloat_8_0_1_1_6_1_0_0_01_0_01_1_aie2_hw_qor": {
+    "test_36_2_cfloat_8_0_1_1_6_1_0_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "8",
@@ -2594,22 +2444,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_31_2_cfloat_32_0_1_1_6_1_0_0_01_0_01_1_aie2_hw_qor": {
-        "AIE_VARIANT": "2",
-        "DATA_TYPE": "cfloat",
-        "DIM_SIZE": "32",
-        "SUBST_TYPE": "0",
-        "L_LEADING": "1",
-        "GRID_DIM": "1",
-        "NITER": "6",
-        "NUM_FRAMES": "1",
-        "DIAG_INV": "0",
-        "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
-        "DATA_SEED": "1"
-    },
-    "test_33_2_float_16_0_1_2_6_1_0_0_01_0_01_1_aie2_hw_qor": {
+    "test_37_2_float_16_0_1_2_6_1_0_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "16",
@@ -2624,22 +2459,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_34_2_float_24_0_1_3_6_1_0_0_01_0_01_1_aie2_hw_qor": {
-        "AIE_VARIANT": "2",
-        "DATA_TYPE": "float",
-        "DIM_SIZE": "24",
-        "SUBST_TYPE": "0",
-        "L_LEADING": "1",
-        "GRID_DIM": "3",
-        "NITER": "6",
-        "NUM_FRAMES": "1",
-        "DIAG_INV": "0",
-        "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
-        "DATA_SEED": "1"
-    },
-    "test_35_2_float_32_0_1_4_6_1_0_0_01_0_01_1_aie2_hw_qor": {
+    "test_38_2_float_32_0_1_4_6_1_0_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "32",
@@ -2654,7 +2474,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_36_2_float_32_0_1_2_6_1_0_0_01_0_01_1_aie2_hw_qor": {
+    "test_39_2_float_32_0_1_2_6_1_0_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "32",
@@ -2669,7 +2489,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_37_2_float_48_0_1_2_6_1_0_0_01_0_01_1_aie2_hw_qor": {
+    "test_40_2_float_48_0_1_2_6_1_0_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "48",
@@ -2684,22 +2504,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_40_2_float_8_1_0_1_6_1_0_0_01_0_01_1_aie2_hw_qor": {
-        "AIE_VARIANT": "2",
-        "DATA_TYPE": "float",
-        "DIM_SIZE": "8",
-        "SUBST_TYPE": "1",
-        "L_LEADING": "0",
-        "GRID_DIM": "1",
-        "NITER": "6",
-        "NUM_FRAMES": "1",
-        "DIAG_INV": "0",
-        "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
-        "DATA_SEED": "1"
-    },
-    "test_41_2_float_16_1_0_1_6_1_0_0_01_0_01_1_aie2_hw_qor": {
+    "test_42_2_float_16_1_0_1_6_1_0_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "float",
         "DIM_SIZE": "16",
@@ -2714,37 +2519,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_42_2_float_64_1_0_1_6_1_0_0_01_0_01_1_aie2_hw_qor": {
-        "AIE_VARIANT": "2",
-        "DATA_TYPE": "float",
-        "DIM_SIZE": "64",
-        "SUBST_TYPE": "1",
-        "L_LEADING": "0",
-        "GRID_DIM": "1",
-        "NITER": "6",
-        "NUM_FRAMES": "1",
-        "DIAG_INV": "0",
-        "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
-        "DATA_SEED": "1"
-    },
-    "test_43_2_cfloat_4_1_0_1_6_1_0_0_01_0_01_1_aie2_hw_qor": {
-        "AIE_VARIANT": "2",
-        "DATA_TYPE": "cfloat",
-        "DIM_SIZE": "4",
-        "SUBST_TYPE": "1",
-        "L_LEADING": "0",
-        "GRID_DIM": "1",
-        "NITER": "6",
-        "NUM_FRAMES": "1",
-        "DIAG_INV": "0",
-        "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
-        "DATA_SEED": "1"
-    },
-    "test_44_2_cfloat_8_1_0_1_6_1_0_0_01_0_01_1_aie2_hw_qor": {
+    "test_43_2_cfloat_8_1_0_1_6_1_0_0_01_0_01_1_aie2_hw_checkin": {
         "AIE_VARIANT": "2",
         "DATA_TYPE": "cfloat",
         "DIM_SIZE": "8",
@@ -2759,82 +2534,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_45_2_cfloat_32_1_0_1_6_1_0_0_01_0_01_1_aie2_hw_qor": {
-        "AIE_VARIANT": "2",
-        "DATA_TYPE": "cfloat",
-        "DIM_SIZE": "32",
-        "SUBST_TYPE": "1",
-        "L_LEADING": "0",
-        "GRID_DIM": "1",
-        "NITER": "6",
-        "NUM_FRAMES": "1",
-        "DIAG_INV": "0",
-        "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
-        "DATA_SEED": "1"
-    },
-    "test_49_22_float_16_0_1_1_6_1_0_0_01_0_01_1_aie22_hw_qor": {
-        "AIE_VARIANT": "22",
-        "DATA_TYPE": "float",
-        "DIM_SIZE": "16",
-        "SUBST_TYPE": "0",
-        "L_LEADING": "1",
-        "GRID_DIM": "1",
-        "NITER": "6",
-        "NUM_FRAMES": "1",
-        "DIAG_INV": "0",
-        "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
-        "DATA_SEED": "1"
-    },
-    "test_50_22_float_64_0_1_1_6_1_0_0_01_0_01_1_aie22_hw_qor": {
-        "AIE_VARIANT": "22",
-        "DATA_TYPE": "float",
-        "DIM_SIZE": "64",
-        "SUBST_TYPE": "0",
-        "L_LEADING": "1",
-        "GRID_DIM": "1",
-        "NITER": "6",
-        "NUM_FRAMES": "1",
-        "DIAG_INV": "0",
-        "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
-        "DATA_SEED": "1"
-    },
-    "test_51_22_cfloat_8_0_1_1_6_1_0_0_01_0_01_1_aie22_hw_qor": {
-        "AIE_VARIANT": "22",
-        "DATA_TYPE": "cfloat",
-        "DIM_SIZE": "8",
-        "SUBST_TYPE": "0",
-        "L_LEADING": "1",
-        "GRID_DIM": "1",
-        "NITER": "6",
-        "NUM_FRAMES": "1",
-        "DIAG_INV": "0",
-        "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
-        "DATA_SEED": "1"
-    },
-    "test_52_22_cfloat_32_0_1_1_6_1_0_0_01_0_01_1_aie22_hw_qor": {
-        "AIE_VARIANT": "22",
-        "DATA_TYPE": "cfloat",
-        "DIM_SIZE": "32",
-        "SUBST_TYPE": "0",
-        "L_LEADING": "1",
-        "GRID_DIM": "1",
-        "NITER": "6",
-        "NUM_FRAMES": "1",
-        "DIAG_INV": "0",
-        "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
-        "DATA_SEED": "1"
-    },
-    "test_54_22_float_32_0_1_2_6_1_0_0_01_0_01_1_aie22_hw_qor": {
+    "test_46_22_float_32_0_1_2_6_1_0_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "32",
@@ -2849,7 +2549,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_55_22_float_48_0_1_3_6_1_0_0_01_0_01_1_aie22_hw_qor": {
+    "test_47_22_float_48_0_1_3_6_1_0_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "48",
@@ -2864,7 +2564,7 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_56_22_float_64_0_1_4_6_1_0_0_01_0_01_1_aie22_hw_qor": {
+    "test_48_22_float_64_0_1_4_6_1_0_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "64",
@@ -2879,73 +2579,13 @@
         "CC_TOLERANCE": "0.01",
         "DATA_SEED": "1"
     },
-    "test_58_22_float_96_0_1_2_6_1_0_0_01_0_01_1_aie22_hw_qor": {
+    "test_49_22_float_96_0_1_2_6_1_0_0_01_0_01_1_aie22_hw_checkin": {
         "AIE_VARIANT": "22",
         "DATA_TYPE": "float",
         "DIM_SIZE": "96",
         "SUBST_TYPE": "0",
         "L_LEADING": "1",
         "GRID_DIM": "2",
-        "NITER": "6",
-        "NUM_FRAMES": "1",
-        "DIAG_INV": "0",
-        "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
-        "DATA_SEED": "1"
-    },
-    "test_61_22_float_16_1_0_1_6_1_0_0_01_0_01_1_aie22_hw_qor": {
-        "AIE_VARIANT": "22",
-        "DATA_TYPE": "float",
-        "DIM_SIZE": "16",
-        "SUBST_TYPE": "1",
-        "L_LEADING": "0",
-        "GRID_DIM": "1",
-        "NITER": "6",
-        "NUM_FRAMES": "1",
-        "DIAG_INV": "0",
-        "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
-        "DATA_SEED": "1"
-    },
-    "test_62_22_float_64_1_0_1_6_1_0_0_01_0_01_1_aie22_hw_qor": {
-        "AIE_VARIANT": "22",
-        "DATA_TYPE": "float",
-        "DIM_SIZE": "64",
-        "SUBST_TYPE": "1",
-        "L_LEADING": "0",
-        "GRID_DIM": "1",
-        "NITER": "6",
-        "NUM_FRAMES": "1",
-        "DIAG_INV": "0",
-        "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
-        "DATA_SEED": "1"
-    },
-    "test_63_22_cfloat_8_1_0_1_6_1_0_0_01_0_01_1_aie22_hw_qor": {
-        "AIE_VARIANT": "22",
-        "DATA_TYPE": "cfloat",
-        "DIM_SIZE": "8",
-        "SUBST_TYPE": "1",
-        "L_LEADING": "0",
-        "GRID_DIM": "1",
-        "NITER": "6",
-        "NUM_FRAMES": "1",
-        "DIAG_INV": "0",
-        "TARGET": "hw",
-        "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0.01",
-        "DATA_SEED": "1"
-    },
-    "test_64_22_cfloat_32_1_0_1_6_1_0_0_01_0_01_1_aie22_hw_qor": {
-        "AIE_VARIANT": "22",
-        "DATA_TYPE": "cfloat",
-        "DIM_SIZE": "32",
-        "SUBST_TYPE": "1",
-        "L_LEADING": "0",
-        "GRID_DIM": "1",
         "NITER": "6",
         "NUM_FRAMES": "1",
         "DIAG_INV": "0",

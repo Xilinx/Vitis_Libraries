@@ -89,7 +89,8 @@ cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, k
 
                     // Performing eliminations on columns...
                     for (int chunk = diagChunk; chunk < kNumVecsPerDim; chunk++) {
-                        colBlockEliminations<TT_DATA, kNumVecsPerDim>(diagColPtr, diagColPtr, inPtr, chunk, chunk);
+                        colBlockEliminations<TT_DATA, kNumVecsPerDim, kVecSampleNum>(diagColPtr, diagColPtr, inPtr,
+                                                                                     chunk, chunk);
                     }
                     chess_memory_fence();
                     if
@@ -171,8 +172,8 @@ cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, k
 
                     for (int chunk = 0; chunk < kNumVecsPerDim; chunk++)
                         chess_prepare_for_pipelining chess_loop_count(kNumVecsPerDim) {
-                            colBlockEliminations<TT_DATA, kNumVecsPerDim>(diagColBuffPtr, diagColBuffPtr, inPtr, chunk,
-                                                                          chunk);
+                            colBlockEliminations<TT_DATA, kNumVecsPerDim, kVecSampleNum>(diagColBuffPtr, diagColBuffPtr,
+                                                                                         inPtr, chunk, chunk);
                         }
                 }
 
@@ -188,7 +189,7 @@ cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, k
                     if
                         constexpr(TP_Y + 1 < TP_GRID_DIM) { // if there are kernels below us...
                             TT_DATA diagInvSqrtCompatible = getScalarAsType<TT_DATA>(diagInvSqrt);
-                            writeScalarToPort<TT_DATA>(ports.outDown, diagInvSqrtCompatible);
+                            writeScalarToPort<TT_DATA, kVecSampleNum>(ports.outDown, diagInvSqrtCompatible);
                         }
 
                     for (int j = diagChunk; j < kNumVecsPerDim; j++) {
@@ -204,8 +205,8 @@ cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, k
 
                     // Performing eliminations on columns...
                     for (int chunk = diagChunk; chunk < kNumVecsPerDim; chunk++) {
-                        colBlockEliminations<TT_DATA, kNumVecsPerDim>(diagColHomePtr, diagColHomePtr, inPtr, chunk,
-                                                                      chunk);
+                        colBlockEliminations<TT_DATA, kNumVecsPerDim, kVecSampleNum>(diagColHomePtr, diagColHomePtr,
+                                                                                     inPtr, chunk, chunk);
                     }
                     chess_memory_fence();
                     if
@@ -282,7 +283,8 @@ cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, k
                             diagRowBuffPtr[i] = diagRowVect;
                         }
                     chess_memory_fence();
-                    matrixBlockEliminations<TT_DATA, kNumVecsPerDim>(diagColBuffPtr, diagRowBuffPtr, inPtr);
+                    matrixBlockEliminations<TT_DATA, kNumVecsPerDim, kVecSampleNum>(diagColBuffPtr, diagRowBuffPtr,
+                                                                                    inPtr);
                 }
 
             // * diag HAS reached our kernel
@@ -293,7 +295,7 @@ cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, k
                     int diagChunk = diag / kVecSampleNum;
                     int diagLocal = diag % kVecSampleNum;
 
-                    TT_DATA diagInvSqrtCompatible = readScalarFromPort<TT_DATA>(ports.inUp);
+                    TT_DATA diagInvSqrtCompatible = readScalarFromPort<TT_DATA, kVecSampleNum>(ports.inUp);
                     float diagInvSqrt = getReal<TT_DATA>(diagInvSqrtCompatible);
 
                     for (int i = diagChunk; i < kNumVecsPerDim; i++) {
@@ -310,8 +312,8 @@ cholesky<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_GRID_DIM, TP_DIAG_INV, TP_X, TP_Y, k
 
                     int rowStart = 0;
                     for (int colStart = diagChunk; colStart < kNumVecsPerDim; colStart++) {
-                        colBlockEliminations<TT_DATA, kNumVecsPerDim>(diagColHomePtr, diagRowBuffPtr, inPtr, colStart,
-                                                                      rowStart);
+                        colBlockEliminations<TT_DATA, kNumVecsPerDim, kVecSampleNum>(diagColHomePtr, diagRowBuffPtr,
+                                                                                     inPtr, colStart, rowStart);
                     }
                     chess_memory_fence();
                     diagColHomePtr += kNumVecsPerDim;

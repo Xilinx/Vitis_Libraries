@@ -51,7 +51,7 @@ INLINE_DECL void
 qrd_hh_kernel<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN, TP_KERNEL_POS, TP_ROUT_EN, TP_STREAM_EN>::
     qrd_hh_r_func(T_inputIF<TP_STREAM_EN, TT_DATA>& inInterface,
                   T_outputIF<TP_STREAM_EN, TP_ROUT_EN, TT_DATA>& outInterface) {
-    using acc_t = accTypeMult_t<TT_DATA, TT_DATA>;
+    using acc_t = accType_t<TT_DATA>;
     using vect_t = ::aie::vector<TT_DATA, vecSampleNum>;
     using acc_vect_t = ::aie::accum<acc_t, vecSampleNum>;
 
@@ -115,15 +115,45 @@ qrd_hh_kernel<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN, TP_
                             // vvector
                             mul_scalars(x_1, x_1, x_col_sqr);
 
-                            for (int row_chunk = col_chunk + 1; row_chunk < m_kRowChunkNum;
-                                 row_chunk++) {     // remainder of the row chunks
-                                x_vect = *inAPtr++; // reading current A vector
-                                mac_vectors(acc_x_norm, x_vect, x_vect);
-                                *vvectBuffPtr++ =
-                                    x_vect; // save the xvector, vvector is the same for the rest of the chunks
+                            // x norm-squared accumulation over the remaining row chunks. On the
+                            // float path a second (zero-initialised) accumulator processes the odd
+                            // chunks, breaking the fpmac feedback recurrence so MAC latency is hidden.
+                            // Trip count is runtime (col_chunk-dependent) so a scalar remainder
+                            // handles the tail; the x_vect store to vvectBuff is preserved per chunk.
+                            // cfloat keeps the original single-accumulator path (no code growth).
+                            if
+                                constexpr(!std::is_same<TT_DATA, cfloat>::value && m_kRowChunkNum >= 4) {
+                                    acc_vect_t acc_x_norm_b;
+                                    mul_vectors(acc_x_norm_b, blank_vect, blank_vect); // zero-init second accumulator
+                                    int row_chunk = col_chunk + 1;
+                                    for (; row_chunk + 1 < m_kRowChunkNum; row_chunk += 2)
+                                        chess_prepare_for_pipelining {
+                                            vect_t xa = *inAPtr++;
+                                            vect_t xb = *inAPtr++;
+                                            mac_vectors(acc_x_norm, xa, xa);
+                                            mac_vectors(acc_x_norm_b, xb, xb);
+                                            *vvectBuffPtr++ = xa;
+                                            *vvectBuffPtr++ = xb;
+                                        }
+                                    for (; row_chunk < m_kRowChunkNum; row_chunk++) { // scalar remainder
+                                        vect_t xa = *inAPtr++;
+                                        mac_vectors(acc_x_norm, xa, xa);
+                                        *vvectBuffPtr++ = xa;
+                                    }
+                                    auto xv0 = acc_x_norm.template to_vector<TT_DATA>(0);
+                                    auto xv1 = acc_x_norm_b.template to_vector<TT_DATA>(0);
+                                    x_acc_val = ::aie::reduce_add(::aie::add(xv0, xv1));
+                                }
+                            else {
+                                for (int row_chunk = col_chunk + 1; row_chunk < m_kRowChunkNum;
+                                     row_chunk++) {     // remainder of the row chunks
+                                    x_vect = *inAPtr++; // reading current A vector
+                                    mac_vectors(acc_x_norm, x_vect, x_vect);
+                                    *vvectBuffPtr++ =
+                                        x_vect; // save the xvector, vvector is the same for the rest of the chunks
+                                }
+                                x_acc_val = ::aie::reduce_add(acc_x_norm.template to_vector<TT_DATA>(0));
                             }
-
-                            x_acc_val = ::aie::reduce_add(acc_x_norm.template to_vector<TT_DATA>(0));
                             calc_sqrt(x_acc_val, x_norm_val); // calculate the norm of x_vect
                             alpha = -phase * x_norm_val;
                             v_vect[col] =
@@ -160,12 +190,38 @@ qrd_hh_kernel<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN, TP_
                                     vvectBuffPtr = vvectPtrBase;
                                     inAPtr = inAPtrBase;
 
-                                    mul_vectors(acc_mid_prod, *vvectBuffPtr++,
-                                                *inAPtr++); // initial condition for acc_mid_prod
-                                    for (int row_chunk = col_chunk + 1; row_chunk < m_kRowChunkNum; row_chunk++) {
-                                        mac_vectors(acc_mid_prod, *vvectBuffPtr++, *inAPtr++);
+                                    // v . r dot product. Split-accumulator (N=2) on the float path with a
+                                    // scalar remainder for the runtime trip count; cfloat keeps the original.
+                                    if
+                                        constexpr(!std::is_same<TT_DATA, cfloat>::value && m_kRowChunkNum >= 4) {
+                                            acc_vect_t acc_mid_prod_b;
+                                            mul_vectors(acc_mid_prod, *vvectBuffPtr++, *inAPtr++); // chunk col_chunk
+                                            mul_vectors(acc_mid_prod_b, blank_vect, blank_vect);   // zero-init
+                                            int row_chunk = col_chunk + 1;
+                                            for (; row_chunk + 1 < m_kRowChunkNum; row_chunk += 2)
+                                                chess_prepare_for_pipelining {
+                                                    vect_t va0 = *vvectBuffPtr++;
+                                                    vect_t vb0 = *inAPtr++;
+                                                    vect_t va1 = *vvectBuffPtr++;
+                                                    vect_t vb1 = *inAPtr++;
+                                                    mac_vectors(acc_mid_prod, va0, vb0);
+                                                    mac_vectors(acc_mid_prod_b, va1, vb1);
+                                                }
+                                            for (; row_chunk < m_kRowChunkNum; row_chunk++) { // scalar remainder
+                                                mac_vectors(acc_mid_prod, *vvectBuffPtr++, *inAPtr++);
+                                            }
+                                            auto mp0 = acc_mid_prod.template to_vector<TT_DATA>(0);
+                                            auto mp1 = acc_mid_prod_b.template to_vector<TT_DATA>(0);
+                                            mid_prod_val = ::aie::reduce_add(::aie::add(mp0, mp1));
+                                        }
+                                    else {
+                                        mul_vectors(acc_mid_prod, *vvectBuffPtr++,
+                                                    *inAPtr++); // initial condition for acc_mid_prod
+                                        for (int row_chunk = col_chunk + 1; row_chunk < m_kRowChunkNum; row_chunk++) {
+                                            mac_vectors(acc_mid_prod, *vvectBuffPtr++, *inAPtr++);
+                                        }
+                                        mid_prod_val = ::aie::reduce_add(acc_mid_prod.template to_vector<TT_DATA>(0));
                                     }
-                                    mid_prod_val = ::aie::reduce_add(acc_mid_prod.template to_vector<TT_DATA>(0));
                                     mid_prod_val = mid_prod_val * beta_val;
 
                                     // Now update the r_mat
@@ -230,7 +286,7 @@ qrd_hh_kernel<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN, TP_
     qrd_hh_q_func(T_inputIF<TP_STREAM_EN, TT_DATA>& inInterface,
                   T_outputIF<TP_STREAM_EN, TP_ROUT_EN, TT_DATA>& outInterface,
                   int& frame_id) {
-    using acc_t = accTypeMult_t<TT_DATA, TT_DATA>;
+    using acc_t = accType_t<TT_DATA>;
     using vect_t = ::aie::vector<TT_DATA, vecSampleNum>;
     using acc_vect_t = ::aie::accum<acc_t, vecSampleNum>;
 
@@ -274,11 +330,37 @@ qrd_hh_kernel<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN, TP_
                             outQPtr = QPtrBase;
                             inAPtr = inAPtrBase;
 
-                            mul_vectors(acc_mid_prod, *inAPtr++, *outQPtr++); // initial condition for acc_x_norm
-                            for (int row_chunk = col_chunk + 1; row_chunk < m_kRowChunkNum; row_chunk++) {
-                                mac_vectors(acc_mid_prod, *inAPtr++, *outQPtr++);
+                            // v . q dot product. Split-accumulator (N=2) on the float path with a
+                            // scalar remainder for the runtime trip count; cfloat keeps the original.
+                            if
+                                constexpr(!std::is_same<TT_DATA, cfloat>::value && m_kRowChunkNum >= 4) {
+                                    acc_vect_t acc_mid_prod_b;
+                                    mul_vectors(acc_mid_prod, *inAPtr++, *outQPtr++);    // chunk col_chunk
+                                    mul_vectors(acc_mid_prod_b, blank_vect, blank_vect); // zero-init
+                                    int row_chunk = col_chunk + 1;
+                                    for (; row_chunk + 1 < m_kRowChunkNum; row_chunk += 2)
+                                        chess_prepare_for_pipelining {
+                                            vect_t va0 = *inAPtr++;
+                                            vect_t vb0 = *outQPtr++;
+                                            vect_t va1 = *inAPtr++;
+                                            vect_t vb1 = *outQPtr++;
+                                            mac_vectors(acc_mid_prod, va0, vb0);
+                                            mac_vectors(acc_mid_prod_b, va1, vb1);
+                                        }
+                                    for (; row_chunk < m_kRowChunkNum; row_chunk++) { // scalar remainder
+                                        mac_vectors(acc_mid_prod, *inAPtr++, *outQPtr++);
+                                    }
+                                    auto mp0 = acc_mid_prod.template to_vector<TT_DATA>(0);
+                                    auto mp1 = acc_mid_prod_b.template to_vector<TT_DATA>(0);
+                                    mid_prod_val = ::aie::reduce_add(::aie::add(mp0, mp1));
+                                }
+                            else {
+                                mul_vectors(acc_mid_prod, *inAPtr++, *outQPtr++); // initial condition for acc_x_norm
+                                for (int row_chunk = col_chunk + 1; row_chunk < m_kRowChunkNum; row_chunk++) {
+                                    mac_vectors(acc_mid_prod, *inAPtr++, *outQPtr++);
+                                }
+                                mid_prod_val = ::aie::reduce_add(acc_mid_prod.template to_vector<TT_DATA>(0));
                             }
-                            mid_prod_val = ::aie::reduce_add(acc_mid_prod.template to_vector<TT_DATA>(0));
                             mid_prod_val = mid_prod_val * beta_val;
 
                             outQPtr = QPtrBase;
@@ -307,7 +389,7 @@ INLINE_DECL void
 qrd_hh_kernel<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN, TP_KERNEL_POS, TP_ROUT_EN, TP_STREAM_EN>::
     qrd_hh_r_casc_func(T_inputIF<TP_STREAM_EN, TT_DATA>& inInterface,
                        T_outputIF<TP_STREAM_EN, TP_ROUT_EN, TT_DATA>& outInterface) {
-    using acc_t = accTypeMult_t<TT_DATA, TT_DATA>;
+    using acc_t = accType_t<TT_DATA>;
     using vect_t = ::aie::vector<TT_DATA, vecSampleNum>;
     using acc_vect_t = ::aie::accum<acc_t, vecSampleNum>;
 
@@ -579,7 +661,7 @@ qrd_hh_kernel<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN, TP_
     qrd_hh_q_casc_func(T_inputIF<TP_STREAM_EN, TT_DATA>& inInterface,
                        T_outputIF<TP_STREAM_EN, TP_ROUT_EN, TT_DATA>& outInterface,
                        int& frame_id) {
-    using acc_t = accTypeMult_t<TT_DATA, TT_DATA>;
+    using acc_t = accType_t<TT_DATA>;
     using vect_t = ::aie::vector<TT_DATA, vecSampleNum>;
     using acc_vect_t = ::aie::accum<acc_t, vecSampleNum>;
 
@@ -650,6 +732,9 @@ qrd_hh_kernel<TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM_FRAMES, TP_CASC_LEN, TP_
                             chess_memory_fence();
                             mid_prod_val = readincr<aie_stream_resource_in::a>(inInterface.inStream);
                         }
+                        // keep the forward and the Q update below from being scheduled across the final mid_prod_val
+                        chess_separator_scheduler();
+                        chess_memory_fence();
 
                         if ((kernel_role != 2) && ((kernel_role != 3) || (TP_KERNEL_POS != 0))) { // stop transfer
                             writeincr<aie_stream_resource_out::a, TT_DATA>(

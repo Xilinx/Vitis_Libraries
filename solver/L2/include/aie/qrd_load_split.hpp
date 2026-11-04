@@ -15,6 +15,7 @@
  */
 
 #include "device_defs.h"
+#include "qrd_traits.hpp"
 #include <array>
 #include <cmath>
 
@@ -51,8 +52,10 @@ template <typename TT_DATA,
           unsigned int TP_CASC_LEN,
           unsigned int TP_NUM_FRAMES>
 constexpr unsigned int qrd_load_split(unsigned int col_dim_distributed, unsigned int kernel_num) {
-    // Calculate the maximum number of columns per kernel based on memory constraints for R and Q matrices
-    unsigned int max_col_per_kernel_r = (__DATA_MEM_BYTES__) / (TP_DIM_COLS * sizeof(TT_DATA) * TP_NUM_FRAMES);
+    // Calculate the maximum number of columns per kernel based on memory constraints for R and Q matrices.
+    // In a cascade the R buffer also leaves room for the kernel's system memory (see fnMaxRBufferBytes).
+    unsigned int max_col_per_kernel_r =
+        (fnMaxRBufferBytes<TT_DATA, TP_DIM_ROWS, TP_CASC_LEN>()) / (TP_DIM_COLS * sizeof(TT_DATA) * TP_NUM_FRAMES);
     unsigned int max_col_per_kernel_q = (__DATA_MEM_BYTES__) / (TP_DIM_ROWS * sizeof(TT_DATA) * TP_NUM_FRAMES);
     unsigned int max_col_per_kernel =
         (max_col_per_kernel_r > max_col_per_kernel_q) ? max_col_per_kernel_q : max_col_per_kernel_r;
@@ -112,6 +115,24 @@ get_qrd_loads_of_kernels() {
         col_dim_dist_kernel_arr[i] = col_dim_kernel_dist;
     }
     return {col_dim_kernel_arr, col_dim_dist_kernel_arr};
+}
+
+/**
+ * @brief Checks that TP_CASC_LEN kernels can hold all TP_DIM_COLS columns within the per-kernel memory limits.
+ *
+ */
+template <typename TT_DATA,
+          unsigned int TP_DIM_COLS,
+          unsigned int TP_DIM_ROWS,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_FRAMES>
+constexpr bool fnCheckCascLenFitsMemory() {
+    unsigned int col_dim_kernel_dist = 0;
+    for (unsigned int i = 0; i < TP_CASC_LEN; i++) {
+        col_dim_kernel_dist +=
+            qrd_load_split<TT_DATA, TP_DIM_COLS, TP_DIM_ROWS, TP_CASC_LEN, TP_NUM_FRAMES>(col_dim_kernel_dist, i);
+    }
+    return col_dim_kernel_dist == TP_DIM_COLS;
 }
 }
 } // namespace aie

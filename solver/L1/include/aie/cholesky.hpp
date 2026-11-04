@@ -66,7 +66,7 @@ class cholesky {
    private:
    public:
     static constexpr unsigned int kKernelDim = TP_DIM / TP_GRID_DIM;
-    static constexpr unsigned int kVecSampleNum = fnVecSampleNum<TT_DATA>();
+    static constexpr unsigned int kVecSampleNum = fnVecSampleNumGCD<TT_DATA, kKernelDim>();
     static constexpr unsigned int kNumVecsPerDim = kKernelDim / kVecSampleNum;
     static constexpr unsigned int kActiveGridOffset = kDiagStart / kKernelDim;
 

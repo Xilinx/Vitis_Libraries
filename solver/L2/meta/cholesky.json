@@ -1,6 +1,6 @@
 {
     "schema": "vitis_library_api_spec_schema-1.0",
-    "api_name": "xf::dsp::aie::cholesky::cholesky_graph",
+    "api_name": "xf::solver::aie::cholesky::cholesky_graph",
     "display_name": "cholesky_graph",
     "header_file_name": "cholesky_graph.hpp",
     "search_paths": [

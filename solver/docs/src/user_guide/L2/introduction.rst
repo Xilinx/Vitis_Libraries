@@ -41,6 +41,12 @@ AMD documentation is organized around a set of standard design processes to help
 
    -  :ref:`SOLVER_CHOLESKY`
 
+   -  :ref:`SOLVER_EIGENVALUE`
+
+   -  :ref:`SOLVER_LS_CHOLESKY_SOLVER`
+
+   -  :ref:`SOLVER_MP_PSEUDOINVERSE_SVD`
+
    -  :ref:`SOLVER_QRD`
 
    -  :ref:`SOLVER_QRD_HH`

@@ -27,6 +27,9 @@ are purely for kernel use, not graph-level compilation.
 #include "device_defs.h"
 #include "svd.hpp"
 
+// Enable split-accumulator float reductions on AIE-ML, where they improve QoR.
+#define XF_SOLVER_SVD_USE_SPLIT_ACCUMULATOR_REDUCTIONS (__AIE_ARCH__ == 20)
+
 namespace xf {
 namespace solver {
 namespace aie {
@@ -151,14 +154,13 @@ static constexpr float kEpsilon = 1e-10f;
 // The caller is responsible for normalising phase and computing |dotIJ| for cfloat.
 // Used by both the single-kernel and cascaded paths.
 //-----------------------------------------------------------------------------------------------------
-template <typename TT_DATA, unsigned int kVecSize, bool kIsComplex>
+template <typename TT_DATA, unsigned int kVecSize, bool kIsComplex, unsigned int kVecsPerUCol>
 static NOINLINE_DECL void computePairDots(::aie::vector<TT_DATA, kVecSize>* __restrict iPtr,
                                           ::aie::vector<TT_DATA, kVecSize>* __restrict jPtr,
                                           float& dotII,
                                           float& dotJJ,
                                           float& dotIJreal,
-                                          float& dotIJimag,
-                                          int vecsPerUCol) {
+                                          float& dotIJimag) {
     using acc_t = ::aie::accum<accfloat, kVecSize>;
 
     if
@@ -168,7 +170,7 @@ static NOINLINE_DECL void computePairDots(::aie::vector<TT_DATA, kVecSize>* __re
             cacc_t norm_j_acc = ::aie::mul(::aie::op_conj(jPtr[0]), jPtr[0]);
             cacc_t dotIJ_acc = ::aie::mul(::aie::op_conj(iPtr[0]), jPtr[0]);
 
-            for (int v = 1; v < vecsPerUCol; v++) {
+            for (int v = 1; v < kVecsPerUCol; v++) {
                 norm_i_acc = ::aie::mac(norm_i_acc, ::aie::op_conj(iPtr[v]), iPtr[v]);
                 norm_j_acc = ::aie::mac(norm_j_acc, ::aie::op_conj(jPtr[v]), jPtr[v]);
                 dotIJ_acc = ::aie::mac(dotIJ_acc, ::aie::op_conj(iPtr[v]), jPtr[v]);
@@ -182,10 +184,64 @@ static NOINLINE_DECL void computePairDots(::aie::vector<TT_DATA, kVecSize>* __re
             dotIJimag = dij.imag;
         }
     else {
+#if XF_SOLVER_SVD_USE_SPLIT_ACCUMULATOR_REDUCTIONS
+        // Split-accumulator (N=2) to break the single fpmac feedback recurrence.
+        // Each of the three reductions (norm_i, norm_j, dotIJ) uses two independent
+        // accumulators advanced over even/odd vectors, then combined. This raises the
+        // available ILP so the chess compiler can hide the fpmac latency (4-cycle on
+        // AIE1, 2-cycle on AIE-ML), reducing the effective loop II. A scalar remainder
+        // handles the case where kVecsPerUCol is odd. Float path only — the cfloat path
+        // is intentionally left single-accumulator because cfloat cascaded AIE22 kernels
+        // are already near the 16 KB program-memory limit.
+        constexpr bool haveAcc1 = (kVecsPerUCol > 1);
+        acc_t norm_i_acc0 = ::aie::mul_square(iPtr[0]);
+        acc_t norm_j_acc0 = ::aie::mul_square(jPtr[0]);
+        acc_t dotIJ_acc0 = ::aie::mul(iPtr[0], jPtr[0]);
+        acc_t norm_i_acc1;
+        acc_t norm_j_acc1;
+        acc_t dotIJ_acc1;
+        int v = 1;
+        if
+            constexpr(haveAcc1) {
+                norm_i_acc1 = ::aie::mul_square(iPtr[1]);
+                norm_j_acc1 = ::aie::mul_square(jPtr[1]);
+                dotIJ_acc1 = ::aie::mul(iPtr[1], jPtr[1]);
+                v = 2;
+            }
+        for (; v + 1 < (int)kVecsPerUCol; v += 2) chess_prepare_for_pipelining {
+                norm_i_acc0 = ::aie::mac_square(norm_i_acc0, iPtr[v]);
+                norm_i_acc1 = ::aie::mac_square(norm_i_acc1, iPtr[v + 1]);
+                norm_j_acc0 = ::aie::mac_square(norm_j_acc0, jPtr[v]);
+                norm_j_acc1 = ::aie::mac_square(norm_j_acc1, jPtr[v + 1]);
+                dotIJ_acc0 = ::aie::mac(dotIJ_acc0, iPtr[v], jPtr[v]);
+                dotIJ_acc1 = ::aie::mac(dotIJ_acc1, iPtr[v + 1], jPtr[v + 1]);
+            }
+        // Scalar remainder for odd kVecsPerUCol.
+        for (; v < (int)kVecsPerUCol; v++) {
+            norm_i_acc0 = ::aie::mac_square(norm_i_acc0, iPtr[v]);
+            norm_j_acc0 = ::aie::mac_square(norm_j_acc0, jPtr[v]);
+            dotIJ_acc0 = ::aie::mac(dotIJ_acc0, iPtr[v], jPtr[v]);
+        }
+        if
+            constexpr(haveAcc1) {
+                auto ni = ::aie::add(norm_i_acc0.template to_vector<float>(), norm_i_acc1.template to_vector<float>());
+                auto nj = ::aie::add(norm_j_acc0.template to_vector<float>(), norm_j_acc1.template to_vector<float>());
+                auto dij = ::aie::add(dotIJ_acc0.template to_vector<float>(), dotIJ_acc1.template to_vector<float>());
+                dotII = ::aie::reduce_add(ni);
+                dotJJ = ::aie::reduce_add(nj);
+                dotIJreal = ::aie::reduce_add(dij);
+            }
+        else {
+            dotII = ::aie::reduce_add(norm_i_acc0.template to_vector<float>());
+            dotJJ = ::aie::reduce_add(norm_j_acc0.template to_vector<float>());
+            dotIJreal = ::aie::reduce_add(dotIJ_acc0.template to_vector<float>());
+        }
+        dotIJimag = 0.0f;
+#else
         acc_t norm_i_acc = ::aie::mul_square(iPtr[0]);
         acc_t norm_j_acc = ::aie::mul_square(jPtr[0]);
         acc_t dotIJ_acc = ::aie::mul(iPtr[0], jPtr[0]);
-        for (int v = 1; v < vecsPerUCol; v++) {
+        for (int v = 1; v < kVecsPerUCol; v++) {
             norm_i_acc = ::aie::mac_square(norm_i_acc, iPtr[v]);
             norm_j_acc = ::aie::mac_square(norm_j_acc, jPtr[v]);
             dotIJ_acc = ::aie::mac(dotIJ_acc, iPtr[v], jPtr[v]);
@@ -194,6 +250,7 @@ static NOINLINE_DECL void computePairDots(::aie::vector<TT_DATA, kVecSize>* __re
         dotJJ = ::aie::reduce_add(norm_j_acc.template to_vector<float>());
         dotIJreal = ::aie::reduce_add(dotIJ_acc.template to_vector<float>());
         dotIJimag = 0.0f;
+#endif
     }
 }
 
@@ -374,6 +431,218 @@ static NOINLINE_DECL void sortSingularValues(T_outSDataType* __restrict S,
             }
         }
     }
+}
+
+//-----------------------------------------------------------------------------------------------------
+// Helper: Initialize U from input A (with phantom column zero-padding) and V to identity.
+//
+// Shared by pass-pipelined SVD kernels. Mirrors the init block at the
+// top of svdMain/svdCascadedMain; kept as a separate helper rather than refactoring those two
+// (proven, in-production) entry points to call it, to avoid regression risk.
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA, unsigned int kVecSize, bool kIsComplex>
+static NOINLINE_DECL void initUVIdentity(::aie::vector<TT_DATA, kVecSize>* __restrict A_in,
+                                         ::aie::vector<TT_DATA, kVecSize>* __restrict U,
+                                         ::aie::vector<TT_DATA, kVecSize>* V,
+                                         TT_DATA* Vscalar,
+                                         int numCols,
+                                         int storeCols,
+                                         int vecsPerUCol,
+                                         int vecsPerVCol) {
+    // Copy true columns from input (column-major, A_in and U share stride vecsPerUCol).
+    for (int i = 0; i < numCols * vecsPerUCol; i++) {
+        U[i] = A_in[i];
+    }
+    // Zero-pad schedule/storage phantom columns.
+    for (int col = numCols; col < storeCols; col++) {
+        for (int v = 0; v < vecsPerUCol; v++) {
+            U[col * vecsPerUCol + v] = ::aie::zeros<TT_DATA, kVecSize>();
+        }
+    }
+    // V identity: storeCols x storeCols.
+    for (int v = 0; v < storeCols * vecsPerVCol; v++) {
+        V[v] = ::aie::zeros<TT_DATA, kVecSize>();
+    }
+    // Set the identity diagonal through the same vector view consumed by the
+    // sweep. Using a scalar alias here is miscompiled by the AIE backend when
+    // this NOINLINE helper returns to another helper: for float, the earlier
+    // vector zero-fill wins and V remains entirely zero. A single vector view
+    // avoids the alias ambiguity on every architecture.
+    for (int col = 0; col < storeCols; col++) {
+        TT_DATA one;
+        if
+            constexpr(kIsComplex) { one = TT_DATA{1.0f, 0.0f}; }
+        else {
+            one = 1.0f;
+        }
+        int vec = col / (int)kVecSize;
+        int lane = col % (int)kVecSize;
+        V[col * vecsPerVCol + vec].set(one, lane);
+    }
+
+    chess_memory_fence();
+}
+
+//-----------------------------------------------------------------------------------------------------
+// Helper: Run one full Jacobi sweep (all kNumSets, phases 1-3) over U/V held ENTIRELY LOCALLY
+// (no row split, no stream exchange — the caller already owns the complete matrix).
+//
+// Shared by pass-pipelined SVD kernels, where each kernel
+// performs exactly one sweep before forwarding U/V to the next kernel. kPairsPerSet/kVecsPerUCol/
+// kVecsPerVCol are template (not runtime) parameters because computeGivensRotations/computePairDots
+// require compile-time trip counts, matching the existing single-kernel/cascaded code.
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          unsigned int kVecSize,
+          bool kIsComplex,
+          unsigned int kPairsPerSet,
+          unsigned int kVecsPerUCol,
+          unsigned int kVecsPerVCol>
+static NOINLINE_DECL void runJacobiSweep(::aie::vector<TT_DATA, kVecSize>* __restrict U,
+                                         ::aie::vector<TT_DATA, kVecSize>* V,
+                                         float* dotII,
+                                         float* dotJJ,
+                                         float* dotIJ,
+                                         float* c_arr,
+                                         float* s_arr,
+                                         float* phase_real,
+                                         float* phase_imag,
+                                         const uint8_t (*pairs)[2],
+                                         int kNumSets) {
+    using vec_t = ::aie::vector<TT_DATA, kVecSize>;
+
+    for (int setIdx = 0; setIdx < kNumSets; setIdx++) {
+        int setStart = setIdx * (int)kPairsPerSet;
+
+        // ============ PHASE 1: Compute all dot products ============
+        for (int p = 0; p < (int)kPairsPerSet; p++) {
+            int i = pairs[setStart + p][0];
+            int j = pairs[setStart + p][1];
+            vec_t* iPtr = U + i * kVecsPerUCol;
+            vec_t* jPtr = U + j * kVecsPerUCol;
+
+            float raw_real, raw_imag;
+            computePairDots<TT_DATA, kVecSize, kIsComplex, kVecsPerUCol>(iPtr, jPtr, dotII[p], dotJJ[p], raw_real,
+                                                                         raw_imag);
+
+            if
+                constexpr(kIsComplex) {
+                    float mag = hw_sqrt(hw_add(hw_mul(raw_real, raw_real), hw_mul(raw_imag, raw_imag)));
+                    dotIJ[p] = mag;
+                    if (hw_lt(kEpsilon, mag)) {
+                        float inv_mag = hw_inv(mag);
+                        phase_real[p] = hw_mul(raw_real, inv_mag);
+                        phase_imag[p] = hw_mul(raw_imag, inv_mag);
+                    } else {
+                        phase_real[p] = 1.0f;
+                        phase_imag[p] = 0.0f;
+                    }
+                }
+            else {
+                dotIJ[p] = raw_real;
+            }
+        }
+        // See svdMain: one fence per iteration is well-defined (Phase 1 always before,
+        // Phase 2-3 always after).
+        chess_memory_fence();
+
+        // ============ PHASE 2: Scalar Givens computation ============
+        computeGivensRotations<kPairsPerSet>(dotII, dotJJ, dotIJ, c_arr, s_arr);
+
+        chess_separator_scheduler();
+
+        // ============ PHASE 3: Apply rotations to U and V ============
+        applyGivensRotations<TT_DATA, kVecSize, kIsComplex>(U, V, c_arr, s_arr, phase_real, phase_imag, pairs, setStart,
+                                                            (int)kPairsPerSet, (int)kVecsPerUCol, (int)kVecsPerVCol);
+        // See svdMain: guards against the chess compiler delaying V stores (not __restrict)
+        // past the loop boundary, which would leave stale V reads on the next set.
+        chess_separator_scheduler();
+    }
+}
+
+//-----------------------------------------------------------------------------------------------------
+// Helper: Finalize — extract singular values, normalize U, sort descending, compact V.
+//
+// Shared by the final pass-pipeline stage, which runs this on the U/V
+// state handed to it by the last pass-kernel (no sweep of its own). Mirrors the finalize block at
+// the bottom of svdMain/svdCascadedMain.
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          unsigned int kVecSize,
+          bool kIsComplex,
+          unsigned int kVecsPerUCol,
+          unsigned int kVecsPerVCol>
+static NOINLINE_DECL void finalizeSVD(::aie::vector<TT_DATA, kVecSize>* __restrict U,
+                                      ::aie::vector<TT_DATA, kVecSize>* V,
+                                      T_outSDataType* __restrict S,
+                                      int numCols,
+                                      int storeCols) {
+    using vec_t = ::aie::vector<TT_DATA, kVecSize>;
+    using acc_t = ::aie::accum<accfloat, kVecSize>;
+
+    for (int col = 0; col < numCols; col++) {
+        vec_t* colPtr = U + col * kVecsPerUCol;
+
+        float normSq;
+        if
+            constexpr(kIsComplex) {
+                using cacc_t = ::aie::accum<caccfloat, kVecSize>;
+                cacc_t cacc = ::aie::mul(::aie::op_conj(colPtr[0]), colPtr[0]);
+                for (int v = 1; v < (int)kVecsPerUCol; v++) {
+                    cacc = ::aie::mac(cacc, ::aie::op_conj(colPtr[v]), colPtr[v]);
+                }
+                cfloat norm_c = ::aie::reduce_add(cacc.template to_vector<cfloat>());
+                normSq = norm_c.real;
+            }
+        else {
+            // Split-accumulator (N=2): see svdMain finalize for rationale.
+            constexpr bool haveAcc1 = (kVecsPerUCol > 1);
+            acc_t nacc0 = ::aie::mul_square(colPtr[0]);
+            acc_t nacc1;
+            int v = 1;
+            if
+                constexpr(haveAcc1) {
+                    nacc1 = ::aie::mul_square(colPtr[1]);
+                    v = 2;
+                }
+            for (; v + 1 < (int)kVecsPerUCol; v += 2) chess_prepare_for_pipelining {
+                    nacc0 = ::aie::mac_square(nacc0, colPtr[v]);
+                    nacc1 = ::aie::mac_square(nacc1, colPtr[v + 1]);
+                }
+            for (; v < (int)kVecsPerUCol; v++) {
+                nacc0 = ::aie::mac_square(nacc0, colPtr[v]);
+            }
+            if
+                constexpr(haveAcc1) {
+                    auto nv = ::aie::add(nacc0.template to_vector<float>(), nacc1.template to_vector<float>());
+                    normSq = ::aie::reduce_add(nv);
+                }
+            else {
+                normSq = ::aie::reduce_add(nacc0.template to_vector<float>());
+            }
+        }
+        float sigma = hw_sqrt(normSq);
+        S[col] = sigma;
+
+        float invSigma = hw_lt(kEpsilon, sigma) ? hw_inv(sigma) : 0.0f;
+        for (int v = 0; v < (int)kVecsPerUCol; v++) {
+            colPtr[v] = ::aie::mul(colPtr[v], invSigma);
+        }
+    }
+    // Phantom columns: set sigma=0 directly for the sort.
+    for (int col = numCols; col < storeCols; col++) {
+        S[col] = 0.0f;
+    }
+
+    // Sort real columns only; phantom columns are zero and naturally trail any real sigma.
+    sortSingularValues<TT_DATA, kVecSize>(S, U, V, numCols, (int)kVecsPerUCol, (int)kVecsPerVCol);
+
+    // V remains in its storeCols x storeCols padded column-major layout.
+    // MatMul1 in mp_pseudoinverse_graph reads V as storeCols x storeCols col-major,
+    // which matches this layout. Padding columns/rows contribute zero to the result
+    // since the corresponding S^-1 diagonal entries are zero. (See svd.cpp svdMain
+    // for the same rationale -- this helper must not reintroduce the V-compaction
+    // that was removed there.)
 }
 
 } // namespace svd

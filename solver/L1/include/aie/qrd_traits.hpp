@@ -25,8 +25,6 @@ and therefore must be suitable for the aie compiler graph-level compilation.
 
 #include "device_defs.h"
 #include "fir_utils.hpp"
-#include "single_mul_out_types.hpp"
-#include "single_mul_acc_types.hpp"
 
 using namespace ::xf::dsp::aie;
 
@@ -37,6 +35,33 @@ namespace qrd {
 
 static constexpr unsigned int kMaxBufferLenInBytes = __DATA_MEM_BYTES__; // Max buffer Length
 static constexpr unsigned int kMaxReadInBytes = __MAX_READ_WRITE__ / 8;
+
+// A kernel in the middle of a cascade chain
+// effectively reaches only 3 memory modules, since it shares the modules along the chain with its
+// neighbours. If A, Q and R each fill a whole module there is no room left for sysmem and placement
+// Estimated sysmem per kernel:
+//   stack          : 1024 B                         (default kernel stack size, seen in the kernel .map file)
+//   kernel object  : TP_DIM_ROWS * sizeof(TT_DATA)  (QrdCascData[TP_DIM_ROWS] member in qrd.hpp)
+//   runtime data   : 128 B                          (sync buffer and atexit data, ~70 B in the .map file, rounded up)
+
+static constexpr unsigned int kSysMemStackBytes = 1024;
+static constexpr unsigned int kSysMemRuntimeBytes = 128;
+
+template <typename TT_DATA, unsigned int TP_DIM_ROWS>
+INLINE_DECL constexpr unsigned int fnSysMemBytes() {
+    return kSysMemStackBytes + TP_DIM_ROWS * sizeof(TT_DATA) + kSysMemRuntimeBytes;
+};
+
+template <typename TT_DATA, unsigned int TP_DIM_ROWS, unsigned int TP_CASC_LEN>
+INLINE_DECL constexpr unsigned int fnMaxRBufferBytes() {
+    if (TP_CASC_LEN <= 2) {
+        return kMaxBufferLenInBytes;
+    }
+    if (fnSysMemBytes<TT_DATA, TP_DIM_ROWS>() >= kMaxBufferLenInBytes) {
+        return 0;
+    }
+    return kMaxBufferLenInBytes - fnSysMemBytes<TT_DATA, TP_DIM_ROWS>();
+};
 
 template <typename TT_DATA>
 INLINE_DECL constexpr bool fnCheckDataType() {
@@ -50,6 +75,18 @@ template <>
 INLINE_DECL constexpr bool fnCheckDataType<cfloat>() {
     return true;
 };
+
+// accumulator type for TT_DATA x TT_DATA products (only float and cfloat are supported)
+template <typename TT>
+struct acc_t {
+    using type = accfloat;
+};
+template <>
+struct acc_t<cfloat> {
+    using type = caccfloat;
+};
+template <typename TT>
+using accType_t = typename acc_t<TT>::type;
 
 template <typename TT_DATA, unsigned int TP_DIM_ROWS, unsigned int TP_DIM_COLS, unsigned int TP_NUM_FRAMES>
 INLINE_DECL constexpr bool fnCheckBufferSize() {

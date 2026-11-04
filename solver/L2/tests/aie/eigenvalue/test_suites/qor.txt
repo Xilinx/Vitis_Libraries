@@ -1,0 +1,49 @@
+# eigenvalue QoR sweep
+#
+# Goal: measure compile-time/throughput across the supported matrix-size and
+# AIE-variant space. Uses TARGET=hw (aiesim) via the runmake framework.
+#
+# NITER=6 is made explicit below (rather than relying on the runmake
+# framework's default) since some QoR metrics (e.g. Initiation Interval) only
+# become valid once the core reaches steady state -- typically >=4 iterations.
+# NITER=6 is a starting default, not yet confirmed to reach steady state for
+# every config here (some larger/higher-PASSES configs may need more).
+
+# ============================================================
+# AIE1
+# ============================================================
+make all DATA_TYPE=cfloat DIM_SIZE=4  PASSES=20  CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05 NITER=6
+make all DATA_TYPE=cfloat DIM_SIZE=8  PASSES=30  CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05 NITER=6
+make all DATA_TYPE=cfloat DIM_SIZE=12 PASSES=40  CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05 NITER=6
+make all DATA_TYPE=cfloat DIM_SIZE=16 PASSES=50  CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05 NITER=6
+
+make all DATA_TYPE=float  DIM_SIZE=8  PASSES=30  CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05 NITER=6
+make all DATA_TYPE=float  DIM_SIZE=16 PASSES=50  CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05 NITER=6
+make all DATA_TYPE=float  DIM_SIZE=24 PASSES=75  CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05 NITER=6
+make all DATA_TYPE=float  DIM_SIZE=32 PASSES=100 CASC_LEN=1 AIE_VARIANT=1 DIFF_TOLERANCE=0.05 NITER=6
+
+# ============================================================
+# AIE-ML (AIE_VARIANT=2)
+# ============================================================
+make all DATA_TYPE=cfloat DIM_SIZE=4  PASSES=20  CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05 NITER=6
+make all DATA_TYPE=cfloat DIM_SIZE=8  PASSES=30  CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05 NITER=6
+make all DATA_TYPE=cfloat DIM_SIZE=12 PASSES=40  CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05 NITER=6
+make all DATA_TYPE=cfloat DIM_SIZE=16 PASSES=50  CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05 NITER=6
+
+make all DATA_TYPE=float  DIM_SIZE=8  PASSES=30  CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05 NITER=6
+make all DATA_TYPE=float  DIM_SIZE=16 PASSES=50  CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05 NITER=6
+make all DATA_TYPE=float  DIM_SIZE=24 PASSES=75  CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05 NITER=6
+make all DATA_TYPE=float  DIM_SIZE=32 PASSES=100 CASC_LEN=1 AIE_VARIANT=2 DIFF_TOLERANCE=0.05 NITER=6
+
+# ============================================================
+# AIE-MLv2 (AIE_VARIANT=22)
+# ============================================================
+make all DATA_TYPE=cfloat DIM_SIZE=4  PASSES=20  CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05 NITER=6
+make all DATA_TYPE=cfloat DIM_SIZE=8  PASSES=30  CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05 NITER=6
+make all DATA_TYPE=cfloat DIM_SIZE=12 PASSES=40  CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05 NITER=6
+make all DATA_TYPE=cfloat DIM_SIZE=16 PASSES=50  CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05 NITER=6
+
+make all DATA_TYPE=float  DIM_SIZE=8  PASSES=30  CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05 NITER=6
+make all DATA_TYPE=float  DIM_SIZE=16 PASSES=50  CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05 NITER=6
+make all DATA_TYPE=float  DIM_SIZE=24 PASSES=75  CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05 NITER=6
+make all DATA_TYPE=float  DIM_SIZE=32 PASSES=100 CASC_LEN=1 AIE_VARIANT=22 DIFF_TOLERANCE=0.05 NITER=6

@@ -1,0 +1,7 @@
+# Direct QoR progression for the finalize-only TP_PASSES + 1 mode.
+make all DATA_TYPE=float  DIM_ROWS=64 DIM_COLS=8 PASSES=4 PASSES_SSR=[1,2,4,5] SORT=1 CASC_LEN=1 AIE_VARIANT=[1,2,22]
+make all DATA_TYPE=cfloat DIM_ROWS=64 DIM_COLS=8 PASSES=4 PASSES_SSR=[1,2,4,5] SORT=1 CASC_LEN=1 AIE_VARIANT=[1,2,22]
+
+# Finalize-only stage composed with the row-cascade axis.
+make all DATA_TYPE=float  DIM_ROWS=128 DIM_COLS=8 PASSES=4 PASSES_SSR=5 SORT=1 CASC_LEN=2 AIE_VARIANT=[1,2,22]
+make all DATA_TYPE=cfloat DIM_ROWS=128 DIM_COLS=8 PASSES=4 PASSES_SSR=5 SORT=1 CASC_LEN=2 AIE_VARIANT=[1,2,22]

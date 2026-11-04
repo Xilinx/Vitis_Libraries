@@ -17,8 +17,6 @@
 #define _SOLVERLIB_QRD_REF_UTILS_HPP_
 
 #include "aie_api/utils.hpp" // for vector print function
-#include "single_mul_ref_out_types.hpp"
-#include "single_mul_ref_acc_types.hpp"
 
 #include "aie_api/aie_adf.hpp"
 #include <adf.h>
@@ -31,7 +29,7 @@ namespace qrd {
 template <typename T_A, typename T_B, unsigned int ARRAY_LENGTH>
 class array_operations {
    private:
-    using out_t = outTypeMult_t<T_A, T_B>;
+    using out_t = T_A; // only instantiated with T_A == T_B (float)
 
    public:
     array_operations(){};
@@ -112,7 +110,7 @@ class array_operations {
 template <unsigned int ARRAY_LENGTH>
 class array_operations<cfloat, cfloat, ARRAY_LENGTH> {
    private:
-    using out_t = outTypeMult_t<cfloat, cfloat>;
+    using out_t = cfloat;
     using arr_t = ::std::array<cfloat, ARRAY_LENGTH>;
 
    public:

@@ -59,6 +59,27 @@ The following table provides results for Cholesky across a wide range of support
 
 :download:`cholesky_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2026.1/solver/docs/src/csv_data_files/L2/cholesky_benchmark.csv>`
 
+Eigenvalue
+============
+
+The following table provides results for Eigenvalue across a wide range of supported parameters, defined in :ref:`SOLVER_CONFIGURATION_PARAMETERS_EIGENVALUE`.
+
+:download:`eigenvalue_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2026.2/solver/docs/src/csv_data_files/L2/eigenvalue_benchmark.csv>`
+
+LS_Cholesky_Solver
+============
+
+The following table provides results for LS_Cholesky_Solver across a wide range of supported parameters, defined in :ref:`SOLVER_CONFIGURATION_PARAMETERS_LS_CHOLESKY_SOLVER`.
+
+:download:`ls_cholesky_solver_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2026.2/solver/docs/src/csv_data_files/L2/ls_cholesky_solver_benchmark.csv>`
+
+MP_Pseudoinverse
+============
+
+The following table provides results for MP_Pseudoinverse across a wide range of supported parameters, defined in :ref:`SOLVER_CONFIGURATION_PARAMETERS_MP_PSEUDOINVERSE_SVD`.
+
+:download:`mp_pseudoinverse_svd_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2026.2/solver/docs/src/csv_data_files/L2/mp_pseudoinverse_svd_benchmark.csv>`
+
 QRD
 ============
 

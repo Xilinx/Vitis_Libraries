@@ -123,9 +123,22 @@ def update_TP_DIM_ROWS(args):
 
 def fn_update_tp_dim_rows(AIE_VARIANT, TT_DATA, TP_DIM_ROWS):
     TP_DIM_ROWS_min = int(com.k_max_read_write_bytes[AIE_VARIANT] / byte_size[TT_DATA])
-    buffer_size_sample = com.k_data_memory_bytes[AIE_VARIANT] / byte_size[TT_DATA]
+    TP_DIM_COLS_min = TP_DIM_ROWS_min
+    # Theoretical max assumes 1 column per kernel, distributed over a cascade. The kernel's system memory
+    # grows with TP_DIM_ROWS (QrdCascData, see qrd_sysmem_bytes in kernel_load_utils.py) and must fit
+    # in one memory module next to the smallest possible R buffer (TP_DIM_COLS_min x 1 column):
+    #   TP_DIM_COLS_min * bytes + (QRD_SYSMEM_STACK_BYTES + TP_DIM_ROWS * bytes + QRD_SYSMEM_RUNTIME_BYTES) <= module
     TP_DIM_ROWS_max = int(
-        int(buffer_size_sample / 1) #theoratical min for tp_dim_col is 1 here assumining min colsize will be distributed over cascaded kernels
+        com.FLOOR(
+            (
+                com.k_data_memory_bytes[AIE_VARIANT]
+                - QRD_SYSMEM_STACK_BYTES
+                - QRD_SYSMEM_RUNTIME_BYTES
+                - TP_DIM_COLS_min * byte_size[TT_DATA]
+            )
+            // byte_size[TT_DATA],
+            TP_DIM_ROWS_min,
+        )
     )
 
     param_dict = {}
@@ -272,6 +285,14 @@ def fn_update_tp_casc_len(AIE_VARIANT, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM
             break
         casc_len_max -= 1
 
+    # casc_len_min above assumes full memory modules. In a cascade the R buffer also leaves room for the
+    # kernel's system memory (CR-1252233, see qrd_max_r_buffer_bytes in kernel_load_utils.py), so raise
+    # the minimum until the column split covers all of TP_DIM_COLS.
+    while casc_len_min <= casc_len_max and sum(
+        qrd_load_split(AIE_VARIANT, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, casc_len_min, TP_NUM_FRAMES)
+    ) != TP_DIM_COLS:
+        casc_len_min += 1
+
     param_dict = {}
     param_dict.update({"name": "TP_CASC_LEN"})
     param_dict.update({"minimum": casc_len_min})
@@ -283,8 +304,27 @@ def fn_update_tp_casc_len(AIE_VARIANT, TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_NUM
 def validate_TP_CASC_LEN(args):
     TP_CASC_LEN = args["TP_CASC_LEN"]
     param_dict = update_TP_CASC_LEN(args)
+    if param_dict["minimum"] > param_dict["maximum"]:
+        return com.isError(
+            "No TP_CASC_LEN fits this TP_DIM_ROWS/TP_DIM_COLS/TP_NUM_FRAMES combination: the R buffer of "
+            "each cascaded kernel must leave room for the kernel's system memory. "
+            "Reduce TP_DIM_ROWS, TP_DIM_COLS or TP_NUM_FRAMES."
+        )
     range_TP_CASC_LEN = [param_dict["minimum"], param_dict["maximum"]]
-    return com.validate_range(range_TP_CASC_LEN, "TP_CASC_LEN", TP_CASC_LEN)
+    vld = com.validate_range(range_TP_CASC_LEN, "TP_CASC_LEN", TP_CASC_LEN)
+    if not vld["is_valid"]:
+        return vld
+
+    col_dim_kernel_list = qrd_load_split(
+        args["AIE_VARIANT"], args["TT_DATA"], args["TP_DIM_ROWS"], args["TP_DIM_COLS"], TP_CASC_LEN, args["TP_NUM_FRAMES"]
+    )
+    if sum(col_dim_kernel_list) != args["TP_DIM_COLS"]:
+        return com.isError(
+            f"TP_CASC_LEN = {TP_CASC_LEN} cannot fit all {args['TP_DIM_COLS']} columns within the per-kernel memory "
+            f"limits (A and Q fill at most one memory module each, and in a cascade the R buffer also leaves room "
+            f"for the kernel's system memory). Increase TP_CASC_LEN."
+        )
+    return vld
 
 #######################################################
 ######## TP_DIM_A_LEADING Updater and Validator #######
@@ -431,9 +471,9 @@ def info_ports(args):
     portsOutR = []
     for casc_num in range(0, TP_CASC_LEN):
         colSize = col_dim_kernel_list[casc_num]
-        TP_WINDOW_VSIZE_R = TP_DIM_ROWS*colSize*TP_NUM_FRAMES
-        TP_WINDOW_VSIZE_Q = colSize*colSize*TP_NUM_FRAMES
-        
+        TP_WINDOW_VSIZE_Q = TP_DIM_ROWS*colSize*TP_NUM_FRAMES
+        TP_WINDOW_VSIZE_R = TP_DIM_COLS*colSize*TP_NUM_FRAMES
+
         portsInA += get_port_info(
             portname="inA",
             dir="in",
@@ -488,7 +528,7 @@ public:
   casc_port_array<output> outQ;
   casc_port_array<output> outR;
 
-  xf::dsp::aie::qrd::qrd_graph<
+  xf::solver::aie::qrd::qrd_graph<
     {TT_DATA}, //TT_DATA
     {TP_DIM_ROWS}, //TP_DIM_ROWS
     {TP_DIM_COLS}, //TP_DIM_COLS
@@ -500,12 +540,11 @@ public:
   > qrd;
 
   {graphname}() : qrd() {{
-    adf::kernel *qrd_kernels = qrd.getKernels();
 
     for (int i=0; i < TP_CASC_LEN; i++) {{
       adf::connect<> net_in(inA[i], qrd.inA[i]);
-      adf::connect<> net_out(qrd.outQ[i], outQ[i]);
-      adf::connect<> net_out(qrd.outR[i], outR[i]);
+      adf::connect<> net_outQ(qrd.outQ[i], outQ[i]);
+      adf::connect<> net_outR(qrd.outR[i], outR[i]);
     }}
   }}
 
@@ -522,6 +561,8 @@ public:
         "L1/src/aie",
         "L1/tests/aie/inc",
         "L1/tests/aie/src",
+        "../xf_dsp/L1/include/aie",
+        "../xf_dsp/L2/include/aie",
     ]
 
     return out

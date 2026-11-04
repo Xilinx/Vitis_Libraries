@@ -131,6 +131,18 @@ class create_casc_kernel_recur_qrd {
  *         call to this function.
  * @tparam TP_CASC_LEN selects the number of kernels the QRD will be split over to accomplish
  *         higher matrix sizes.
+ * @tparam TP_DIM_A_LEADING selects the leading dimension of the input matrix A. \n
+ *         When set to 0 (default), matrix A is read in column-major order. \n
+ *         When set to 1, matrix A is read in row-major order. \n
+ *         Row-major is not supported for the cfloat data type.
+ * @tparam TP_DIM_Q_LEADING selects the leading dimension of the output matrix Q. \n
+ *         When set to 0 (default), matrix Q is written in column-major order. \n
+ *         When set to 1, matrix Q is written in row-major order. \n
+ *         Row-major is not supported for the cfloat data type.
+ * @tparam TP_DIM_R_LEADING selects the leading dimension of the output matrix R. \n
+ *         When set to 0 (default), matrix R is written in column-major order. \n
+ *         When set to 1, matrix R is written in row-major order. \n
+ *         Row-major is not supported for the cfloat data type.
  **/
 
 template <typename TT_DATA,
@@ -173,6 +185,13 @@ class qrd_graph : public graph {
                   " Assertion Failed : \n"
                   "             ERROR: TP_DIM_ROWS should be minimum of 32 bytes / sizeof(TT_DATA) for AIE1 / 64 bytes "
                   "/ sizeof(TT_DATA) for AIE-ML and AIE-MLv2. \n");
+
+    static_assert(fnCheckCascLenFitsMemory<TT_DATA, TP_DIM_COLS, TP_DIM_ROWS, TP_CASC_LEN, TP_NUM_FRAMES>(),
+                  " Assertion Failed : \n"
+                  "             ERROR: TP_CASC_LEN is too small to fit all TP_DIM_COLS columns within the per-kernel "
+                  "memory limits (A and Q fill at most one memory module each, and in a cascade the R buffer also "
+                  "leaves room for the kernel's system memory: stack, kernel object and runtime data). Increase "
+                  "TP_CASC_LEN or reduce TP_DIM_ROWS/TP_DIM_COLS/TP_NUM_FRAMES. \n");
 
     // static_assert(fnCheckTiling<TT_DATA, TP_DIM_ROWS, TP_DIM_A_LEADING, TP_DIM_Q_LEADING, TP_DIM_R_LEADING>(),
     //               " Assertion Failed : \n"
