@@ -328,8 +328,14 @@ def main():
     elif test_suite == "jenkins":
         test_suite_files = [
             f"{called_dir}/test_suites/checkin.txt",
-            f"{called_dir}/test_suites/qor.txt",
         ]
+        # Prompt-driven cases are generated into the same multi_params.json as checkin/qor cases
+        # (not every IP has this suite yet, so only add it when present). They are still kept out
+        # of CI execution: description.json's checkin/qor param_set patterns are the actual gate,
+        # and prompt test names (always ending in "_prompt") never match those patterns.
+        prompt_suite = f"{called_dir}/test_suites/prompt.txt"
+        if os.path.isfile(prompt_suite):
+            test_suite_files.append(prompt_suite)
     else:
         test_suite_files = [f"{called_dir}/test_suites/{test_suite}.txt"]
 
@@ -355,6 +361,21 @@ def main():
         module,
         enable_updater_padding,
     )
+
+    # Prompt-driven tests need a user-specific LLM API token, which Jenkins does not have. They
+    # may end up in the same multi_params.json as checkin/qor cases (see the "jenkins" branch
+    # above), so the actual thing keeping them out of CI execution is their name: create_test_name()
+    # always appends the originating suite's basename last, so a case built from PROMPT_FILE must
+    # end in "_prompt" -- description.json's checkin/qor param_set patterns (the real execution
+    # gate) never match that suffix. Reject anything that would break that invariant.
+    prompt_tests = [name for name, test in json_tests.items() if "PROMPT_FILE" in test]
+    mislabeled = [name for name in prompt_tests if not name.endswith("_prompt")]
+    if mislabeled:
+        print(
+            "Error: PROMPT_FILE may only be used in a test_suites/prompt*.txt suite, so its test "
+            f"name ends in '_prompt'. Offending tests: {mislabeled}"
+        )
+        sys.exit(1)
 
     if fail_count == 0 or ignore_fails:
         jenkins_tests = {}

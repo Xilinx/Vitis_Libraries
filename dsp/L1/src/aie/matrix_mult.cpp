@@ -70,30 +70,34 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_AB_RANGE,
           unsigned int TP_DIM_B_RANGE,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
-INLINE_DECL void kernelMatMultClass<
-    TT_DATA_A,
-    TT_DATA_B,
-    TT_OUT_DATA,
-    TP_DIM_A,
-    TP_DIM_AB,
-    TP_DIM_B,
-    TP_SHIFT,
-    TP_RND,
-    TP_SAT,
-    TP_DIM_A_LEADING,
-    TP_DIM_B_LEADING,
-    TP_DIM_OUT_LEADING,
-    TP_INPUT_WINDOW_VSIZE_A,
-    TP_INPUT_WINDOW_VSIZE_B,
-    TP_CASC_IN,
-    TP_CASC_OUT,
-    TP_DIM_A_RANGE,
-    TP_DIM_AB_RANGE,
-    TP_DIM_B_RANGE,
-    TP_KERNEL_POSITION,
-    TP_CASC_LEN>::matMultKernel(T_inputIF<TP_CASC_IN, TT_DATA_A, TT_DATA_B> inInterface,
-                                T_outputIF<TP_CASC_OUT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA> outInterface) {
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_CONJ_A,
+          unsigned int TP_CONJ_B>
+INLINE_DECL void
+kernelMatMultClass<TT_DATA_A,
+                   TT_DATA_B,
+                   TT_OUT_DATA,
+                   TP_DIM_A,
+                   TP_DIM_AB,
+                   TP_DIM_B,
+                   TP_SHIFT,
+                   TP_RND,
+                   TP_SAT,
+                   TP_DIM_A_LEADING,
+                   TP_DIM_B_LEADING,
+                   TP_DIM_OUT_LEADING,
+                   TP_INPUT_WINDOW_VSIZE_A,
+                   TP_INPUT_WINDOW_VSIZE_B,
+                   TP_CASC_IN,
+                   TP_CASC_OUT,
+                   TP_DIM_A_RANGE,
+                   TP_DIM_AB_RANGE,
+                   TP_DIM_B_RANGE,
+                   TP_KERNEL_POSITION,
+                   TP_CASC_LEN,
+                   TP_CONJ_A,
+                   TP_CONJ_B>::matMultKernel(T_inputIF<TP_CASC_IN, TT_DATA_A, TT_DATA_B> inInterface,
+                                             T_outputIF<TP_CASC_OUT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA> outInterface) {
     // This function hides exposure of the implementation choice from the user.
     matMult_impl1(inInterface, outInterface);
 };
@@ -118,30 +122,34 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_AB_RANGE,
           unsigned int TP_DIM_B_RANGE,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
-INLINE_DECL void kernelMatMultClass<
-    TT_DATA_A,
-    TT_DATA_B,
-    TT_OUT_DATA,
-    TP_DIM_A,
-    TP_DIM_AB,
-    TP_DIM_B,
-    TP_SHIFT,
-    TP_RND,
-    TP_SAT,
-    TP_DIM_A_LEADING,
-    TP_DIM_B_LEADING,
-    TP_DIM_OUT_LEADING,
-    TP_INPUT_WINDOW_VSIZE_A,
-    TP_INPUT_WINDOW_VSIZE_B,
-    TP_CASC_IN,
-    TP_CASC_OUT,
-    TP_DIM_A_RANGE,
-    TP_DIM_AB_RANGE,
-    TP_DIM_B_RANGE,
-    TP_KERNEL_POSITION,
-    TP_CASC_LEN>::matMult_impl1(T_inputIF<TP_CASC_IN, TT_DATA_A, TT_DATA_B> inInterface,
-                                T_outputIF<TP_CASC_OUT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA> outInterface) {
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_CONJ_A,
+          unsigned int TP_CONJ_B>
+INLINE_DECL void
+kernelMatMultClass<TT_DATA_A,
+                   TT_DATA_B,
+                   TT_OUT_DATA,
+                   TP_DIM_A,
+                   TP_DIM_AB,
+                   TP_DIM_B,
+                   TP_SHIFT,
+                   TP_RND,
+                   TP_SAT,
+                   TP_DIM_A_LEADING,
+                   TP_DIM_B_LEADING,
+                   TP_DIM_OUT_LEADING,
+                   TP_INPUT_WINDOW_VSIZE_A,
+                   TP_INPUT_WINDOW_VSIZE_B,
+                   TP_CASC_IN,
+                   TP_CASC_OUT,
+                   TP_DIM_A_RANGE,
+                   TP_DIM_AB_RANGE,
+                   TP_DIM_B_RANGE,
+                   TP_KERNEL_POSITION,
+                   TP_CASC_LEN,
+                   TP_CONJ_A,
+                   TP_CONJ_B>::matMult_impl1(T_inputIF<TP_CASC_IN, TT_DATA_A, TT_DATA_B> inInterface,
+                                             T_outputIF<TP_CASC_OUT, TT_DATA_A, TT_DATA_B, TT_OUT_DATA> outInterface) {
     set_rnd_mode<TP_RND>();
     set_sat_mode<TP_SAT>();
     constexpr unsigned int M = tilingScheme.Atile;
@@ -235,22 +243,98 @@ INLINE_DECL void kernelMatMultClass<
                             if
                                 constexpr(parallelA && parallelB) C11 =
                                     MMUL(readincr_v<sizeTileC>(inInterface.inCascade));
-                            C00.mac(A0, B0);
+                            // mac with optional A and/or B conjugation
+                            // Note: aie::conj() explicitly computes the element-wise complex conjugate
+                            // (negates imaginary parts) of each vector before the MMUL operation.
+                            // This is used instead of aie::op_conj() which is a hint to the hardware
+                            // conjugate-MMUL instruction but is silently a no-op for some tile
+                            // configurations (e.g. cint16xcint16 {4,4,2} on AIE1).
                             if
-                                constexpr(parallelB) C01.mac(A0, B1);
-                            if
-                                constexpr(parallelA) C10.mac(A1, B0);
-                            if
-                                constexpr(parallelA && parallelB) C11.mac(A1, B1);
+                                constexpr(TP_CONJ_A && TP_CONJ_B) {
+                                    C00.mac(aie::conj(A0), aie::conj(B0));
+                                    if
+                                        constexpr(parallelB) C01.mac(aie::conj(A0), aie::conj(B1));
+                                    if
+                                        constexpr(parallelA) C10.mac(aie::conj(A1), aie::conj(B0));
+                                    if
+                                        constexpr(parallelA && parallelB) C11.mac(aie::conj(A1), aie::conj(B1));
+                                }
+                            else if
+                                constexpr(TP_CONJ_A) {
+                                    C00.mac(aie::conj(A0), B0);
+                                    if
+                                        constexpr(parallelB) C01.mac(aie::conj(A0), B1);
+                                    if
+                                        constexpr(parallelA) C10.mac(aie::conj(A1), B0);
+                                    if
+                                        constexpr(parallelA && parallelB) C11.mac(aie::conj(A1), B1);
+                                }
+                            else if
+                                constexpr(TP_CONJ_B) {
+                                    C00.mac(A0, aie::conj(B0));
+                                    if
+                                        constexpr(parallelB) C01.mac(A0, aie::conj(B1));
+                                    if
+                                        constexpr(parallelA) C10.mac(A1, aie::conj(B0));
+                                    if
+                                        constexpr(parallelA && parallelB) C11.mac(A1, aie::conj(B1));
+                                }
+                            else {
+                                C00.mac(A0, B0);
+                                if
+                                    constexpr(parallelB) C01.mac(A0, B1);
+                                if
+                                    constexpr(parallelA) C10.mac(A1, B0);
+                                if
+                                    constexpr(parallelA && parallelB) C11.mac(A1, B1);
+                            }
                         }
                     else {
-                        C00.mul(A0, B0);
+                        // mul with optional A and/or B conjugation
+                        // Note: aie::conj() explicitly computes the element-wise complex conjugate
+                        // (negates imaginary parts) of each vector before the MMUL operation.
+                        // This is used instead of aie::op_conj() which is a hint to the hardware
+                        // conjugate-MMUL instruction but is silently a no-op for some tile
+                        // configurations (e.g. cint16xcint16 {4,4,2} on AIE1).
                         if
-                            constexpr(parallelB) C01.mul(A0, B1);
-                        if
-                            constexpr(parallelA) C10.mul(A1, B0);
-                        if
-                            constexpr(parallelA && parallelB) C11.mul(A1, B1);
+                            constexpr(TP_CONJ_A && TP_CONJ_B) {
+                                C00.mul(aie::conj(A0), aie::conj(B0));
+                                if
+                                    constexpr(parallelB) C01.mul(aie::conj(A0), aie::conj(B1));
+                                if
+                                    constexpr(parallelA) C10.mul(aie::conj(A1), aie::conj(B0));
+                                if
+                                    constexpr(parallelA && parallelB) C11.mul(aie::conj(A1), aie::conj(B1));
+                            }
+                        else if
+                            constexpr(TP_CONJ_A) {
+                                C00.mul(aie::conj(A0), B0);
+                                if
+                                    constexpr(parallelB) C01.mul(aie::conj(A0), B1);
+                                if
+                                    constexpr(parallelA) C10.mul(aie::conj(A1), B0);
+                                if
+                                    constexpr(parallelA && parallelB) C11.mul(aie::conj(A1), B1);
+                            }
+                        else if
+                            constexpr(TP_CONJ_B) {
+                                C00.mul(A0, aie::conj(B0));
+                                if
+                                    constexpr(parallelB) C01.mul(A0, aie::conj(B1));
+                                if
+                                    constexpr(parallelA) C10.mul(A1, aie::conj(B0));
+                                if
+                                    constexpr(parallelA && parallelB) C11.mul(A1, aie::conj(B1));
+                            }
+                        else {
+                            C00.mul(A0, B0);
+                            if
+                                constexpr(parallelB) C01.mul(A0, B1);
+                            if
+                                constexpr(parallelA) C10.mul(A1, B0);
+                            if
+                                constexpr(parallelA && parallelB) C11.mul(A1, B1);
+                        }
                     }
 
                     //#pragma unroll((TP_DIM_AB/N -1))
@@ -272,13 +356,46 @@ INLINE_DECL void kernelMatMultClass<
                                     pB2 += sizeTileB * TP_DIM_B / K;
                                 }
 
-                            C00.mac(A0, B0);
+                            // mac with optional A and/or B conjugation (inner loop)
                             if
-                                constexpr(parallelB) { C01.mac(A0, B1); }
-                            if
-                                constexpr(parallelA) { C10.mac(A1, B0); }
-                            if
-                                constexpr(parallelA && parallelB) { C11.mac(A1, B1); }
+                                constexpr(TP_CONJ_A && TP_CONJ_B) {
+                                    C00.mac(aie::conj(A0), aie::conj(B0));
+                                    if
+                                        constexpr(parallelB) { C01.mac(aie::conj(A0), aie::conj(B1)); }
+                                    if
+                                        constexpr(parallelA) { C10.mac(aie::conj(A1), aie::conj(B0)); }
+                                    if
+                                        constexpr(parallelA && parallelB) { C11.mac(aie::conj(A1), aie::conj(B1)); }
+                                }
+                            else if
+                                constexpr(TP_CONJ_A) {
+                                    C00.mac(aie::conj(A0), B0);
+                                    if
+                                        constexpr(parallelB) { C01.mac(aie::conj(A0), B1); }
+                                    if
+                                        constexpr(parallelA) { C10.mac(aie::conj(A1), B0); }
+                                    if
+                                        constexpr(parallelA && parallelB) { C11.mac(aie::conj(A1), B1); }
+                                }
+                            else if
+                                constexpr(TP_CONJ_B) {
+                                    C00.mac(A0, aie::conj(B0));
+                                    if
+                                        constexpr(parallelB) { C01.mac(A0, aie::conj(B1)); }
+                                    if
+                                        constexpr(parallelA) { C10.mac(A1, aie::conj(B0)); }
+                                    if
+                                        constexpr(parallelA && parallelB) { C11.mac(A1, aie::conj(B1)); }
+                                }
+                            else {
+                                C00.mac(A0, B0);
+                                if
+                                    constexpr(parallelB) { C01.mac(A0, B1); }
+                                if
+                                    constexpr(parallelA) { C10.mac(A1, B0); }
+                                if
+                                    constexpr(parallelA && parallelB) { C11.mac(A1, B1); }
+                            }
                         }
 
                     if
@@ -337,7 +454,9 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_AB_RANGE,
           unsigned int TP_DIM_B_RANGE,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_CONJ_A,
+          unsigned int TP_CONJ_B>
 NOINLINE_DECL void matrix_mult<TT_DATA_A,
                                TT_DATA_B,
                                TT_OUT_DATA,
@@ -358,9 +477,11 @@ NOINLINE_DECL void matrix_mult<TT_DATA_A,
                                TP_DIM_AB_RANGE,
                                TP_DIM_B_RANGE,
                                TP_KERNEL_POSITION,
-                               TP_CASC_LEN>::matMult(input_buffer<TT_DATA_A>& __restrict inWindowA,
-                                                     input_buffer<TT_DATA_B>& __restrict inWindowB,
-                                                     output_buffer<TT_OUT_DATA>& __restrict outWindow) {
+                               TP_CASC_LEN,
+                               TP_CONJ_A,
+                               TP_CONJ_B>::matMult(input_buffer<TT_DATA_A>& __restrict inWindowA,
+                                                   input_buffer<TT_DATA_B>& __restrict inWindowB,
+                                                   output_buffer<TT_OUT_DATA>& __restrict outWindow) {
     T_inputIF<CASC_IN_FALSE, TT_DATA_A, TT_DATA_B> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA_A, TT_DATA_B, TT_OUT_DATA> outInterface;
     inInterface.inWindowA = (void*)inWindowA.data();
@@ -390,7 +511,9 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_AB_RANGE,
           unsigned int TP_DIM_B_RANGE,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_CONJ_A,
+          unsigned int TP_CONJ_B>
 NOINLINE_DECL void matrix_mult<TT_DATA_A,
                                TT_DATA_B,
                                TT_OUT_DATA,
@@ -411,10 +534,12 @@ NOINLINE_DECL void matrix_mult<TT_DATA_A,
                                TP_DIM_AB_RANGE,
                                TP_DIM_B_RANGE,
                                TP_KERNEL_POSITION,
-                               TP_CASC_LEN>::matMult(input_buffer<TT_DATA_A>& __restrict inWindowA,
-                                                     input_buffer<TT_DATA_B>& __restrict inWindowB,
-                                                     input_cascade<accType_t<TT_DATA_A, TT_DATA_B> >* inCascade,
-                                                     output_buffer<TT_OUT_DATA>& __restrict outWindow) {
+                               TP_CASC_LEN,
+                               TP_CONJ_A,
+                               TP_CONJ_B>::matMult(input_buffer<TT_DATA_A>& __restrict inWindowA,
+                                                   input_buffer<TT_DATA_B>& __restrict inWindowB,
+                                                   input_cascade<accType_t<TT_DATA_A, TT_DATA_B> >* inCascade,
+                                                   output_buffer<TT_OUT_DATA>& __restrict outWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA_A, TT_DATA_B> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA_A, TT_DATA_B, TT_OUT_DATA> outInterface;
     inInterface.inWindowA = (void*)inWindowA.data();
@@ -445,7 +570,9 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_AB_RANGE,
           unsigned int TP_DIM_B_RANGE,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_CONJ_A,
+          unsigned int TP_CONJ_B>
 NOINLINE_DECL void matrix_mult<TT_DATA_A,
                                TT_DATA_B,
                                TT_OUT_DATA,
@@ -466,9 +593,11 @@ NOINLINE_DECL void matrix_mult<TT_DATA_A,
                                TP_DIM_AB_RANGE,
                                TP_DIM_B_RANGE,
                                TP_KERNEL_POSITION,
-                               TP_CASC_LEN>::matMult(input_buffer<TT_DATA_A>& __restrict inWindowA,
-                                                     input_buffer<TT_DATA_B>& __restrict inWindowB,
-                                                     output_cascade<accType_t<TT_DATA_A, TT_DATA_B> >* outCascade) {
+                               TP_CASC_LEN,
+                               TP_CONJ_A,
+                               TP_CONJ_B>::matMult(input_buffer<TT_DATA_A>& __restrict inWindowA,
+                                                   input_buffer<TT_DATA_B>& __restrict inWindowB,
+                                                   output_cascade<accType_t<TT_DATA_A, TT_DATA_B> >* outCascade) {
     T_inputIF<CASC_IN_FALSE, TT_DATA_A, TT_DATA_B> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA_A, TT_DATA_B, TT_OUT_DATA> outInterface;
     inInterface.inWindowA = (void*)inWindowA.data();
@@ -498,7 +627,9 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_AB_RANGE,
           unsigned int TP_DIM_B_RANGE,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_CONJ_A,
+          unsigned int TP_CONJ_B>
 NOINLINE_DECL void matrix_mult<TT_DATA_A,
                                TT_DATA_B,
                                TT_OUT_DATA,
@@ -519,10 +650,12 @@ NOINLINE_DECL void matrix_mult<TT_DATA_A,
                                TP_DIM_AB_RANGE,
                                TP_DIM_B_RANGE,
                                TP_KERNEL_POSITION,
-                               TP_CASC_LEN>::matMult(input_buffer<TT_DATA_A>& inWindowA,
-                                                     input_buffer<TT_DATA_B>& inWindowB,
-                                                     input_cascade<accType_t<TT_DATA_A, TT_DATA_B> >* inCascade,
-                                                     output_cascade<accType_t<TT_DATA_A, TT_DATA_B> >* outCascade) {
+                               TP_CASC_LEN,
+                               TP_CONJ_A,
+                               TP_CONJ_B>::matMult(input_buffer<TT_DATA_A>& inWindowA,
+                                                   input_buffer<TT_DATA_B>& inWindowB,
+                                                   input_cascade<accType_t<TT_DATA_A, TT_DATA_B> >* inCascade,
+                                                   output_cascade<accType_t<TT_DATA_A, TT_DATA_B> >* outCascade) {
     T_inputIF<CASC_IN_TRUE, TT_DATA_A, TT_DATA_B> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA_A, TT_DATA_B, TT_OUT_DATA> outInterface;
     inInterface.inWindowA = (void*)inWindowA.data();

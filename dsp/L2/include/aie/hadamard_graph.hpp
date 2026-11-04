@@ -134,7 +134,7 @@ class hadamard_graph : public graph {
     static_assert(TP_DIM % TP_SSR == 0, "ERROR: TP_DIM is not a multiple of TP_SSR");
 
     static constexpr unsigned int kSamplesInVectOutData =
-        TP_API == 0 ? 256 / 8 / (vectByte<TT_DATA_A, TT_DATA_B>().val_byteBuffWin)
+        TP_API == 0 ? __MAX_READ_WRITE__ / 8 / (vectByte<TT_DATA_A, TT_DATA_B>().val_byteBuffWin)
                     : (128 / 8 / (vectByte<TT_DATA_A, TT_DATA_B>().val_byteBuffStream));
 
     static constexpr int DataSizePerSSR = TP_DIM / TP_SSR;
@@ -144,9 +144,10 @@ class hadamard_graph : public graph {
     static constexpr unsigned int kBufferSize = (kKernelWindowVsize * vectByte<TT_DATA_A, TT_DATA_B>().val_byteOut);
     static_assert(kBufferSize <= __DATA_MEM_BYTES__,
                   "ERROR: TP_NUM_FRAMES*(TP_DIM/TP_SSR)*sizeof(TT_DATA) must be at no more than data memory size.");
-    static_assert(kKernelPtSize >= 16, "ERROR: TP_DIM/TP_SSR must be at least 16");
-    //     static_assert(kKernelWindowVsize * sizeof(outTypeMult_t<TT_DATA_A, TT_DATA_B>) <= __DATA_MEM_BYTES__,
-    //                   "ERROR: TP_NUM_FRAMES*(TP_DIM/TP_SSR) must be at no more than data memory size.");
+    static_assert(kKernelPtSize >= kSamplesInVectOutData,
+                  "ERROR: TP_DIM/TP_SSR must be at least 64/ByteSize(output) for AIE_ML and AIE_MLv2 devices, and "
+                  "32/ByteSize(output) for AIE1 devices.");
+
     /**
       * @endcond
       */
@@ -199,13 +200,9 @@ class hadamard_graph : public graph {
                     connect(m_kernels[i].out[0], out[i]);
                     dimensions(m_kernels[i].out[0]) = {kKernelWindowVsize};
 
-                    if
-                        constexpr(kBufferSize > __DATA_MEM_BYTES__ / 2) { // if not fitting in pinpong, use single
-                                                                          // buffer
-                            single_buffer(m_kernels[i].in[0]);
-                            single_buffer(m_kernels[i].in[1]);
-                            single_buffer(m_kernels[i].out[0]);
-                        }
+                    conditional_single_buffer<TT_DATA_A, kKernelWindowVsize>(m_kernels[i].in[0]);
+                    conditional_single_buffer<TT_DATA_B, kKernelWindowVsize>(m_kernels[i].in[1]);
+                    conditional_single_buffer<outType_t<TT_DATA_A, TT_DATA_B>, kKernelWindowVsize>(m_kernels[i].out[0]);
                 }
             else {
                 connect<stream>(inA[i], m_kernels[i].in[0]);

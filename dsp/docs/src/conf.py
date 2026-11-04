@@ -39,9 +39,9 @@ copyright = "2019-2022, Xilinx Inc. 2022-2026, Advanced Micro Devices, Inc."
 author = "AMD Inc."
 
 # The short X.Y version
-version = "2026.1"
+version = "2026.2"
 # The full version, including alpha/beta/rc tags
-release = "v2026.1"
+release = "v2026.2"
 
 
 # -- General configuration ---------------------------------------------------

@@ -321,6 +321,7 @@ class fir_interpolate_hb_graph : public graph {
             constexpr(TP_API == USE_WINDOW_API) {
                 connect<>(in[0], m_firKernels[0].in[0]);
                 dimensions(m_firKernels[0].in[0]) = {TP_INPUT_WINDOW_VSIZE};
+                conditional_single_buffer<TT_DATA, TP_INPUT_WINDOW_VSIZE>(m_firKernels[0].in[0]);
                 for (int i = 1; i < TP_CASC_LEN; i++) {
                     single_buffer(m_firKernels[i].in[0]);
                     connect<>(m_firKernels[i - 1].out[1], m_firKernels[i].in[0]);
@@ -328,11 +329,15 @@ class fir_interpolate_hb_graph : public graph {
                                                               fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()};
                     dimensions(m_firKernels[i].in[0]) = {TP_INPUT_WINDOW_VSIZE +
                                                          fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()};
+                    conditional_single_buffer<TT_DATA, TP_INPUT_WINDOW_VSIZE +
+                                                           fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()>(
+                        m_firKernels[i - 1].out[1], m_firKernels[i].in[0]);
                 }
                 if
                     constexpr(TP_DUAL_IP == DUAL_IP_DUAL) {
                         connect<>(in2[0], m_firKernels[0].in[1]);
                         dimensions(m_firKernels[0].in[1]) = {TP_INPUT_WINDOW_VSIZE};
+                        conditional_single_buffer<TT_DATA, TP_INPUT_WINDOW_VSIZE>(m_firKernels[0].in[1]);
                     }
             }
         else {
@@ -340,9 +345,11 @@ class fir_interpolate_hb_graph : public graph {
                 constexpr(TP_DUAL_IP == DUAL_IP_SINGLE) {
                     connect<>(in[0], m_firKernels[0].in[0]);
                     dimensions(m_firKernels[0].in[0]) = {TP_INPUT_WINDOW_VSIZE};
+                    conditional_single_buffer<TT_DATA, TP_INPUT_WINDOW_VSIZE>(m_firKernels[0].in[0]);
                     for (int i = 1; i < TP_CASC_LEN; i++) {
                         connect<>(in[0], m_firKernels[i].in[0]);
                         dimensions(m_firKernels[i].in[0]) = {TP_INPUT_WINDOW_VSIZE};
+                        conditional_single_buffer<TT_DATA, TP_INPUT_WINDOW_VSIZE>(m_firKernels[i].in[0]);
                     }
                 }
             else if
@@ -355,6 +362,8 @@ class fir_interpolate_hb_graph : public graph {
                     connect<>(m_inWidgetKernel.out[0], m_firKernels[0].in[0]);
                     dimensions(m_inWidgetKernel.out[0]) = {TP_INPUT_WINDOW_VSIZE};
                     dimensions(m_firKernels[0].in[0]) = {TP_INPUT_WINDOW_VSIZE};
+                    conditional_single_buffer<TT_DATA, TP_INPUT_WINDOW_VSIZE>(m_inWidgetKernel.out[0],
+                                                                              m_firKernels[0].in[0]);
                     source(m_inWidgetKernel) = "widget_api_cast.cpp";
                     headers(m_inWidgetKernel) = {"widget_api_cast.hpp"};
                     runtime<ratio>(m_inWidgetKernel) = 0.8;
@@ -366,6 +375,8 @@ class fir_interpolate_hb_graph : public graph {
                                                                   fnFirMargin<TP_FIR_LEN, TT_DATA>()};
                         dimensions(m_firKernels[i].in[0]) = {TP_INPUT_WINDOW_VSIZE +
                                                              fnFirMargin<TP_FIR_LEN, TT_DATA>()};
+                        conditional_single_buffer<TT_DATA, TP_INPUT_WINDOW_VSIZE + fnFirMargin<TP_FIR_LEN, TT_DATA>()>(
+                            m_firKernels[i - 1].out[1], m_firKernels[i].in[0]);
                     }
                 }
         }
@@ -384,6 +395,8 @@ class fir_interpolate_hb_graph : public graph {
             // out[0]);
             connect<>(m_firKernels[TP_CASC_LEN - 1].out[0], out[0]);
             dimensions(m_firKernels[TP_CASC_LEN - 1].out[0]) = {kInterpolateFactor * TP_INPUT_WINDOW_VSIZE};
+            conditional_single_buffer<TT_DATA, kInterpolateFactor * TP_INPUT_WINDOW_VSIZE>(
+                m_firKernels[TP_CASC_LEN - 1].out[0]);
         } else {
             connect<stream>(m_firKernels[TP_CASC_LEN - 1].out[0], out[0]);
         }
@@ -396,6 +409,8 @@ class fir_interpolate_hb_graph : public graph {
                         // out2[0]);
                         connect<>(m_firKernels[TP_CASC_LEN - 1].out[1], out2[0]);
                         dimensions(m_firKernels[TP_CASC_LEN - 1].out[1]) = {kInterpolateFactor * TP_INPUT_WINDOW_VSIZE};
+                        conditional_single_buffer<TT_DATA, kInterpolateFactor * TP_INPUT_WINDOW_VSIZE>(
+                            m_firKernels[TP_CASC_LEN - 1].out[1]);
                     }
                 else {
                     connect<stream>(m_firKernels[TP_CASC_LEN - 1].out[1], out2[0]);
@@ -454,10 +469,12 @@ class fir_interpolate_hb_graph : public graph {
                 else {
                     connect<>(in[i], m_ct_firKernels[i].in[0]);
                     dimensions(m_ct_firKernels[i].in[0]) = {TP_INPUT_WINDOW_VSIZE / TP_SSR};
+                    conditional_single_buffer<TT_DATA, TP_INPUT_WINDOW_VSIZE / TP_SSR>(m_ct_firKernels[i].in[0]);
                     if
                         constexpr(TP_DUAL_IP == 1) { connect<>(in2[i], m_ct_firKernels[i].in[1]); }
                     connect<>(m_ct_firKernels[i].out[0], out3[CT_SSROutputPath]);
                     dimensions(m_ct_firKernels[i].out[0]) = {TP_INPUT_WINDOW_VSIZE / TP_SSR};
+                    conditional_single_buffer<TT_DATA, TP_INPUT_WINDOW_VSIZE / TP_SSR>(m_ct_firKernels[i].out[0]);
                     if
                         constexpr(TP_NUM_OUTPUTS == 2) { connect<>(m_ct_firKernels[i].out[1], out4[CT_SSROutputPath]); }
                 }

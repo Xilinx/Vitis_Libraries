@@ -19,15 +19,20 @@ CURRENT_DIR=$1
 UUT_KERNEL=$2
 STATUS_FILE=$3
 AIE_VARIANT=$4
+STATUS_JSON=${5:-${STATUS_FILE%.txt}.json} # defaults to the status file path with a .json extension
+
+# resolve to absolute paths, as the pdm script runs from inside PWR_DIR
+STATUS_FILE=$(realpath -m "$STATUS_FILE")
+STATUS_JSON=$(realpath -m "$STATUS_JSON")
 
 PWR_DIR=./pwr_test
 VCD_DIR=${CURRENT_DIR}/${UUT_KERNEL}_sim.vcd
 
-if [ $AIE_VARIANT == 1 ]; then
+if [ "$AIE_VARIANT" == 1 ]; then
     PART="XCVC1902-VSVD1760-1LP-E-S"
-    elif [ $AIE_VARIANT == 2 ]; then
+    elif [ "$AIE_VARIANT" == 2 ]; then
     PART="XCVE2802-VSVH1760-1MP-E-S"
-    elif [ $AIE_VARIANT == 22 ]; then
+    elif [ "$AIE_VARIANT" == 22 ]; then
     PART="xc2ve3858-ssva2112-2MP-e-S"
 fi
 
@@ -46,6 +51,8 @@ try:
    from libxv_pdm_pytasks import *
 except ImportError:
     from librdi_pypdmtasks import *
+import json
+import os
 
 prj = new_project("new_proj.pdm", part="'${PART}'", process="Typ")
 prj.import_xpe("./test.xpe")
@@ -54,9 +61,21 @@ prj.export_power_design("./test_pwr.xml")
 prj.export_xdc("./test_xdc.xdc")
 dyn_pwr=prj.dynamic_power
 prj.close()
-f = open(".'${STATUS_FILE}'", "a")
-f.write("    Dynamic Power:        " +  str(dyn_pwr) + " W\n")
-f.close()
+# write to whichever status files exist (txt and/or json)
+status_file = "'${STATUS_FILE}'"
+status_json = "'${STATUS_JSON}'"
+if os.path.exists(status_file):
+    f = open(status_file, "a")
+    f.write("    Dynamic Power:        " +  str(dyn_pwr) + " W\n")
+    f.close()
+if os.path.exists(status_json):
+    with open(status_json, "r") as f:
+        status = json.load(f)
+    status.setdefault("Results", {})["dynamic power (W)"] = float(dyn_pwr)
+    with open(status_json, "w") as f:
+        json.dump(status, f, indent=4)
+if not os.path.exists(status_file) and not os.path.exists(status_json):
+    print("No status file found! Dynamic power not written.")
 exit()
 '> $PWR_DIR/pwr_analyze.py
 

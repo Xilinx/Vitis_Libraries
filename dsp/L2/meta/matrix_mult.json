@@ -486,6 +486,48 @@
                 "file": "matrix_mult.py",
                 "function": "validate_TP_SAT"
             }
+        },
+        {
+            "name": "TP_CONJ_A",
+            "type": "uint",
+            "description": "Selects whether to conjugate the elements of Matrix A before multiplication. When set to 1, the kernel computes A* x B (where A* is the element-wise complex conjugate of A). Must be 0 when TT_DATA_A is a real type (int16, int32, float); may be 0 or 1 when TT_DATA_A is complex (cint16, cint32, cfloat). TP_CONJ_A and TP_CONJ_B may be combined to compute A* x B*.",
+            "minimum": 0,
+            "maximum": 1,
+            "updater": {
+                "file": "matrix_mult.py",
+                "function": "update_TP_CONJ_A",
+                "args": [
+                    "TT_DATA_A"
+                ]
+            },
+            "validator": {
+                "file": "matrix_mult.py",
+                "function": "validate_TP_CONJ_A",
+                "args": [
+                    "TT_DATA_A"
+                ]
+            }
+        },
+        {
+            "name": "TP_CONJ_B",
+            "type": "uint",
+            "description": "Selects whether to conjugate the elements of Matrix B before multiplication. When set to 1, the kernel computes A x B* (where B* is the element-wise complex conjugate of B). Must be 0 when TT_DATA_B is a real type (int16, int32, float); may be 0 or 1 when TT_DATA_B is complex (cint16, cint32, cfloat).",
+            "minimum": 0,
+            "maximum": 1,
+            "updater": {
+                "file": "matrix_mult.py",
+                "function": "update_TP_CONJ_B",
+                "args": [
+                    "TT_DATA_B"
+                ]
+            },
+            "validator": {
+                "file": "matrix_mult.py",
+                "function": "validate_TP_CONJ_B",
+                "args": [
+                    "TT_DATA_B"
+                ]
+            }
         }
     ],
     "ports": {

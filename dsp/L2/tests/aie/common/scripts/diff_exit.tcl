@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ set logFolder "${fileDir}logs"
 set funcPassPhraseStatus "FUNC:                 1"
 
 # Find the single status file in the log folder
-set statusFiles [glob -nocomplain -directory $logFolder "status_*"]
+set statusFiles [glob -nocomplain -directory $logFolder "status_*.txt"]
 if {[llength $statusFiles] == 1} {
     set statusFile [lindex $statusFiles 0]
     # Search for funcPassPhraseStatus in the status file

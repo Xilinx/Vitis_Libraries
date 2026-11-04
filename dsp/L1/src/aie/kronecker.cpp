@@ -64,7 +64,7 @@ kronecker<TT_DATA_A,
           TP_RND,
           TP_SAT>::kronecker_main(input_buffer<TT_DATA_A>& __restrict inWindowA,
                                   input_buffer<TT_DATA_B>& __restrict inWindowB,
-                                  output_buffer<outTypeMult_t<TT_DATA_A, TT_DATA_B> >& __restrict outWindow) {
+                                  output_buffer<outType_t<TT_DATA_A, TT_DATA_B> >& __restrict outWindow) {
     using dataVectA_t = ::aie::vector<TT_DATA_A, kSamplesInVectA>;
     using dataVectB_t = ::aie::vector<TT_DATA_B, kSamplesInVectB>;
     using dataVectOut_t = ::aie::vector<out_t, kSamplesInVectOut>;

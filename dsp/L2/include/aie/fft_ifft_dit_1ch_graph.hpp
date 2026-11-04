@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -807,6 +807,12 @@ class fft_ifft_dit_1ch_base_graph : public graph {
             //      if (TP_POINT_SIZE*sizeof(TT_DATA) >= 8192) { //This would exceed data memory limits for AIE1.
             //        single_buffer(m_fftKernels[k + 1].in[0]);
             //      }
+            // conditional_single_buffer only forces single-buffering when the port's actual size already exceeds
+            // half the tile's data memory (double-buffering would already be impossible), so it does not carry the
+            // throughput cost of the fixed-threshold attempt above, which forced single-buffer above a point-size
+            // cutoff that didn't guarantee double-buffering was actually infeasible.
+            conditional_single_buffer<T_internalDataType, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(T_internalDataType)>(
+                m_fftKernels[k].out[0], m_fftKernels[k + 1].in[0]);
         }
 
 #ifdef USE_GRAPH_SCOPE
@@ -1109,8 +1115,12 @@ class fft_ifft_dit_1ch_baseports_graph : public fft_ifft_dit_1ch_base_graph<TT_D
         static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? __ALIGN_BYTE_SIZE__ : 0;
         connect(in[0], this->m_fftKernels[0].in[0]);
         dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        conditional_single_buffer<TT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)>(
+            this->m_fftKernels[0].in[0]);
         connect(this->m_fftKernels[TP_CASC_LEN - 1].out[0], out[0]);
         dimensions(this->m_fftKernels[TP_CASC_LEN - 1].out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
+        conditional_single_buffer<TT_OUT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)>(
+            this->m_fftKernels[TP_CASC_LEN - 1].out[0]);
     };
 };
 
@@ -1251,10 +1261,17 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
     fft_ifft_dit_1ch_baseports_graph() {
         connect<>(m_inWidgetKernel.out[0], this->m_fftKernels[0].in[0]);
         dimensions(m_inWidgetKernel.out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        conditional_single_buffer<TT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)>(m_inWidgetKernel.out[0]);
         dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        conditional_single_buffer<TT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)>(
+            this->m_fftKernels[0].in[0]);
         connect<>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], m_outWidgetKernel.in[0]);
         dimensions(this->m_fftKernels[TP_CASC_LEN - 1].out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
+        conditional_single_buffer<TT_OUT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)>(
+            this->m_fftKernels[TP_CASC_LEN - 1].out[0]);
         dimensions(m_outWidgetKernel.in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
+        conditional_single_buffer<TT_OUT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)>(
+            m_outWidgetKernel.in[0]);
         // Make data connections
         for (int i = 0; i < kStreamsPerTile; i++) {
             connect<stream>(in[i], m_inWidgetKernel.in[i]);
@@ -1327,6 +1344,8 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
         // Make data connections
         connect<>(in[0], this->m_fftKernels[0].in[0]);
         dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        conditional_single_buffer<TT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)>(
+            this->m_fftKernels[0].in[0]);
         connect<stream>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], out[0]);
         connect<stream>(this->m_fftKernels[TP_CASC_LEN - 1].out[1], out[1]);
     };
@@ -1393,9 +1412,15 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
         // Make data connections
         connect<>(in[0], this->m_fftKernels[0].in[0]);
         dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        conditional_single_buffer<TT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)>(
+            this->m_fftKernels[0].in[0]);
         connect<>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], m_outWidgetKernel.in[0]);
         dimensions(this->m_fftKernels[TP_CASC_LEN - 1].out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
+        conditional_single_buffer<TT_OUT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)>(
+            this->m_fftKernels[TP_CASC_LEN - 1].out[0]);
         dimensions(m_outWidgetKernel.in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
+        conditional_single_buffer<TT_OUT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)>(
+            m_outWidgetKernel.in[0]);
         connect<stream>(this->m_outWidgetKernel.out[0], out[0]);
         connect<stream>(this->m_outWidgetKernel.out[1], out[1]);
 
@@ -1462,6 +1487,8 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
         // Make data connections
         connect<>(in[0], this->m_fftKernels[0].in[0]);
         dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        conditional_single_buffer<TT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)>(
+            this->m_fftKernels[0].in[0]);
         connect<cascade>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], out[0]);
         connect<stream>(this->m_fftKernels[TP_CASC_LEN - 1].out[1], out[1]);
     };
@@ -1526,9 +1553,15 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
         // Make data connections
         connect<>(in[0], this->m_fftKernels[0].in[0]);
         dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        conditional_single_buffer<TT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)>(
+            this->m_fftKernels[0].in[0]);
         connect<>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], m_outWidgetKernel.in[0]);
         dimensions(this->m_fftKernels[TP_CASC_LEN - 1].out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
+        conditional_single_buffer<TT_OUT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)>(
+            this->m_fftKernels[TP_CASC_LEN - 1].out[0]);
         dimensions(m_outWidgetKernel.in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
+        conditional_single_buffer<TT_OUT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)>(
+            m_outWidgetKernel.in[0]);
         connect<cascade>(m_outWidgetKernel.out[0], out[0]);
         connect<stream>(m_outWidgetKernel.out[1], out[1]);
 
@@ -1595,6 +1628,8 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
         // Make data connections
         connect<>(in[0], this->m_fftKernels[0].in[0]);
         dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        conditional_single_buffer<TT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)>(
+            this->m_fftKernels[0].in[0]);
         connect<stream>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], out[0]);
         connect<cascade>(this->m_fftKernels[TP_CASC_LEN - 1].out[1], out[1]);
     };
@@ -1659,9 +1694,15 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
         // Make data connections
         connect<>(in[0], this->m_fftKernels[0].in[0]);
         dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        conditional_single_buffer<TT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)>(
+            this->m_fftKernels[0].in[0]);
         connect<>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], m_outWidgetKernel.in[0]);
         dimensions(this->m_fftKernels[TP_CASC_LEN - 1].out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
+        conditional_single_buffer<TT_OUT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)>(
+            this->m_fftKernels[TP_CASC_LEN - 1].out[0]);
         dimensions(m_outWidgetKernel.in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
+        conditional_single_buffer<TT_OUT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)>(
+            m_outWidgetKernel.in[0]);
         connect<stream>(m_outWidgetKernel.out[0], out[0]);
         connect<cascade>(m_outWidgetKernel.out[1], out[1]);
 
@@ -1799,10 +1840,17 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
         connect<stream>(in[0], m_inWidgetKernel.in[0]);
         connect<>(m_inWidgetKernel.out[0], this->m_fftKernels[0].in[0]);
         dimensions(m_inWidgetKernel.out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        conditional_single_buffer<TT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)>(m_inWidgetKernel.out[0]);
         dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        conditional_single_buffer<TT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)>(
+            this->m_fftKernels[0].in[0]);
         connect<>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], m_outWidgetKernel.in[0]);
         dimensions(m_outWidgetKernel.in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
+        conditional_single_buffer<TT_OUT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)>(
+            m_outWidgetKernel.in[0]);
         dimensions(this->m_fftKernels[TP_CASC_LEN - 1].out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
+        conditional_single_buffer<TT_OUT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)>(
+            this->m_fftKernels[TP_CASC_LEN - 1].out[0]);
         connect<cascade>(m_outWidgetKernel.out[0], out[0]);
         connect<stream>(m_outWidgetKernel.out[1], out[1]);
 
@@ -1943,10 +1991,17 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
         connect<stream>(in[0], m_inWidgetKernel.in[0]);
         connect<>(m_inWidgetKernel.out[0], this->m_fftKernels[0].in[0]);
         dimensions(m_inWidgetKernel.out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        conditional_single_buffer<TT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)>(m_inWidgetKernel.out[0]);
         dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        conditional_single_buffer<TT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)>(
+            this->m_fftKernels[0].in[0]);
         connect<>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], m_outWidgetKernel.in[0]);
         dimensions(this->m_fftKernels[TP_CASC_LEN - 1].out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
+        conditional_single_buffer<TT_OUT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)>(
+            this->m_fftKernels[TP_CASC_LEN - 1].out[0]);
         dimensions(m_outWidgetKernel.in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)};
+        conditional_single_buffer<TT_OUT_DATA, TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_OUT_DATA)>(
+            m_outWidgetKernel.in[0]);
         connect<stream>(m_outWidgetKernel.out[0], out[0]);
         connect<cascade>(m_outWidgetKernel.out[1], out[1]);
 
@@ -2413,6 +2468,8 @@ class fft_ifft_dit_1ch_graph : public graph {
                         connect<>(m_combInKernel[i].out[0], m_r2Comb[i].in[0]);
                         dimensions(m_combInKernel[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
                         dimensions(m_r2Comb[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
+                        conditional_single_buffer<TT_OUT_DATA, kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)>(
+                            m_combInKernel[i].out[0], m_r2Comb[i].in[0]);
                     }
                 }
             }
@@ -2430,6 +2487,8 @@ class fft_ifft_dit_1ch_graph : public graph {
                         connect<>(m_combInKernel[i].out[0], m_r2Comb[i].in[0]);
                         dimensions(m_combInKernel[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
                         dimensions(m_r2Comb[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
+                        conditional_single_buffer<TT_OUT_DATA, kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)>(
+                            m_combInKernel[i].out[0], m_r2Comb[i].in[0]);
                     }
                 } else { // bottom half
                     if
@@ -2443,6 +2502,8 @@ class fft_ifft_dit_1ch_graph : public graph {
                         connect<>(m_combInKernel[i].out[0], m_r2Comb[i].in[0]);
                         dimensions(m_combInKernel[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
                         dimensions(m_r2Comb[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
+                        conditional_single_buffer<TT_OUT_DATA, kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)>(
+                            m_combInKernel[i].out[0], m_r2Comb[i].in[0]);
                     }
                 }
             }
@@ -2463,6 +2524,8 @@ class fft_ifft_dit_1ch_graph : public graph {
                         connect<>(m_r2Comb[i].out[0], m_combOutKernel[i].in[0]);
                         dimensions(m_r2Comb[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
                         dimensions(m_combOutKernel[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
+                        conditional_single_buffer<TT_OUT_DATA, kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)>(
+                            m_r2Comb[i].out[0], m_combOutKernel[i].in[0]);
                         connect<stream>(m_combOutKernel[i].out[0], out[i]);
                         if (kStreamsPerTile == 2) {
                             connect<stream>(m_combOutKernel[i].out[1], out[i + kParallel_factor]);
@@ -2473,6 +2536,8 @@ class fft_ifft_dit_1ch_graph : public graph {
                 for (int i = 0; i < kParallel_factor; i++) {
                     connect<>(m_r2Comb[i].out[0], out[i]);
                     dimensions(m_r2Comb[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
+                    conditional_single_buffer<TT_OUT_DATA, kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)>(
+                        m_r2Comb[i].out[0]);
                 }
             }
         } else { // not top level, so outputs are internal trellis connections
@@ -2488,6 +2553,8 @@ class fft_ifft_dit_1ch_graph : public graph {
                         connect(m_r2Comb[i].out[0], m_combOutKernel[i].in[0]);
                         dimensions(m_r2Comb[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
                         dimensions(m_combOutKernel[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
+                        conditional_single_buffer<TT_OUT_DATA, kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)>(
+                            m_r2Comb[i].out[0], m_combOutKernel[i].in[0]);
                         connect<stream>(m_combOutKernel[i].out[0], out[i]);
                         connect<stream>(m_combOutKernel[i].out[1], out[i + kParallel_factor]);
                     }
@@ -2504,6 +2571,8 @@ class fft_ifft_dit_1ch_graph : public graph {
                             connect(m_r2Comb[i].out[0], m_combOutKernel[i].in[0]);
                             dimensions(m_r2Comb[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
                             dimensions(m_combOutKernel[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
+                            conditional_single_buffer<TT_OUT_DATA, kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)>(
+                                m_r2Comb[i].out[0], m_combOutKernel[i].in[0]);
                             connect<cascade>(m_combOutKernel[i].out[0], out[i]);
                             connect<stream>(m_combOutKernel[i].out[1], out[i + kParallel_factor]);
                         }
@@ -2517,6 +2586,8 @@ class fft_ifft_dit_1ch_graph : public graph {
                             connect(m_r2Comb[i].out[0], m_combOutKernel[i].in[0]);
                             dimensions(m_r2Comb[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
                             dimensions(m_combOutKernel[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)};
+                            conditional_single_buffer<TT_OUT_DATA, kWindowSize + kHeaderBytes / sizeof(TT_OUT_DATA)>(
+                                m_r2Comb[i].out[0], m_combOutKernel[i].in[0]);
                             connect<stream>(m_combOutKernel[i].out[0], out[i]);
                             connect<cascade>(m_combOutKernel[i].out[1], out[i + kParallel_factor]);
                         }

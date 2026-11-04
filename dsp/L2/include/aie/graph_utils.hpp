@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ The file captures the definition of the graph utilities commonly used across var
 
 #include <adf.h>
 #include <vector>
+#include "device_defs.h"
 
 namespace xf {
 namespace dsp {
@@ -85,6 +86,40 @@ using port_array = typename std::array<port<DIRECTION>, SIZE>;
 template <typename DIRECTION, bool Condition, unsigned int SIZE>
 using port_conditional_array =
     typename std::conditional<Condition, port_array<DIRECTION, SIZE>, std::array<no_port, SIZE> >::type;
+
+//--------------------------------------------------------------------------------------------------
+// fn_exceeds_half_data_mem / conditional_single_buffer
+//--------------------------------------------------------------------------------------------------
+/**
+ * @ingroup graph_utils
+ *
+ * @brief Returns true when a buffer of NUM_SAMPLES elements of type TT_DATA would occupy more
+ * than half of the device's data memory module, in which case double-buffering that port is
+ * infeasible and single_buffer() must be applied.
+ * @tparam TT_DATA the sample data type carried by the port.
+ * @tparam NUM_SAMPLES number of samples the port's buffer will hold (as passed to dimensions()).
+ */
+template <typename TT_DATA, unsigned int NUM_SAMPLES>
+static constexpr bool fn_exceeds_half_data_mem() {
+    return (NUM_SAMPLES * sizeof(TT_DATA)) > (__DATA_MEM_BYTES__ / 2);
+}
+
+/**
+ * @ingroup graph_utils
+ *
+ * @brief Applies single_buffer() to one or more ports when their buffer size (NUM_SAMPLES elements
+ * of type TT_DATA) exceeds half of the device's data memory module. Otherwise a no-op, leaving the
+ * ADF default (double buffering) in place.
+ * @tparam TT_DATA the sample data type carried by the port(s).
+ * @tparam NUM_SAMPLES number of samples the port's buffer will hold.
+ * @param ports one or more ADF ports that share this sizing decision (e.g. a tiler's in/out ports
+ * and the downstream kernel's in port, which must agree on single-vs-double buffering together).
+ */
+template <typename TT_DATA, unsigned int NUM_SAMPLES, typename... Ports>
+static void conditional_single_buffer(Ports&... ports) {
+    if
+        constexpr(fn_exceeds_half_data_mem<TT_DATA, NUM_SAMPLES>()) { (single_buffer(ports), ...); }
+}
 }
 }
 } // namespace braces

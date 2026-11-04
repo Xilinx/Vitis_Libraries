@@ -24,13 +24,14 @@ this file does not contain any vector types or intrinsics since it is required f
 and therefore must be suitable for the aie compiler graph-level compilation.
 */
 
-#include "single_mul_out_types.hpp"
-#include "single_mul_acc_types.hpp"
+#include "promotions_mul.hpp"
 
 namespace xf {
 namespace dsp {
 namespace aie {
 namespace outer_tensor {
+
+using namespace ::xf::dsp::aie::promotions_mul;
 
 template <typename outType>
 INLINE_DECL constexpr unsigned int getUnrollBudget() {

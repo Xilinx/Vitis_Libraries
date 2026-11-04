@@ -39,14 +39,14 @@ def render_header(ip, chosen_model, train_df, test_df, git_hash, param_cols=None
     date_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     n_train = len(train_df) if train_df is not None else "N/A"
     n_test  = len(test_df)  if test_df  is not None else "N/A"
-    model_type = modelled_params = unmodelled_params = features_in = "N/A"
+    model_type = modelled_cols_str = unmodelled_cols_str = features_processed = "N/A"
     if chosen_model:
         model_type = chosen_model.__class__.__name__ if chosen_model else "N/A"
         modelled_cols       = chosen_model.independent_cols
         unmodelled_cols     = [p for p in param_cols if p not in modelled_cols]
         modelled_cols_str   = ', '.join(modelled_cols)
         unmodelled_cols_str = ', '.join(unmodelled_cols) if unmodelled_cols else "None"
-        features_processed  = chosen_model.model.n_features_in_
+        features_processed  = next(iter(chosen_model.models.values())).n_features_in_
     return f"""
         <h1>QoR Model Report</h1>
         <table>
@@ -253,14 +253,19 @@ def render_actual_vs_predicted(train_df, test_df, model_params, chosen_model):
     baseline.fit(X_train, y_train)
 
     # --- Training metrics for chosen model (smoke test) ---
+    def _metrics_row(dep, truth, pred):
+        mask  = (truth > 0).to_numpy()
+        truth = truth.to_numpy()[mask]
+        pred  = pred.to_numpy()[mask]
+        return (
+            f"<tr><td>{dep}</td>"
+            f"<td>{r2_score(truth, pred):.3f}</td>"
+            f"<td>{mean_absolute_percentage_error(truth, pred) * 100:.1f}%</td>"
+            f"<td>{median_absolute_percentage_error(truth, pred) * 100:.1f}%</td></tr>"
+        )
+
     y_train_pred = chosen_model.predict(X_train)
-    train_rows = ''.join(
-        f"<tr><td>{dep}</td>"
-        f"<td>{r2_score(y_train[dep], y_train_pred[dep]):.3f}</td>"
-        f"<td>{mean_absolute_percentage_error(y_train[dep], y_train_pred[dep]) * 100:.1f}%</td>"
-        f"<td>{median_absolute_percentage_error(y_train[dep], y_train_pred[dep]) * 100:.1f}%</td></tr>"
-        for dep in dependent_cols
-    )
+    train_rows = ''.join(_metrics_row(dep, y_train[dep], y_train_pred[dep]) for dep in dependent_cols)
     train_table = f"""
         <p><b>{chosen_model.__class__.__name__} — Performance on Training Data (Overfit)</b></p>
         <table border='1' cellpadding='4' cellspacing='0'>
@@ -282,26 +287,31 @@ def render_actual_vs_predicted(train_df, test_df, model_params, chosen_model):
         (chosen_model,  f'{chosen_model.__class__.__name__} Model on Test Data'),
     ]
 
-    blurb = "<p><i>Axes are in transformed log space. Metrics are in original units.</i></p>"
+    blurb = "<p><i>Axes are in each column's model space (log_transform then StandardScaler). Metrics are in original units.</i></p>"
     figures_html = []
     for model, row_title in models_labels:
-        y_pred   = model.predict(X_test)
-        y_test_t = np.log(y_test.values + 1)
-        y_pred_t = np.log(y_pred.values + 1)
+        y_pred = model.predict(X_test)
 
-        subplot_titles = [
-            f'{dep}<br>R²={r2_score(y_test[dep], y_pred[dep]):.3f}  '
-            f'MAPE={mean_absolute_percentage_error(y_test[dep], y_pred[dep]) * 100:.1f}%  '
-            f'MdAPE={median_absolute_percentage_error(y_test[dep], y_pred[dep]) * 100:.1f}%'
-            for dep in dependent_cols
-        ]
+        subplot_titles = []
+        col_masks = {}
+        for dep in dependent_cols:
+            mask = (y_test[dep] > 0).to_numpy()
+            col_masks[dep] = mask
+            truth = y_test[dep].to_numpy()[mask]
+            pred  = y_pred[dep].to_numpy()[mask]
+            subplot_titles.append(
+                f'{dep}<br>R²={r2_score(truth, pred):.3f}  '
+                f'MAPE={mean_absolute_percentage_error(truth, pred) * 100:.1f}%  '
+                f'MdAPE={median_absolute_percentage_error(truth, pred) * 100:.1f}%'
+            )
 
         fig = make_subplots(rows=1, cols=n_deps, subplot_titles=subplot_titles)
         for col_idx in range(1, n_deps + 1):
             dep       = dependent_cols[col_idx - 1]
             color     = colors[(col_idx - 1) % len(colors)]
-            actual    = y_test_t[:, col_idx - 1]
-            predicted = y_pred_t[:, col_idx - 1]
+            mask      = col_masks[dep]
+            actual    = model.y_process_pipes[dep].transform(y_test[[dep]]).ravel()[mask]
+            predicted = model.y_process_pipes[dep].transform(y_pred[[dep]]).ravel()[mask]
             lim       = [min(actual.min(), predicted.min()), max(actual.max(), predicted.max())]
 
             hover_texts = [
@@ -309,7 +319,7 @@ def render_actual_vs_predicted(train_df, test_df, model_params, chosen_model):
                 f'----------<br>'
                 f'<b>Predicted:</b> {y_pred[dep].iloc[i]:.2f}<br>'
                 f'<b>Actual:</b> {y_test[dep].iloc[i]:.2f}'
-                for i in range(len(test_df))
+                for i in range(len(test_df)) if mask[i]
             ]
 
             fig.add_trace(go.Scatter(
@@ -342,18 +352,24 @@ def render_learning_curve(model_params, train_df, test_df, chosen_model, n_parti
     y_test = test_df[dependent_cols]
 
     n_total         = len(train_df)
-    offset          = len(test_df)  # Our smallest train partition must be >= len(test_df).
+    offset          = 0
     partition_sizes = [int(offset + (n_total - offset) * (i + 1) / n_partitions) for i in range(n_partitions)]
 
     mapes = {dep: [] for dep in dependent_cols}
     for size in partition_sizes:
         subset = train_df.iloc[:size]
-        X_preprocessed = chosen_model.preprocessor.transform(subset[independent_cols])
-        y_preprocessed = chosen_model.y_process_pipe.transform(subset[dependent_cols]) 
-        chosen_model.model.fit(X_preprocessed, y_preprocessed)
+        for dep in dependent_cols:
+            train_mask = subset[dep] > 0
+            X_preprocessed = chosen_model.preprocessor.transform(subset.loc[train_mask, independent_cols])
+            y_preprocessed = chosen_model.y_process_pipes[dep].transform(subset.loc[train_mask, [dep]])
+            chosen_model.models[dep].fit(X_preprocessed, y_preprocessed)
+
         y_pred = chosen_model.predict(X_test)
         for dep in dependent_cols:
-            mape = np.mean(np.abs((y_test[dep].values - y_pred[dep].values) / y_test[dep].values)) * 100
+            test_mask = y_test[dep] > 0
+            actual    = y_test[dep][test_mask].values
+            predicted = y_pred[dep][test_mask].values
+            mape = np.mean(np.abs((actual - predicted) / actual)) * 100
             mapes[dep].append(mape)
 
     def power_law(x, a, b, c):
@@ -428,6 +444,7 @@ def main(args):
 
     categorical_cols = model_params["categorical"]
     ordinal_cols = model_params["ordinal"]
+    independent_cols = categorical_cols + ordinal_cols
     dependent_cols = model_params["dependent"]
     restricted_params = model_params.get("restricted", {})
 
@@ -437,8 +454,6 @@ def main(args):
 
     # --- Load submitted CSV ---
     raw_df = pd.read_csv(args.submitted_csv)
-    raw_df.columns = raw_df.columns.str.upper()
-
     has_metrics = "FUNC" in raw_df.columns
 
     passed_df, failed_func_df, no_sim_df, not_steady_df, train_df, test_df = None, None, None, None, None, None
@@ -448,9 +463,9 @@ def main(args):
         failed_func_raw = raw_df[raw_df["FUNC"] == "0"].copy()
         no_sim_raw      = raw_df[raw_df["FUNC"] == "default"].copy()
 
-        passed_all      = preprocess_dataframe(passed_raw,      sampler, dependent_cols, config_translation, filter_steady_state=False)
-        failed_func_all = preprocess_dataframe(failed_func_raw, sampler, dependent_cols, config_translation, filter_steady_state=False)
-        no_sim_df       = preprocess_dataframe(no_sim_raw,      sampler, [],             config_translation, filter_steady_state=False)
+        passed_all      = preprocess_dataframe(passed_raw,      param_cols, dependent_cols, config_translation, aie_mapper)
+        failed_func_all = preprocess_dataframe(failed_func_raw, param_cols, dependent_cols, config_translation, aie_mapper)
+        no_sim_df       = preprocess_dataframe(no_sim_raw,      param_cols, [],             config_translation, aie_mapper)
 
         passed_not_steady_mask      = (passed_all[dependent_cols]      == -1).any(axis=1)
         failed_func_not_steady_mask = (failed_func_all[dependent_cols] == -1).any(axis=1)
@@ -460,17 +475,17 @@ def main(args):
         not_steady_df  = pd.concat([passed_all[passed_not_steady_mask],
                                     failed_func_all[failed_func_not_steady_mask]]).reset_index(drop=True)
 
-        train_df = pd.concat([passed_df, failed_func_df]).sort_index().reset_index(drop=True)
+        train_df = pd.concat([passed_all, failed_func_all]).sort_index().reset_index(drop=True)
 
         if args.test_csv:
             test_raw = pd.read_csv(args.test_csv)
-            test_df  = preprocess_dataframe(test_raw, sampler, dependent_cols, config_translation, filter_steady_state=True)
+            test_df  = preprocess_dataframe(test_raw, param_cols, dependent_cols, config_translation, aie_mapper)
         else:
             split    = int(0.8 * len(train_df))
             test_df  = train_df.iloc[split:].reset_index(drop=True)
             train_df = train_df.iloc[:split].reset_index(drop=True)
     else:
-        no_sim_df = preprocess_dataframe(raw_df, sampler, dependent_cols, config_translation)
+        no_sim_df = preprocess_dataframe(raw_df, param_cols, [], config_translation, aie_mapper)
 
     # --- Load and refit model on train split ---
     chosen_model = None

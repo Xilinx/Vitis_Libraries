@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -176,13 +176,17 @@ def fn_update_TP_SSR(TP_API):
 def validate_TP_SSR(args):
     TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
-    return fn_validate_ssr(TP_API, TP_SSR)
+    AIE_VARIANT = args["AIE_VARIANT"]
+    return fn_validate_ssr(TP_API, TP_SSR, AIE_VARIANT)
 
 
-def fn_validate_ssr(TP_API, TP_SSR):
+def fn_validate_ssr(TP_API, TP_SSR, AIE_VARIANT):
     param_dict = fn_update_TP_SSR(TP_API)
     TP_SSR_range = [param_dict["minimum"], param_dict["maximum"]]
-    return validate_range(TP_SSR_range, "TP_SSR", TP_SSR)
+    range_check = validate_range(TP_SSR_range, "TP_SSR", TP_SSR)
+    if range_check != isValid:
+        return range_check
+    return isValid
 
 
 #######################################################
@@ -291,7 +295,6 @@ def update_TP_WINDOW_VSIZE(args):
     TP_POINT_SIZE = args["TP_POINT_SIZE"]
     TP_SSR = args["TP_SSR"]
     TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
-
     if ("TP_WINDOW_VSIZE" in args) and args["TP_WINDOW_VSIZE"]:
         TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
     else:
@@ -573,35 +576,35 @@ def info_ports(args):
                 "out", "out", TT_DATA, TP_WINDOW_VSIZE / TP_SSR, TP_SSR, 0, TP_API
             )
     else:
-        # AIE_VARIANT=1 and TP_API=1 uses 2x ports
+        # AIE_VARIANT=1 and TP_API=1: each kernel uses 2 stream ports, TP_SSR is the kernel count
         if AIE_VARIANT == AIE:
             if TP_DYN_PT_SIZE == 0:
                 portsIn = get_port_info(
                     portname="in",
                     dir="in",
                     dataType=TT_DATA,
-                    windowVsize=TP_WINDOW_VSIZE * 2 / TP_SSR,
+                    windowVsize=TP_WINDOW_VSIZE / (2 * TP_SSR),
                     apiType="stream",
-                    vectorLength=TP_SSR,
+                    vectorLength=2 * TP_SSR,
                 )
                 portsOut = get_port_info(
                     portname="out",
                     dir="out",
                     dataType=TT_DATA,
-                    windowVsize=TP_WINDOW_VSIZE * 2 / TP_SSR,
+                    windowVsize=TP_WINDOW_VSIZE / (2 * TP_SSR),
                     apiType="stream",
-                    vectorLength=TP_SSR,
+                    vectorLength=2 * TP_SSR,
                 )
             else:
                 portsIn = get_dyn_pt_port_info(
-                    "in", "in", TT_DATA, TP_WINDOW_VSIZE * 2 / TP_SSR, TP_SSR, 0, TP_API
+                    "in", "in", TT_DATA, TP_WINDOW_VSIZE / (2 * TP_SSR), 2 * TP_SSR, 0, TP_API
                 )
                 portsOut = get_dyn_pt_port_info(
                     "out",
                     "out",
                     TT_DATA,
-                    TP_WINDOW_VSIZE * 2 / TP_SSR,
-                    TP_SSR,
+                    TP_WINDOW_VSIZE / (2 * TP_SSR),
+                    2 * TP_SSR,
                     0,
                     TP_API,
                 )
@@ -658,12 +661,14 @@ def generate_graph(graphname, args):
     TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
     TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
+    TP_RND = args["TP_RND"]
+    TP_SAT = args["TP_SAT"]
     AIE_VARIANT = args["AIE_VARIANT"]
     coeff_list = args["weights"]
-    if TP_API == API_STREAM and AIE_VARIANT == AIE:  # 2 streams per tile
-        ssr = TP_SSR // 2
-    else:
-        ssr = TP_SSR
+    # TP_SSR is the number of kernels. On AIE1 stream mode each kernel uses 2 streams per tile,
+    # so the graph has 2 * TP_SSR ports (matches fft_window_graph and the test bench).
+    kApiFactor = 2 if (TP_API == API_STREAM and AIE_VARIANT == AIE) else 1
+    numPorts = TP_SSR * kApiFactor
 
     weights = fn_get_weights_vector(TT_COEFF, coeff_list)
 
@@ -672,8 +677,9 @@ def generate_graph(graphname, args):
 class {graphname} : public adf::graph {{
 public:
   static constexpr unsigned int TP_SSR = {TP_SSR};
+  static constexpr unsigned int NUM_PORTS = {numPorts};
   template <typename dir>
-  using ssr_port_array = std::array<adf::port<dir>, TP_SSR>;
+  using ssr_port_array = std::array<adf::port<dir>, NUM_PORTS>;
 
   ssr_port_array<input> in;
   ssr_port_array<output> out;
@@ -686,14 +692,24 @@ public:
     {TP_WINDOW_VSIZE}, //TP_WINDOW_VSIZE
     {TP_SHIFT}, //TP_SHIFT
     {TP_API}, //TP_API
-    {ssr}, //TP_SSR
-    {TP_DYN_PT_SIZE} //TP_DYN_PT_SIZE
+    {TP_SSR}, //TP_SSR
+    {TP_DYN_PT_SIZE}, //TP_DYN_PT_SIZE
+    {TP_RND}, //TP_RND
+    {TP_SAT} //TP_SAT
   > fft_window;
 
+  // Constructor using weights passed as an argument
+  {graphname}(const std::array<{TT_COEFF},{TP_POINT_SIZE*(1 + TP_DYN_PT_SIZE)}>& weights) : fft_window(weights) {{
+    create_connections();
+  }}
+  // Constructor using internal weights
   {graphname}() : fft_window(weights) {{
+    create_connections();
+  }}
+  void create_connections() {{
     adf::kernel *fft_window_kernels = fft_window.getKernels();
 
-    for (int i=0; i < TP_SSR; i++) {{
+    for (int i=0; i < NUM_PORTS; i++) {{
       adf::connect<> net_in(in[i], fft_window.in[i]);
       adf::connect<> net_out(fft_window.out[i], out[i]);
     }}

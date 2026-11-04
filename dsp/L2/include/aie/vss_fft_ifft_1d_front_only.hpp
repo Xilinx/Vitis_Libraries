@@ -280,8 +280,12 @@ class vss_fft_ifft_1d_front_only : public graph {
                     }
                     connect<>(m_combInKernel[ss].out[0], frontFFTGraph[ss].in[0]);
                     dimensions(m_combInKernel[ss].out[0]) = {kWindowSizeCalc + kHeaderBytes / sizeof(TT_DATA)};
+                    conditional_single_buffer<TT_DATA, kWindowSizeCalc + kHeaderBytes / sizeof(TT_DATA)>(
+                        m_combInKernel[ss].out[0]);
                     connect<>(frontFFTGraph[ss].out[0], m_fftTwRotKernels[ss].in[0]);
                     dimensions(m_fftTwRotKernels[ss].in[0]) = {kWindowSizeCalc + kHeaderBytes / sizeof(TT_DATA)};
+                    conditional_single_buffer<TT_DATA, kWindowSizeCalc + kHeaderBytes / sizeof(TT_DATA)>(
+                        m_fftTwRotKernels[ss].in[0]);
                     for (int ii = 0; ii < kPortsPerFFT; ii++) {
                         connect<>(m_fftTwRotKernels[ss].out[ii], front_o[ss + ii * TP_SSR]);
                     }
@@ -292,9 +296,13 @@ class vss_fft_ifft_1d_front_only : public graph {
                 connect<>(front_i[ss], frontFFTGraph[ss].in[0]);
                 connect<>(frontFFTGraph[ss].out[0], m_fftTwRotKernels[ss].in[0]);
                 dimensions(m_fftTwRotKernels[ss].in[0]) = {kWindowSizeCalc + kHeaderBytes / sizeof(TT_DATA)};
+                conditional_single_buffer<TT_DATA, kWindowSizeCalc + kHeaderBytes / sizeof(TT_DATA)>(
+                    m_fftTwRotKernels[ss].in[0]);
 
                 connect<>(m_fftTwRotKernels[ss].out[0], front_o[ss]);
                 dimensions(m_fftTwRotKernels[ss].out[0]) = {kWindowSizeCalc + kHeaderBytes / sizeof(TT_DATA)};
+                conditional_single_buffer<TT_DATA, kWindowSizeCalc + kHeaderBytes / sizeof(TT_DATA)>(
+                    m_fftTwRotKernels[ss].out[0]);
             }
         }
     };

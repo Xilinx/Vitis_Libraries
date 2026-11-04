@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,9 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_B_LEADING, // = COL_MAJOR,
           unsigned int TP_DIM_OUT_LEADING,
           unsigned int TP_INPUT_WINDOW_VSIZE_A, // = TP_DIM_A*TP_DIM_AB,
-          unsigned int TP_INPUT_WINDOW_VSIZE_B  // = TP_DIM_B*TP_DIM_AB
+          unsigned int TP_INPUT_WINDOW_VSIZE_B, // = TP_DIM_B*TP_DIM_AB
+          unsigned int TP_CONJ_A,               // = 0
+          unsigned int TP_CONJ_B                // = 0
           >
 void matrix_mult_ref<TT_DATA_A,
                      TT_DATA_B,
@@ -55,9 +57,11 @@ void matrix_mult_ref<TT_DATA_A,
                      TP_DIM_B_LEADING,
                      TP_DIM_OUT_LEADING,
                      TP_INPUT_WINDOW_VSIZE_A,
-                     TP_INPUT_WINDOW_VSIZE_B>::mmult(input_buffer<TT_DATA_A>& inWindowA,
-                                                     input_buffer<TT_DATA_B>& inWindowB,
-                                                     output_buffer<TT_OUT_DATA>& outWindow) {
+                     TP_INPUT_WINDOW_VSIZE_B,
+                     TP_CONJ_A,
+                     TP_CONJ_B>::mmult(input_buffer<TT_DATA_A>& inWindowA,
+                                       input_buffer<TT_DATA_B>& inWindowB,
+                                       output_buffer<TT_OUT_DATA>& outWindow) {
     const unsigned int shift = TP_SHIFT;
     T_accRef<TT_OUT_DATA> accum;
     TT_DATA_A dA_in[TP_DIM_AB];
@@ -130,7 +134,9 @@ void matrix_mult_ref<TT_DATA_A,
                 accum =
                     null_accRef<TT_OUT_DATA>(); // reset accumulator at the start of the mult-add for each output sample
                 for (unsigned int j = 0; j < TP_DIM_AB; ++j) {
-                    multiplyAcc(accum, dA_in[j], dB_in[j]);
+                    TT_DATA_A a_elem = TP_CONJ_A ? conjElm(dA_in[j]) : dA_in[j];
+                    TT_DATA_B b_elem = TP_CONJ_B ? conjElm(dB_in[j]) : dB_in[j];
+                    multiplyAcc(accum, a_elem, b_elem);
                 }
                 // prior to output, the final accumulated value must be downsized to the same type
                 // as was input. To do this, the final result is rounded, saturated and shifted down

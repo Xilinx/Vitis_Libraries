@@ -661,10 +661,12 @@ def update_TP_CASC_LEN(args):
     TT_DATA = args["TT_DATA"]
     TP_POINT_SIZE = args["TP_POINT_SIZE"]
     TP_PARALLEL_POWER = args["TP_PARALLEL_POWER"]
-    return fn_update_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER)
+    TP_API = args["TP_API"]
+    TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
+    return fn_update_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER, TP_API, TP_DYN_PT_SIZE)
 
 
-def fn_update_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER):
+def fn_update_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER, TP_API, TP_DYN_PT_SIZE):
 
     # Defines how many radix-2 ranks there are in the FFT itself (subframe or main FFT).
     log2PointSize = fn_log2(TP_POINT_SIZE >> TP_PARALLEL_POWER)
@@ -674,10 +676,14 @@ def fn_update_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER
     maxTP_CASC_LEN = min(TP_CASC_LEN_max, int(NUM_STAGES))
 
     #In one particular scenario, cascade increases the memory requirement per kernel because the cascade data type is cint32 which increases memory use past the limit
-    #However, in this very particular scenario of CASC_LEN=2, 4k works out as 6 ranks of radix4 which divide into 3 per kernel. This allows the output buffer of the
-    #first kernel to be re-used as one of the internal temp buffers and for the input buffer of the second kernel to be used in a similar fashion, so this just fits.
+    #With dynamic point size, the 4k cint32 buffer between kernels plus its header exceeds the 32kB memory module, so no cascade is possible.
+    #With iobuffer I/O, the first kernel holds the ping-pong input buffer, so only CASC_LEN=2 (3 radix4 stages per kernel, output buffer re-used) is known to fit.
+    #With stream I/O, the input buffer is single, and cascade lengths up to the number of stages have been verified.
     if (AIE_VARIANT==AIE) and (TP_POINT_SIZE>>TP_PARALLEL_POWER == 4096) and (TT_DATA in ["cint16"]):
-        maxTP_CASC_LEN = 2
+        if TP_DYN_PT_SIZE == 1:
+            maxTP_CASC_LEN = 1
+        elif TP_API == 0:
+            maxTP_CASC_LEN = 2
 
     # maxTP_CASC_LEN=TP_CASC_LEN_max
 
@@ -694,12 +700,14 @@ def validate_TP_CASC_LEN(args):
     TT_DATA = args["TT_DATA"]
     TP_POINT_SIZE = args["TP_POINT_SIZE"]
     TP_PARALLEL_POWER = args["TP_PARALLEL_POWER"]
+    TP_API = args["TP_API"]
+    TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
     TP_CASC_LEN = args["TP_CASC_LEN"]
-    return fn_validate_casc_len(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER, TP_CASC_LEN)
+    return fn_validate_casc_len(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER, TP_API, TP_DYN_PT_SIZE, TP_CASC_LEN)
 
 
-def fn_validate_casc_len(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER, TP_CASC_LEN):
-    param_dict = fn_update_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER)
+def fn_validate_casc_len(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER, TP_API, TP_DYN_PT_SIZE, TP_CASC_LEN):
+    param_dict = fn_update_TP_CASC_LEN(AIE_VARIANT, TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER, TP_API, TP_DYN_PT_SIZE)
     range_TP_CASC_LEN = [param_dict["minimum"], param_dict["maximum"]]
     return validate_range(range_TP_CASC_LEN, "TP_CASC_LEN", TP_CASC_LEN)
 

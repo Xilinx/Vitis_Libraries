@@ -60,11 +60,11 @@ template <typename TT_DATA_A,
           unsigned int TP_SAT>
 class kronecker {
    private:
-    static constexpr unsigned int kSamplesInVect = 256 / 8 / sizeof(outTypeMult_t<TT_DATA_A, TT_DATA_B>);
+    static constexpr unsigned int kSamplesInVect = 256 / 8 / sizeof(outType_t<TT_DATA_A, TT_DATA_B>);
 
    public:
-    using acc_t = accTypeMult_t<TT_DATA_A, TT_DATA_B>;
-    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using acc_t = accType_t<TT_DATA_A, TT_DATA_B>;
+    using out_t = outType_t<TT_DATA_A, TT_DATA_B>;
 
     static constexpr unsigned int kSamplesInVectA = vecSampleNum<TT_DATA_A, TT_DATA_B>().A;
     static constexpr unsigned int kSamplesInVectB = vecSampleNum<TT_DATA_A, TT_DATA_B>().B;
@@ -112,11 +112,11 @@ class kronecker<TT_DATA_A,
                 TP_RND,
                 TP_SAT> {
    private:
-    static constexpr unsigned int kSamplesInVect = 256 / 8 / sizeof(outTypeMult_t<TT_DATA_A, TT_DATA_B>);
+    static constexpr unsigned int kSamplesInVect = 256 / 8 / sizeof(outType_t<TT_DATA_A, TT_DATA_B>);
 
    public:
-    using acc_t = accTypeMult_t<TT_DATA_A, TT_DATA_B>;
-    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using acc_t = accType_t<TT_DATA_A, TT_DATA_B>;
+    using out_t = outType_t<TT_DATA_A, TT_DATA_B>;
     static constexpr unsigned int sizeMatA = (TP_DIM_A_ROWS * TP_DIM_A_COLS);
     static constexpr unsigned int sizeMatB = TP_DIM_B_ROWS * TP_DIM_B_COLS;
     static constexpr unsigned int sizeMatOut = sizeMatA * sizeMatB;

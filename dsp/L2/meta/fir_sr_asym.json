@@ -263,7 +263,8 @@
           "TT_COEFF",
           "TP_FIR_LEN",
           "TP_API",
-          "TP_SSR"
+          "TP_SSR",
+          "TP_CASC_LEN"
         ]
       },
       "validator": {
@@ -275,7 +276,8 @@
           "TT_COEFF",
           "TP_FIR_LEN",
           "TP_API",
-          "TP_SSR"
+          "TP_SSR",
+          "TP_CASC_LEN"
         ]
       }
     },

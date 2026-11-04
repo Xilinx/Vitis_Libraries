@@ -1,0 +1,1111 @@
+#!/bin/bash
+#
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+rm -rf runmake_logs
+mkdir -p runmake_logs
+# We may run the script from another directory. Recursive LSF call needs correct path to script. Can't assume cwd.
+echo "Running runmake located at `readlink -f \"$0\"`" | tee ./runmake_logs/runmake.log
+pathToRunmake=$(readlink -f "$0")
+runmakeDir=$(dirname $pathToRunmake)
+args=("$@")
+echo "inputs args are: ${args[*]}" | tee -a ./runmake_logs/runmake.log
+make_args=()
+# specify the test suite to run with "runmake.sh -run_type qor>"
+run_type="checkin"
+run_tests=1
+verify_tests=1
+for i in "${!args[@]}"; do
+    if [[ "${args[$i]}" == '-h' ]]
+    then
+            echo "This script contains a number of test suites such as checkin, qor etc. These suites contain a list of commands for a specific test (currently this should be in format: make all PARAM=PARAM_VALUE...)"
+            echo "All the tests in the specified suite are converted into a multi_params.json file which can then be used to run tests"
+            echo "Options:"
+            echo "   -run_type checkin | qor | commslib | randomized ## Specifies which test suite to use)"
+            echo "          (Use "-run_type jenkins" to create multi_params.json file containing PR, checkin, and qor tests."
+            echo "   -make_arg <MAKE_ARG>=<VALUE> ## used to add an argument to all tests list in the suite. For example, "-add_make TARGET=x86sim""
+            echo "   -no_test_run ## creates multi_params file but does not run tests."
+            echo ""
+            echo "Example Usage:"
+            echo "  runmake.sh -run_type qor                                (creates multi_params_qor.json, and runs all qor tests)"
+            echo "  runmake.sh -run_type qor -make_arg TARGET=x86sim    (appends TARGET=x86sim to all tests, creates multi_params_qor.json, and runs all qor tests)"
+            echo "  runmake.sh -run_type qor -no_test_run                   (creates multi_params_qor.json, but does not run tests)"
+            echo "  runmake.sh -run_type jenkins                            (creates multi_params.json. This will include all canary test, PR tests, checkin(daily), and qor)"
+
+            exit 0
+    fi
+    if [[ "${args[$i]}" == '-run_type' ]]
+    then
+        run_type=${args[($i+1)]}
+    fi
+    if [[ "${args[$i]}" == '-make_arg' ]]
+    then
+        echo "Make args will be passed directly to any make commands. The following will be used: ${args[($i+1)]}"  | tee -a ./runmake_logs/runmake.log
+        make_args[${#make_args[*]}]=${args[($i+1)]}
+    fi
+    # use this option if you do not want to run tests of the generated multi_params
+    if [[ "${args[$i]}" == '-no_test_run' ]]
+    then
+        run_tests=0
+    fi
+    # use this option if you do not want to verify tests of the generated multi_params
+    if [[ "${args[$i]}" == '-no_test_verify' ]]
+    then
+        verify_tests=0
+    fi
+done
+
+test_arr=()
+
+if [[ "$*" == *smoke* ]]
+then
+    test_arr[$LINENO]="make all AIE_VARIANT=1 "
+    test_arr[$LINENO]="make all AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all AIE_VARIANT=22 "
+fi
+
+if [[ "$*" == *smoke* ]]
+then
+# POINT_SIZE=16
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=10 NITER=8 "
+fi
+
+if [[ "$*" == *pkt_switch* || "$*" == *checkin* || "$*" == *qor* ]]
+then
+    test_arr[$LINENO]="make all AIE_VARIANT=1 USE_PKT_SWITCHING=0 POINT_SIZE=64 CASC_LEN=1 UUT_SSR=1"
+    test_arr[$LINENO]="make all AIE_VARIANT=1 USE_PKT_SWITCHING=0 POINT_SIZE=64 CASC_LEN=1 UUT_SSR=4"
+    test_arr[$LINENO]="make all AIE_VARIANT=1 USE_PKT_SWITCHING=0 POINT_SIZE=64 CASC_LEN=2 UUT_SSR=1"
+    test_arr[$LINENO]="make all AIE_VARIANT=1 USE_PKT_SWITCHING=0 POINT_SIZE=64 CASC_LEN=2 UUT_SSR=4"
+
+    # test_arr[$LINENO]="make all AIE_VARIANT=1 USE_PKT_SWITCHING=1 NPORT_I=1 NPORT_O=1 POINT_SIZE=64 CASC_LEN=1 UUT_SSR=1"
+    # test_arr[$LINENO]="make all AIE_VARIANT=1 USE_PKT_SWITCHING=1 NPORT_I=1 NPORT_O=1 POINT_SIZE=64 CASC_LEN=1 UUT_SSR=4"
+    # test_arr[$LINENO]="make all AIE_VARIANT=1 USE_PKT_SWITCHING=1 NPORT_I=1 NPORT_O=1 POINT_SIZE=64 CASC_LEN=2 UUT_SSR=1"
+    # test_arr[$LINENO]="make all AIE_VARIANT=1 USE_PKT_SWITCHING=1 NPORT_I=1 NPORT_O=1 POINT_SIZE=64 CASC_LEN=2 UUT_SSR=4"
+
+    test_arr[$LINENO]="make all AIE_VARIANT=1 USE_PKT_SWITCHING=2 NPORT_I=1 NPORT_O=1 POINT_SIZE=64 CASC_LEN=1 UUT_SSR=1"
+    test_arr[$LINENO]="make all AIE_VARIANT=1 USE_PKT_SWITCHING=2 NPORT_I=1 NPORT_O=1 POINT_SIZE=64 CASC_LEN=1 UUT_SSR=4"
+    test_arr[$LINENO]="make all AIE_VARIANT=1 USE_PKT_SWITCHING=2 NPORT_I=1 NPORT_O=1 POINT_SIZE=64 CASC_LEN=2 UUT_SSR=1"
+    test_arr[$LINENO]="make all AIE_VARIANT=1 USE_PKT_SWITCHING=2 NPORT_I=1 NPORT_O=1 POINT_SIZE=64 CASC_LEN=2 UUT_SSR=4"
+fi
+
+if [[ "$*" == *single_buf*  || "$*" == *qor*  || "$*" == *checkin* ]]
+then
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=1  FFT_NIFFT=0 SHIFT=0  NITER=8 SINGLE_BUF=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64   CASC_LEN=1  UUT_SSR=2  NUM_FRAMES=1  FFT_NIFFT=0 SHIFT=0  NITER=8 SINGLE_BUF=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=128  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=1  FFT_NIFFT=0 SHIFT=0  NITER=8 SINGLE_BUF=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64   CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=1  FFT_NIFFT=0 SHIFT=0  NITER=8 SINGLE_BUF=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64   CASC_LEN=8  UUT_SSR=1  NUM_FRAMES=1  FFT_NIFFT=0 SHIFT=0  NITER=8 SINGLE_BUF=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=128  CASC_LEN=4  UUT_SSR=4  NUM_FRAMES=1  FFT_NIFFT=0 SHIFT=0  NITER=8 SINGLE_BUF=1"
+
+fi
+
+if [[ "$*" == *checkin* ]]
+then
+# POINT_SIZE=16
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=16  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=0  NITER=8 "
+        # with NUM_FRAMES
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=16   FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=16   FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=16  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=16   FFT_NIFFT=0 SHIFT=0  NITER=8 "
+        # with ssr
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=16  CASC_LEN=1  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 "
+        # with awkward ssr
+    # test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=3  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=3  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=16  CASC_LEN=1  UUT_SSR=3  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 "
+        # with cascades
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=16  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 "
+
+# POINT_SIZE=32
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=0  NITER=8 "
+        # with NUM_FRAMES
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=2  UUT_SSR=1  NUM_FRAMES=16   FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=2  UUT_SSR=1  NUM_FRAMES=16   FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32  CASC_LEN=2  UUT_SSR=1  NUM_FRAMES=16   FFT_NIFFT=0 SHIFT=0  NITER=8 "
+        # with ssr
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 "
+        # with awkward ssr
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=1  UUT_SSR=3  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=1  UUT_SSR=3  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32  CASC_LEN=1  UUT_SSR=3  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 "
+        # with cascades
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 "
+
+# POINT_SIZE=64
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=4  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=4  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64  CASC_LEN=4  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=0  NITER=8 "
+        # with NUM_FRAMES
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 "
+        # with ssr
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 "
+        # with ssr
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=1  UUT_SSR=5  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=1  UUT_SSR=5  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64  CASC_LEN=1  UUT_SSR=5  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 "
+        # with cascades
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=2  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=2  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64  CASC_LEN=2  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 "
+
+# POINT_SIZE=128
+        # with NUM_FRAMES
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=128  CASC_LEN=2  UUT_SSR=8  NUM_FRAMES=4   FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=128  CASC_LEN=2  UUT_SSR=8  NUM_FRAMES=4   FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=128  CASC_LEN=2  UUT_SSR=8  NUM_FRAMES=4   FFT_NIFFT=0 SHIFT=0  NITER=8 "
+        # with cascade
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=128  CASC_LEN=4  UUT_SSR=4  NUM_FRAMES=4   FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=128  CASC_LEN=4  UUT_SSR=4  NUM_FRAMES=4   FFT_NIFFT=0 SHIFT=10 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=128  CASC_LEN=4  UUT_SSR=4  NUM_FRAMES=4   FFT_NIFFT=0 SHIFT=0  NITER=8 "
+
+################################################################ AIE-ML#############################################################################################
+# POINT_SIZE=16
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=16  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=0  NITER=8 AIE_VARIANT=2 "
+        # with NUM_FRAMES
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=16   FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=16   FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=16  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=16   FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=2 "
+        # with ssr
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=16  CASC_LEN=1  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=2 "
+        # with awkward ssr
+    # test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=3  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=3 NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=16  CASC_LEN=1  UUT_SSR=3  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=2 "
+        # with cascades
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=16  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=2 "
+
+# POINT_SIZE=32
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=0  NITER=8 AIE_VARIANT=2 "
+        # with NUM_FRAMES
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=2  UUT_SSR=1  NUM_FRAMES=16   FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=2  UUT_SSR=1  NUM_FRAMES=16   FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32  CASC_LEN=2  UUT_SSR=1  NUM_FRAMES=16   FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=2 "
+        # with ssr
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=2 "
+        # with awkward ssr
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=1  UUT_SSR=3  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=1  UUT_SSR=3  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32  CASC_LEN=1  UUT_SSR=3  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=2 "
+        # with cascades
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=2 "
+
+# POINT_SIZE=64
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=4  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=4  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64  CASC_LEN=4  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=0  NITER=8 AIE_VARIANT=2 "
+        # with NUM_FRAMES
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=2 "
+        # with ssr
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=2 "
+        # with awkward ssr
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=1  UUT_SSR=5  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=1  UUT_SSR=5  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64  CASC_LEN=1  UUT_SSR=5  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=2 "
+        # with cascades
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=2  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=2  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64  CASC_LEN=2  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=2 "
+
+# POINT_SIZE=128
+        # with NUM_FRAMES
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=128  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=1   FFT_NIFFT=1 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=128  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=1   FFT_NIFFT=1 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=128  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=1   FFT_NIFFT=1 SHIFT=0  NITER=8 AIE_VARIANT=2 "
+        # with ssr
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=128  CASC_LEN=1  UUT_SSR=8  NUM_FRAMES=4   FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=128  CASC_LEN=1  UUT_SSR=8  NUM_FRAMES=4   FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=128  CASC_LEN=1  UUT_SSR=8  NUM_FRAMES=4   FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=2 "
+        # with awkward ssr
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=128  CASC_LEN=1  UUT_SSR=12  NUM_FRAMES=4   FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=128  CASC_LEN=1  UUT_SSR=12  NUM_FRAMES=4   FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=128  CASC_LEN=1  UUT_SSR=12  NUM_FRAMES=4   FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=2 "
+        # with cascade
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=128  CASC_LEN=4  UUT_SSR=4  NUM_FRAMES=4   FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=128  CASC_LEN=4  UUT_SSR=4  NUM_FRAMES=4   FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=2 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=128  CASC_LEN=4  UUT_SSR=4  NUM_FRAMES=4   FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=2 "
+
+################################################################ AIE-ML#############################################################################################
+# POINT_SIZE=16
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=16  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=0  NITER=8 AIE_VARIANT=22 "
+        # with NUM_FRAMES
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=16   FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=16   FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=16  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=16   FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=22 "
+        # with ssr
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=16  CASC_LEN=1  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=22 "
+        # with awkward ssr
+    # test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=3  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=1  UUT_SSR=3 NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=16  CASC_LEN=1  UUT_SSR=3  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=22 "
+        # with cascades
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=16  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=22 "
+
+# POINT_SIZE=32
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32  CASC_LEN=1  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=0  NITER=8 AIE_VARIANT=22 "
+        # with NUM_FRAMES
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=2  UUT_SSR=1  NUM_FRAMES=16   FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=2  UUT_SSR=1  NUM_FRAMES=16   FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32  CASC_LEN=2  UUT_SSR=1  NUM_FRAMES=16   FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=22 "
+        # with ssr
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=22 "
+        # with awkward ssr
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=1  UUT_SSR=3  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=1  UUT_SSR=3  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32  CASC_LEN=1  UUT_SSR=3  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=22 "
+        # with cascades
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=22 "
+
+# POINT_SIZE=64
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=4  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=4  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64  CASC_LEN=4  UUT_SSR=1  NUM_FRAMES=1    FFT_NIFFT=1 SHIFT=0  NITER=8 AIE_VARIANT=22 "
+        # with NUM_FRAMES
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=22 "
+        # with ssr
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64  CASC_LEN=2  UUT_SSR=2  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=22 "
+        # with awkward ssr
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=1  UUT_SSR=5  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=1  UUT_SSR=5  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64  CASC_LEN=1  UUT_SSR=5  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=22 "
+        # with cascades
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=2  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64  CASC_LEN=2  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64  CASC_LEN=2  UUT_SSR=4  NUM_FRAMES=8    FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=22 "
+
+# POINT_SIZE=128
+        # with NUM_FRAMES
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=128  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=1   FFT_NIFFT=1 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=128  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=1   FFT_NIFFT=1 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=128  CASC_LEN=1  UUT_SSR=4  NUM_FRAMES=1   FFT_NIFFT=1 SHIFT=0  NITER=8 AIE_VARIANT=22 "
+        # with ssr
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=128  CASC_LEN=1  UUT_SSR=8  NUM_FRAMES=4   FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=128  CASC_LEN=1  UUT_SSR=8  NUM_FRAMES=4   FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=128  CASC_LEN=1  UUT_SSR=8  NUM_FRAMES=4   FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=22 "
+        # with awkward ssr
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=128  CASC_LEN=1  UUT_SSR=12  NUM_FRAMES=4   FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=128  CASC_LEN=1  UUT_SSR=12  NUM_FRAMES=4   FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=128  CASC_LEN=1  UUT_SSR=12  NUM_FRAMES=4   FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=22 "
+        # with cascade
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=128  CASC_LEN=4  UUT_SSR=4  NUM_FRAMES=4   FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=128  CASC_LEN=4  UUT_SSR=4  NUM_FRAMES=4   FFT_NIFFT=0 SHIFT=10 NITER=8 AIE_VARIANT=22 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=128  CASC_LEN=4  UUT_SSR=4  NUM_FRAMES=4   FFT_NIFFT=0 SHIFT=0  NITER=8 AIE_VARIANT=22 "
+
+    # Test POINT_SIZE minimum
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=5   FFT_NIFFT=0 SHIFT=5   CASC_LEN=1 NUM_FRAMES=64 STIM_TYPE=0 NITER=4 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=5   FFT_NIFFT=0 SHIFT=5   CASC_LEN=1 NUM_FRAMES=64 STIM_TYPE=0 NITER=4 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=5   FFT_NIFFT=0 SHIFT=5   CASC_LEN=1 NUM_FRAMES=64 STIM_TYPE=0 NITER=4 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=5   FFT_NIFFT=0 SHIFT=5   CASC_LEN=1 NUM_FRAMES=64 STIM_TYPE=0 NITER=4 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=5   FFT_NIFFT=0 SHIFT=5   CASC_LEN=1 NUM_FRAMES=64 STIM_TYPE=0 NITER=4 AIE_VARIANT=2 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=5   FFT_NIFFT=0 SHIFT=5   CASC_LEN=1 NUM_FRAMES=64 STIM_TYPE=0 NITER=4 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=5   FFT_NIFFT=0 SHIFT=5   CASC_LEN=1 NUM_FRAMES=64 STIM_TYPE=0 NITER=4 AIE_VARIANT=22 "
+
+
+fi
+
+if [[ "$*" == *qor* ]]
+then
+    # explore point sizes - single frame
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=27   FFT_NIFFT=0 SHIFT=5   CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=27   FFT_NIFFT=0 SHIFT=5   CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=27   FFT_NIFFT=0 SHIFT=0   CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=7   CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=7   CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0   CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=48   FFT_NIFFT=0 SHIFT=8   CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=48   FFT_NIFFT=0 SHIFT=8   CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=48   FFT_NIFFT=0 SHIFT=0   CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=9   CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=9   CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0   CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=16 " #max point size for cfloat casc_len=1
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=72   FFT_NIFFT=0 SHIFT=10  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=72   FFT_NIFFT=0 SHIFT=10  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=87   FFT_NIFFT=0 SHIFT=11  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=87   FFT_NIFFT=0 SHIFT=11  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=16 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=27   FFT_NIFFT=0 SHIFT=5   CASC_LEN=1 NUM_FRAMES=16 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=27   FFT_NIFFT=0 SHIFT=5   CASC_LEN=1 NUM_FRAMES=16 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=27   FFT_NIFFT=0 SHIFT=0   CASC_LEN=1 NUM_FRAMES=16 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=15   FFT_NIFFT=0 SHIFT=6   CASC_LEN=1 NUM_FRAMES=16 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=15   FFT_NIFFT=0 SHIFT=6   CASC_LEN=1 NUM_FRAMES=16 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=15   FFT_NIFFT=0 SHIFT=0   CASC_LEN=1 NUM_FRAMES=16 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=48   FFT_NIFFT=0 SHIFT=8   CASC_LEN=1 NUM_FRAMES=8  STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=48   FFT_NIFFT=0 SHIFT=8   CASC_LEN=1 NUM_FRAMES=8  STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=48   FFT_NIFFT=0 SHIFT=0   CASC_LEN=1 NUM_FRAMES=8  STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=9   CASC_LEN=1 NUM_FRAMES=8  STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=9   CASC_LEN=1 NUM_FRAMES=8  STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0   CASC_LEN=1 NUM_FRAMES=8  STIM_TYPE=0 NITER=16 " #max point size for cfloat casc_len=1
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=72   FFT_NIFFT=0 SHIFT=10  CASC_LEN=1 NUM_FRAMES=8  STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=72   FFT_NIFFT=0 SHIFT=10  CASC_LEN=1 NUM_FRAMES=8  STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=87   FFT_NIFFT=0 SHIFT=11  CASC_LEN=1 NUM_FRAMES=8  STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=87   FFT_NIFFT=0 SHIFT=11  CASC_LEN=1 NUM_FRAMES=8  STIM_TYPE=0 NITER=16 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=27   FFT_NIFFT=0 SHIFT=5   CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=16 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=27   FFT_NIFFT=0 SHIFT=5   CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=16 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=27   FFT_NIFFT=0 SHIFT=0   CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=16 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=19   FFT_NIFFT=0 SHIFT=6   CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=16 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=19   FFT_NIFFT=0 SHIFT=6   CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=16 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=19   FFT_NIFFT=0 SHIFT=0   CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=16 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=48   FFT_NIFFT=0 SHIFT=8   CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=8  STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=48   FFT_NIFFT=0 SHIFT=8   CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=8  STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=48   FFT_NIFFT=0 SHIFT=0   CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=8  STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=9   CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=8  STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=9   CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=8  STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0   CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=8  STIM_TYPE=0 NITER=16 " #max point size for cfloat casc_len=1
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=72   FFT_NIFFT=0 SHIFT=10  CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=8  STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=72   FFT_NIFFT=0 SHIFT=10  CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=8  STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=87   FFT_NIFFT=0 SHIFT=11  CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=8  STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=87   FFT_NIFFT=0 SHIFT=11  CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=8  STIM_TYPE=0 NITER=16 "
+
+    # explore NUM_FRAMES with CASC_LEN
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=4 NUM_FRAMES=16 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=4 NUM_FRAMES=16 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=4 NUM_FRAMES=16 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=4 NUM_FRAMES=32 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=4 NUM_FRAMES=32 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=4 NUM_FRAMES=32 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=4 NUM_FRAMES=48 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=4 NUM_FRAMES=48 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=4 NUM_FRAMES=48 STIM_TYPE=0 NITER=16 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2  UUT_SSR=4 NUM_FRAMES=16 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2  UUT_SSR=4 NUM_FRAMES=16 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2  UUT_SSR=4 NUM_FRAMES=16 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=4  UUT_SSR=4 NUM_FRAMES=16 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=4  UUT_SSR=4 NUM_FRAMES=16 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=4  UUT_SSR=4 NUM_FRAMES=16 STIM_TYPE=0 NITER=16 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=4  UUT_SSR=4 NUM_FRAMES=16 STIM_TYPE=0 NITER=16 "
+
+    # AIE-ML/AIE_VARIANT=2
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=4  CASC_LEN=1 NUM_FRAMES=1   STIM_TYPE=0 NITER=16 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=4  CASC_LEN=1 NUM_FRAMES=1   STIM_TYPE=0 NITER=16 AIE_VARIANT=2 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=4  CASC_LEN=1 NUM_FRAMES=10  STIM_TYPE=0 NITER=16 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=4  CASC_LEN=1 NUM_FRAMES=10  STIM_TYPE=0 NITER=16 AIE_VARIANT=2"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=4  CASC_LEN=4 NUM_FRAMES=40  STIM_TYPE=0 NITER=16 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=4  CASC_LEN=4 NUM_FRAMES=40  STIM_TYPE=0 NITER=16 AIE_VARIANT=2"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=67    FFT_NIFFT=0 SHIFT=8  CASC_LEN=5 NUM_FRAMES=1   STIM_TYPE=0 NITER=16 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=67    FFT_NIFFT=0 SHIFT=8  CASC_LEN=5 NUM_FRAMES=1   STIM_TYPE=0 NITER=16 AIE_VARIANT=2"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=67    FFT_NIFFT=0 SHIFT=8  CASC_LEN=5 NUM_FRAMES=4   STIM_TYPE=0 NITER=16 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=67    FFT_NIFFT=0 SHIFT=8  CASC_LEN=5 NUM_FRAMES=4   STIM_TYPE=0 NITER=16 AIE_VARIANT=2"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=0 SHIFT=2  CASC_LEN=4 NUM_FRAMES=10  STIM_TYPE=0 NITER=16 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=0 SHIFT=2  CASC_LEN=4 NUM_FRAMES=10  STIM_TYPE=0 NITER=16 AIE_VARIANT=2"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=4 UUT_SSR=2 CASC_LEN=1 NUM_FRAMES=1   STIM_TYPE=0 NITER=16  AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=4 UUT_SSR=2 CASC_LEN=1 NUM_FRAMES=1   STIM_TYPE=0 NITER=16  AIE_VARIANT=2 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=4 UUT_SSR=2 CASC_LEN=1 NUM_FRAMES=8   STIM_TYPE=0 NITER=16  AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=4 UUT_SSR=2 CASC_LEN=1 NUM_FRAMES=8   STIM_TYPE=0 NITER=16  AIE_VARIANT=2 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=4 UUT_SSR=3 CASC_LEN=2 NUM_FRAMES=8   STIM_TYPE=0 NITER=16  AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=4 UUT_SSR=3 CASC_LEN=2 NUM_FRAMES=8   STIM_TYPE=0 NITER=16  AIE_VARIANT=2 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=67    FFT_NIFFT=0 SHIFT=8 UUT_SSR=4 CASC_LEN=2 NUM_FRAMES=1   STIM_TYPE=0 NITER=16  AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=67    FFT_NIFFT=0 SHIFT=8 UUT_SSR=4 CASC_LEN=2 NUM_FRAMES=1   STIM_TYPE=0 NITER=16  AIE_VARIANT=2 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=67    FFT_NIFFT=0 SHIFT=8 UUT_SSR=4 CASC_LEN=2 NUM_FRAMES=4   STIM_TYPE=0 NITER=16  AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=67    FFT_NIFFT=0 SHIFT=8 UUT_SSR=4 CASC_LEN=2 NUM_FRAMES=4   STIM_TYPE=0 NITER=16  AIE_VARIANT=2 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=0 SHIFT=2 UUT_SSR=3 CASC_LEN=2 NUM_FRAMES=8   STIM_TYPE=0 NITER=16  AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=0 SHIFT=2 UUT_SSR=3 CASC_LEN=2 NUM_FRAMES=8   STIM_TYPE=0 NITER=16  AIE_VARIANT=2 "
+
+    # AIE-ML/AIE_VARIANT=22
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=4  CASC_LEN=1 NUM_FRAMES=1   STIM_TYPE=0 NITER=16 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=4  CASC_LEN=1 NUM_FRAMES=1   STIM_TYPE=0 NITER=16 AIE_VARIANT=22 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=4  CASC_LEN=1 NUM_FRAMES=10  STIM_TYPE=0 NITER=16 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=4  CASC_LEN=1 NUM_FRAMES=10  STIM_TYPE=0 NITER=16 AIE_VARIANT=22"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=4  CASC_LEN=4 NUM_FRAMES=40  STIM_TYPE=0 NITER=16 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=4  CASC_LEN=4 NUM_FRAMES=40  STIM_TYPE=0 NITER=16 AIE_VARIANT=22"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=67    FFT_NIFFT=0 SHIFT=8  CASC_LEN=5 NUM_FRAMES=1   STIM_TYPE=0 NITER=16 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=67    FFT_NIFFT=0 SHIFT=8  CASC_LEN=5 NUM_FRAMES=1   STIM_TYPE=0 NITER=16 AIE_VARIANT=22"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=67    FFT_NIFFT=0 SHIFT=8  CASC_LEN=5 NUM_FRAMES=4   STIM_TYPE=0 NITER=16 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=67    FFT_NIFFT=0 SHIFT=8  CASC_LEN=5 NUM_FRAMES=4   STIM_TYPE=0 NITER=16 AIE_VARIANT=22"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=0 SHIFT=2  CASC_LEN=4 NUM_FRAMES=10  STIM_TYPE=0 NITER=16 AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=0 SHIFT=2  CASC_LEN=4 NUM_FRAMES=10  STIM_TYPE=0 NITER=16 AIE_VARIANT=22"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=4 UUT_SSR=2 CASC_LEN=1 NUM_FRAMES=1   STIM_TYPE=0 NITER=16  AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=4 UUT_SSR=2 CASC_LEN=1 NUM_FRAMES=1   STIM_TYPE=0 NITER=16  AIE_VARIANT=22 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=4 UUT_SSR=2 CASC_LEN=1 NUM_FRAMES=8   STIM_TYPE=0 NITER=16  AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=4 UUT_SSR=2 CASC_LEN=1 NUM_FRAMES=8   STIM_TYPE=0 NITER=16  AIE_VARIANT=22 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=4 UUT_SSR=3 CASC_LEN=2 NUM_FRAMES=8   STIM_TYPE=0 NITER=16  AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=4 UUT_SSR=3 CASC_LEN=2 NUM_FRAMES=8   STIM_TYPE=0 NITER=16  AIE_VARIANT=22 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=67    FFT_NIFFT=0 SHIFT=8 UUT_SSR=4 CASC_LEN=2 NUM_FRAMES=1   STIM_TYPE=0 NITER=16  AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=67    FFT_NIFFT=0 SHIFT=8 UUT_SSR=4 CASC_LEN=2 NUM_FRAMES=1   STIM_TYPE=0 NITER=16  AIE_VARIANT=22 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=67    FFT_NIFFT=0 SHIFT=8 UUT_SSR=4 CASC_LEN=2 NUM_FRAMES=4   STIM_TYPE=0 NITER=16  AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=67    FFT_NIFFT=0 SHIFT=8 UUT_SSR=4 CASC_LEN=2 NUM_FRAMES=4   STIM_TYPE=0 NITER=16  AIE_VARIANT=22 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=0 SHIFT=2 UUT_SSR=3 CASC_LEN=2 NUM_FRAMES=8   STIM_TYPE=0 NITER=16  AIE_VARIANT=22 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=0 SHIFT=2 UUT_SSR=3 CASC_LEN=2 NUM_FRAMES=8   STIM_TYPE=0 NITER=16  AIE_VARIANT=22 "
+
+fi
+
+
+if [[ "$*" == *old_check* ]]
+then
+    # CASC_LEN=1
+        # WINDOW_VSIZE
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0  CASC_LEN=1 NUM_FRAMES=8   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0  CASC_LEN=1 NUM_FRAMES=8   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=16   FFT_NIFFT=0  CASC_LEN=1 NUM_FRAMES=8   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=0  CASC_LEN=1 NUM_FRAMES=8   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=0  CASC_LEN=1 NUM_FRAMES=8   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=31   FFT_NIFFT=0  CASC_LEN=1 NUM_FRAMES=8   NITER=8  "
+        # WINDOW_VSIZE
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=1  CASC_LEN=1 NUM_FRAMES=8   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=1  CASC_LEN=1 NUM_FRAMES=8   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=16   FFT_NIFFT=1  CASC_LEN=1 NUM_FRAMES=8   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=1  CASC_LEN=1 NUM_FRAMES=8   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=1  CASC_LEN=1 NUM_FRAMES=8   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=31   FFT_NIFFT=1  CASC_LEN=1 NUM_FRAMES=8   NITER=8  "
+
+    # CASC_LEN=3
+        # FFT_NIFFT=0
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0  CASC_LEN=3 NUM_FRAMES=1   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0  CASC_LEN=3 NUM_FRAMES=1   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=16   FFT_NIFFT=0  CASC_LEN=3 NUM_FRAMES=1   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=0  CASC_LEN=3 NUM_FRAMES=1   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=0  CASC_LEN=3 NUM_FRAMES=1   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=31   FFT_NIFFT=0  CASC_LEN=3 NUM_FRAMES=1   NITER=8  "
+        # FFT_NIFFT=1
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=1  CASC_LEN=3 NUM_FRAMES=1   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=1  CASC_LEN=3 NUM_FRAMES=1   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=16   FFT_NIFFT=1  CASC_LEN=3 NUM_FRAMES=1   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=1  CASC_LEN=3 NUM_FRAMES=1   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=1  CASC_LEN=3 NUM_FRAMES=1   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=31   FFT_NIFFT=1  CASC_LEN=3 NUM_FRAMES=1   NITER=8  "
+
+    # SSR
+        # SSR=2
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=16   FFT_NIFFT=0  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=0  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=0  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=31   FFT_NIFFT=0  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1   NITER=8  "
+        # CASC and SSR
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=48   FFT_NIFFT=1  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=8   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=48   FFT_NIFFT=1  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=8   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=48   FFT_NIFFT=1  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=8   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=1  CASC_LEN=2 UUT_SSR=4 NUM_FRAMES=8   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=1  CASC_LEN=2 UUT_SSR=4 NUM_FRAMES=8   NITER=8  "
+        test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64   FFT_NIFFT=1  CASC_LEN=2 UUT_SSR=4 NUM_FRAMES=8   NITER=8  "
+
+
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=64  CASC_LEN=4  NUM_FRAMES=1    "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=68  CASC_LEN=4  NUM_FRAMES=1    "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=72  CASC_LEN=4  NUM_FRAMES=1    "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=80  CASC_LEN=4  NUM_FRAMES=1    "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=84  CASC_LEN=4  NUM_FRAMES=1    "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=128 CASC_LEN=4  NUM_FRAMES=1    "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=128 CASC_LEN=4  NUM_FRAMES=1    "
+        test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat   POINT_SIZE=32  CASC_LEN=4  NUM_FRAMES=1    "
+        test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat   POINT_SIZE=48  CASC_LEN=4  NUM_FRAMES=1    "
+        test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat   POINT_SIZE=60  CASC_LEN=4  NUM_FRAMES=1    "
+        test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat   POINT_SIZE=64  CASC_LEN=4  NUM_FRAMES=1    "
+        test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat   POINT_SIZE=128 CASC_LEN=4  NUM_FRAMES=1    "
+
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=64  CASC_LEN=4 UUT_SSR=2 NUM_FRAMES=1    "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=68  CASC_LEN=4 UUT_SSR=2 NUM_FRAMES=1    "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=72  CASC_LEN=4 UUT_SSR=2 NUM_FRAMES=1    "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=80  CASC_LEN=4 UUT_SSR=2 NUM_FRAMES=1    "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=84  CASC_LEN=4 UUT_SSR=2 NUM_FRAMES=1    "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=128 CASC_LEN=4 UUT_SSR=2 NUM_FRAMES=1    "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=128 CASC_LEN=4 UUT_SSR=2 NUM_FRAMES=1    "
+        test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat   POINT_SIZE=32  CASC_LEN=4 UUT_SSR=2 NUM_FRAMES=1    "
+        test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat   POINT_SIZE=48  CASC_LEN=4 UUT_SSR=2 NUM_FRAMES=1    "
+        test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat   POINT_SIZE=60  CASC_LEN=4 UUT_SSR=2 NUM_FRAMES=1    "
+        test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat   POINT_SIZE=64  CASC_LEN=4 UUT_SSR=2 NUM_FRAMES=1    "
+        test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat   POINT_SIZE=128 CASC_LEN=4 UUT_SSR=2 NUM_FRAMES=1    "
+
+# AIE-Ml
+    # CASC_LEN=1
+        # FFT_NIFFT=0
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1   NITER=8 AIE_VARIANT=2  "
+        # WINDOW_VSIZE
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=8   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=8   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=8   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=8   NITER=8 AIE_VARIANT=2  "
+        # FFT_NIFFT=1
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=1 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=1 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=1 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=1 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1   NITER=8 AIE_VARIANT=2  "
+        # WINDOW_VSIZE
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=1 SHIFT=0  CASC_LEN=1 NUM_FRAMES=8   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=1 SHIFT=0  CASC_LEN=1 NUM_FRAMES=8   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=1 SHIFT=0  CASC_LEN=1 NUM_FRAMES=8   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=1 SHIFT=0  CASC_LEN=1 NUM_FRAMES=8   NITER=8 AIE_VARIANT=2  "
+
+
+        # FFT_NIFFT=0
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=1   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=1   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=1   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=0 SHIFT=0  CASC_LEN=4 UUT_SSR=2 NUM_FRAMES=1   NITER=8 AIE_VARIANT=2  "
+        # WINDOW_VSIZE
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=8   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=8   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=0 SHIFT=0  CASC_LEN=4 UUT_SSR=2 NUM_FRAMES=8   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=0 SHIFT=0  CASC_LEN=8 UUT_SSR=2 NUM_FRAMES=8   NITER=8 AIE_VARIANT=2  "
+        # FFT_NIFFT=1
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=1 SHIFT=0  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=1   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=1 SHIFT=0  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=1   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=1 SHIFT=0  CASC_LEN=4 UUT_SSR=2 NUM_FRAMES=1   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=1 SHIFT=0  CASC_LEN=8 UUT_SSR=2 NUM_FRAMES=1   NITER=8 AIE_VARIANT=2  "
+        # WINDOW_VSIZE
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=1 SHIFT=0  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=8   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=1 SHIFT=0  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=8   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=1 SHIFT=0  CASC_LEN=4 UUT_SSR=2 NUM_FRAMES=8   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=1 SHIFT=0  CASC_LEN=8 UUT_SSR=2 NUM_FRAMES=8   NITER=8 AIE_VARIANT=2  "
+
+
+        # FFT_NIFFT=0
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=1   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=1   NITER=8 AIE_VARIANT=2  "
+        # WINDOW_VSIZE
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=8   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=8   NITER=8 AIE_VARIANT=2  "
+        # FFT_NIFFT=1
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=1 SHIFT=0  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=1 SHIFT=0  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=1 SHIFT=0  CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=1   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=1 SHIFT=0  CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=1   NITER=8 AIE_VARIANT=2  "
+        # WINDOW_VSIZE
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=1 SHIFT=0  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=1 SHIFT=0  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=1 SHIFT=0  CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=8   NITER=8 AIE_VARIANT=2  "
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=31   FFT_NIFFT=1 SHIFT=0  CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=8   NITER=8 AIE_VARIANT=2  "
+
+
+fi
+
+if [[ "$*" == *ssr* ]]
+then
+# casc 1
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    #
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    #
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=128  FFT_NIFFT=0 SHIFT=8  CASC_LEN=4 UUT_SSR=4 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    #
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    #
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 UUT_SSR=4 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=128  FFT_NIFFT=0 SHIFT=8  CASC_LEN=4 UUT_SSR=4 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+
+# casc 2
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=8  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=8  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=8  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=8  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    #
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=8  CASC_LEN=2 UUT_SSR=4 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=8  CASC_LEN=2 UUT_SSR=4 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 UUT_SSR=4 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=8  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=8  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    #
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=8  CASC_LEN=2 UUT_SSR=4 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=8  CASC_LEN=2 UUT_SSR=4 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 UUT_SSR=4 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=128  FFT_NIFFT=0 SHIFT=8  CASC_LEN=2 UUT_SSR=4 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 "
+
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=8  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=8  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=8  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=8  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    #
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=8  CASC_LEN=2 UUT_SSR=4 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=8  CASC_LEN=2 UUT_SSR=4 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 UUT_SSR=4 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=8  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=8  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    #
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=8  CASC_LEN=2 UUT_SSR=4 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=8  CASC_LEN=2 UUT_SSR=4 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cfloat POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 UUT_SSR=4 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+fi
+
+
+if [[ "$*" == *aie_compare* ]]
+then
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=48   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=48   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=48   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=48   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=48   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=48   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=48   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=48   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+fi
+
+if [[ "$*" == *compare_dft_fft* ]]
+then
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=3 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=3 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=3 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=4 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=4 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=4 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=2 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=2 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=2 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 NUM_FRAMES=2 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 NUM_FRAMES=2 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 NUM_FRAMES=2 STIM_TYPE=0 NITER=8 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=3 NUM_FRAMES=2 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=3 NUM_FRAMES=2 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=3 NUM_FRAMES=2 STIM_TYPE=0 NITER=8 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=4 NUM_FRAMES=2 STIM_TYPE=0 NITER=8 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=4 NUM_FRAMES=2 STIM_TYPE=0 NITER=8 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=4 NUM_FRAMES=2 STIM_TYPE=0 NITER=8 "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=4 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=4 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=4 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 NUM_FRAMES=4 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 NUM_FRAMES=4 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 NUM_FRAMES=4 STIM_TYPE=0 NITER=8 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=3 NUM_FRAMES=4 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=3 NUM_FRAMES=4 STIM_TYPE=0 NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=3 NUM_FRAMES=4 STIM_TYPE=0 NITER=8 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=4 NUM_FRAMES=4 STIM_TYPE=0 NITER=8 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32   FFT_NIFFT=0 SHIFT=0  CASC_LEN=4 NUM_FRAMES=4 STIM_TYPE=0 NITER=8 "
+    # test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64   FFT_NIFFT=0 SHIFT=0  CASC_LEN=4 NUM_FRAMES=4 STIM_TYPE=0 NITER=8 "
+
+fi
+
+if [[ "$*" == *test_aieml* ]]
+then
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=15    FFT_NIFFT=0 SHIFT=4  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=15    FFT_NIFFT=0 SHIFT=4  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=15    FFT_NIFFT=0 SHIFT=4  CASC_LEN=1 NUM_FRAMES=4 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=15    FFT_NIFFT=0 SHIFT=4  CASC_LEN=1 NUM_FRAMES=4 STIM_TYPE=0 NITER=8 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=15    FFT_NIFFT=0 SHIFT=4  CASC_LEN=1 NUM_FRAMES=12 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=15    FFT_NIFFT=0 SHIFT=4  CASC_LEN=1 NUM_FRAMES=12 STIM_TYPE=0 NITER=8 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=15    FFT_NIFFT=0 SHIFT=4  CASC_LEN=1 NUM_FRAMES=32 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=15    FFT_NIFFT=0 SHIFT=4  CASC_LEN=1 NUM_FRAMES=32 STIM_TYPE=0 NITER=8 AIE_VARIANT=2"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=15    FFT_NIFFT=0 SHIFT=4  CASC_LEN=2 NUM_FRAMES=4 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=15    FFT_NIFFT=0 SHIFT=4  CASC_LEN=2 NUM_FRAMES=4 STIM_TYPE=0 NITER=8 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=15    FFT_NIFFT=0 SHIFT=4  CASC_LEN=2 NUM_FRAMES=12 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=15    FFT_NIFFT=0 SHIFT=4  CASC_LEN=2 NUM_FRAMES=12 STIM_TYPE=0 NITER=8 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=15    FFT_NIFFT=0 SHIFT=4  CASC_LEN=2 NUM_FRAMES=32 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=15    FFT_NIFFT=0 SHIFT=4  CASC_LEN=2 NUM_FRAMES=32 STIM_TYPE=0 NITER=8 AIE_VARIANT=2"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=15    FFT_NIFFT=0 SHIFT=4  CASC_LEN=4 NUM_FRAMES=12 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=15    FFT_NIFFT=0 SHIFT=4  CASC_LEN=4 NUM_FRAMES=12 STIM_TYPE=0 NITER=8 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=15    FFT_NIFFT=0 SHIFT=4  CASC_LEN=4 NUM_FRAMES=32 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=15    FFT_NIFFT=0 SHIFT=4  CASC_LEN=4 NUM_FRAMES=32 STIM_TYPE=0 NITER=8 AIE_VARIANT=2"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=15    FFT_NIFFT=0 SHIFT=4  CASC_LEN=8 NUM_FRAMES=12 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=15    FFT_NIFFT=0 SHIFT=4  CASC_LEN=8 NUM_FRAMES=12 STIM_TYPE=0 NITER=8 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=15    FFT_NIFFT=0 SHIFT=4  CASC_LEN=8 NUM_FRAMES=32 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=15    FFT_NIFFT=0 SHIFT=4  CASC_LEN=8 NUM_FRAMES=32 STIM_TYPE=0 NITER=8 AIE_VARIANT=2"
+#########
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=1 SHIFT=4  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=1 SHIFT=4  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=1 SHIFT=4  CASC_LEN=1 NUM_FRAMES=4 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=1 SHIFT=4  CASC_LEN=1 NUM_FRAMES=4 STIM_TYPE=0 NITER=8 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=1 SHIFT=4  CASC_LEN=1 NUM_FRAMES=12 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=1 SHIFT=4  CASC_LEN=1 NUM_FRAMES=12 STIM_TYPE=0 NITER=8 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=1 SHIFT=4  CASC_LEN=1 NUM_FRAMES=32 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=1 SHIFT=4  CASC_LEN=1 NUM_FRAMES=32 STIM_TYPE=0 NITER=8 AIE_VARIANT=2"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=1 SHIFT=4  CASC_LEN=2 NUM_FRAMES=4 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=1 SHIFT=4  CASC_LEN=2 NUM_FRAMES=4 STIM_TYPE=0 NITER=8 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=1 SHIFT=4  CASC_LEN=2 NUM_FRAMES=12 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=1 SHIFT=4  CASC_LEN=2 NUM_FRAMES=12 STIM_TYPE=0 NITER=8 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=1 SHIFT=4  CASC_LEN=2 NUM_FRAMES=32 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=1 SHIFT=4  CASC_LEN=2 NUM_FRAMES=32 STIM_TYPE=0 NITER=8 AIE_VARIANT=2"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=1 SHIFT=4  CASC_LEN=4 NUM_FRAMES=12 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=1 SHIFT=4  CASC_LEN=4 NUM_FRAMES=12 STIM_TYPE=0 NITER=8 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=1 SHIFT=4  CASC_LEN=4 NUM_FRAMES=32 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=1 SHIFT=4  CASC_LEN=4 NUM_FRAMES=32 STIM_TYPE=0 NITER=8 AIE_VARIANT=2"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=1 SHIFT=4  CASC_LEN=8 NUM_FRAMES=12 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=1 SHIFT=4  CASC_LEN=8 NUM_FRAMES=12 STIM_TYPE=0 NITER=8 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=1 SHIFT=4  CASC_LEN=8 NUM_FRAMES=32 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=36    FFT_NIFFT=1 SHIFT=4  CASC_LEN=8 NUM_FRAMES=32 STIM_TYPE=0 NITER=8 AIE_VARIANT=2"
+
+
+fi
+
+if [[ "$*" == *compare_aie* ]]
+then
+# AIE1
+    # CASC_LEN=1 SSR=1 FRAMES=1
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=1 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=1 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=1 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=1 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=1 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=1 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=1 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 AIE_VARIANT=1 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=1 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 AIE_VARIANT=1 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=1 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 AIE_VARIANT=1 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=1 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 AIE_VARIANT=1 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=1 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 AIE_VARIANT=1 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=1 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 AIE_VARIANT=1 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=1 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=1 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=1 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=1 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=1 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=1 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 AIE_VARIANT=1 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 AIE_VARIANT=1 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 AIE_VARIANT=1 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 AIE_VARIANT=1 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 AIE_VARIANT=1 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 AIE_VARIANT=1 "
+# AIE2
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=1 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=1 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=1 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=1 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=1 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=1 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64    FFT_NIFFT=0 SHIFT=8  CASC_LEN=1 UUT_SSR=2 NUM_FRAMES=8 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+
+
+fi
+
+if [[ "$*" == *mac_add* ]]
+then
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=8     FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=8     FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64    FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64    FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=8     FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=16 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=8     FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=16 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=16 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16    FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=16 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=16 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=32    FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=16 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=64    FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=16 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=64    FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=16 STIM_TYPE=0 NITER=8 AIE_VARIANT=2 "
+
+
+
+fi
+
+
+if [[ "$*" == *target_x86* ]]
+then
+
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=31 CASC_LEN=1 NUM_FRAMES=1   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=31 CASC_LEN=1 NUM_FRAMES=2   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=31 CASC_LEN=1 NUM_FRAMES=3   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=31 CASC_LEN=1 NUM_FRAMES=4   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=31 CASC_LEN=1 NUM_FRAMES=5   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=31 CASC_LEN=1 NUM_FRAMES=6   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=16 CASC_LEN=1 NUM_FRAMES=1   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=16 CASC_LEN=1 NUM_FRAMES=2   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=16 CASC_LEN=1 NUM_FRAMES=3   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=16 CASC_LEN=1 NUM_FRAMES=4   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=16 CASC_LEN=1 NUM_FRAMES=5   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=16 CASC_LEN=1 NUM_FRAMES=6   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=31 CASC_LEN=2 NUM_FRAMES=1   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=31 CASC_LEN=2 NUM_FRAMES=2   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=31 CASC_LEN=2 NUM_FRAMES=3   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=31 CASC_LEN=2 NUM_FRAMES=4   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=31 CASC_LEN=2 NUM_FRAMES=5   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=31 CASC_LEN=2 NUM_FRAMES=6   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=16 CASC_LEN=2 NUM_FRAMES=1   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=16 CASC_LEN=2 NUM_FRAMES=2   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=16 CASC_LEN=2 NUM_FRAMES=3   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=16 CASC_LEN=2 NUM_FRAMES=4   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=16 CASC_LEN=2 NUM_FRAMES=5   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=16 CASC_LEN=2 NUM_FRAMES=6   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=31 CASC_LEN=3 NUM_FRAMES=1   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=31 CASC_LEN=3 NUM_FRAMES=2   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=31 CASC_LEN=3 NUM_FRAMES=3   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=31 CASC_LEN=3 NUM_FRAMES=4   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=31 CASC_LEN=3 NUM_FRAMES=5   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=31 CASC_LEN=3 NUM_FRAMES=6   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=16 CASC_LEN=3 NUM_FRAMES=1   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=16 CASC_LEN=3 NUM_FRAMES=2   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=16 CASC_LEN=3 NUM_FRAMES=3   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=16 CASC_LEN=3 NUM_FRAMES=4   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=16 CASC_LEN=3 NUM_FRAMES=5   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16   POINT_SIZE=16 CASC_LEN=3 NUM_FRAMES=6   STIM_TYPE=0 NITER=1 TARGET=x86sim "
+
+fi
+
+if [[  "$*" == *PR* ]]
+then
+    # line_num=$LINENO
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 DUMP_VCD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=2 API_IO=1 NUM_FRAMES=1 DUMP_VCD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 API_IO=1 NUM_FRAMES=1 DUMP_VCD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 DUMP_VCD=0"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat TWIDDLE_TYPE=cint16 POINT_SIZE=16   FFT_NIFFT=0 SHIFT=0  CASC_LEN=1 NUM_FRAMES=1 DUMP_VCD=0"
+
+fi
+
+# Randomized testing
+if [[ "$*" == *randomized* ]]
+then
+    # read from randomized test file
+    while IFS= read -r line; do
+        test_arr[${#test_arr[*]}]="$line"
+    done < randomized_tests.txt
+fi
+
+# echo "Adding the following args to make commands: ${make_args[@]}"
+# Ensure each test goes into a seperate runmake
+for i in "${!test_arr[@]}"; do
+    # append make args to each make command
+    if [[ ${test_arr[$i]} == make* ]]
+    then
+        test_arr[$i]="${test_arr[$i]} ${make_args[@]}"
+    fi
+    test_arr[$i]="${test_arr[$i]} |& tee runmake_logs/runmake_${i}.log "
+done
+
+makeCmd_raw=()
+otherCmd_raw=()
+
+for i in "${!test_arr[@]}"; do
+    # append make args to each make command
+    if [[ ${test_arr[$i]} == make* ]]; then
+        makeCmd_raw[${#makeCmd_raw[*]}]=${test_arr[$i]}
+    else
+        otherCmd_raw[${#otherCmd_raw[*]}]=${test_arr[$i]}
+    fi
+done
+
+# for i in "${!makeCmd_raw[@]}"; do
+#     echo ${makeCmd_raw[$i]}
+# done
+
+if [[ "$*" == *-append* ]]
+then
+    verify_tests=0
+    new_test_names=$(python3 $runmakeDir/../common/scripts/populate_params.py $run_type $runmakeDir "${makeCmd_raw[@]}" -append)
+else
+    new_test_names=$(python3 $runmakeDir/../common/scripts/populate_params.py $run_type $runmakeDir "${makeCmd_raw[@]}")
+fi
+multi_params_file=multi_params_$run_type
+
+if [[ $run_type == "jenkins" ]]
+then
+    python3 $runmakeDir/../common/scripts/populate_params.py clear_params $runmakeDir
+    $runmakeDir/runmake.sh -run_type checkin -no_test_run
+    exit_code1=$?
+    $runmakeDir/runmake.sh -run_type qor -no_test_run
+    exit_code2=$?
+    if [[ $exit_code1 -eq 1 || $exit_code2 -eq 1 ]]; then
+        exit 1
+    fi
+    $runmakeDir/runmake.sh -run_type checkin -append -no_test_run -no_test_verify
+    $runmakeDir/runmake.sh -run_type qor -append -no_test_run -no_test_verify
+    multi_params_file=multi_params
+    run_tests=0
+    verify_tests=0
+fi
+
+if [[ $verify_tests == 1 ]]
+then
+    test_lines_string=${!test_arr[@]}
+    echo Verifying $run_type test suite...
+    python3 $runmakeDir/../common/scripts/verify_multi_params.py --ip $(basename $runmakeDir) --multi_params $runmakeDir/$multi_params_file.json --test_lines "$test_lines_string" --gen_test_file --test_suite $run_type
+    exit_code=$?
+    if [[ $exit_code -eq 1 ]]; then
+        exit 1
+    fi
+fi
+
+if [[ $run_tests == 1 ]]
+then
+    timestamp=$(date +"%y%m%d_%H%M")
+    echo "Start of Batch Run ($timestamp)" | tee ./runmake_logs/runmake.log
+    $runmakeDir/../common/scripts/run_batch.sh -func $runmakeDir -params $multi_params_file -batch_suffix $timestamp
+fi

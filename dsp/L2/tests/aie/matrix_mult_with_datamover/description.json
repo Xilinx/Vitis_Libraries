@@ -5,13 +5,13 @@
     "match_makefile": false,
     "flow": "system",
     "platform_allowlist": [
-        "vck190"
+        "vck190_base"
     ],
     "data": [
         "PROJECT/data/"
     ],
     "platform_properties": {
-        "vck190": {
+        "vck190_base": {
             "v++": {
                 "compiler": {
                     "clflags": []

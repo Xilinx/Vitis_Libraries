@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,11 @@
 #define UUT_GRAPH kronecker_graph
 #endif
 
+#ifdef USING_UUT
+#include "kronecker_native_generated_graph/kronecker_generated_graph.h"
+#else
 #include QUOTE(UUT_GRAPH.hpp)
+#endif
 
 using namespace adf;
 
@@ -79,10 +83,14 @@ class test_graph : public graph {
         printf("SAT_MODE          = %d \n", SAT_MODE);
         printf("========================\n");
 
-        // Kronecker Matrix Product graph
+// Kronecker Matrix Product graph
+#ifdef USING_UUT
+        kronecker_native_generated_graph kroneckerGraph;
+#else
         dsplib::kronecker::UUT_GRAPH<T_DATA_A, T_DATA_B, DIM_A_ROWS, DIM_A_COLS, DIM_B_ROWS, DIM_B_COLS, NUM_FRAMES,
                                      API_IO, SHIFT, UUT_SSR, ROUND_MODE, SAT_MODE>
             kroneckerGraph;
+#endif
 
 #ifdef USING_UUT
         for (int i = 0; i < UUT_SSR; i++) {
@@ -102,11 +110,11 @@ class test_graph : public graph {
             connect<>(inB[i].out[0], kroneckerGraph.inB[i]);
             connect<>(kroneckerGraph.out[i], out[i].in[0]);
 #if (SINGLE_BUF == 1) // Single buffer constraint applies for both stream and buffer implementations
-            single_buffer(kroneckerGraph.getKernels()[i].in[0]);
-            single_buffer(kroneckerGraph.getKernels()[i].in[1]);
+            single_buffer(kroneckerGraph.kronecker.getKernels()[i].in[0]);
+            single_buffer(kroneckerGraph.kronecker.getKernels()[i].in[1]);
             printf("INFO: Single Buffer Constraint applied to the inputs of kernel %d.\n", i);
 #if (API_IO == 0) // Single buffer constraint applies for buffer implementations
-            single_buffer(kroneckerGraph.getKernels()[i].out[0]);
+            single_buffer(kroneckerGraph.kronecker.getKernels()[i].out[0]);
             printf("INFO: Single Buffer Constraint applied to the output buffer of kernel %d.\n", i);
 #endif
 #endif

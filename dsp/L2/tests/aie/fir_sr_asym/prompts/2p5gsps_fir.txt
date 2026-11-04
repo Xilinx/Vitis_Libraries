@@ -1,0 +1,5 @@
+Configure a single-rate asymmetric FIR filter for an AIE1 device. Use complex
+16-bit input/output data and 16-bit integer coefficients, with 16 filter
+taps. I want this configuration to achieve close to 2.5 GSps
+(giga-samples-per-second) of throughput, using as few AIE tiles as
+reasonably possible -- ideally around 2 tiles total.

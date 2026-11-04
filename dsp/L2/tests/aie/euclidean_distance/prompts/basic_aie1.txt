@@ -1,0 +1,3 @@
+Configure a Euclidean distance kernel for an AIE1 device between 3-dimensional float
+points P and Q, 64 points per call, with window I/O, returning the square-rooted (not
+squared) distance.

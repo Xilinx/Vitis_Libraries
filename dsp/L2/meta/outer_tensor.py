@@ -14,9 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import json
+import os
+
 import aie_common as com
 from aie_common import *
-import math
+
+with open(os.path.join(os.path.dirname(__file__), "type_promotions.json")) as f:
+    out_mul_type_dict = json.load(f)["out_mul_type"]
 
 #### naming ####
 #
@@ -179,7 +184,7 @@ def update_TP_DIM_A(args):
 def fn_update_TP_DIM_A(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_SSR, TP_NUM_FRAMES, TP_DIM_A):
     kVecSampleNumA = com.fnVecSampleNumMax(AIE_VARIANT, TT_DATA_A)
     io_bytes_max_per_frame = com.FLOOR(com.k_data_memory_bytes[AIE_VARIANT] // TP_NUM_FRAMES, kVecSampleNumA)
-    out_type = fn_det_out_type(TT_DATA_A, TT_DATA_B)
+    out_type = com.fn_det_out_type(TT_DATA_A, TT_DATA_B, out_mul_type_dict)
     io_samples_max_per_frame = io_bytes_max_per_frame // com.sizeof(out_type)
     io_dim_min = TP_SSR * kVecSampleNumA
     io_dim_max = TP_SSR * io_samples_max_per_frame
@@ -210,7 +215,7 @@ def fn_validate_TP_DIM_A(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_SSR, TP_NUM_FRAME
     if TP_DIM_A % TP_SSR != 0:
         return com.isError(f"TP_DIM_A must be a multiple of TP_SSR.")
     elif kKernelDim % kVecSampleNumA != 0:
-        return com.isError(f"TP_DIM_A / TP_SSR must be a multiple of vecSampleNumA.")
+        return com.isError(f"TP_DIM_A / TP_SSR must be a multiple of {kVecSampleNumA}.")
     else:
         param_dict = fn_update_TP_DIM_A(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_SSR, TP_NUM_FRAMES, TP_DIM_A)
         range_TP_DIM_A = [param_dict["minimum"], param_dict["maximum"]]
@@ -231,7 +236,7 @@ def update_TP_DIM_B(args):
 def fn_update_TP_DIM_B(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_NUM_FRAMES, TP_DIM_B):
     kVecSampleNumB = com.fnVecSampleNumMax(AIE_VARIANT, TT_DATA_B)
     io_bytes_max_per_frame = com.FLOOR(com.k_data_memory_bytes[AIE_VARIANT] // TP_NUM_FRAMES, kVecSampleNumB)
-    out_type = fn_det_out_type(TT_DATA_A, TT_DATA_B)
+    out_type = com.fn_det_out_type(TT_DATA_A, TT_DATA_B, out_mul_type_dict)
     io_samples_max_per_frame = io_bytes_max_per_frame // com.sizeof(out_type)
 
     param_dict = {
@@ -256,7 +261,7 @@ def fn_validate_TP_DIM_B(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_NUM_FRAMES, TP_DI
     kVecSampleNumB = com.fnVecSampleNumMax(AIE_VARIANT, TT_DATA_B)
 
     if TP_DIM_B % kVecSampleNumB != 0:
-        return com.isError(f"TP_DIM_B must be a multiple of vecSampleNumB.")
+        return com.isError(f"TP_DIM_B must be a multiple of {kVecSampleNumB}.")
     else:
         param_dict = fn_update_TP_DIM_B(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_NUM_FRAMES, TP_DIM_B)
         range_TP_DIM_B = [param_dict["minimum"], param_dict["maximum"]]
@@ -273,15 +278,16 @@ def update_TP_API(args):
     TP_DIM_A = args["TP_DIM_A"]
     TP_DIM_B = args["TP_DIM_B"]
     TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
-    return fn_update_TP_API(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES)
+    TP_SSR = args["TP_SSR"]
+    return fn_update_TP_API(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_SSR)
 
-def fn_update_TP_API(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES):
+def fn_update_TP_API(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_SSR):
     io_bytes_max_per_tile = com.k_data_memory_bytes[AIE_VARIANT]
-    out_type = fn_det_out_type(TT_DATA_A, TT_DATA_B)
-    out_window_bytes = TP_NUM_FRAMES * TP_DIM_A * TP_DIM_B * com.sizeof(out_type)
+    out_type = com.fn_det_out_type(TT_DATA_A, TT_DATA_B, out_mul_type_dict)
+    out_kernel_bytes = TP_NUM_FRAMES * TP_DIM_A * TP_DIM_B * com.sizeof(out_type) // TP_SSR
 
     legal_set_TP_API = [com.API_BUFFER, com.API_STREAM]
-    if out_window_bytes > io_bytes_max_per_tile:
+    if out_kernel_bytes > io_bytes_max_per_tile:
         legal_set_TP_API.remove(com.API_BUFFER)
 
     param_dict = {"name": "TP_API", "enum": legal_set_TP_API}
@@ -294,11 +300,12 @@ def validate_TP_API(args):
     TP_DIM_A = args["TP_DIM_A"]
     TP_DIM_B = args["TP_DIM_B"]
     TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
+    TP_SSR = args["TP_SSR"]
     TP_API = args["TP_API"]
-    return fn_validate_api_val(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_API)
+    return fn_validate_api_val(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_SSR, TP_API)
 
-def fn_validate_api_val(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_API):
-    param_dict = fn_update_TP_API(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES)
+def fn_validate_api_val(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_SSR, TP_API):
+    param_dict = fn_update_TP_API(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_SSR)
     return com.validate_legal_set(param_dict["enum"], "TP_API", TP_API)
 
 
@@ -380,49 +387,6 @@ def fn_validate_TP_SAT(TP_SAT):
 
 
 ## utility functions
-def fn_det_out_type(TT_DATA_A, TT_DATA_B):
-    if TT_DATA_A == "int16" and TT_DATA_B == "int16":
-        return "int16"
-    if TT_DATA_A == "int16" and TT_DATA_B == "int32":
-        return "int32"
-    if TT_DATA_A == "int16" and TT_DATA_B == "cint16":
-        return "cint16"
-    if TT_DATA_A == "int16" and TT_DATA_B == "cint32":
-        return "cint32"
-    if TT_DATA_A == "int32" and TT_DATA_B == "int16":
-        return "int32"
-    if TT_DATA_A == "int32" and TT_DATA_B == "int32":
-        return "int32"
-    if TT_DATA_A == "int32" and TT_DATA_B == "cint16":
-        return "cint32"
-    if TT_DATA_A == "int32" and TT_DATA_B == "cint32":
-        return "cint32"
-    if TT_DATA_A == "cint16" and TT_DATA_B == "int16":
-        return "cint16"
-    if TT_DATA_A == "cint16" and TT_DATA_B == "int32":
-        return "cint32"
-    if TT_DATA_A == "cint16" and TT_DATA_B == "cint16":
-        return "cint16"
-    if TT_DATA_A == "cint16" and TT_DATA_B == "cint32":
-        return "cint32"
-    if TT_DATA_A == "cint32" and TT_DATA_B == "int16":
-        return "cint32"
-    if TT_DATA_A == "cint32" and TT_DATA_B == "int32":
-        return "cint32"
-    if TT_DATA_A == "cint32" and TT_DATA_B == "cint16":
-        return "cint32"
-    if TT_DATA_A == "cint32" and TT_DATA_B == "cint32":
-        return "cint32"
-    if TT_DATA_A == "float" and TT_DATA_B == "float":
-        return "float"
-    if TT_DATA_A == "float" and TT_DATA_B == "cfloat":
-        return "cfloat"
-    if TT_DATA_A == "cfloat" and TT_DATA_B == "float":
-        return "cfloat"
-    if TT_DATA_A == "cfloat" or TT_DATA_B == "cfloat":
-        return "cfloat"
-
-
 #### port ####
 def get_port_info(portname, dir, dataType, dim, numFrames, apiType, vectorLength):
     windowSize = dim * fn_size_by_byte(dataType)
@@ -475,7 +439,7 @@ def info_ports(args):
         portsOut = get_port_info(
             portname="out",
             dir="out",
-            dataType=fn_det_out_type(TT_DATA_A, TT_DATA_B),
+            dataType=com.fn_det_out_type(TT_DATA_A, TT_DATA_B, out_mul_type_dict),
             dim=TP_DIM_A * TP_DIM_B / TP_SSR,
             numFrames=TP_NUM_FRAMES,
             apiType="window",
@@ -503,7 +467,7 @@ def info_ports(args):
         portsOut = get_port_info(
             portname="out",
             dir="out",
-            dataType=fn_det_out_type(TT_DATA_A, TT_DATA_B),
+            dataType=com.fn_det_out_type(TT_DATA_A, TT_DATA_B, out_mul_type_dict),
             dim=TP_DIM_A * TP_DIM_B / TP_SSR,
             numFrames=TP_NUM_FRAMES,
             apiType="stream",
@@ -526,6 +490,8 @@ def generate_graph(graphname, args):
     TP_SHIFT = args["TP_SHIFT"]
     TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
+    TP_RND = args["TP_RND"]
+    TP_SAT = args["TP_SAT"]
 
     # Use formatted multi-line string to avoid a lot of \n and \t
     code = f"""
@@ -547,7 +513,9 @@ public:
     {TP_NUM_FRAMES}, //TP_NUM_FRAMES
     {TP_SHIFT}, //TP_SHIFT
     {TP_API}, //TP_API
-    {TP_SSR} //TP_SSR
+    {TP_SSR}, //TP_SSR
+    {TP_RND}, //TP_RND
+    {TP_SAT} //TP_SAT
   > outer_tensor;
 
   {graphname}() : outer_tensor() {{

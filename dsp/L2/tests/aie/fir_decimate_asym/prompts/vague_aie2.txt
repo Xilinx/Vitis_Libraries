@@ -1,0 +1,1 @@
+Decimate complex 16-bit samples by 4 on an AIE-ML device.

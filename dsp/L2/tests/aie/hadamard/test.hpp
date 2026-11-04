@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,11 @@
 #define UUT_GRAPH hadamard_graph
 #endif
 
+#ifdef USING_UUT
+#include "hadamard_native_generated_graph/hadamard_generated_graph.h"
+#else
 #include QUOTE(UUT_GRAPH.hpp)
+#endif
 
 using namespace adf;
 
@@ -74,10 +78,14 @@ class test_graph : public graph {
         printf("ROUND_MODE        = %d \n", ROUND_MODE);
         printf("SAT_MODE          = %d \n", SAT_MODE);
 
-        // Hadamard sub-graph
+// Hadamard sub-graph
+#ifdef USING_UUT
+        hadamard_native_generated_graph hadamardGraph;
+#else
         dsplib::hadamard::UUT_GRAPH<T_DATA_A, T_DATA_B, DIM_SIZE, NUM_FRAMES, SHIFT, API_IO, UUT_SSR, ROUND_MODE,
                                     SAT_MODE>
             hadamardGraph;
+#endif
 
         // Make connections
         for (int i = 0; i < UUT_SSR; i++) {
@@ -96,9 +104,9 @@ class test_graph : public graph {
             connect<>(hadamardGraph.out[i], out[i].in[0]);
 #ifdef USING_UUT
 #if (SINGLE_BUF == 1 && API_IO == 0) // Single buffer constraint applies for windows implementations
-            single_buffer(hadamardGraph.getKernels()[i].in[0]);
-            single_buffer(hadamardGraph.getKernels()[i].in[1]);
-            single_buffer(hadamardGraph.getKernels()[i].out[0]);
+            single_buffer(hadamardGraph.hadamard.getKernels()[i].in[0]);
+            single_buffer(hadamardGraph.hadamard.getKernels()[i].in[1]);
+            single_buffer(hadamardGraph.hadamard.getKernels()[i].out[0]);
             printf("INFO: Single Buffer Constraint applied to input and output buffers of kernel %d.\n", i);
 
 #endif

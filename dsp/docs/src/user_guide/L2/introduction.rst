@@ -43,6 +43,8 @@ AMD documentation is organized around a set of standard design processes to help
 
    -  :ref:`DSP_CONVOLUTION_CORRELATION`
 
+   -  :ref:`DSP_Cumsum`
+
    -  :ref:`DSP_DDS_MIXER`
 
    -  :ref:`DSP_DFT`
@@ -74,6 +76,8 @@ AMD documentation is organized around a set of standard design processes to help
    -  :ref:`DSP_OUTER_TENSOR_PRODUCT`
 
    -  :ref:`DSP_SAMPLE_DELAY`
+
+   -  :ref:`DSP_TRANSPOSE`
 
    -  :ref:`DSP_WIDGET_API_CAST`
 

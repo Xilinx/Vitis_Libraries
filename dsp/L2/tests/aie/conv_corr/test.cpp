@@ -58,14 +58,28 @@ int main(void) {
             }
         }
 
+// When USING_UUT is defined, conv_corrGraph is the AIE-compiler-generated native wrapper class
+// (conv_corr_native_generated_graph), which does not expose update_rtp() directly.
+// The wrapper contains an inner member named conv_corr_graph (of type conv_corr_graph<...>)
+// that does have update_rtp(). Route through that member for the UUT path.
+#ifdef USING_UUT
+        conv_corr_TestHarness.conv_corrGraph.conv_corr_graph.update_rtp(
+            conv_corr_TestHarness, conv_corr_TestHarness.rtpVecLen, rtpFLen, rtpGLen);
+#else
         conv_corr_TestHarness.conv_corrGraph.update_rtp(conv_corr_TestHarness, conv_corr_TestHarness.rtpVecLen, rtpFLen,
                                                         rtpGLen);
+#endif
         conv_corr_TestHarness.run(1);
         conv_corr_TestHarness.wait();
     }
 
+#ifdef USING_UUT
+    conv_corr_TestHarness.conv_corrGraph.conv_corr_graph.update_rtp(conv_corr_TestHarness,
+                                                                    conv_corr_TestHarness.rtpVecLen, REF_F_LEN, G_LEN);
+#else
     conv_corr_TestHarness.conv_corrGraph.update_rtp(conv_corr_TestHarness, conv_corr_TestHarness.rtpVecLen, REF_F_LEN,
                                                     G_LEN);
+#endif
     conv_corr_TestHarness.run(NITER / 2);
     conv_corr_TestHarness.wait();
 

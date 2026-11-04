@@ -1,0 +1,18 @@
+
+{
+    "parameter_constraints": {
+        "AIE_VARIANT": 1,
+        "TT_DATA": ["float"],
+        "TP_DIM_ROWS": 8,
+        "TP_DIM_COLS": 8,
+        "TP_PASSES": 1
+    },
+    "qor_constraints": {
+        "frame rate (kHz)": ">10"
+    },
+    "sort_by": {
+        "num aie": "ascending",
+        "frame rate (kHz)": "descending"
+    },
+    "confidence": 1
+}

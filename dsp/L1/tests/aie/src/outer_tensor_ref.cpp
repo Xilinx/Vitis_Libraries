@@ -28,8 +28,8 @@ namespace dsp {
 namespace aie {
 namespace outer_tensor {
 template <typename T_A, typename T_B>
-outTypeMult_t<T_A, T_B> scalar_mult(T_A a, T_B b, const int shift, unsigned int t_rnd, unsigned int t_sat) {
-    using out_t = outTypeMult_t<T_A, T_B>;
+outType_t<T_A, T_B> scalar_mult(T_A a, T_B b, const int shift, unsigned int t_rnd, unsigned int t_sat) {
+    using out_t = outType_t<T_A, T_B>;
     out_t ret_val;
     T_accRef<T_A> aAcc;
     T_accRef<T_B> bAcc;
@@ -127,8 +127,8 @@ template <typename TT_DATA_A,
 void outer_tensor_ref<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_SHIFT, TP_RND, TP_SAT>::
     outer_tensor_main(input_buffer<TT_DATA_A>& inWindowA,
                       input_buffer<TT_DATA_B>& inWindowB,
-                      output_buffer<outTypeMult_t<TT_DATA_A, TT_DATA_B> >& outWindow0) {
-    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+                      output_buffer<outType_t<TT_DATA_A, TT_DATA_B> >& outWindow0) {
+    using out_t = outType_t<TT_DATA_A, TT_DATA_B>;
     TT_DATA_A dA_in;
     TT_DATA_B dB_in;
     out_t d_out;

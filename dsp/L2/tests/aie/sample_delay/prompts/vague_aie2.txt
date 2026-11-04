@@ -1,0 +1,1 @@
+Delay a stream of 32-bit integer samples on an AIE-ML device.

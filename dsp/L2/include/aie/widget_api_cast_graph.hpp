@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,6 +161,7 @@ class widget_api_cast_graph : public graph {
                 //                m_kernel.in[i]);
                 connect(in[i], m_kernel.in[i]);
                 dimensions(m_kernel.in[i]) = {TP_WINDOW_VSIZE + TP_HEADER_BYTES / sizeof(TT_DATA)};
+                conditional_single_buffer<TT_DATA, TP_WINDOW_VSIZE + TP_HEADER_BYTES / sizeof(TT_DATA)>(m_kernel.in[i]);
             }
         } else if (TP_IN_API == kStreamAPI) {
             for (int i = 0; i < TP_NUM_INPUTS; i++) {
@@ -175,6 +176,8 @@ class widget_api_cast_graph : public graph {
                 constexpr unsigned int outWindowInterleaved =
                     (TP_IN_API == kWindowAPI) ? TP_WINDOW_VSIZE * TP_NUM_INPUTS : TP_WINDOW_VSIZE;
                 dimensions(m_kernel.out[i]) = {outWindowInterleaved + TP_HEADER_BYTES / sizeof(TT_DATA)};
+                conditional_single_buffer<TT_DATA, outWindowInterleaved + TP_HEADER_BYTES / sizeof(TT_DATA)>(
+                    m_kernel.out[i]);
             }
         } else if (TP_OUT_API == kStreamAPI) {
             for (int i = 0; i < TP_NUM_OUTPUT_CLONES; i++) {

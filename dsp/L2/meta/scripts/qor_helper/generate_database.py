@@ -18,10 +18,29 @@
 import json
 import pandas as pd
 import numpy as np
-import random
 from scipy.spatial.distance import cdist
 from config_sampler import ConfigSampler
+from models import declare_model, preprocess_dataframe
 
+def generate_configs_df(configs_dict, reverse_translation, canary_test, niter, clean_test):
+    generated_df = pd.DataFrame.from_dict(configs_dict)
+    generated_df = generated_df.rename(columns=reverse_translation)
+    for key in canary_test:
+        if key not in generated_df.columns:
+                generated_df[key] = canary_test[key]
+    keep_cols = list(canary_test.keys())   # drop columns like "weights"
+    generated_df = generated_df[keep_cols]
+    generated_df["NITER"] = niter
+    generated_df["CLEAN_TEST"] = int(clean_test)
+    generated_df = generated_df.astype(str)
+    generated_df["name"] = "test_"
+    generated_df["name"] += [str(i) for i in range(len(generated_df))]
+    generated_df["name"] += "_aie"
+    generated_df["name"] += generated_df["AIE_VARIANT"].apply(lambda x: str(x))
+    generated_df["name"] += "_hw_qor"
+    generated_df = generated_df.set_index(generated_df["name"])
+    generated_df = generated_df.drop(columns=["name"])
+    return generated_df
 
 def best_candidate_algorithm_iteration(blue_set: np.array, candidates: np.array):
     """Iteration of the best candidate algorithm for generating blue noise using scipy."""
@@ -34,40 +53,29 @@ if __name__ == "__main__":
     import argparse
     import os
 
-    with open("data/config_translation.json", "r") as file:
-        FORWARD_CONFIG_TRANSLATION = json.load(file)
-
     parser = argparse.ArgumentParser(
         prog="generate_database",
         description="""
             This is a utility script to be used to generate a database of configs which will be simulated for
-            training data for the QoR models. Data can be generated uniformly (unbiased), or biased by a given
-            benchmark suite. If a benchmark csv is provided, users can fit ordinal data to a
-            lognormal distribution, and categorical data to a categorical distribution.
+            training data for the QoR models. Data can be generated uniformly or according to a blue distribution in 
+            vector embedded space.
             """
     )
-    parser.add_argument("-ip")
+    parser.add_argument("-ip") 
     parser.add_argument("--num_generated_configs", type=int, default=1000, help="number of configs to generate.")
-    parser.add_argument("--num_partitions", type=int, default=1, help="number of partitions to break the dataset into.")
     parser.add_argument("--generated_csv_filepath", help="output path for generated csv file.")
-    parser.add_argument("--checkpoint_pickup", help="If true, the script will comb the test dir for an existing database and append to it.")
-    parser.add_argument("--seed", type=int, default=42, help="seed for random number generators.")
-    parser.add_argument("--runmake", type=int, default=0, help="flag for if script is being piped into runmake.")
+    parser.add_argument("--niter", type=int, default=16, help="number of iterations to run for each config.")
+    parser.add_argument("--clean_test", action="store_true", default=False, help="flag for if clean test should be run.")
+    parser.add_argument("--runmake", action="store_true", default=False, help="flag for if script is being piped into runmake.")
+    parser.add_argument("--uniform", action="store_true", default=False, help="enumerate all legal configs exhaustively then sample uniformly at random.")
+    parser.add_argument("--blue", action="store_true", default=True, help="run blue noise in preprocessor embedding space (encodes categorical params).")
     args = parser.parse_args()
 
     ip_name = args.ip
     num_generated_configs = args.num_generated_configs
-    num_partitions = args.num_partitions
     generated_csv_filepath = args.generated_csv_filepath
-    checkpoint_pickup = args.checkpoint_pickup
-    seed = args.seed
     runmake = args.runmake
-
-    num_configs_per_partition = num_generated_configs // num_partitions
-
-    random.seed(seed)
-    np.random.seed(seed)
-
+    niter = args.niter
 
     with open("data/model_params.json", 'r') as file:
         MODEL_PARAMS = json.load(file)
@@ -87,120 +95,91 @@ if __name__ == "__main__":
         multi_params_dict = json.load(file)
         test_0_tool_canary_aie = multi_params_dict["test_0_tool_canary_aie"]
 
+    with open("data/config_translation.json", "r") as file:
+        FORWARD_CONFIG_TRANSLATION = json.load(file)
+
     REVERSE_CONFIG_TRANSLATION = {}
     for key in test_0_tool_canary_aie:
         if key in FORWARD_CONFIG_TRANSLATION:
             val = FORWARD_CONFIG_TRANSLATION[key]
             REVERSE_CONFIG_TRANSLATION[val] = key
     
-    ordinal_coords = []
-    generated_configs = []
-    n_invalid_configs = 0
-    n_duplicated_configs = 0
-    n_bugged_configs = 0
-    n_samples = 0
 
-    database = {}
-    if checkpoint_pickup:
-        for file in os.listdir(sampler.tests_folder):
-            if file.startswith("multi_params_database_"):
-                print(f"Loading {file}")
-                with open(f"{sampler.tests_folder}/{file}", "r") as file:
-                    database |= json.load(file) # append partition
+    if args.uniform:
+        print("Enumerating all legal configs exhaustively...")
+        all_configs_df = sampler.generate_configs(config_limit=10_000_000)
+        print(f"Total legal configs found: {len(all_configs_df)}")
+        sampled_df = all_configs_df.sample(n=num_generated_configs)
+        generated_configs = sampled_df.to_dict(orient='records')
+        print(f"Sampled {len(generated_configs)} configs uniformly at random.")
+
+        generated_df = generate_configs_df(generated_configs, REVERSE_CONFIG_TRANSLATION, test_0_tool_canary_aie, niter, args.clean_test)
+        filename = f"{sampler.tests_folder}/multi_params_database_uniform.json"
+        generated_dict = generated_df.to_dict(orient="index")
+        with open(filename, "w") as json_file:
+            json.dump(generated_dict, json_file, indent=4)
+        print(f"Saved to {filename}")
+        if generated_csv_filepath:
+            generated_df.to_csv(generated_csv_filepath, index=False)
+        exit(0)
+
+    elif args.blue:
+        # Step 1. Generate 1M white points for us to fit embedding pipeline and draw samples from.
+        N = 100 * num_generated_configs
+        white_noise_configs = []
+        print(f"Generating {N} white noise configs...")
+        n = 0
+        while len(white_noise_configs) < N:
+            config = sampler.sample_path()
+            if config and config != "BUGGED":
+                white_noise_configs.append(config)
+            n += 1
+            if n % 10_000 == 0:
+                print(f"{n} trials, {len(white_noise_configs)} white noise configs generated...")
+
+        candidates_df = pd.DataFrame(white_noise_configs)
+        candidates_df = preprocess_dataframe(candidates_df, independent_params, [], FORWARD_CONFIG_TRANSLATION, sampler.aie_mapper)
+        candidates_df = candidates_df.drop_duplicates()
         
-    for config in database:
-        config_sample = {k:v for k,v in database[config].items() if k in FORWARD_CONFIG_TRANSLATION}
-        config_sample = {FORWARD_CONFIG_TRANSLATION[k]:v for k,v in config_sample.items()}
-        config_sample = {k:v for k,v in config_sample.items() if k in independent_params}
-        config_sample = {k:(int(v) if v.isnumeric() else v) for k,v in config_sample.items()}
-        generated_configs.append(config_sample)
+        # Scrub duplicates from list of configs...
+        indices = list(candidates_df.index)
+        white_noise_configs = [white_noise_configs[i] for i in indices]
+        candidates_df = candidates_df.reset_index(drop=True)
+        print(f"{len(candidates_df)} after duplicates dropped.")
 
-        sample_ordinal = [v for k,v in config_sample.items() if k in ordinal_params]
-        sample_ordinal = [np.log(v+1) for v in sample_ordinal]
-        ordinal_coords.append(sample_ordinal)
-    del database
-
-    def generate_configs_df(configs_dict, start_idx, end_idx):
-        generated_df = pd.DataFrame.from_dict(configs_dict)
-        generated_df = generated_df.rename(columns=REVERSE_CONFIG_TRANSLATION)
-        for key in test_0_tool_canary_aie:
-            if key not in generated_df.columns:
-                    generated_df[key] = test_0_tool_canary_aie[key]
-        keep_cols = list(test_0_tool_canary_aie.keys())   # drop columns like "weights"
-        generated_df = generated_df[keep_cols]
-
-        generated_df["NITER"] = 16
-        generated_df = generated_df.astype(str)
-        generated_df["name"] = "test_"
-        generated_df["name"] += [str(i) for i in range(start_idx, end_idx)]
-        generated_df["name"] += "_CLEAN_aie"
-        generated_df["name"] += generated_df["AIE_VARIANT"].apply(lambda x: str(x))
-        generated_df["name"] += "_hw_database"
-        generated_df = generated_df.set_index(generated_df["name"])
-        generated_df = generated_df.drop(columns=["name"])
-        return generated_df
-
-    print("generating configs...")
-    while len(generated_configs) < num_generated_configs:
+        # Step 2. Fit embedding pipeline based on white samples.
+        embedding_model = declare_model("linear", model_params, pca_variance=0.99)
+        embedding_preprocessor = embedding_model.preprocessor
+        embedding_preprocessor.fit(candidates_df)
+        embedded_candidates = embedding_preprocessor.transform(candidates_df)
+        print(f"Embedding pipeline fitted and candidates embedded shape={embedded_candidates.shape}.")
         
-        n_candidates = (len(generated_configs)) + 1
-        config_candidates = []
-        ordinal_candidates = []
-        while len(config_candidates) < n_candidates:
+        # Step 3. Select blue noise configs using best candidate algorithm in embedding space.
+        print(f"Selecting {num_generated_configs} blue noise configs in embedding space...")
+        blue_configs = [white_noise_configs[0]]
+        blue_embeddings = np.zeros((num_generated_configs, embedded_candidates.shape[1]))   # initialize full array.
+        blue_embeddings[0] = embedded_candidates[0]
 
-            config_sample = sampler.sample_path()
-            n_samples += 1
+        for i in range(1, num_generated_configs):
+            perm = np.random.permutation( len(embedded_candidates) )[:i+1]
+            bluest_with_respect_to_perm = best_candidate_algorithm_iteration(blue_embeddings[:i], embedded_candidates[perm])
+            bluest_idx = perm[bluest_with_respect_to_perm] # translated idx with respect to the original set.
+            blue_configs.append(white_noise_configs[bluest_idx])
+            blue_embeddings[i] = embedded_candidates[bluest_idx]
 
-            if n_samples % 100000 == 0:
-                print(f"{ip_name} : {n_samples} trialled. {len(generated_configs)} configs generated. {n_bugged_configs} bugged configs. {n_invalid_configs} invalid configs. {n_duplicated_configs} duplicate configs.")
-            
-            if config_sample == "BUGGED":
-                n_bugged_configs +=1
-                continue
+            if i % 100 == 0:
+                print(f"{i} blue configs generated...")
 
-            if not config_sample:
-                n_invalid_configs += 1
-                continue
+        generated_df = generate_configs_df(blue_configs, REVERSE_CONFIG_TRANSLATION, test_0_tool_canary_aie, niter, args.clean_test)
+        generated_dict = generated_df.to_dict(orient="index")
 
-            sample_ordinal = [v for k,v in config_sample.items() if k in ordinal_params]
-            sample_ordinal = [np.log(v+1) for v in sample_ordinal]
+        if args.runmake:
+            filename = f"{sampler.tests_folder}/multi_params_random.json"
+        else:   
+            filename = f"{sampler.tests_folder}/multi_params_database.json"
 
-            config_candidates.append(config_sample)
-            ordinal_candidates.append(sample_ordinal)
+        with open(filename, "w") as json_file:
+            json.dump(generated_dict, json_file, indent=4)
 
-        if len(generated_configs) == 0:
-            ordinal_coords.append(sample_ordinal)
-            generated_configs.append(config_sample)
-            continue
-
-        candidates = np.array(ordinal_candidates)
-        existing = np.array(ordinal_coords)
-        bluest_idx = best_candidate_algorithm_iteration(existing, candidates)
-
-        if config_candidates[bluest_idx] in generated_configs:
-            n_duplicated_configs += 1
-            continue
-        
-        generated_configs.append(config_candidates[bluest_idx])
-        ordinal_coords.append(ordinal_candidates[bluest_idx])
-
-        if len(generated_configs) % num_configs_per_partition == 0:
-            if generated_csv_filepath:
-                generated_df = generate_configs_df(generated_configs, 0, len(generated_configs))
-                generated_df.to_csv(generated_csv_filepath, index=False)
-            
-            end_idx = len(generated_configs)
-            start_idx = end_idx - num_configs_per_partition
-            file_idx = start_idx // num_configs_per_partition
-            
-            if runmake:
-                filename = f"{sampler.tests_folder}/multi_params_random.json"
-            else:   
-                filename = f"{sampler.tests_folder}/multi_params_database_{file_idx}.json"
-            
-            generated_df = generate_configs_df(generated_configs[start_idx : end_idx], start_idx, end_idx)
-            generated_dict = generated_df.to_dict(orient="index")
-            with open(filename, "w") as json_file:
-                json.dump(generated_dict, json_file, indent=4)
-        
-    print(f"{ip_name} : {n_samples} trialled. {len(generated_configs)} configs generated. {n_bugged_configs} bugged configs. {n_invalid_configs} invalid configs. {n_duplicated_configs} duplicate configs.")
+        if generated_csv_filepath:
+            generated_df.to_csv(generated_csv_filepath, index=False)

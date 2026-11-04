@@ -35,10 +35,15 @@ TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "py
 VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3
 
 NUM_PORTS := 1
+
+include $(HELPER_ROOT_DIR)/L2/tests/aie/out_mul_types.mk
+T_DATA_OUT := $(call fn_det_out_type,$(T_DATA_A),$(T_DATA_B))
+
 CASC_LEN := 1
 
 
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
+STATUS_JSON = ./logs/status_$(UUT_KERNEL)_$(PARAMS).json
 PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) T_DATA_A $(T_DATA_A) T_DATA_B $(T_DATA_B) DIM_A_ROWS $(DIM_A_ROWS) DIM_A_COLS $(DIM_A_COLS) DIM_B_ROWS $(DIM_B_ROWS) DIM_B_COLS $(DIM_B_COLS) NUM_FRAMES $(NUM_FRAMES) API_IO $(API_IO) SHIFT $(SHIFT) UUT_SSR $(UUT_SSR) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE)
 
 $(HELPER): create_input sim_ref prep_x86_out
@@ -79,9 +84,11 @@ prep_aie_out:
 get_diff:
 	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_card_cut.pl -f ./data/uut_output.txt --rows $(DIM_OUT_SIZE) --cols 1 --ssrSplit $(UUT_SSR) --casc $(CASC_LEN) --zip -type $(T_DATA_A) -findOutType $(T_DATA_B) -n $(NITER) --plioWidth 64;\
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE)
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py functional_check $(STATUS_JSON) ./logs/diff.txt
 
 get_status:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP) SINGLE_BUF $(SINGLE_BUF)
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py init $(STATUS_JSON) UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP) NITER $(NITER)
 
 get_latency:
 	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT)
@@ -89,6 +96,10 @@ get_latency:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_inputA_0_0.txt ./data/uut_output_0.txt $(STATUS_FILE) $(WINDOW_VSIZE_OUT) $(NITER)
 
 	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_qor.py -t_in_file T_inputA_0_0.txt -t_out_file uut_output_0.txt -status_file_dir $(STATUS_FILE) -num_of_samples $(WINDOW_VSIZE_OUT) -niter $(NITER) -casc_len 1 -aiesim_out_dir ./aiesimulator_output -ip kronecker_main
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py qor $(STATUS_JSON) Work $(NITER) $(NUM_FRAMES) T_inputA_ uut_output_ 64 $(T_DATA_OUT) --verbose
+
+get_memory:
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py harvest $(STATUS_JSON) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts Work
 
 create_config:
 	echo $(STATUS_FILE)

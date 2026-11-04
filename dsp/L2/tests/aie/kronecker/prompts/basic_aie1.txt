@@ -1,0 +1,3 @@
+Configure a Kronecker product for an AIE1 device of a 16x2 cint16 matrix A and a 16x2
+int16 matrix B, window output, SSR 1, one frame per call, no shift, round-half-up and
+saturation.

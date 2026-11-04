@@ -77,9 +77,10 @@ hadamard<TT_DATA_A, TT_DATA_B, TP_DIM, TP_NUM_FRAMES, TP_SHIFT, TP_API, TP_SSR, 
     input_buffer<TT_DATA_A>& __restrict inWindowA,
     input_buffer<TT_DATA_B>& __restrict inWindowB,
     output_buffer<out_t>& __restrict outWindow) {
-    static constexpr unsigned int vecSampleNumA = 256 / 8 / vectByte<TT_DATA_A, TT_DATA_B>().val_byteA;
-    static constexpr unsigned int vecSampleNumB = 256 / 8 / vectByte<TT_DATA_A, TT_DATA_B>().val_byteB;
-    static constexpr unsigned int vecSampleNumOut = 256 / 8 / vectByte<TT_DATA_A, TT_DATA_B>().val_byteOut;
+    static constexpr unsigned int vecSampleNumA = __MAX_READ_WRITE__ / 8 / vectByte<TT_DATA_A, TT_DATA_B>().val_byteA;
+    static constexpr unsigned int vecSampleNumB = __MAX_READ_WRITE__ / 8 / vectByte<TT_DATA_A, TT_DATA_B>().val_byteB;
+    static constexpr unsigned int vecSampleNumOut =
+        __MAX_READ_WRITE__ / 8 / vectByte<TT_DATA_A, TT_DATA_B>().val_byteOut;
 
     static constexpr unsigned int vecSampleNumBuff = std::max(vecSampleNumA, vecSampleNumB);
 

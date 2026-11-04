@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import json
 import os
 
 # Define AI Engine variants
@@ -142,6 +143,17 @@ def fnVecSampleNumMin(AIE_VARIANT, TT_DATA):
 def fnVecSampleNumMax(AIE_VARIANT, TT_DATA):
     return k_max_read_write_bytes[AIE_VARIANT] // sizeof(TT_DATA)
 
+def fnVecSampleNumGCD(AIE_VARIANT, TT_DATA, TP_DIM):
+    """
+    Returns the greatest common divisor for vecSampleNum into a TP_DIM (i.e. largest read possible).
+    This function only assumes 2 read sizes (max and min). If devices support >2 read sizes this will need refactored.
+    """
+    if TP_DIM % fnVecSampleNumMax(AIE_VARIANT, TT_DATA) == 0:
+        return fnVecSampleNumMax(AIE_VARIANT, TT_DATA)
+    elif TP_DIM % fnVecSampleNumMin(AIE_VARIANT, TT_DATA) == 0:
+        return fnVecSampleNumMin(AIE_VARIANT, TT_DATA)
+    return False
+
 def fnTrunc(x, y):
     a = int(x)
     b = int(y)
@@ -250,6 +262,23 @@ def fn_is_32b_type(type):
 
 def fn_input_window_size(TP_INPUT_WINDOW_VSIZE, TT_DATA):
     return int(TP_INPUT_WINDOW_VSIZE) * fn_size_by_byte(TT_DATA)
+
+
+k_supports_acc64 = {
+    AIE: False,
+    AIE_ML: True,
+    AIE_MLv2: True,
+    AIE_2P: True
+}
+
+def fn_det_out_type(TT_DATA_A, TT_DATA_B, out_mul_type: dict):
+    return out_mul_type[TT_DATA_A][TT_DATA_B]
+
+def fn_det_acc_type(TT_DATA_A, TT_DATA_B, AIE_VARIANT, acc_mul_type: dict):
+    if k_supports_acc64[AIE_VARIANT]:
+        return acc_mul_type["acc64"][TT_DATA_A][TT_DATA_B]
+    else:
+        return acc_mul_type["acc48"][TT_DATA_A][TT_DATA_B]
 
 
 #### internal validation functions ####
@@ -442,18 +471,38 @@ def get_parameter_enum_info(portname, default, enum_list, vectorLength=None):
         for idx in range((vectorLength if vectorLength else 1))
     ]  # do just one port if vectorLength=None
 
-def validate_rnd_mode(AIE_VARIANT, legal_set, param_value):
+def fn_get_rnd_mode_map(AIE_VARIANT):
     if AIE_VARIANT == AIE:
-        rnd_mode_map = k_rnd_mode_map_aie
+        return k_rnd_mode_map_aie
     elif AIE_VARIANT == AIE_ML:
-        rnd_mode_map = k_rnd_mode_map_aie_ml
+        return k_rnd_mode_map_aie_ml
     elif AIE_VARIANT == AIE_MLv2:
-        rnd_mode_map = k_rnd_mode_map_aie_mlv2
+        return k_rnd_mode_map_aie_mlv2
 
-    if param_value in rnd_mode_map.keys():
-        param_value = rnd_mode_map[param_value]
-    return validate_legal_set(legal_set, "TP_RND", param_value)
-    
+
+# formats rounding mode values as "value (name)", e.g. "12 (rnd_conv_even)"
+def fn_rnd_mode_str(AIE_VARIANT, rnd_values):
+    rnd_names = {v: k for k, v in fn_get_rnd_mode_map(AIE_VARIANT).items()}
+    return ", ".join(f"{v} ({rnd_names[v]})" for v in rnd_values)
+
+
+def validate_rnd_mode(AIE_VARIANT, legal_set, TP_RND):
+    rnd_mode_map = fn_get_rnd_mode_map(AIE_VARIANT)
+    rnd_names = {v: k for k, v in rnd_mode_map.items()}
+    rnd_value = rnd_mode_map.get(TP_RND, TP_RND)  # name or integer
+    if rnd_value in legal_set:
+        return isValid
+    legal_str = fn_rnd_mode_str(AIE_VARIANT, legal_set)
+    if rnd_value in rnd_names:
+        return isError(
+            f"TP_RND = {rnd_value} ({rnd_names[rnd_value]}) is not supported by this IP on "
+            f"{k_aie_variant[AIE_VARIANT]}. Legal values are {legal_str}."
+        )
+    return isError(
+        f"TP_RND = {TP_RND} is not a valid rounding mode on {k_aie_variant[AIE_VARIANT]}. "
+        f"Legal values are {legal_str}."
+    )
+
 
 def validate_legal_set(legal_set, param_name, param_value):
     if not legal_set:
@@ -467,6 +516,16 @@ def validate_legal_set(legal_set, param_name, param_value):
             f"{param_name} ({param_value}) is not in the legal set of {legal_set}"
         )
 
+def validate_all_legal_sets(legal_sets, param_name, param_value):
+
+    # Find the intersection of all legal sets, i.e. the actual combined legal set
+    intersection_legal_set = [
+        item for item in legal_sets[0] if all(item in legal_set for legal_set in legal_sets[1:])
+    ]
+
+    # Validate the parameter value against the intersection of all legal sets
+    return validate_legal_set(intersection_legal_set, param_name, param_value)
+
 
 def validate_range(range, param_name, param_value):
     if len(range) > 2:
@@ -479,6 +538,28 @@ def validate_range(range, param_name, param_value):
     else:
         return isError(f"{param_name} ({param_value}) is not in the range of {range}")
 
+def validate_all_ranges(ranges, param_name, param_value):
+
+    # Ensure maximuma and minima exist
+    for idx, range in enumerate(ranges):
+        if len(range) > 2:
+            raise ValueError(
+                f"Length of range list (index {idx}) is {len(range)}. Expecting minimum and maximum values only!"
+            )
+        
+    # Find overlap range (intersection) - Error if doesn't exist
+    all_range_min = max(lo for lo, _ in ranges)
+    all_range_max = min(hi for _, hi in ranges)
+    if all_range_min > all_range_max:
+        raise ValueError(
+            f"Ranges do not overlap. Computed overlap range for {param_name} is [{all_range_min}, {all_range_max}]."
+        )
+
+    # Validate parameter value in range
+    if param_value >= all_range_min and param_value <= all_range_max:
+        return isValid
+    else:
+        return isError(f"{param_name} ({param_value}) is not in the range of [{all_range_min}, {all_range_max}]")
 
 def remove_from_set(remove_list, original_list):
     for k in remove_list:

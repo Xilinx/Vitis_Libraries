@@ -1,0 +1,2 @@
+Configure a sample delay for an AIE1 device on cint16 data with window I/O, 256 samples
+per window and a maximum delay of 256 samples.

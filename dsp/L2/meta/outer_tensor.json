@@ -86,37 +86,35 @@
             "updater": {
                 "file": "outer_tensor.py",
                 "function": "update_TP_SSR",
-                "args": [
-                ]
+                "args": []
             },
             "validator": {
                 "file": "outer_tensor.py",
                 "function": "validate_TP_SSR",
-                "args": [
-                ]
+                "args": []
             }
         },
         {
             "name": "TP_NUM_FRAMES",
             "description": "The number of operations per call to the kernel",
             "type": "uint",
+            "test_max": 32,
             "updater": {
                 "file": "outer_tensor.py",
                 "function": "update_TP_NUM_FRAMES",
-                "args": [
-                ]
+                "args": []
             },
             "validator": {
                 "file": "outer_tensor.py",
                 "function": "validate_TP_NUM_FRAMES",
-                "args": [
-                ]
+                "args": []
             }
         },
         {
             "name": "TP_DIM_A",
             "description": "The number of sample inputs in port A.",
             "type": "uint",
+            "test_max": 512,
             "updater": {
                 "file": "outer_tensor.py",
                 "function": "update_TP_DIM_A",
@@ -143,6 +141,7 @@
             "name": "TP_DIM_B",
             "description": "The number of sample inputs in port B.",
             "type": "uint",
+            "test_max": 512,
             "updater": {
                 "file": "outer_tensor.py",
                 "function": "update_TP_DIM_B",
@@ -176,7 +175,8 @@
                     "TT_DATA_B",
                     "TP_DIM_A",
                     "TP_DIM_B",
-                    "TP_NUM_FRAMES"
+                    "TP_NUM_FRAMES",
+                    "TP_SSR"
                 ]
             },
             "validator": {
@@ -188,7 +188,8 @@
                     "TT_DATA_B",
                     "TP_DIM_A",
                     "TP_DIM_B",
-                    "TP_NUM_FRAMES"
+                    "TP_NUM_FRAMES",
+                    "TP_SSR"
                 ]
             }
         },

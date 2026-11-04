@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,11 @@ mixed_radix_fft graph class.
 #define LOC_XBASE 1
 #define LOC_YBASE 0
 
+#ifdef USING_UUT
+#include "mixed_radix_fft_native_generated_graph/mixed_radix_fft_generated_graph.h"
+#else
 #include QUOTE(UUT_GRAPH.hpp)
+#endif
 
 using namespace adf;
 
@@ -94,9 +98,13 @@ class test_graph : public graph {
 
         printf("========================\n");
 
+#ifdef USING_UUT
+        mixed_radix_fft_native_generated_graph mixed_radix_fftGraph;
+#else
         xf::dsp::aie::fft::mixed_radix_fft::UUT_GRAPH<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, ROUND_MODE,
                                                       SAT_MODE, WINDOW_VSIZE, CASC_LEN, API_IO, DYN_PT_SIZE>
             mixed_radix_fftGraph;
+#endif
 
         for (int i = 0; i < kAPIFactor; i++) {
             std::string filenameIn = QUOTE(INPUT_FILE);
@@ -130,10 +138,10 @@ class test_graph : public graph {
 #ifdef USING_UUT
 #if (SINGLE_BUF == 1 && API_IO == 0) // Single buffer constraint applies for windows implementations
         for (int i = 0; i < CASC_LEN; i++) {
-            single_buffer(mixed_radix_fftGraph.getKernels()[i].in[0]);
-            single_buffer(mixed_radix_fftGraph.getKernels()[i].out[0]);
+            single_buffer(mixed_radix_fftGraph.mixed_radix_fft_graph.getKernels()[i].in[0]);
+            single_buffer(mixed_radix_fftGraph.mixed_radix_fft_graph.getKernels()[i].out[0]);
 #if (DYN_PT_SIZE == 1)
-            single_buffer(mixed_radix_fftGraph.getKernels()[i].in[1]);
+            single_buffer(mixed_radix_fftGraph.mixed_radix_fft_graph.getKernels()[i].in[1]);
 #endif
             printf("INFO: Single Buffer Constraint applied to input and output buffers of kernel %d.\n", i);
         }

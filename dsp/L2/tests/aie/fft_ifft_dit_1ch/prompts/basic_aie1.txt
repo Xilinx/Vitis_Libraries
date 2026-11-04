@@ -1,0 +1,5 @@
+Configure a single-channel FFT for an AIE1 device. Use complex 16-bit input
+and output data with 16-bit complex twiddles. It should be a forward FFT of
+1024 points with a fixed (not dynamic) point size, using window (buffer)
+I/O, a single kernel with no cascade, no parallel SSR, and no widgets. Scale
+the output by the FFT size, use round-half-up rounding and saturation.

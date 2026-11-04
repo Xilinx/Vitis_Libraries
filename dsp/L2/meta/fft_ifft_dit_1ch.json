@@ -260,7 +260,9 @@
                     "AIE_VARIANT",
                     "TT_DATA",
                     "TP_POINT_SIZE",
-                    "TP_PARALLEL_POWER"
+                    "TP_PARALLEL_POWER",
+                    "TP_API",
+                    "TP_DYN_PT_SIZE"
                 ]
             },
             "validator": {
@@ -270,7 +272,9 @@
                     "AIE_VARIANT",
                     "TT_DATA",
                     "TP_POINT_SIZE",
-                    "TP_PARALLEL_POWER"
+                    "TP_PARALLEL_POWER",
+                    "TP_API",
+                    "TP_DYN_PT_SIZE"
                 ]
             }
         },

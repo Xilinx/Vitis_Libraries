@@ -53,7 +53,9 @@ template <typename TT_DATA_A,
           unsigned int TP_CASC_LEN = 1, // not used - just to match UUT.
           unsigned int TP_SAT = 1,
           unsigned int TP_SSR = 1,
-          typename TT_OUT_DATA = outType_t<TT_DATA_A, TT_DATA_B> >
+          typename TT_OUT_DATA = outType_t<TT_DATA_A, TT_DATA_B>,
+          unsigned int TP_CONJ_A = 0,
+          unsigned int TP_CONJ_B = 0>
 class matrix_mult_ref_graph : public graph {
    public:
     port<input> inA[1];
@@ -73,7 +75,7 @@ class matrix_mult_ref_graph : public graph {
         m_firKernel = kernel::create_object<
             matrix_mult_ref<TT_DATA_A, TT_DATA_B, TT_OUT_DATA, TP_DIM_A, TP_DIM_AB, TP_DIM_B, TP_SHIFT, TP_RND, TP_SAT,
                             TP_DIM_A_LEADING, TP_DIM_B_LEADING, TP_DIM_OUT_LEADING, TP_INPUT_WINDOW_VSIZE_A,
-                            TP_INPUT_WINDOW_VSIZE_B> >();
+                            TP_INPUT_WINDOW_VSIZE_B, TP_CONJ_A, TP_CONJ_B> >();
         printf("Created object");
         // Make connections
         // Size of window in Bytes.

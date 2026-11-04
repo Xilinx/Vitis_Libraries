@@ -1,0 +1,10 @@
+Create a valid single-rate asymmetric FIR graph configuration for an AIE-ML
+(AIE2) device.
+
+Use real 16-bit integer input data and real 16-bit integer coefficients.
+Use a 16-tap filter, stream I/O with a single input and a single output,
+an SSR of 2, and a cascade length of 2. Make the coefficients reloadable
+at runtime rather than static. Use an input window of 512 samples, a shift
+of 8, rnd_floor rounding (truncate, round towards negative infinity), and
+saturate mode (saturation mode 1). Use coefficient values 2, 3, 4, and so on
+up to 17 (i.e. tap index + 2) for the 16 filter taps, in order.

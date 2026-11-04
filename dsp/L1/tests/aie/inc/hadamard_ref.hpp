@@ -69,7 +69,7 @@ class hadamard_ref
                     : (128 / 8 / (vectByte<TT_DATA_A, TT_DATA_B>().val_byteBuffStream));
 
    public:
-    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using out_t = outType_t<TT_DATA_A, TT_DATA_B>;
 
     // Constructor
     hadamard_ref() {}

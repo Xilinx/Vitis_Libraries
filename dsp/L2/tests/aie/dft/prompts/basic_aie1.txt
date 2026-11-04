@@ -1,0 +1,3 @@
+Configure a DFT for an AIE1 device on cint16 data with cint16 twiddles: forward transform
+of 16 points, 8 frames per call, single kernel, scale by 4 bits with round-half-up and
+saturation.

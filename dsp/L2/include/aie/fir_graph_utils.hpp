@@ -809,11 +809,14 @@ class ssr_kernels {
         if (TP_API == USE_WINDOW_API) {
             connect<>(in, firKernels[0].in[0]);
             dimensions(firKernels[0].in[0]) = {INPUT_WINDOW_BYTESIZE / sizeof(TT_DATA)};
+            conditional_single_buffer<TT_DATA, INPUT_WINDOW_BYTESIZE / sizeof(TT_DATA)>(firKernels[0].in[0]);
             for (int i = 1; i < TP_CASC_LEN; i++) {
                 single_buffer(firKernels[i].in[0]);
                 connect<>(firKernels[i - 1].out[1], firKernels[i].in[0]);
                 dimensions(firKernels[i - 1].out[1]) = {(INPUT_WINDOW_BYTESIZE + MARGIN_BYTESIZE) / sizeof(TT_DATA)};
                 dimensions(firKernels[i].in[0]) = {(INPUT_WINDOW_BYTESIZE + MARGIN_BYTESIZE) / sizeof(TT_DATA)};
+                conditional_single_buffer<TT_DATA, (INPUT_WINDOW_BYTESIZE + MARGIN_BYTESIZE) / sizeof(TT_DATA)>(
+                    firKernels[i - 1].out[1], firKernels[i].in[0]);
             }
         } else if (TP_API == USE_STREAM_API) {
             for (int i = 0; i < TP_CASC_LEN; i++) {
@@ -824,6 +827,7 @@ class ssr_kernels {
             for (int i = 0; i < TP_CASC_LEN; i++) {
                 connect<>(in, firKernels[i].in[0]);
                 dimensions(firKernels[i].in[0]) = {INPUT_WINDOW_BYTESIZE / sizeof(TT_DATA)};
+                conditional_single_buffer<TT_DATA, INPUT_WINDOW_BYTESIZE / sizeof(TT_DATA)>(firKernels[i].in[0]);
             }
         }
     }
@@ -836,6 +840,7 @@ class ssr_kernels {
             for (int i = 0; i < TP_CASC_LEN; i++) {
                 connect<>(in, firKernels[i].in[0]);
                 dimensions(firKernels[i].in[0]) = {INPUT_WINDOW_BYTESIZE / sizeof(TT_DATA)};
+                conditional_single_buffer<TT_DATA, INPUT_WINDOW_BYTESIZE / sizeof(TT_DATA)>(firKernels[i].in[0]);
             }
         } else if (TP_API == USE_STREAM_API) {
             for (int i = 0; i < TP_CASC_LEN; i++) {
@@ -846,6 +851,7 @@ class ssr_kernels {
             for (int i = 0; i < TP_CASC_LEN; i++) {
                 connect<>(in, firKernels[i].in[0]);
                 dimensions(firKernels[i].in[0]) = {INPUT_WINDOW_BYTESIZE / sizeof(TT_DATA)};
+                conditional_single_buffer<TT_DATA, INPUT_WINDOW_BYTESIZE / sizeof(TT_DATA)>(firKernels[i].in[0]);
             }
         }
     }
@@ -873,6 +879,8 @@ class ssr_kernels {
             if (TP_API == USE_WINDOW_API) {
                 connect<>(firKernels[TP_CASC_LEN - 1].out[0], out);
                 dimensions(firKernels[TP_CASC_LEN - 1].out[0]) = {OUTPUT_WINDOW_BYTESIZE / sizeof(TT_OUT_DATA)};
+                conditional_single_buffer<TT_OUT_DATA, OUTPUT_WINDOW_BYTESIZE / sizeof(TT_OUT_DATA)>(
+                    firKernels[TP_CASC_LEN - 1].out[0]);
             } else {
                 connect<stream>(firKernels[TP_CASC_LEN - 1].out[0], out);
             }
@@ -908,6 +916,8 @@ class ssr_kernels {
                     connect<>(firKernels[TP_CASC_LEN - 1].out[DUAL_OUT_PORT_POS], out2);
                     dimensions(firKernels[TP_CASC_LEN - 1].out[DUAL_OUT_PORT_POS]) = {OUTPUT_WINDOW_BYTESIZE /
                                                                                       sizeof(TT_OUT_DATA)};
+                    conditional_single_buffer<TT_OUT_DATA, OUTPUT_WINDOW_BYTESIZE / sizeof(TT_OUT_DATA)>(
+                        firKernels[TP_CASC_LEN - 1].out[DUAL_OUT_PORT_POS]);
                 } else {
                     connect<stream>(firKernels[TP_CASC_LEN - 1].out[DUAL_OUT_PORT_POS], out2);
                 }

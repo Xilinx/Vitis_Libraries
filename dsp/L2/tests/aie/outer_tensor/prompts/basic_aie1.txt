@@ -1,0 +1,3 @@
+Configure an outer tensor product for an AIE1 device of a 32-sample cint16 vector A and a
+32-sample cint16 vector B, window I/O, SSR 1, one frame per call, shift down by 15 bits
+with round-half-up and saturation.

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,20 +25,21 @@ and therefore must be suitable for the aie compiler graph-level compilation.
 */
 
 #include "device_defs.h"
-#include "single_mul_out_types.hpp"
-#include "single_mul_acc_types.hpp"
+#include "promotions_mul.hpp"
 
 namespace xf {
 namespace dsp {
 namespace aie {
 namespace kronecker {
 
+using namespace ::xf::dsp::aie::promotions_mul;
+
 template <typename T_A, typename T_B>
 struct vectByte {
-    unsigned val_byteA = sizeof(outTypeMult_t<T_A, T_B>);
-    unsigned val_byteB = sizeof(outTypeMult_t<T_A, T_B>);
-    unsigned val_byteAcc = sizeof(outTypeMult_t<T_A, T_B>);
-    unsigned val_byteOut = sizeof(outTypeMult_t<T_A, T_B>);
+    unsigned val_byteA = sizeof(outType_t<T_A, T_B>);
+    unsigned val_byteB = sizeof(outType_t<T_A, T_B>);
+    unsigned val_byteAcc = sizeof(outType_t<T_A, T_B>);
+    unsigned val_byteOut = sizeof(outType_t<T_A, T_B>);
 };
 
 template <>

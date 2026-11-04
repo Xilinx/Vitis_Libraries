@@ -92,10 +92,6 @@ The following table gives results for the DFT function with a wide variety of su
 
 :download:`dft_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2026.1/dsp/docs/src/csv_data_files/L2/dft_benchmark.csv>`
 
-The following table gives an extended dataset for the DFT function with a wide variety of supported parameters, which are defined in: :ref:`DSP_CONFIGURATION_PARAMETERS_DFT`.
-
-:download:`dft_database.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2026.1/dsp/docs/src/csv_data_files/L2/dft_database.csv>`
-
 Euclidean Distance
 ==================
 
@@ -242,6 +238,13 @@ Sample Delay
 The following table gives results for the Sample Delay with a wide variety of supported parameters, which are defined in: :ref:`DSP_CONFIGURATION_PARAMETERS_SAMPLE_DELAY`.
 
 :download:`sample_delay_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2026.1/dsp/docs/src/csv_data_files/L2/sample_delay_benchmark.csv>`
+
+Transpose
+=========
+
+The following table gives results for the Transpose with a wide variety of supported parameters, which are defined in: :ref:`DSP_CONFIGURATION_PARAMETERS_TRANSPOSE`.
+
+:download:`transpose_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/blob/2026.2/dsp/docs/src/csv_data_files/L2/transpose_benchmark.csv>`
 
 Widget Real to Complex
 ======================

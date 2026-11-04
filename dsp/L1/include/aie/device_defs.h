@@ -57,12 +57,12 @@
 
 //----------------------------------
 // FFT vectorization.
-#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21)
+#if (__AIE_ARCH__ == 10)
+#define __FFT_MIN_VECTORIZATION__ 16
+#elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21)
 #define __FFT_MIN_VECTORIZATION__ 32
 #elif (__AIE_ARCH__ == 22)
 #define __FFT_MIN_VECTORIZATION__ 64
-#else
-#define __FFT_MIN_VECTORIZATION__ 16
 #endif
 
 //----------------------------------
@@ -81,23 +81,20 @@
 // FFT cfloat support (native)
 #if (__AIE_ARCH__ == 10)
 #define __SUPPORTS_CFLOAT__ 1
-// #warning Supports cfloats
-
-#else
+#elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
 #define __SUPPORTS_CFLOAT__ 0
-// #warning AIE Architecture does not supports cfloats
 #endif
 
 // FFT 32 bit twiddle support
 #if (__AIE_ARCH__ == 10)
 #define __SUPPORTS_32B_TW__ 1
-#else
+#elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
 #define __SUPPORTS_32B_TW__ 0
 #endif
 
 #if (__AIE_ARCH__ == 10)
 #define __HAS_SYM_PREADD__ 1
-#else
+#elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
 #define __HAS_SYM_PREADD__ 0
 #endif
 
@@ -111,14 +108,6 @@
 #elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21)
 #define __MRFFT_ATOM__ 32
 #elif (__AIE_ARCH__ == 22)
-#define __MRFFT_ATOM__ 64
-#else
-// Ideally this would NOT be an else. It is best if an unknown value of AIE_ARCH leaves MRFFT_ATOM
-// undefined, but curiously, 2 independent ifs malfunctions for AIE1.
-
-//#endif
-//#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)   || \
-//
 #define __MRFFT_ATOM__ 64
 #endif
 
@@ -134,6 +123,58 @@
 #if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
 #define __SUPPORTS_ACC32__
 #define __SUPPORTS_ACC64__
+#endif
+
+//----------------------------------
+// Accumulator register file capacity
+// Number of physical accumulator registers available, by accumulator width. A value of 0
+// means that width is not natively available on the device. These describe the dedicated
+// (fixed-point) accumulator file - see the floating-point note further below.
+//
+//   AIE1     (arch 10): 8x 384-bit accs, combinable to 4x 768-bit. Floating-point MACs do
+//                       NOT use this file; they operate on the 8x 256-bit vector registers,
+//                       which are SHARED with data registers.
+//   AIE-ML   (arch 20/21): dedicated file of 36x 256-bit accs, combinable to 18x 512-bit or
+//                       9x 1024-bit, separate from the 24x 256-bit data registers.
+//   AIE-MLv2 (arch 22): dedicated file of 32x 512-bit accs, combinable to 16x 1024-bit or
+//                       8x 2048-bit; no 256-bit accumulators.
+#if (__AIE_ARCH__ == 10)
+#define __NUM_ACCS_256B__ 0
+#define __NUM_ACCS_384B__ 8
+#define __NUM_ACCS_512B__ 0
+#define __NUM_ACCS_768B__ 4
+#define __NUM_ACCS_1024B__ 0
+#define __NUM_ACCS_2048B__ 0
+#elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21)
+#define __NUM_ACCS_256B__ 36
+#define __NUM_ACCS_384B__ 0
+#define __NUM_ACCS_512B__ 18
+#define __NUM_ACCS_768B__ 0
+#define __NUM_ACCS_1024B__ 9
+#define __NUM_ACCS_2048B__ 0
+#elif (__AIE_ARCH__ == 22)
+#define __NUM_ACCS_256B__ 0
+#define __NUM_ACCS_384B__ 0
+#define __NUM_ACCS_512B__ 32
+#define __NUM_ACCS_768B__ 0
+#define __NUM_ACCS_1024B__ 16
+#define __NUM_ACCS_2048B__ 8
+#endif
+
+// Maximum number of simultaneously-live floating-point accumulators recommended for unrolled
+// inner loops (e.g. accumulator arrays exposing per-iteration independence to the scheduler).
+// On AIE1, float/cfloat MACs use the 8x 256-bit vector registers which are SHARED with data,
+// so the budget is deliberately small to avoid register spills. On AIE-ML/MLv2 the dedicated
+// accumulator file is large, so the budget is set high enough not to constrain unrolling.
+#if (__AIE_ARCH__ == 10)
+#define __MAX_FLOAT_ACCS__ 2
+#define __MAX_CFLOAT_ACCS__ 1
+#elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21)
+#define __MAX_FLOAT_ACCS__ 8
+#define __MAX_CFLOAT_ACCS__ 8
+#elif (__AIE_ARCH__ == 22)
+#define __MAX_FLOAT_ACCS__ 16
+#define __MAX_CFLOAT_ACCS__ 16
 #endif
 
 //----------------------------------
@@ -156,15 +197,12 @@
 #define __STREAMS_PER_TILE__ 2
 #elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
 #define __STREAMS_PER_TILE__ 1
-#else
-// error trap
-#define __STREAMS_PER_TILE__ -1
 #endif
 
 #if (__AIE_ARCH__ == 10)
 #define MCD_SIZE 256
 #define SCD_SIZE 256
-#else
+#elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
 #define MCD_SIZE 512
 #define SCD_SIZE 512
 #endif
@@ -242,9 +280,12 @@
 #define __MAX_READ_WRITE__ 512
 #endif
 
+// Minimum native readincr_v/writeincr transaction size, in bits. Same 128b floor on AIE1, AIE-ML and AIE-MLv2.
+#define __MIN_STREAM_ACCESS__ 128
+
 #if (__AIE_ARCH__ == 10)
 #define __HAS_ACCUM_PERMUTES__ 1
-#else
+#elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
 #define __HAS_ACCUM_PERMUTES__ 0
 #endif
 
@@ -252,8 +293,6 @@
 #define __AXI4_STREAM_INTERCONNECT_WIDTH__ 32
 #elif (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
 #define __AXI4_STREAM_INTERCONNECT_WIDTH__ 64
-#else
-#define __AXI4_STREAM_INTERCONNECT_WIDTH__ 32
 #endif
 
 #if (__AIE_ARCH__ == 10) || (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21)
@@ -264,7 +303,7 @@
 
 #if (__AIE_ARCH__ == 10)
 #define __SUPPORTS_DMA_FIFO__ 1
-#else
+#elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
 #define __SUPPORTS_DMA_FIFO__ 0
 #endif
 
@@ -287,16 +326,19 @@
 
 #if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 22)
 #define _SUPPORTS_CBFLOAT16_
-#else
-// not supported.
-// #define _SUPPORTS_CBFLOAT16_
 #endif
 
-// define whether or not the device has native sqrt and invsqrt scalar hw
-#if (__AIE_ARCH__ == 20)
-#define __USES_NATIVE_SQRT_FUNC__ 0
-#else
+//--------------------------------------------
+// Native square root hw
+#if (__AIE_ARCH__ == 10) || (__AIE_ARCH__ == 22)
 #define __USES_NATIVE_SQRT_FUNC__ 1
+#elif (__AIE_ARCH__ == 20)
+#define __USES_NATIVE_SQRT_FUNC__ 0
+#endif
+
+// Native inverse hw
+#if (__AIE_ARCH__ == 10)
+#define _SUPPORTS_HW_INVERSE_
 #endif
 
 #if (__AIE_ARCH__ == 10)
@@ -306,8 +348,6 @@
 #elif (__AIE_ARCH__ == 22)
 // AIE-MLv2 requires core model optimization that are not available at the moment.
 // Adding extra SHUFFLEs here would only degrade performance.
-#define __SHUFFLE_CASCADE__ 0
-#else
 #define __SHUFFLE_CASCADE__ 0
 #endif
 
@@ -321,9 +361,6 @@
 //------------------SHIFTING--------------------------
 #if (__AIE_ARCH__ == 10)
 #define __MAX_SHIFT__ 62
-// ! Possible AIE compiler bug. If compiling aiesim AIE1, then this macro is not set if no else clause, resulting in a..
-// ! 'not defined in this scope' bug in the fnValidateShiftRange function further down this file. This means that..
-// ! right now effectively all __MAX_SHIFT__s are set to 59 to circumvent compilation fail, regardless of device.
 #elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
 #define __MAX_SHIFT__ 59
 #endif
@@ -333,9 +370,6 @@
 #define __PARALLEL_LUT_WIDTH__ 128
 #elif (__AIE_ARCH__ == 22)
 #define __PARALLEL_LUT_WIDTH__ 256
-#else
-// deliberate error
-#define __PARALLEL_LUT_WIDTH__ -1
 #endif
 
 //-----------------Cumsum accumulator to accumulator add-------------------
@@ -343,8 +377,6 @@
 #define __SUPPORTS_ACC_ACC_ADD__ 0
 #elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
 #define __SUPPORTS_ACC_ACC_ADD__ 1
-#else
-#define __SUPPORTS_ACC_ACC_ADD__ 0
 #endif
 
 // maximum data size in bytes that the buffer descriptor can be used for doing transposes.
@@ -428,7 +460,7 @@
 #define rnd_conv_odd 13
 #endif
 
-#else
+#elif (__AIE_ARCH__ == 10)
 
 // AIE1 offers 8 rounding modes
 #define __ROUNDING_MODES__ 7
@@ -633,12 +665,16 @@ INLINE_DECL constexpr unsigned int fnVecSampleNumMin() {
     return __MIN_READ_WRITE__ / 8 / sizeof(TT);
 }
 
-//--------------------------------------------
-//_SUPPORTS_HW_INVERSE_
-#if (__AIE_ARCH__ == 10)
-#define _SUPPORTS_HW_INVERSE_
-#elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22)
-// AIE2 does not have hardware inverse support
-#endif //_SUPPORTS_HW_INVERSE_
+template <typename TT, unsigned int dimSize>
+INLINE_DECL constexpr unsigned int fnVecSampleNumGCD() { // This function assumes only 2 vec sizes (min and max)
+    if
+        constexpr(dimSize % fnVecSampleNumMax<TT>() == 0) { return fnVecSampleNumMax<TT>(); }
+    else if
+        constexpr(dimSize % fnVecSampleNumMin<TT>() == 0) { return fnVecSampleNumMin<TT>(); }
+    else {
+        static_assert(dimSize % fnVecSampleNumMin<TT>() == 0,
+                      "ERROR: dimSize must be divisible by minimum samples per vector.");
+    }
+}
 
 #endif // __DEVICE_DEFS__

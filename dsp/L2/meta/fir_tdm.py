@@ -994,6 +994,10 @@ class {graphname} : public adf::graph {{
         return firClass::extractTaps(taps, kernelNo);
     }};
 
+    int getTapsPerRtpPort(int kernelNo) {{
+        return filter.getTapsPerRtpPort(kernelNo);
+    }};
+
     template<typename TopGraph>
     void update_rtp(TopGraph& top, const std::vector<{TT_COEFF}>& taps, rtp_port_array coeff) {{
         filter.update_rtp(top, taps, coeff);

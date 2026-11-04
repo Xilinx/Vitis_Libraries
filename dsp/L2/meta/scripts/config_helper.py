@@ -265,278 +265,283 @@ class ip_parameter:
             print_with_condition(validate_return["err_message"], test_config_helper)
 
 
-##CONFIG HELPER ALGORITHM
+test_config_helper = False  # module-level default so this file stays
+# importable without running the script (see valid_name(), which reads
+# this global). Reassigned below when run as __main__.
 
-# Arguments
-IP_in_use=None
-meta_dir=None
-out_dir=None
-test_config_helper=False
+if __name__ == "__main__":
+    ##CONFIG HELPER ALGORITHM
 
-for i in range(len(sys.argv)):
-    if sys.argv[i] == "--ip":
-        IP_in_use = sys.argv[i + 1]
-    if sys.argv[i] == "--mdir":
-        meta_dir = sys.argv[i + 1]
-    if sys.argv[i] == "--outdir":
-        out_dir = sys.argv[i + 1]
-    if sys.argv[i] == "--test_config_helper":
-        test_config_helper = True
-        config_test_path = sys.argv[i + 1]
-        with open(config_test_path) as f:
-            config_test_load = json.load(f)
-        config_test = config_test_load["parameters"]
+    # Arguments
+    IP_in_use=None
+    meta_dir=None
+    out_dir=None
+    test_config_helper=False
 
-if "--h" in sys.argv:
-    help_msg = (
-        "\nConfig Helper Options:"
-        + "\n--h [prints the helper message]"
-        + "\n--ip ip_name [providing the config helper the IP to configure]"
-        + "\n--mdir metadata_directory [by default config helper will guide you to xf_dsp\\L2\\meta]"
-        + "\n--outdir output_directory [by default config helper will guide you to xf_dsp\\L2\\meta]"
-        + "\n--test_config_helper [tests config_helper with the canary test of the IP]"
-        + "\nLIST_PARAMS [lists the parameters of the chosen IP to configure]"
-        + "\nPRINT_GRAPH [prints the resulting graph at the end of the configuration]"
-        + "\nNO_INSTANCE [no graph instance is to be generated at the end of the configuration]"
-        + "\nLIST_IPS [prints the IP list in DSPLIB]"
-    )
-    print(help_msg)
-    sys.exit()
+    for i in range(len(sys.argv)):
+        if sys.argv[i] == "--ip":
+            IP_in_use = sys.argv[i + 1]
+        if sys.argv[i] == "--mdir":
+            meta_dir = sys.argv[i + 1]
+        if sys.argv[i] == "--outdir":
+            out_dir = sys.argv[i + 1]
+        if sys.argv[i] == "--test_config_helper":
+            test_config_helper = True
+            config_test_path = sys.argv[i + 1]
+            with open(config_test_path) as f:
+                config_test_load = json.load(f)
+            config_test = config_test_load["parameters"]
 
-if "LIST_PARAMS" in sys.argv:
-    LIST_PARAMS = True
-else:
-    LIST_PARAMS = False
-
-if "PRINT_GRAPH" in sys.argv:
-    PRINT_GRAPH = True
-else:
-    PRINT_GRAPH = False
-
-if "NO_INSTANCE" in sys.argv:
-    NO_INSTANCE = True
-else:
-    NO_INSTANCE = False
-
-if "LIST_IPS" in sys.argv:
-    LIST_IPS = True
-else:
-    LIST_IPS = False
-
-
-scripts_directory = os.path.dirname(os.path.abspath(__file__))
-dsp_root = scripts_directory[:scripts_directory.rfind('/L2')]
-
-# script can be called from library root, L1 or L2 directories and sub directories.
-called_path = os.getcwd()
-
-if '/L1' in called_path:
-    called_root = called_path[:called_path.rfind('/L1')]
-    default_root = called_root
-if '/L2' in called_path:
-    called_root = called_path[:called_path.rfind('/L2')]
-    default_root = called_root
-elif os.path.isdir(os.path.join(called_path, "L2")):
-    # If "L2" is a subdirectory of the current working directory
-    called_root = called_path
-    default_root = called_root
-else:
-    called_root = dsp_root #if called root cannot be inserted, not to cause a bug assign dsp_root for a first scan of the IP
-    default_root = dsp_root  # Fallback to dsp_root if /L2 not in path and no L2 subdir
-
-libraries = ["dsp", "dsp_ip", "solver"]
-default_lib_meta_dirs = {}
-parent_dir = os.path.dirname(dsp_root)
-
-for lib in libraries:
-    lib_meta_dir = None
-    # Search for a directory containing {lib} in its name in parent_dir
-    for entry in os.listdir(parent_dir):
-        entry_path = os.path.join(parent_dir, entry)
-        if os.path.isdir(entry_path) and lib in entry:
-            lib_meta_dir = os.path.join(entry_path, "L2", "meta")
-            break
-    if lib_meta_dir is None:
-        lib_meta_dir = f"{dsp_root}/L2/meta"
-    default_lib_meta_dirs[lib] = lib_meta_dir
-
-# import the IP
-print_with_condition("\nHello this is CONFIG HELPER!", test_config_helper)
-print_IPs(LIST_IPS, default_lib_meta_dirs)
-
-if IP_in_use is None: # try to find IP in libraries
-    IP_in_use = fn_helper_IPname_in()
-
-json_loc, metadata_dir, lib_in_use = fn_helper_metadir_in(IP_in_use, meta_dir, called_root, default_lib_meta_dirs)
-while json_loc is None or not(os.path.exists(json_loc)):
-    help_request = input(
-        f"\nERROR: {IP_in_use} cannot be found in {', '.join(libraries)} libraries."
-        + "\nWould you like to retry? (y/n) "
-    )
-    if help_request == "y" or help_request == "":
-        print_IPs(True, default_lib_meta_dirs)
-        IP_in_use = fn_helper_IPname_in()
-        json_loc, metadata_dir, lib_in_use = fn_helper_metadir_in(IP_in_use, meta_dir, called_root, default_lib_meta_dirs)
-    if help_request == "n":
-        print_with_condition("\nExiting config_helper...", test_config_helper)
+    if "--h" in sys.argv:
+        help_msg = (
+            "\nConfig Helper Options:"
+            + "\n--h [prints the helper message]"
+            + "\n--ip ip_name [providing the config helper the IP to configure]"
+            + "\n--mdir metadata_directory [by default config helper will guide you to xf_dsp\\L2\\meta]"
+            + "\n--outdir output_directory [by default config helper will guide you to xf_dsp\\L2\\meta]"
+            + "\n--test_config_helper [tests config_helper with the canary test of the IP]"
+            + "\nLIST_PARAMS [lists the parameters of the chosen IP to configure]"
+            + "\nPRINT_GRAPH [prints the resulting graph at the end of the configuration]"
+            + "\nNO_INSTANCE [no graph instance is to be generated at the end of the configuration]"
+            + "\nLIST_IPS [prints the IP list in DSPLIB]"
+        )
+        print(help_msg)
         sys.exit()
 
-sys.path.insert(0, default_lib_meta_dirs["dsp"]) #always insert xf_dsp path for common library imports
-if metadata_dir and metadata_dir not in sys.path:
-    sys.path.insert(1, metadata_dir) #insert the metadata directory of the chosen IP for its specific imports
-
-print_with_condition(
-    f"\n{IP_in_use} IP found in the {lib_in_use}!",
-    test_config_helper,
-)
-
-if out_dir is None:
-    out_dir = fn_helper_outdir_in(metadata_dir, test_config_helper)
-
-print_with_condition(
-    f"\nNow, let me help you validate {IP_in_use} parameters.",
-    test_config_helper,
-)
-module_name = IP_in_use
-is_vss_object = False
-
-if "vss_" in module_name:
-    is_vss_object = True
-    
-module = importlib.import_module(module_name)
-if is_vss_object:
-    out_inst = "cfg"
-    generate_out = getattr(module, "generate_" + out_inst)
-    ext_name = out_inst
-else:
-    out_inst = "graph"
-    generate_out = getattr(module, "generate_" + out_inst)
-    ext_name = "txt"
-
-with open(json_loc) as f:
-    json_load = json.load(f)
-    params_json = json_load["parameters"]
-
-    param_list = []
-    validator_dict = {}
-    updater_dict = {}
-    type_dict = {}
-    param_vals = {}
-    vector_dict = {}
-    for pj in params_json:
-        if "updater" in pj:
-            param_list.append(pj["name"])
-            updater_dict.update({pj["name"]: pj["updater"]["function"]})
-            validator_dict.update({pj["name"]: pj["validator"]["function"]})
-            type_dict.update({pj["name"]: pj["type"]})
-        else:
-            pj_name = pj["name"]
-            raise Exception(f"Error! There is no updater for {pj_name}.")
-
-        if "element_type" in pj:
-            vector_dict.update({pj["name"]: pj["element_type"]})
-        param_vals.update(
-            {pj["name"]: ""}
-        )  # construct the parameter library where all the necessary values will be written
-
-if LIST_PARAMS:
-    print_with_condition("", test_config_helper)
-    print_with_condition(
-        f"\nHere are the parameters that will be configured for {IP_in_use} IP:",
-        test_config_helper,
-    )
-    for n in param_list:
-        print_with_condition(n, test_config_helper)
-
-# Run the updaters to capture defaults
-ip_parameter_objects_dict = {}
-idx = 0
-while idx < (len(param_list)):
-    # Extract Params
-    new_helper_param = "param_" + param_list[idx]
-    new_helper_param = ip_parameter()  # generate parameter object
-    ip_parameter_objects_dict.update(
-        {param_list[idx]: new_helper_param}
-    )  # dict of the parameter objects
-    ip_parameter_objects_dict[param_list[idx]].name = param_list[
-        idx
-    ]  # assign names of the parameters
-    ip_parameter_objects_dict[param_list[idx]].type = type_dict[
-        param_list[idx]
-    ]  # assign types
-    ip_parameter_objects_dict[param_list[idx]].updater = updater_dict[
-        param_list[idx]
-    ]  # assign updaters
-    ip_parameter_objects_dict[param_list[idx]].validator = validator_dict[
-        param_list[idx]
-    ]  # assign validators
-    if ip_parameter_objects_dict[param_list[idx]].name in vector_dict:
-        ip_parameter_objects_dict[param_list[idx]].element_type = vector_dict[
-            ip_parameter_objects_dict[param_list[idx]].name
-        ]
-    ip_parameter_objects_dict[param_list[idx]].param_update(
-        param_vals
-    )  # update the parameters with the previous set of values
-    while ip_parameter_objects_dict[param_list[idx]].valid == "False":
-        ip_parameter_objects_dict[param_list[idx]].get_input(
-            param_vals
-        )  # get input from the user
-        if ip_parameter_objects_dict[param_list[idx]].idx_inc == 1:
-            break
-        param_vals[param_list[idx]] = ip_parameter_objects_dict[param_list[idx]].value
-        ip_parameter_objects_dict[param_list[idx]].param_validate(
-            param_vals
-        )  # validate the input from the user
-        if ip_parameter_objects_dict[param_list[idx]].valid == "False":
-            # Run the updaters to capture defaults
-            ip_parameter_objects_dict[param_list[idx]].param_update(param_vals)
-            if ip_parameter_objects_dict[param_list[idx]].actual != []:
-                print_with_condition(
-                    f"\nWARNING: The requested value for {ip_parameter_objects_dict[param_list[idx]].name} cannot be achieved."
-                    + f"\nThe closest legal value {ip_parameter_objects_dict[param_list[idx]].actual} is suggested by config helper.",
-                    test_config_helper,
-                )
-
-    if ip_parameter_objects_dict[param_list[idx]].idx_inc == 1:
-        if idx != 0:
-            idx -= 1
+    if "LIST_PARAMS" in sys.argv:
+        LIST_PARAMS = True
     else:
-        idx += 1
+        LIST_PARAMS = False
 
-print_with_condition(
-    f"\nAll parameters of {IP_in_use} IP is validated!", test_config_helper
-)
-if not (NO_INSTANCE) and not (test_config_helper):
-    # get the instance name
-    print_with_condition(
-        f"\nNow, let me output a {IP_in_use} instance.", test_config_helper
-    )
-    valid_instance_name = False
-    while not valid_instance_name:
-        instanceName = input("\nPlease enter a name for your instance: ")
-        valid_instance_name = valid_name(instanceName)
+    if "PRINT_GRAPH" in sys.argv:
+        PRINT_GRAPH = True
+    else:
+        PRINT_GRAPH = False
 
-    print_with_condition(instanceName + " is accepted\n", test_config_helper)
-    instance_out = generate_out(instanceName, param_vals)
-    file = open(f"{out_dir}/{out_inst}_{IP_in_use}_{instanceName}.{ext_name}", "w")
-    file.write(instance_out[out_inst])
-    file.close()
+    if "NO_INSTANCE" in sys.argv:
+        NO_INSTANCE = True
+    else:
+        NO_INSTANCE = False
+
+    if "LIST_IPS" in sys.argv:
+        LIST_IPS = True
+    else:
+        LIST_IPS = False
+
+
+    scripts_directory = os.path.dirname(os.path.abspath(__file__))
+    dsp_root = scripts_directory[:scripts_directory.rfind('/L2')]
+
+    # script can be called from library root, L1 or L2 directories and sub directories.
+    called_path = os.getcwd()
+
+    if '/L1' in called_path:
+        called_root = called_path[:called_path.rfind('/L1')]
+        default_root = called_root
+    if '/L2' in called_path:
+        called_root = called_path[:called_path.rfind('/L2')]
+        default_root = called_root
+    elif os.path.isdir(os.path.join(called_path, "L2")):
+        # If "L2" is a subdirectory of the current working directory
+        called_root = called_path
+        default_root = called_root
+    else:
+        called_root = dsp_root #if called root cannot be inserted, not to cause a bug assign dsp_root for a first scan of the IP
+        default_root = dsp_root  # Fallback to dsp_root if /L2 not in path and no L2 subdir
+
+    libraries = ["dsp", "dsp_ip", "solver"]
+    default_lib_meta_dirs = {}
+    parent_dir = os.path.dirname(dsp_root)
+
+    for lib in libraries:
+        lib_meta_dir = None
+        # Search for a directory containing {lib} in its name in parent_dir
+        for entry in os.listdir(parent_dir):
+            entry_path = os.path.join(parent_dir, entry)
+            if os.path.isdir(entry_path) and lib in entry:
+                lib_meta_dir = os.path.join(entry_path, "L2", "meta")
+                break
+        if lib_meta_dir is None:
+            lib_meta_dir = f"{dsp_root}/L2/meta"
+        default_lib_meta_dirs[lib] = lib_meta_dir
+
+    # import the IP
+    print_with_condition("\nHello this is CONFIG HELPER!", test_config_helper)
+    print_IPs(LIST_IPS, default_lib_meta_dirs)
+
+    if IP_in_use is None: # try to find IP in libraries
+        IP_in_use = fn_helper_IPname_in()
+
+    json_loc, metadata_dir, lib_in_use = fn_helper_metadir_in(IP_in_use, meta_dir, called_root, default_lib_meta_dirs)
+    while json_loc is None or not(os.path.exists(json_loc)):
+        help_request = input(
+            f"\nERROR: {IP_in_use} cannot be found in {', '.join(libraries)} libraries."
+            + "\nWould you like to retry? (y/n) "
+        )
+        if help_request == "y" or help_request == "":
+            print_IPs(True, default_lib_meta_dirs)
+            IP_in_use = fn_helper_IPname_in()
+            json_loc, metadata_dir, lib_in_use = fn_helper_metadir_in(IP_in_use, meta_dir, called_root, default_lib_meta_dirs)
+        if help_request == "n":
+            print_with_condition("\nExiting config_helper...", test_config_helper)
+            sys.exit()
+
+    sys.path.insert(0, default_lib_meta_dirs["dsp"]) #always insert xf_dsp path for common library imports
+    if metadata_dir and metadata_dir not in sys.path:
+        sys.path.insert(1, metadata_dir) #insert the metadata directory of the chosen IP for its specific imports
+
     print_with_condition(
-        f"\nPlease find the configured instance in {out_dir}/{out_inst}_{IP_in_use}_{instanceName}.{ext_name}",
+        f"\n{IP_in_use} IP found in the {lib_in_use}!",
         test_config_helper,
     )
 
+    if out_dir is None:
+        out_dir = fn_helper_outdir_in(metadata_dir, test_config_helper)
+
+    print_with_condition(
+        f"\nNow, let me help you validate {IP_in_use} parameters.",
+        test_config_helper,
+    )
+    module_name = IP_in_use
+    is_vss_object = False
+
+    if "vss_" in module_name:
+        is_vss_object = True
+    
+    module = importlib.import_module(module_name)
     if is_vss_object:
+        out_inst = "cfg"
+        generate_out = getattr(module, "generate_" + out_inst)
+        ext_name = out_inst
+    else:
+        out_inst = "graph"
+        generate_out = getattr(module, "generate_" + out_inst)
+        ext_name = "txt"
+
+    with open(json_loc) as f:
+        json_load = json.load(f)
+        params_json = json_load["parameters"]
+
+        param_list = []
+        validator_dict = {}
+        updater_dict = {}
+        type_dict = {}
+        param_vals = {}
+        vector_dict = {}
+        for pj in params_json:
+            if "updater" in pj:
+                param_list.append(pj["name"])
+                updater_dict.update({pj["name"]: pj["updater"]["function"]})
+                validator_dict.update({pj["name"]: pj["validator"]["function"]})
+                type_dict.update({pj["name"]: pj["type"]})
+            else:
+                pj_name = pj["name"]
+                raise Exception(f"Error! There is no updater for {pj_name}.")
+
+            if "element_type" in pj:
+                vector_dict.update({pj["name"]: pj["element_type"]})
+            param_vals.update(
+                {pj["name"]: ""}
+            )  # construct the parameter library where all the necessary values will be written
+
+    if LIST_PARAMS:
+        print_with_condition("", test_config_helper)
         print_with_condition(
-            "\nUse the cfg file to as an input to your VSS generator makefile."
-            f"\nFor example, make -f vss_fft_ifft_1d.mk PARAMS_CFG={out_inst}_{IP_in_use}_{instanceName}.{ext_name}"
-            "\n"
-            "\nPlease note that the makefile might also require other build parameters. The help target in the vss generator will contain details about any other parameters. \n",
+            f"\nHere are the parameters that will be configured for {IP_in_use} IP:",
+            test_config_helper,
+        )
+        for n in param_list:
+            print_with_condition(n, test_config_helper)
+
+    # Run the updaters to capture defaults
+    ip_parameter_objects_dict = {}
+    idx = 0
+    while idx < (len(param_list)):
+        # Extract Params
+        new_helper_param = "param_" + param_list[idx]
+        new_helper_param = ip_parameter()  # generate parameter object
+        ip_parameter_objects_dict.update(
+            {param_list[idx]: new_helper_param}
+        )  # dict of the parameter objects
+        ip_parameter_objects_dict[param_list[idx]].name = param_list[
+            idx
+        ]  # assign names of the parameters
+        ip_parameter_objects_dict[param_list[idx]].type = type_dict[
+            param_list[idx]
+        ]  # assign types
+        ip_parameter_objects_dict[param_list[idx]].updater = updater_dict[
+            param_list[idx]
+        ]  # assign updaters
+        ip_parameter_objects_dict[param_list[idx]].validator = validator_dict[
+            param_list[idx]
+        ]  # assign validators
+        if ip_parameter_objects_dict[param_list[idx]].name in vector_dict:
+            ip_parameter_objects_dict[param_list[idx]].element_type = vector_dict[
+                ip_parameter_objects_dict[param_list[idx]].name
+            ]
+        ip_parameter_objects_dict[param_list[idx]].param_update(
+            param_vals
+        )  # update the parameters with the previous set of values
+        while ip_parameter_objects_dict[param_list[idx]].valid == "False":
+            ip_parameter_objects_dict[param_list[idx]].get_input(
+                param_vals
+            )  # get input from the user
+            if ip_parameter_objects_dict[param_list[idx]].idx_inc == 1:
+                break
+            param_vals[param_list[idx]] = ip_parameter_objects_dict[param_list[idx]].value
+            ip_parameter_objects_dict[param_list[idx]].param_validate(
+                param_vals
+            )  # validate the input from the user
+            if ip_parameter_objects_dict[param_list[idx]].valid == "False":
+                # Run the updaters to capture defaults
+                ip_parameter_objects_dict[param_list[idx]].param_update(param_vals)
+                if ip_parameter_objects_dict[param_list[idx]].actual != []:
+                    print_with_condition(
+                        f"\nWARNING: The requested value for {ip_parameter_objects_dict[param_list[idx]].name} cannot be achieved."
+                        + f"\nThe closest legal value {ip_parameter_objects_dict[param_list[idx]].actual} is suggested by config helper.",
+                        test_config_helper,
+                    )
+
+        if ip_parameter_objects_dict[param_list[idx]].idx_inc == 1:
+            if idx != 0:
+                idx -= 1
+        else:
+            idx += 1
+
+    print_with_condition(
+        f"\nAll parameters of {IP_in_use} IP is validated!", test_config_helper
+    )
+    if not (NO_INSTANCE) and not (test_config_helper):
+        # get the instance name
+        print_with_condition(
+            f"\nNow, let me output a {IP_in_use} instance.", test_config_helper
+        )
+        valid_instance_name = False
+        while not valid_instance_name:
+            instanceName = input("\nPlease enter a name for your instance: ")
+            valid_instance_name = valid_name(instanceName)
+
+        print_with_condition(instanceName + " is accepted\n", test_config_helper)
+        instance_out = generate_out(instanceName, param_vals)
+        file = open(f"{out_dir}/{out_inst}_{IP_in_use}_{instanceName}.{ext_name}", "w")
+        file.write(instance_out[out_inst])
+        file.close()
+        print_with_condition(
+            f"\nPlease find the configured instance in {out_dir}/{out_inst}_{IP_in_use}_{instanceName}.{ext_name}",
             test_config_helper,
         )
 
+        if is_vss_object:
+            print_with_condition(
+                "\nUse the cfg file to as an input to your VSS generator makefile."
+                f"\nFor example, make -f vss_fft_ifft_1d.mk PARAMS_CFG={out_inst}_{IP_in_use}_{instanceName}.{ext_name}"
+                "\n"
+                "\nPlease note that the makefile might also require other build parameters. The help target in the vss generator will contain details about any other parameters. \n",
+                test_config_helper,
+            )
+
         
-    if PRINT_GRAPH:
-        print_with_condition("\nHere is your configured instance:", test_config_helper)
-        print_with_condition(instance_out[out_inst])
+        if PRINT_GRAPH:
+            print_with_condition("\nHere is your configured instance:", test_config_helper)
+            print_with_condition(instance_out[out_inst])
 

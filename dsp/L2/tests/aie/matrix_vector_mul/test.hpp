@@ -81,6 +81,26 @@ class test_graph : public graph {
     std::array<output_plio, UUT_SSR * NUM_OUTPUTS> out;
     DATA_A m_matrixA[CASC_LEN * UUT_SSR][2][matrixSizePerKernel];
 
+#if defined(USING_UUT) && (USE_MATRIX_RELOAD == 1)
+    // Load RTP data at simulation time; the AIE compiler also constructs this graph.
+    void loadMatrix() {
+        for (int ssr = 0; ssr < UUT_SSR; ssr++) {
+            for (int casc = 0; casc < CASC_LEN; casc++) {
+                std::string filenameInMatrix = QUOTE(INPUT_FILE_A);
+                filenameInMatrix.insert(filenameInMatrix.length() - 4,
+                                        ("_" + std::to_string(ssr) + "_" + std::to_string(casc)));
+
+                test_stim<DATA_A, matrixSizePerKernel * NITER, 0> taps_gen(filenameInMatrix);
+                taps_gen.gen(1, matrixA);
+                for (int i = 0; i < matrixSizePerKernel; i++) {
+                    m_matrixA[casc + ssr * CASC_LEN][0][i] = matrixA[i];
+                    m_matrixA[casc + ssr * CASC_LEN][1][i] = matrixA[(matrixSizePerKernel * NITER / 2) + i];
+                }
+            }
+        }
+    }
+#endif
+
     // Constructor
     test_graph() {
         printf("==========================\n");
@@ -125,16 +145,6 @@ class test_graph : public graph {
                 connect<>(inA[casc + ssr * CASC_LEN].out[0], matrix_vector_mulGraph.inA[casc + ssr * CASC_LEN]);
 // RTP A
 #else
-                // Load NITER samples per kernel
-                test_stim<DATA_A, matrixSizePerKernel * NITER, 0> taps_gen(filenameInMatrix);
-                taps_gen.gen(1, matrixA);
-
-                for (int i = 0; i < matrixSizePerKernel; i++) {
-                    m_matrixA[casc + ssr * CASC_LEN][0][i] = matrixA[i];
-                }
-                for (int i = 0; i < matrixSizePerKernel; i++) {
-                    m_matrixA[casc + ssr * CASC_LEN][1][i] = matrixA[(matrixSizePerKernel * NITER / 2) + i];
-                }
                 connect<>(matrixRtp[casc + ssr * CASC_LEN], matrix_vector_mulGraph.matrixA[casc + ssr * CASC_LEN]);
 #endif
                 // Streams B (single or dual)

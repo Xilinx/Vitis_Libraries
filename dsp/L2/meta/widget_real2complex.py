@@ -164,8 +164,8 @@ def gen_ports_code(args):
 
 
 def gen_ports_connections(args):
-    in_port = f"      adf::connect<>(in[0],widget_real2complex_graph.in[0]);\n"
-    out_port = f"      adf::connect<>(widget_real2complex_graph.out[0], out[0]);\n"
+    in_port = f"      adf::connect<>(in[0],widget_real2complex_graph.in);\n"
+    out_port = f"      adf::connect<>(widget_real2complex_graph.out, out[0]);\n"
 
     return in_port + out_port  # concat strings
 

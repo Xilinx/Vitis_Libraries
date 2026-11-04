@@ -51,9 +51,9 @@ TP_CASC_LEN_MIN = 1
 TP_CASC_LEN_MAX = 32
 TP_PHASES_MIN = 1
 TP_PHASES_MAX = 16
-TP_G_LEN_iobuffer_max = 256
-TP_F_LEN_min_for_stream = 512 # The stream-based implementation requires a minimum length of 512 for TP_F_LEN to to ensure the stream implementation flushes out partial results
-MAX_NUM_OF_STREAMS = 2 # maximum number of streams per core, used in phases validation
+TP_G_LEN_iobuffer_max = 256 # Maximum TP_G_LEN for stream API
+TP_F_LEN_min_for_stream = 512 # Minimum TP_F_LEN for stream API
+MAX_NUM_OF_STREAMS = 2  # Maximum number of streams per core
 
 sampleSize = {
     "int8": 8,
@@ -102,15 +102,17 @@ def update_TP_API(args):
   return fn_update_api(AIE_VARIANT)
 
 def fn_update_api(AIE_VARIANT):
-  legal_set_api=[com.API_BUFFER, com.API_STREAM]
-  if AIE_VARIANT in [com.AIE_ML,com.AIE_MLv2 ]:
-     legal_set_api=[com.API_BUFFER]
+    # AIE-ML and AIE-MLv2 do not implement the MAC4_ROT stream convolution intrinsic
+    # that the AIE-1 stream kernel relies on, so only the iobuffer (window) API is supported.
+    legal_set_api = [com.API_BUFFER, com.API_STREAM]
+    if AIE_VARIANT in [com.AIE_ML, com.AIE_MLv2]:
+        legal_set_api = [com.API_BUFFER]
 
-  param_dict={
-    "name" : "TP_API",
-    "enum" : legal_set_api
-  }
-  return param_dict
+    param_dict = {
+        "name": "TP_API",
+        "enum": legal_set_api,
+    }
+    return param_dict
 
 def validate_TP_API(args):
   AIE_VARIANT = args["AIE_VARIANT"]
@@ -134,11 +136,15 @@ def fn_update_data_type_f(AIE_VARIANT, TP_API):
     valid_types = ["int8", "int16", "int32", "float", "bfloat16", "cfloat", "cint16", "cint32"]
     if AIE_VARIANT == com.AIE:
         if TP_API == com.API_STREAM:
+            # AIE-1 stream uses the MAC4_ROT intrinsic which only supports the
+            # cint16 x {int16, cint16} data-path; only cint16 is valid for TT_DATA_F.
             valid_types = ["cint16"]
         else:
+            # AIE-1 iobuffer: int8 and bfloat16 are not available on the AIE-1 ISA.
             valid_types.remove("int8")
             valid_types.remove("bfloat16")
     else:
+        # AIE-ML / AIE-MLv2: cfloat (complex float) does not exist in the AIE2 ISA.
         valid_types.remove("cfloat")
 
     param_dict={
@@ -285,22 +291,23 @@ def update_TP_F_LEN(args):
 
 def fn_update_f_len(TP_F_LEN, TT_DATA_G, TT_DATA_F, TT_DATA_OUT, TP_COMPUTE_MODE, TP_API, AIE_VARIANT):
     # Alignment granularity is base load size (256 bits / 8 / sizeof)
-    base_load_f = com.k_max_read_write_bytes[AIE_VARIANT] // com.fn_size_by_byte(TT_DATA_F)
+    sizeof_inF = com.fn_size_by_byte(TT_DATA_F)
+    sizeof_inG = com.fn_size_by_byte(TT_DATA_G)
+    base_load_f = com.k_max_read_write_bytes[AIE_VARIANT] // sizeof_inF
 
     # Minimum is 2x base load for buffer mode, stream has different minimum
     if TP_API == com.API_BUFFER:
-        min_elems_f = (com.k_max_read_write_bytes[AIE_VARIANT] << 1) // com.fn_size_by_byte(TT_DATA_F)
+        min_elems_f = (com.k_max_read_write_bytes[AIE_VARIANT] << 1) // sizeof_inF
     else:
         min_elems_f = TP_F_LEN_min_for_stream
     
     # Calculate elems_per_load for TT_DATA_G to ensure TP_F_LEN can accommodate TP_G_LEN minimum
     if TP_API == com.API_STREAM:
-        elems_per_load_g = com.k_max_read_write_bytes[AIE_VARIANT] // com.fn_size_by_byte(TT_DATA_G)
+        elems_per_load_g = com.k_max_read_write_bytes[AIE_VARIANT] // sizeof_inG
     else:
-        elems_per_load_g = (com.k_max_read_write_bytes[AIE_VARIANT] << 1) // com.fn_size_by_byte(TT_DATA_G)
+        elems_per_load_g = (com.k_max_read_write_bytes[AIE_VARIANT] << 1) // sizeof_inG
 
-    TP_F_LEN_max = (com.k_data_memory_bytes[AIE_VARIANT] // com.fn_size_by_byte(TT_DATA_F)) # Assume always SINGLE_BUFF is ON.
-    TP_F_LEN_max_pingpong_buff= int(com.k_data_memory_bytes[AIE_VARIANT] >> 1)// (com.fn_size_by_byte(TT_DATA_F))
+    TP_F_LEN_max = (com.k_data_memory_bytes[AIE_VARIANT] // sizeof_inF) # Assume always SINGLE_BUFF is ON.
 
     # Output-aware F_max: output port (single copy) must fit within one MG
     # NOTE: The graph auto-enables single_buffer for F and Out independently when they exceed half memory
@@ -308,8 +315,7 @@ def fn_update_f_len(TP_F_LEN, TT_DATA_G, TT_DATA_F, TT_DATA_OUT, TP_COMPUTE_MODE
     if TP_API == com.API_BUFFER:
         sizeof_out = com.fn_size_by_byte(TT_DATA_OUT)
         max_out_elems = com.k_data_memory_bytes[AIE_VARIANT] // sizeof_out
-        pingpong_threshold_elems = (com.k_data_memory_bytes[AIE_VARIANT] >> 1) // sizeof_out
-        G_min = (com.k_max_read_write_bytes[AIE_VARIANT] << 1) // com.fn_size_by_byte(TT_DATA_G)
+        G_min = (com.k_max_read_write_bytes[AIE_VARIANT] << 1) // sizeof_inG
 
         # Calculate the maximum output size based on compute mode
         # This represents the worst-case output buffer requirement
@@ -323,14 +329,17 @@ def fn_update_f_len(TP_F_LEN, TT_DATA_G, TT_DATA_F, TT_DATA_OUT, TP_COMPUTE_MODE
             TP_F_LEN_max_out = max_out_elems + G_min - 1
             max_out_elems_at_max_f = TP_F_LEN_max - G_min + 1  # out = F - G + 1 at max F with min G
         
-        # Only apply output constraint if the output won't trigger single_buffer
-        # If max_out_elems_at_max_f > threshold, output will use single_buffer, no memory collision
-        if max_out_elems_at_max_f <= pingpong_threshold_elems:
+        # Apply output constraint when the output at max F exceeds single-buffer memory.
+        # Even with SINGLE_BUFF auto-enabled, the output cannot exceed k_data_memory_bytes.
+        if max_out_elems_at_max_f > max_out_elems:
             TP_F_LEN_max = min(TP_F_LEN_max, TP_F_LEN_max_out)
-        # else: output will use single_buffer, F can use full memory without collision
 
     # Floor max to base_load_f alignment so the reported maximum is always a valid value
     TP_F_LEN_max = com.FLOOR(TP_F_LEN_max, base_load_f)
+
+    # Ping-pong limit: two copies of F must share the tile memory with G and output.
+    # Bounding to half of TP_F_LEN_max ensures the reported value is an achievable ping-pong size.
+    TP_F_LEN_max_pingpong_buff = com.FLOOR(TP_F_LEN_max >> 1, base_load_f)
 
     # Minimum must be at least elems_per_load_g to satisfy TP_G_LEN <= TP_F_LEN constraint
     minimum = max(min_elems_f, elems_per_load_g)
@@ -371,10 +380,10 @@ def fn_validate_f_len(AIE_VARIANT, TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_COMPUTE
     pingpong_threshold_bytes = com.k_data_memory_bytes[AIE_VARIANT] >> 1
 
     if TP_API == com.API_BUFFER and f_buf_bytes <= pingpong_threshold_bytes:
-        # Buffer mode, ping-pong territory → F must fit in half memory
+        # F is within the ping-pong threshold: validate against maximum_pingpong_buf.
         max_allowed = param_dict["maximum_pingpong_buf"]
     else:
-        # Buffer mode with single_buffer auto-enabled, or stream → use full maximum
+        # Otherwise use maximum: TP_F_LEN_max for IO-buffer, updater maximum for stream.
         max_allowed = param_dict["maximum"]
     
     range_TP_F_LEN = [param_dict["minimum"], max_allowed]
@@ -425,15 +434,12 @@ def fn_update_g_len(TP_G_LEN, TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_COMPUTE_MODE
 
         # Calculate worst-case output size for current TP_F_LEN
         if TP_COMPUTE_MODE == COMPUTE_FULL:
-            # out = F + G - 1, with current F and max G
+            # out = F + G - 1; cap G so output fits in single-buffer data memory.
             max_out_with_max_g = TP_F_LEN + G_max_port - 1
-            out_buffer_bytes = max_out_with_max_g * sizeof_out
-
-            # Only apply output constraint if output won't trigger single_buffer
-            if out_buffer_bytes <= pingpong_threshold_bytes:
+            if max_out_with_max_g > max_out_elems:
                 G_max_out = max_out_elems - TP_F_LEN + 1
             else:
-                G_max_out = G_max_port  # output uses single_buffer, no constraint
+                G_max_out = G_max_port  # output fits, no constraint from output size
         elif TP_COMPUTE_MODE == COMPUTE_SAME:
             # out = F, independent of G — no output-based restriction on G
             G_max_out = G_max_port
@@ -549,9 +555,40 @@ def fn_update_casc_len(AIE_VARIANT, TT_DATA_F, TT_DATA_G, TP_G_LEN, TP_API):
     elif TP_API == com.API_BUFFER:
         legal_set = [1]
 
-    legal_set = [val for val in legal_set.copy() if val >= TP_CASC_LEN_MIN]
-    legal_set = [val for val in legal_set.copy() if val <= TP_CASC_LEN_MAX]
+    legal_set = [val for val in legal_set if val >= TP_CASC_LEN_MIN]
+    legal_set = [val for val in legal_set if val <= TP_CASC_LEN_MAX]
     legal_set = list(dict.fromkeys(legal_set))  # remove duplicates, preserve order
+
+    # AIE-1 stream API: MAC4_ROT delay-buffer hardware limit.
+    #
+    # The MAC4_ROT streaming kernel holds a circular delay buffer of
+    # G_LEN / (CASC_LEN * PHASES) F-data elements per cascade tile.
+    # Using PHASES=1 (the worst case; larger PHASES only relax this constraint),
+    # the required delay buffer size is G_LEN / CASC_LEN elements.
+    #
+    # AIE-1 readStream() supports at most a 1024-bit dual-register read, yielding
+    # a maximum of (k_max_read_write_bytes << 2) / sizeof(TT_DATA_F) elements per
+    # vector load. For example, for cint16 (4 bytes): (32<<2)/4 = 32 elements.
+    #
+    # The native AIE-1 type v64cint16 does not exist in the ISA — readStream() and
+    # mac4_rot() only accept v16cint16 or v32cint16 as delay-buffer arguments.
+    # Implementing support for a 64-element logical buffer in the kernel would require:
+    #   (a) splitting each readStream into two 32-element reads (2x stream bandwidth),
+    #   (b) restructuring circular-buffer pointer arithmetic across two physical buffers,
+    #   (c) re-indexing all mac4_rot() xstart offsets to span the split buffer.
+    # This would double stream reads per convolution step and negate the throughput
+    # benefit that the CASC_LEN configuration is intended to provide.
+    #
+    # Configurations where G_LEN / CASC_LEN exceeds the hardware vector maximum are
+    # therefore rejected here so the user receives a clear metadata error message
+    # rather than a cryptic ChessCC compile failure (undefined template v64cint16).
+    if TP_API == com.API_STREAM and AIE_VARIANT == com.AIE:
+        sizeof_f = com.fn_size_by_byte(TT_DATA_F)
+        # Maximum delay-buffer elements from a 1024-bit (dual-register) readStream
+        max_delay_buf_elems = (com.k_max_read_write_bytes[AIE_VARIANT] << 2) // sizeof_f
+        # Filter: G_LEN / CASC_LEN must fit in the hardware-native delay buffer.
+        # (Conservative assumption: PHASES=1. Larger PHASES make this easier to meet.)
+        legal_set = [c for c in legal_set if c > 0 and TP_G_LEN // c <= max_delay_buf_elems]
 
     param_dict = {"name": "TP_CASC_LEN", "enum": legal_set}
     return param_dict
@@ -591,7 +628,7 @@ def update_TP_PHASES(args):
 def fn_update_phases(AIE_VARIANT, TT_DATA_F,TT_DATA_G,TP_G_LEN, TP_API, TP_CASC_LEN):
     muls = getNumMuls(TT_DATA_F, TT_DATA_G, AIE_VARIANT)
     legal_set = [i for i in range(TP_PHASES_MIN, TP_PHASES_MAX+1)]
-    legal_set = [i for i in legal_set.copy() if com.fn_is_power_of_two(i)]
+    legal_set = [i for i in legal_set if com.fn_is_power_of_two(i)]
 
     if TP_API == com.API_STREAM:
         if TP_CASC_LEN != TP_G_LEN // muls:
@@ -746,12 +783,19 @@ def update_TP_USE_RTP_VECTOR_LENGTHS(args):
 
 
 def fn_update_TP_USE_RTP_VECTOR_LENGTHS(AIE_VARIANT, TP_API, TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_COMPUTE_MODE, TP_F_LEN, TP_G_LEN):
+    # RTP vector lengths allow the user to pass runtime F_LEN and G_LEN values via an async
+    # RTP port (rtpVecLen), enabling the same compiled graph to process different signal lengths
+    # without recompilation.  RTP is only meaningful for iobuffer (buffer) API when at least one
+    # of F_LEN or G_LEN is above its minimum (i.e., there is actually a range to vary over).
+    # Stream API kernels do not support RTP vector lengths.
     param_dict_flen = fn_update_f_len(TP_F_LEN, TT_DATA_G, TT_DATA_F, TT_DATA_OUT, TP_COMPUTE_MODE, TP_API, AIE_VARIANT)
     param_dict_glen = fn_update_g_len(TP_G_LEN, TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_COMPUTE_MODE, TP_F_LEN, TP_API, AIE_VARIANT)
 
-    if (TP_API == 1) or (TP_API == 0 and TP_F_LEN == param_dict_flen["minimum"] and TP_G_LEN == param_dict_glen["minimum"]):
+    if (TP_API == com.API_STREAM) or (TP_API == com.API_BUFFER and TP_F_LEN == param_dict_flen["minimum"] and TP_G_LEN == param_dict_glen["minimum"]):
+        # Stream API does not support RTP lengths; also no RTP benefit when both lengths are at their minimums.
         legal_set_use_rtp_vec_lengths = [0]
-    elif TP_API == 0 and (TP_F_LEN > param_dict_flen["minimum"] or TP_G_LEN > param_dict_glen["minimum"]):
+    elif TP_API == com.API_BUFFER and (TP_F_LEN > param_dict_flen["minimum"] or TP_G_LEN > param_dict_glen["minimum"]):
+        # Buffer API with at least one length above minimum: RTP is optional.
         legal_set_use_rtp_vec_lengths = [0, 1]
     else:
         legal_set_use_rtp_vec_lengths = [0]
@@ -797,6 +841,13 @@ def fn_validate_TP_USE_RTP_VECTOR_LENGTHS(AIE_VARIANT,TP_API, TP_USE_RTP_VECTOR_
 # Utility Functions
 #### Valid Sliding Mul Combos ####
 def fn_get_valid_g_types_for_mul(TT_DATA_F, AIE_VARIANT, TP_API):
+    """Return the list of valid TT_DATA_G types for the given TT_DATA_F, AIE_VARIANT, and TP_API.
+
+    The valid G types are determined by the sliding-multiply (mul_elem / mul_conv)
+    intrinsics supported on each AIE architecture.  Only (TT_DATA_F, TT_DATA_G) pairs
+    with a corresponding hardware multiply path are permitted.
+    Returns an empty list when TT_DATA_F is not supported for the given variant/API.
+    """
     if AIE_VARIANT == com.AIE:
         if TP_API == com.API_STREAM:
             if TT_DATA_F == "cint16":
@@ -833,7 +884,14 @@ def fn_get_valid_g_types_for_mul(TT_DATA_F, AIE_VARIANT, TP_API):
             return ["int16", "cint16"]
     return []
 
-def fn_get_valid_out_types_for_mul(TT_DATA_F, TT_DATA_G):   # Don't feel too good with these functions but it's where we're at.
+def fn_get_valid_out_types_for_mul(TT_DATA_F, TT_DATA_G):
+    """Return the list of valid TT_DATA_OUT types for a given (TT_DATA_F, TT_DATA_G) combination.
+
+    Output type is determined by the accumulator width produced by the hardware multiply
+    intrinsic for the given input pair.  For integer types the output is the next wider
+    integer (e.g. int16 x int16 → int32); for complex inputs at least one input must be
+    complex and the output is always complex.  Returns an empty list for unsupported pairs.
+    """
     if (TT_DATA_F == "int8")        and (TT_DATA_G == "int8"):      return ["int16"]
     if (TT_DATA_F == "int16")       and (TT_DATA_G == "int8"):      return ["int16"]
     if (TT_DATA_F == "int16")       and (TT_DATA_G == "int16"):     return ["int32"]
@@ -851,6 +909,14 @@ def fn_get_valid_out_types_for_mul(TT_DATA_F, TT_DATA_G):   # Don't feel too goo
 
 
 def getNumLanes(TT_DATA_F, TT_DATA_G, AIE_VARIANT=1):
+    """Return the number of output lanes for the sliding-multiply intrinsic on the given AIE variant.
+
+    Lanes correspond to the number of independent multiply-accumulate outputs produced per
+    intrinsic call.  Used to compute output buffer alignment and the padded F input length.
+    Returns 0 for unsupported (TT_DATA_F, TT_DATA_G) combinations.
+
+    Note: AIE-MLv2 lane counts currently match AIE-ML for the supported type combinations.
+    """
     if AIE_VARIANT == com.AIE:
         if (
             (TT_DATA_F == "int8" and TT_DATA_G == "int8")
@@ -921,6 +987,13 @@ def getNumLanes(TT_DATA_F, TT_DATA_G, AIE_VARIANT=1):
 
 
 def getNumMuls(TT_DATA_F, TT_DATA_G, AIE_VARIANT=1):
+    """Return the accumulator capacity (muls = lanes × points) for the given data-type pair and AIE variant.
+
+    'muls' is the total number of multiply-accumulate operations performed per intrinsic
+    call, equal to getNumLanes() × kPoints.  It is used to derive valid cascade lengths
+    (TP_CASC_LEN = G_LEN / muls) and to determine the kMinGLen constraint for stream API
+    phase configuration.  Returns 0 for unsupported (TT_DATA_F, TT_DATA_G) combinations.
+    """
     if AIE_VARIANT == com.AIE:
         if TT_DATA_F == "int8" and TT_DATA_G == "int8":
             return 128
@@ -1014,6 +1087,15 @@ def getNumMuls(TT_DATA_F, TT_DATA_G, AIE_VARIANT=1):
 
 
 def fn_compute_output_dimension(TP_F_LEN, TP_G_LEN, TP_COMPUTE_MODE):
+    """Return the number of output samples for a conv/corr operation.
+
+    Formulae:
+      FULL  (0): TP_F_LEN + TP_G_LEN - 1   (all partial overlaps included)
+      VALID (2): TP_F_LEN - TP_G_LEN + 1   (only fully overlapping positions)
+      SAME  (1): TP_F_LEN                   (output length equals F length)
+
+    Returns an error dict for an unrecognised compute mode.
+    """
     if TP_COMPUTE_MODE == COMPUTE_FULL:
         return TP_F_LEN + TP_G_LEN - 1
     elif TP_COMPUTE_MODE == COMPUTE_VALID:
@@ -1026,9 +1108,35 @@ def fn_compute_output_dimension(TP_F_LEN, TP_G_LEN, TP_COMPUTE_MODE):
         )
 
 
+def fn_stream_output_port_dim(TP_F_LEN, TP_PHASES):
+    """Return the stream output port dimension per phase.
+
+    With TP_PHASES parallel paths (polyphase decomposition), the total F signal
+    of TP_F_LEN samples is split evenly across TP_PHASES inF input ports and
+    TP_PHASES output ports. Each port handles TP_F_LEN / TP_PHASES samples per
+    kernel invocation, matching kSamplesPerInvoc = TP_F_LEN / TP_PHASES defined
+    in conv_corr_stream_align.hpp.
+
+    TP_CASC_LEN does NOT affect this value — cascade tiles share the same inF
+    stream via cascade accumulator buses; no external port split occurs per
+    cascade stage.
+    """
+    return TP_F_LEN // TP_PHASES
+
+
 def fn_get_input_paddedLength(
     TT_DATA_F, TT_DATA_G, TP_F_LEN, TP_G_LEN, TP_COMPUTE_MODE
 ):
+    """Compute the padded F input buffer length required by the iobuffer kernel.
+
+    The kernel zero-pads the F signal before computing the convolution/correlation so
+    that all output positions can be computed with a simple sliding window.  The amount
+    of padding depends on the compute mode and is aligned to the hardware vector load
+    size (256-bit for integer types, 512-bit for float/cfloat/bfloat16).
+
+    Note: This function is a reference utility and is not called by the updater/validator
+    chain in this file.  It may be used by external test-infrastructure scripts.
+    """
     PaddedLength = 0
     lanes = getNumLanes(TT_DATA_F, TT_DATA_G)
     dataSamples = sampleSize[TT_DATA_F]
@@ -1066,6 +1174,13 @@ def fn_get_input_paddedLength(
 def get_port_info(
     portname, dir, dataType, dim, numFrames, numPhases, apiType, vectorLength
 ):
+    """Build a list of port-descriptor dicts, one per vectorLength index.
+
+    Each dict contains the metadata fields (name, type, direction, data_type,
+    fn_is_complex, window_size, margin_size, phases) that the upper-level tooling
+    uses to connect graph ports.  vectorLength is typically TP_PHASES (or 1 for
+    the single shared inG port in stream mode).
+    """
     return [
         {
             "name": f"{portname}[{idx}]",
@@ -1149,11 +1264,15 @@ def info_ports(args):
             else []
         )
     elif TP_API == com.API_STREAM:
+        # Each of the TP_PHASES inF ports and out ports carries TP_F_LEN / TP_PHASES
+        # samples per invocation (polyphase decomposition of the F signal).
+        # TP_CASC_LEN does not divide port dims — cascade connectivity is internal.
+        dim_per_phase = fn_stream_output_port_dim(TP_F_LEN, TP_PHASES)
         portsInF = get_port_info(
             portname="inF",
             dir="in",
             dataType=TT_DATA_F,
-            dim=TP_F_LEN,
+            dim=dim_per_phase,
             numFrames=TP_NUM_FRAMES,
             numPhases=TP_PHASES,
             apiType="stream",
@@ -1173,7 +1292,7 @@ def info_ports(args):
             portname="out",
             dir="out",
             dataType=TT_DATA_OUT,
-            dim=fn_compute_output_dimension(TP_F_LEN, TP_G_LEN, TP_COMPUTE_MODE),
+            dim=dim_per_phase,
             numFrames=TP_NUM_FRAMES,
             numPhases=TP_PHASES,
             apiType="stream",
@@ -1184,13 +1303,20 @@ def info_ports(args):
             if (args["TP_USE_RTP_VECTOR_LENGTHS"] == 1)
             else []
         )
-        pass
 
     return portsInF + portsInG + portsOut + portsRtpVecLen
 
 
 #### graph generator ####
 def generate_graph(graphname, args):
+    """Generate C++ graph instantiation code and port metadata for conv_corr_graph.
+
+    Returns a dict with keys:
+      "graph"       – C++ class definition string wrapping xf::dsp::aie::conv_corr::conv_corr_graph<>.
+      "port_info"   – Port descriptor list from info_ports(args).
+      "headerfile"  – Include path for the graph header.
+      "searchpaths" – List of include search directories for the generated project.
+    """
 
     if graphname == "":
         graphname = "default_graphname"
@@ -1266,6 +1392,11 @@ public:
     }}
     adf::connect<> net_inG(inG[0], conv_corr_graph.inG);
     {rtp_connect_str}
+  }}
+
+    template <typename TopGraph, typename RtpPort>
+    void update_rtp(TopGraph& top, RtpPort& rtpPort, unsigned int rtpFLen, unsigned int rtpGLen) {{
+        conv_corr_graph.update_rtp(top, rtpPort, rtpFLen, rtpGLen);
   }}
 }};
 """

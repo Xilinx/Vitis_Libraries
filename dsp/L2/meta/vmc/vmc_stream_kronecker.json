@@ -30,7 +30,7 @@
         {
             "key": "TT_DATA_A",
             "name": "data_type_A",
-            "description": "describes the data type of input A to the function.",
+            "description": "describes the data type of samples at input A.",
             "default": "int16",
             "label": "A input data type:",
             "tablabel": "Main",
@@ -39,7 +39,7 @@
         {
             "key": "TT_DATA_B",
             "name": "data_type_B",
-            "description": "describes the data type of input B to the function.",
+            "description": "describes the data type of samples at input B.",
             "default": "int16",
             "label": "B input data type:",
             "tablabel": "Main",
@@ -84,18 +84,9 @@
         {
             "key": "TP_NUM_FRAMES",
             "name": "num_frames",
-            "description": "describes number of input data frames to be processed per call to the function. Each frame corresponds to a Kronecker matrix product.",
+            "description": "describes the number of operations performed per kernel call. Each operation is a Kronecker product.",
             "default": 1,
             "label": "Number of frames:",
-            "tablabel": "Main",
-            "parameterType": "edit"
-        },
-        {
-            "key": "TP_SHIFT",
-            "name": "shift_output",
-            "description": "describes power of 2 shift down applied to the accumulation of product terms before each output. TP_SHIFT must be in the range 0 to 59 (61 for AIE1).",
-            "default": 0,
-            "label": "Scale output down by 2^:",
             "tablabel": "Main",
             "parameterType": "edit"
         },
@@ -107,6 +98,15 @@
               "label": "SSR: ",
               "tablabel": "Main",
               "parameterType": "edit"
+        },
+        {
+            "key": "TP_SHIFT",
+            "name": "shift_output",
+            "description": "describes the power-of-2 shift applied to the accumulation before output. TP_SHIFT must be in the range 0 to 59 (61 for AIE1).",
+            "default": 0,
+            "label": "Scale output down by 2^:",
+            "tablabel": "Main",
+            "parameterType": "edit"
         },
         {
             "key": "TP_RND",

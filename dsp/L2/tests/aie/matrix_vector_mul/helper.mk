@@ -29,6 +29,10 @@ WINDOW_VSIZE_B  	= $(shell echo $$(( $(DIM_B) * $(NUM_FRAMES))))
 WINDOW_VSIZE_OUT    = $(shell echo $$(( $(DIM_A) * $(NUM_FRAMES))))
 PARAM_MAP = DATA_A $(DATA_A) DATA_B $(DATA_B) DIM_A $(DIM_A) DIM_B $(DIM_B) DIM_A_LEADING $(DIM_A_LEADING) SHIFT $(SHIFT) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE) NUM_FRAMES $(NUM_FRAMES) CASC_LEN $(CASC_LEN) UUT_SSR $(UUT_SSR) USE_MATRIX_RELOAD $(USE_MATRIX_RELOAD) API_IO $(API_IO) DUAL_IP $(DUAL_IP) NUM_OUTPUTS $(NUM_OUTPUTS) AIE_VARIANT $(AIE_VARIANT)
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
+STATUS_JSON = ./logs/status_$(UUT_KERNEL)_$(PARAMS).json
+
+include $(HELPER_ROOT_DIR)/L2/tests/aie/out_mul_types.mk
+T_DATA_OUT := $(call fn_det_out_type,$(DATA_A),$(DATA_B))
 
 TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" | head -n 1)
 VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3
@@ -58,15 +62,20 @@ $(HELPER):
 	UUT_KERNEL=matrix_vector_mul_ref UUT_SIM_FILE=./data/ref_output.txt make run TARGET=x86sim TAG=REF ;\
 	make cleanall
 
+get_memory:
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py harvest $(STATUS_JSON) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts Work
+
 get_latency:
 	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT)
 	
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output $(TS_INPUT) $(TS_OUTPUT) $(STATUS_FILE) $(WINDOW_VSIZE_A) $(NITER)
 
 	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_qor.py -t_in_file $(TS_INPUT) -t_out_file uut_output_0_0.txt -status_file_dir $(STATUS_FILE) -num_of_samples $(WINDOW_VSIZE_A) -niter $(NITER) -casc_len $(CASC_LEN) -aiesim_out_dir ./aiesimulator_output -ip matVecMul
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py qor $(STATUS_JSON) Work $(NITER) $(NUM_FRAMES) T_inputB_ uut_output_ 64 $(T_DATA_OUT) --verbose
 
 get_status:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP) SINGLE_BUF $(SINGLE_BUF)
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py init $(STATUS_JSON) UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP) SINGLE_BUF $(SINGLE_BUF) NITER $(NITER)
 
 prep_x86_out:
 	@x86_out_files=`ls $(HELPER_CUR_DIR)/x86simulator_output/data`;\
@@ -86,6 +95,7 @@ get_diff:
 	perl $(HELPER_ROOT_DIR)/L2/tests/aie/matrix_vector_mul/dual_stream.pl --dual $(TAG_DUAL_OP) -f ./data/uut_output.txt --x_pos $(UUT_SSR) --zip -t $(DATA_A) -findOutType $(DATA_B) --plioWidth 64;\
 	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_card_cut.pl -f ./data/uut_output.txt --rows $(DIM_A) --cols 1 --ssrSplit $(UUT_SSR) --casc 1 --zip -t $(DATA_A) -findOutType $(DATA_B) -n $(NITER) --plioWidth 64
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE)
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py functional_check $(STATUS_JSON) ./logs/diff.txt
 
 create_config:
 	echo $(STATUS_FILE)

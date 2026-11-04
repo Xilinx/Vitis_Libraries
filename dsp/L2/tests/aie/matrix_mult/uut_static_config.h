@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef P_CONJ_A
+#define P_CONJ_A 0
+#endif
+
+#ifndef P_CONJ_B
+#define P_CONJ_B 0
+#endif
+
 #ifndef P_INPUT_WINDOW_VSIZE_A
 #define P_INPUT_WINDOW_VSIZE_A P_DIM_A* P_DIM_AB
 #endif

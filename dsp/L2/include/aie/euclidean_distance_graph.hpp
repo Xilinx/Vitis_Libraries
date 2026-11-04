@@ -221,6 +221,8 @@ class euclidean_distance_graph : public graph {
                 connect<>(inWindowQ, m_EDKernels[0].in[1]);
                 dimensions(m_EDKernels[0].in[0]) = {(TP_LEN * kDim)};
                 dimensions(m_EDKernels[0].in[1]) = {(TP_LEN * kDim)};
+                conditional_single_buffer<TT_DATA, (TP_LEN * kDim)>(m_EDKernels[0].in[0]);
+                conditional_single_buffer<TT_DATA, (TP_LEN * kDim)>(m_EDKernels[0].in[1]);
 
                 if
                     constexpr(TP_IS_OUTPUT_SQUARED == 0) {
@@ -232,15 +234,19 @@ class euclidean_distance_graph : public graph {
                         connect<>(m_EDKernels[0].out[0], m_EDKernels[1].in[0]);
                         dimensions(m_EDKernels[0].out[0]) = {TP_LEN};
                         dimensions(m_EDKernels[1].in[0]) = {TP_LEN};
+                        conditional_single_buffer<TT_DATA, TP_LEN>(m_EDKernels[0].out[0]);
+                        conditional_single_buffer<TT_DATA, TP_LEN>(m_EDKernels[1].in[0]);
 
                         // connect final kernel output to output of the graph
                         connect<>(m_EDKernels[1].out[0], outWindow);
                         dimensions(m_EDKernels[1].out[0]) = {TP_LEN};
+                        conditional_single_buffer<TT_DATA, TP_LEN>(m_EDKernels[1].out[0]);
                     }
                 else {
                     // connect final kernel output to output of the graph
                     connect<>(m_EDKernels[0].out[0], outWindow);
                     dimensions(m_EDKernels[0].out[0]) = {TP_LEN};
+                    conditional_single_buffer<TT_DATA, TP_LEN>(m_EDKernels[0].out[0]);
                 }
 
                 // Specify mapping constraints

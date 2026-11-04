@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,11 @@
 #define UUT_GRAPH euclidean_distance_graph
 #endif
 
+#ifdef USING_UUT
+#include "euclidean_distance_native_generated_graph/euclidean_distance_generated_graph.h"
+#else
 #include QUOTE(UUT_GRAPH.hpp)
+#endif
 
 using namespace adf;
 
@@ -69,27 +73,40 @@ class test_graph : public graph {
         printf("SAT                   = %d \n", SAT);
         printf("IS_OUTPUT_SQUARED     = %d \n", IS_OUTPUT_SQUARED);
 
-        // euclidean_distance sub-graph
+// euclidean_distance sub-graph
+#ifdef USING_UUT
+        euclidean_distance_native_generated_graph euclidean_distanceGraph;
+#else
         dsplib::euclidean_distance::UUT_GRAPH<DATA, LEN, DIM, API_IO, RND, SAT, IS_OUTPUT_SQUARED>
             euclidean_distanceGraph;
+#endif
 
         // Make connections:
         std::string inpFile_Point_P = QUOTE(INPUT_FILE_P);
         std::string inpFile_Point_Q = QUOTE(INPUT_FILE_Q);
         inWindowP[0] = input_plio::create("PLIO_inpFile_Point_P", adf::plio_64_bits, inpFile_Point_P);
         inWindowQ[0] = input_plio::create("PLIO_inpFile_Point_Q", adf::plio_64_bits, inpFile_Point_Q);
+#ifdef USING_UUT
+        connect<>(inWindowP[0].out[0], euclidean_distanceGraph.inP[0]);
+        connect<>(inWindowQ[0].out[0], euclidean_distanceGraph.inQ[0]);
+#else
         connect<>(inWindowP[0].out[0], euclidean_distanceGraph.inWindowP);
         connect<>(inWindowQ[0].out[0], euclidean_distanceGraph.inWindowQ);
+#endif
 
         std::string OutFile = QUOTE(OUTPUT_FILE);
         outWindow[0] = output_plio::create("PLIO_OutFile", adf::plio_64_bits, OutFile);
+#ifdef USING_UUT
+        connect<>(euclidean_distanceGraph.out[0], outWindow[0].in[0]);
+#else
         connect<>(euclidean_distanceGraph.outWindow, outWindow[0].in[0]);
+#endif
 
 #ifdef USING_UUT
 #if (SINGLE_BUF == 1 && API_IO == 0)
-        single_buffer(euclidean_distanceGraph.getKernels()[0].in[0]);
-        single_buffer(euclidean_distanceGraph.getKernels()[0].in[1]);
-        single_buffer(euclidean_distanceGraph.getKernels()[0].out[0]);
+        single_buffer(euclidean_distanceGraph.euclidean_distance_graph.getKernels()[0].in[0]);
+        single_buffer(euclidean_distanceGraph.euclidean_distance_graph.getKernels()[0].in[1]);
+        single_buffer(euclidean_distanceGraph.euclidean_distance_graph.getKernels()[0].out[0]);
         printf("INFO: Single Buffer Constraint applied to input and output buffers of kernel.\n");
 #endif
 #endif

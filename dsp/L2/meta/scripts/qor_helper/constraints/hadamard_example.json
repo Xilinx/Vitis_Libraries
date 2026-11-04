@@ -1,0 +1,15 @@
+{
+    "parameter_constraints": {
+        "AIE_VARIANT": 1,
+        "TT_DATA_A": "float",
+        "TP_DIM": 256
+    },
+    "qor_constraints": {
+        "frame rate (kHz)": ">50000"
+    },
+    "sort_by": {
+        "num aie": "ascending",
+        "throughput (MSa/s)": "descending"
+    },
+    "confidence": 1
+}

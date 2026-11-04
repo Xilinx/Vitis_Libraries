@@ -45,6 +45,20 @@ struct struct_fft_ssr2 {
     const complex_t& operator[](int i) const { return data[i]; }
 };
 
+/** Four parallel complex lanes per beat (radix-4 variant path). */
+struct struct_fft_ssr4 {
+    complex_t data[4];
+    struct_fft_ssr4() { data[0] = data[1] = data[2] = data[3] = complex_t(0.0f, 0.0f); }
+    struct_fft_ssr4(complex_t d0, complex_t d1, complex_t d2, complex_t d3) {
+        data[0] = d0;
+        data[1] = d1;
+        data[2] = d2;
+        data[3] = d3;
+    }
+    complex_t& operator[](int i) { return data[i]; }
+    const complex_t& operator[](int i) const { return data[i]; }
+};
+
 // Token protocol: 00=idle, 01=first(write only), 10=last(read only), 11=normal(write+read)
 typedef ap_uint<2> token_t;
 

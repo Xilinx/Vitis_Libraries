@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,14 +66,17 @@ INLINE_DECL void ddsWriteOp(aie::vector<TT_DATA, numLanes>* __restrict(&outPtr),
     }
 }
 
-template <unsigned int TP_API, unsigned int numLanes, typename TT_DATA>
+template <unsigned int TP_API,
+          unsigned int numLanes,
+          typename TT_DATA,
+          aie_stream_resource_in TP_STREAM_RSRC = aie_stream_resource_in::a>
 INLINE_DECL void ddsReadIp(aie::vector<TT_DATA, numLanes>* __restrict(&in0Ptr),
                            input_stream<TT_DATA>* __restrict(&inStrm),
                            aie::vector<TT_DATA, numLanes>& inData) {
     if
         constexpr(TP_API == 0) { inData = *in0Ptr++; }
     else {
-        inData = readincr_v<numLanes, aie_stream_resource_in::a>(inStrm);
+        inData = readincr_v<numLanes, TP_STREAM_RSRC>(inStrm);
     }
 }
 //==============================================================================
@@ -191,7 +194,6 @@ INLINE_DECL void kernelDdsMixerClass<TT_DATA,
                     sincosVal[t][i] = sincosLUT[t][((i * m_bFanStepSize) >> (32 - 10 * (t + 1))) & 0x000003FF];
                 }
             }
-
             if
                 constexpr(TP_NUM_LUTS == 1) { tempOut = sincosVal[0]; }
             else if
@@ -262,7 +264,6 @@ INLINE_DECL void kernelDdsMixerClass<TT_DATA,
                 sincosVal[t][i] = sincosLUT[t][((i * m_bFanStepSize) >> (32 - 10 * (t + 1))) & 0x000003FF];
             }
         }
-
         if
             constexpr(TP_NUM_LUTS == 1) {
                 if
@@ -432,7 +433,7 @@ INLINE_DECL void kernelDdsMixerClass<TT_DATA,
             mixer_acc = aie::mul(mixer_vdata, dds_acc.template to_vector<TT_DATA>(this->m_kDdsShift));
             dds_conj_acc =
                 aie::mul(aie::op_conj(rot_vec), aie::op_conj(dds_out[0])); // What?? Why not conjugate dds_acc?
-            ddsReadIp<TP_API, m_kNumLanes, TT_DATA>(in1Ptr, in1Strm, mixer_vdata);
+            ddsReadIp<TP_API, m_kNumLanes, TT_DATA, aie_stream_resource_in::b>(in1Ptr, in1Strm, mixer_vdata);
             mixer_acc = aie::mac(mixer_acc, mixer_vdata, dds_conj_acc.template to_vector<TT_DATA>(this->m_kDdsShift));
             ddsWriteOp<m_kMixerShift, TP_API, m_kNumLanes>(out0Ptr, outStrm, mixer_acc);
         }
@@ -510,7 +511,7 @@ INLINE_DECL void kernelDdsMixerClass<TT_DATA,
                 ddsReadIp<TP_API, m_kNumLanes, TT_DATA>(in0Ptr, in0Strm, mixer_vdata);
                 mixer_acc = aie::mul(mixer_vdata, dds_acc.template to_vector<TT_DATA>(m_kDdsShift));
                 ddsOutConj = aie::conj(dds_acc.template to_vector<TT_DATA>(m_kDdsShift));
-                ddsReadIp<TP_API, m_kNumLanes, TT_DATA>(in1Ptr, in1Strm, mixer_vdata);
+                ddsReadIp<TP_API, m_kNumLanes, TT_DATA, aie_stream_resource_in::b>(in1Ptr, in1Strm, mixer_vdata);
                 mixer_acc = aie::mac(mixer_acc, mixer_vdata, ddsOutConj);
                 ddsWriteOp<m_kMixerShift, TP_API, m_kNumLanes>(out0Ptr, outStrm, mixer_acc);
             }
@@ -840,7 +841,6 @@ INLINE_DECL void kernelDdsMixerClass<cfloat,
             sincosVal[t][i] = sincosLUT[t][((i * m_bFanStepSize) >> (32 - 10 * (t + 1))) & 0x000003FF];
         }
     }
-
     if
         constexpr(TP_NUM_LUTS == 1) { tempOut = sincosVal[0]; }
     else if
@@ -991,7 +991,7 @@ INLINE_DECL void kernelDdsMixerClass<cfloat,
                 ddsReadIp<TP_API, m_kNumLanes, TT_DATA>(in0Ptr, in0Strm, mixer_vdata);
                 mixer_acc = aie::mul(mixer_vdata, dds_acc);
                 dds_conj_acc = aie::mul(aie::op_conj(rot_vec), aie::op_conj(dds_out[0]));
-                ddsReadIp<TP_API, m_kNumLanes, TT_DATA>(in1Ptr, in1Strm, mixer_vdata);
+                ddsReadIp<TP_API, m_kNumLanes, TT_DATA, aie_stream_resource_in::b>(in1Ptr, in1Strm, mixer_vdata);
                 mixer2 = aie::mul(mixer_vdata, dds_conj_acc);
                 mixer_acc = aie::add(mixer_acc, mixer2);
                 ddsWriteOp<0, TP_API, m_kNumLanes>(out0Ptr, outStrm, mixer_acc);
@@ -1050,7 +1050,7 @@ INLINE_DECL void kernelDdsMixerClass<cfloat,
                 ddsReadIp<TP_API, m_kNumLanes, TT_DATA>(in0Ptr, in0Strm, mixerIpData);
                 mixerAcc = aie::mul(mixerIpData, dds_acc);
                 ddsOutConj = aie::conj(dds_acc);
-                ddsReadIp<TP_API, m_kNumLanes, TT_DATA>(in1Ptr, in1Strm, mixerIpData);
+                ddsReadIp<TP_API, m_kNumLanes, TT_DATA, aie_stream_resource_in::b>(in1Ptr, in1Strm, mixerIpData);
                 mixerAccInter = aie::mul(mixerIpData, ddsOutConj);
                 mixerAcc = aie::add(mixerAcc, mixerAccInter);
                 ddsWriteOp<m_kMixerShift, TP_API, m_kNumLanes>(out0Ptr, outStrm, mixerAcc);

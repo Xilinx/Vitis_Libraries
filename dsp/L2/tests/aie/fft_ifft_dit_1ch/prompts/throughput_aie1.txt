@@ -1,0 +1,5 @@
+Configure a single-channel forward FFT for an AIE1 device on complex 16-bit
+data (16-bit complex twiddles), 256 points, fixed point size. I need a
+sustained throughput of at least 1 GSps (giga-samples per second), and want
+to use as few AIE tiles as reasonably possible to reach it. Use saturation
+and round-half-up, and scale the output by the FFT size.

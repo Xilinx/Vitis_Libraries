@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -196,6 +196,8 @@ class fft_window_graph : public graph {
                 dimensions(m_kernels[i].in[0]) = {kKernelWindowVsize + kHeaderBytes / sizeof(TT_DATA)};
                 connect(m_kernels[i].out[0], out[i]);
                 dimensions(m_kernels[i].out[0]) = {kKernelWindowVsize + kHeaderBytes / sizeof(TT_DATA)};
+                conditional_single_buffer<TT_DATA, kKernelWindowVsize + kHeaderBytes / sizeof(TT_DATA)>(
+                    m_kernels[i].in[0], m_kernels[i].out[0]);
             } else {
                 for (int k = 0; k < kStreamsPerTile; k++) {
                     connect<stream>(in[i * kStreamsPerTile + k], m_kernels[i].in[k]);

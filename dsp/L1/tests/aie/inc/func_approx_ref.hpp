@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,11 +68,12 @@ class func_approx_ref {
 #endif //_SUPPORTS_BFLOAT16_
     TT_LUT* m_lutRtpPtr;
     TT_LUT* m_lutRtpPtr1;
+    std::vector<TT_LUT> m_lut_storage;
     TT_LUT* m_lut_ab;
 
-    // Constructor with vector - takes std::vector reference
+    // The x86sim wrapper passes a temporary vector, so retain its LUT data for the kernel lifetime.
     func_approx_ref(const std::vector<TT_LUT>& lut_ab)
-        : m_lut_ab(const_cast<TT_LUT*>(lut_ab.data())), m_lutRtpPtr(nullptr), m_lutRtpPtr1(nullptr) {}
+        : m_lutRtpPtr(nullptr), m_lutRtpPtr1(nullptr), m_lut_storage(lut_ab), m_lut_ab(m_lut_storage.data()) {}
     // Constructor with DummyArray
     template <typename T>
     func_approx_ref(const T& dummy_array) : m_lut_ab(nullptr), m_lutRtpPtr(nullptr), m_lutRtpPtr1(nullptr) {}

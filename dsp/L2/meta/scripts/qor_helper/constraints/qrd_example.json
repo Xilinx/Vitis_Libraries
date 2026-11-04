@@ -1,11 +1,16 @@
 
 {
     "parameter_constraints": {
+        "AIE_VARIANT": 1,
         "TT_DATA": ["float"],
-        "TP_DIM_ROWS": 128
+        "TP_DIM_COLS": 16
     },
-    "qor_constraints": "throughput>100",
-    "sort_by": ["num_aie", "throughput", "latency"],
-    "ascending": [true, false, true],
-    "confidence": 2
+    "qor_constraints": {
+        "frame rate (kHz)": ">15"
+    },
+    "sort_by": {
+        "num aie": "ascending",
+        "frame rate (kHz)": "descending"
+    },
+    "confidence": 1
 }

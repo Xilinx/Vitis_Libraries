@@ -15,7 +15,7 @@ Configuring the Library Elements
 
 .. code-block:: bash
 
-	 setenv PATH "<your-Vitis-install-path>/lin64/2025.1/Vitis/aietools/tps/lnx64/python-3.13.0/bin:$PATH"
+	 setenv PATH "<your-Vitis-install-path>/lin64/2026.2/Vitis/aietools/tps/lnx64/python-3.13.0/bin:$PATH"
 
 DSPLIB IPs can be configured using a Python script called ``config_helper.py``. The ``config_helper.py`` script assists users in establishing a valid configuration for any DSPLIB IP. This script communicates with the user through the console interface.
 
@@ -48,6 +48,30 @@ Config Helper Example
 .. code-block:: bash
 
 	 python3 xf_dsp/L2/meta/config_helper.py --ip hadamard LIST_PARAMS
+
+Interactive Configuration Wizard
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+``L2/meta/scripts/ip_config_wizard/ip_config_wizard.py`` is an interactive
+alternative to ``config_helper.py`` that also explains each parameter (using
+the ``@tparam`` documentation from the IP's graph header) as it asks for a
+value, rather than only enforcing legal ranges. It is built on the same
+metadata-driven validation as ``config_helper.py`` and finalizes through
+``metadata_checker.py`` unmodified, so its output has full parity with the
+existing tools.
+
+.. code-block:: bash
+
+	 python3 xf_dsp/L2/meta/scripts/ip_config_wizard/ip_config_wizard.py --ip hadamard
+
+It also exposes a stateless, scriptable step API (``--step`` / ``--set`` /
+``--finalize``, all backed by a ``--state`` file) intended for AI coding
+agents to drive turn by turn, and a ``--qor-result`` option to seed
+parameters from a ``config_qor_helper.py`` (``L2/meta/scripts/qor_helper/``)
+ranked-configuration CSV when a throughput/latency-optimized starting point
+is wanted instead of a manual walk. Run
+``python3 xf_dsp/L2/meta/scripts/ip_config_wizard/ip_config_wizard.py --h``
+for the full option list.
 
 .. _DSP_LEGALITY_CHECKING:
 

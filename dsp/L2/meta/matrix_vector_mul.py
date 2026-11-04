@@ -15,8 +15,14 @@
 # limitations under the License.
 #
 
+import json
+import os
+
 import aie_common as com
 from aie_common import *
+
+with open(os.path.join(os.path.dirname(__file__), "type_promotions.json")) as f:
+    out_mul_type_dict = json.load(f)["out_mul_type"]
 
 TP_CASC_LEN_min = 1
 TP_CASC_LEN_max = 16
@@ -27,13 +33,6 @@ TP_SSR_max = 16
 #######################################################
 ################## Helper Functions ###################
 #######################################################
-def getOutputType(typeA, typeB):
-    if fn_size_by_byte(typeA) > fn_size_by_byte(typeB):
-        return typeA
-    else:
-        return typeB
-
-
 def get_dim_min(TT_DATA):
     """Minimum dimension granularity: 256 bits / type size in elements."""
     return 256 // 8 // fn_size_by_byte(TT_DATA)
@@ -201,7 +200,7 @@ def update_TP_DIM_A(args):
 def fn_update_tp_dim_a(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_DIM_A):
     dimA_min = get_dim_min(TT_DATA_A)
     dimB_min = get_dim_min(TT_DATA_B)
-    TT_OUT = getOutputType(TT_DATA_A, TT_DATA_B)
+    TT_OUT = com.fn_det_out_type(TT_DATA_A, TT_DATA_B, out_mul_type_dict)
     buffer_size = k_data_memory_bytes[AIE_VARIANT]
     max_buf_a = buffer_size // fn_size_by_byte(TT_DATA_A)
     max_buf_out = buffer_size // fn_size_by_byte(TT_OUT)
@@ -635,7 +634,7 @@ def validate_TP_SAT(args):
 ################## Port Info ##########################
 #######################################################
 def info_ports(args):
-    TT_DATA_OUT = getOutputType(args["TT_DATA_A"], args["TT_DATA_B"])
+    TT_DATA_OUT = com.fn_det_out_type(args["TT_DATA_A"], args["TT_DATA_B"], out_mul_type_dict)
     INPUT_WINDOW_VSIZE_A = (args["TP_NUM_FRAMES"] * args["TP_DIM_A"] * args["TP_DIM_B"] // (args["TP_SSR"] * args["TP_CASC_LEN"]))
     INPUT_WINDOW_VSIZE_B = (args["TP_NUM_FRAMES"] * args["TP_DIM_B"] // args["TP_CASC_LEN"] )
     OUTPUT_WINDOW_VSIZE = args["TP_DIM_A"] * args["TP_NUM_FRAMES"] // args["TP_SSR"]

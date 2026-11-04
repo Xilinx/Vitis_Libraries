@@ -68,17 +68,18 @@ class hadamard {
    private:
     static_assert(TP_RND >= ROUND_MIN && TP_RND <= ROUND_MAX, "ERROR: TP_RND is out of the supported range.");
 
-    static constexpr unsigned int kSamplesInVect = 256 / 8 / (vectByte<TT_DATA_A, TT_DATA_B>().val_byteBuffWin);
+    static constexpr unsigned int kSamplesInVect =
+        __MAX_READ_WRITE__ / 8 / (vectByte<TT_DATA_A, TT_DATA_B>().val_byteBuffWin);
     static constexpr unsigned int kVecInFrame = CEIL(TP_DIM, kSamplesInVect) / kSamplesInVect;
     static constexpr unsigned int kUNROLL = MIN(kVecInFrame, kUnrollMax);
 
     static constexpr int kKernelWindowVsize = (TP_NUM_FRAMES * TP_DIM);
-    static_assert(kKernelWindowVsize * sizeof(outTypeMult_t<TT_DATA_A, TT_DATA_B>) <= __DATA_MEM_BYTES__,
+    static_assert(kKernelWindowVsize * sizeof(outType_t<TT_DATA_A, TT_DATA_B>) <= __DATA_MEM_BYTES__,
                   "ERROR: TP_NUM_FRAMES*(TP_DIM/TP_SSR) must be at no more than data memory size.");
 
    public:
-    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
-    using acc_t = accTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using out_t = outType_t<TT_DATA_A, TT_DATA_B>;
+    using acc_t = accType_t<TT_DATA_A, TT_DATA_B>;
 
     // Constructor
     hadamard();
@@ -105,13 +106,14 @@ template <typename TT_DATA_A,
 class hadamard<TT_DATA_A, TT_DATA_B, TP_DIM, TP_NUM_FRAMES, TP_SHIFT, 1, TP_SSR, TP_RND, TP_SAT> {
    private:
     static_assert(TP_RND >= ROUND_MIN && TP_RND <= ROUND_MAX, "ERROR: TP_RND is out of the supported range.");
-    static constexpr unsigned int kSamplesInVect = MAX(128 / 8 / sizeof(TT_DATA_A), 128 / 8 / sizeof(TT_DATA_B));
+    static constexpr unsigned int kSamplesInVect =
+        MAX(__MIN_STREAM_ACCESS__ / 8 / sizeof(TT_DATA_A), __MIN_STREAM_ACCESS__ / 8 / sizeof(TT_DATA_B));
     static constexpr unsigned int kVecInFrame = CEIL(TP_DIM, kSamplesInVect) / kSamplesInVect;
     static constexpr unsigned int kUNROLL = MIN(kVecInFrame, kUnrollMax);
 
    public:
-    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
-    using acc_t = accTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using out_t = outType_t<TT_DATA_A, TT_DATA_B>;
+    using acc_t = accType_t<TT_DATA_A, TT_DATA_B>;
     // Constructor
     hadamard();
 

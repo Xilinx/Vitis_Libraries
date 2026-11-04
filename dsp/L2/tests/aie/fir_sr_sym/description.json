@@ -61,7 +61,7 @@
                         "default": {
                             "COMPILER_ARGS": "",
                             "AIE_VARIANT": "2",
-                            "FIFO_THRESHOLD": "--aie.swfifo-threshold=120 "
+                            "FIFO_THRESHOLD": ""
                         }
                     }
                 }
@@ -115,7 +115,7 @@
                         "default": {
                             "COMPILER_ARGS": " --aie.Xpreproc=-D_AIE_API_WORKAROUND_CR_1223259_=1",
                             "AIE_VARIANT": "22",
-                            "FIFO_THRESHOLD": "--aie.swfifo-threshold=120 "
+                            "FIFO_THRESHOLD": ""
                         }
                     }
                 }
@@ -125,6 +125,9 @@
     "pre_build": [
         {
             "build_cmd": " mkdir -p logs"
+        },
+        {
+            "build_cmd": "$(if $(PROMPT_FILE), $(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/prompt_config/run_prompt_config.py --ip fir_sr_sym --params_file $(PARAMS_FILE) --instance $(PARAMS) --prompt_file $(PROMPT_FILE) --prompt_dir PROJECT/prompts --lib_dir LIB_DIR --out_dir PROJECT/logs))"
         },
         {
             "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\")"
@@ -165,8 +168,10 @@
                 "grep -ve '[XT]' ./aiesimulator_output/data/uut_output.txt > ./data/uut_output.txt",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk diff HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR\"",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk get_memory HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk get_latency HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
-                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./"
+                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./",
+                "$(if $(filter-out REF,$(TAG)), $(if $(filter 1,$(CLEAN_TEST)), make ultraclean))"
             ]
         },
         {
@@ -178,7 +183,8 @@
                 "$(if $(filter REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./data/ref_output.txt)",
                 "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk diff HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR\")",
                 "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\")",
-                "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./)"
+                "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./)",
+                "$(if $(filter-out REF,$(TAG)), $(if $(filter 1,$(CLEAN_TEST)), make ultraclean))"
             ]
         }
     ],
@@ -305,11 +311,11 @@
                     "vitis_aie_sim",
                     "vitis_aie_x86sim"
                 ],
-                "*_hw_qor": [
+                "*_hw_checkin": [
                     "vitis_aie_sim",
                     "vitis_aie_x86sim"
                 ],
-                "*_x86sim_qor": [
+                "*_x86sim_checkin": [
                     "vitis_aie_x86sim"
                 ]
             },

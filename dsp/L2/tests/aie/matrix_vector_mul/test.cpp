@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ xf::dsp::aie::testcase::test_graph matrix_vector_mul_tb;
 int main(void) {
     matrix_vector_mul_tb.init();
 #if defined(USING_UUT) && (USE_MATRIX_RELOAD == 1)
+    matrix_vector_mul_tb.loadMatrix();
 
     for (int ssr = 0; ssr < UUT_SSR; ssr++) {
         for (int casc = 0; casc < CASC_LEN; casc++) {

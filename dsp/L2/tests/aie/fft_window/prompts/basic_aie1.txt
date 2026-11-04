@@ -1,0 +1,3 @@
+Configure an FFT window function for an AIE1 device on cint16 data with int16 weights,
+window I/O, SSR 1, static 256-point frames with 1024 samples per call, shift down by 14
+bits with round-half-up and saturation.

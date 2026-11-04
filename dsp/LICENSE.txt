@@ -179,7 +179,8 @@ END OF TERMS AND CONDITIONS
 
 
 
-Copyright 2021 Xilinx Inc
+Copyright (C) 2019-2022, Xilinx, Inc.
+Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 
 
 ------------------------------------------------------------

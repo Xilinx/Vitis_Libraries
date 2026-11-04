@@ -6,6 +6,12 @@
         "TT_COEFF": "int16",
         "TP_SSR": [1,2,4,8]
     },
-    "qor_constraints": "throughput>1000",
+    "qor_constraints": {
+        "throughput (MSa/s)": ">1000"
+    },
+    "sort_by": {
+        "num aie": "ascending",
+        "throughput (MSa/s)": "descending"
+    },
     "confidence": 1
 }

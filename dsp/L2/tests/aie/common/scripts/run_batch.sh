@@ -21,6 +21,7 @@ args=("$@")
 # specify results path, default "results" will be in current working directory
 path_to_results="./results"
 json_file="multi_params"
+uut_kernel=""
 for i in "${!args[@]}"; do
     if [[ "${args[$i]}" == '-func' ]]
     then
@@ -38,7 +39,14 @@ for i in "${!args[@]}"; do
         suffix=${args[($i+1)]}
         echo $suffix
     fi
+    if [[ "${args[$i]}" == '-uut_kernel' ]]
+    then
+        uut_kernel=${args[($i+1)]}
+    fi
 done
+if [[ -z "$uut_kernel" ]]; then
+    uut_kernel=$libelemName
+fi
 
 echo "Start of Batch Run $funcDir/results/batch_${json_file}_${suffix}" | tee $funcDir/runmake_logs/runmake.log
 # Read keys into an array
@@ -69,7 +77,7 @@ for test_name in "${json_test_names[@]}"; do
         target_uut="aiesim"
     fi
 
-    updated_cmd="make -f $scriptDir/run_pack.mk all_pack ${part_or_platform}=${platform} PARAMS=${test_name} PARAMS_FILE=${json_file}.json RESULTS_DIR=$funcDir/results/batch_${json_file}_${suffix}/${test_name} TARGET=${target_uut} UUT_KERNEL=$libelemName"
+    updated_cmd="make -f $scriptDir/run_pack.mk all_pack ${part_or_platform}=${platform} PARAMS=${test_name} PARAMS_FILE=${json_file}.json RESULTS_DIR=$funcDir/results/batch_${json_file}_${suffix}/${test_name} TARGET=${target_uut} UUT_KERNEL=$uut_kernel"
     # echo $updated_cmd
     makeCmd[${#makeCmd[*]}]=$updated_cmd
     test_num=`expr $test_num + 1`

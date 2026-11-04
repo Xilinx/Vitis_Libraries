@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -644,7 +644,11 @@ def update_TP_INPUT_WINDOW_VSIZE(args):
 def fn_update_TP_INPUT_WINDOW_VSIZE(
     AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_SSR, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE
 ):
-    numLanes = fnNumLanes384b(TT_DATA, TT_COEFF) * 4
+    # fnNumLanes384b defaults to AIE1 lane counts when AIE_VARIANT is omitted -- pass it through
+    # explicitly (as this file already does elsewhere, e.g. fn_update_TP_PARA_DECI_POLY) so this
+    # matches the kernel's actual per-variant m_kLanes (fnNumLanes384<TT_DATA,TT_COEFF>() in
+    # fir_decimate_hb_asym.hpp), instead of always using AIE1's value regardless of AIE_VARIANT.
+    numLanes = fnNumLanes384b(TT_DATA, TT_COEFF, AIE_VARIANT) * 4
     lcm_ws = TP_SSR * numLanes
     TP_INPUT_WINDOW_VSIZE_min_int = int(CEIL(TP_INPUT_WINDOW_VSIZE_min, lcm_ws))
 
@@ -705,7 +709,7 @@ def validate_TP_INPUT_WINDOW_VSIZE(args):
 def fn_validate_input_window_size(
     AIE_VARIANT, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR
 ):
-    numLanes = fnNumLanes384b(TT_DATA, TT_COEFF) * 4
+    numLanes = fnNumLanes384b(TT_DATA, TT_COEFF, AIE_VARIANT) * 4
     lcm_ws = TP_SSR * numLanes
     if TP_INPUT_WINDOW_VSIZE % lcm_ws != 0:
         return isError(f"TP_INPUT_WINDOW_VSIZE should be a multiple of {lcm_ws}!")
@@ -932,6 +936,15 @@ def generate_graph(graphname, args):
 
     taps = sr_asym.fn_get_taps_vector(TT_COEFF, coeff_list)
     constr_args_str = f"taps" if TP_USE_COEFF_RELOAD == 0 else ""
+    taps_ctor_str = (
+        f"""
+    // Constructor using taps passed as an argument
+    {graphname}(const std::vector<{TT_COEFF}>& taps) : filter(taps) {{
+        create_connections();
+    }}"""
+            if TP_USE_COEFF_RELOAD == 0
+            else "// No taps-argument constructor: TP_USE_COEFF_RELOAD is enabled"
+    )
     dual_ip_declare_str = (
         f"ssr_in_port_array<input> in2;" if TP_DUAL_IP == 1 else "// No dual input"
     )
@@ -997,7 +1010,12 @@ public:
     {TP_SAT} //TP_SAT
   > filter;
 
+  {taps_ctor_str}
+  // Constructor using internal taps
   {graphname}() : filter({constr_args_str}) {{
+    create_connections();
+  }}
+  void create_connections() {{
     adf::kernel *filter_kernels = filter.getKernels();
     for (int i=0; i < TP_SSR*TP_PARA_DECI_POLY; i++) {{
       adf::connect<> net_in(in[i], filter.in[i]);

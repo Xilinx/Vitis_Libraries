@@ -36,7 +36,11 @@
 #define UUT_GRAPH outer_tensor_graph
 #endif
 
+#ifdef USING_UUT
+#include "outer_tensor_native_generated_graph/outer_tensor_generated_graph.h"
+#else
 #include QUOTE(UUT_GRAPH.hpp)
+#endif
 
 using namespace adf;
 
@@ -77,9 +81,7 @@ class test_graph : public graph {
 
 #ifdef USING_UUT
         // Outer Tensor sub-graph
-        dsplib::outer_tensor::UUT_GRAPH<T_DATA_A, T_DATA_B, DIM_SIZE_A, DIM_SIZE_B, NUM_FRAMES, SHIFT, API_IO, UUT_SSR,
-                                        ROUND_MODE, SAT_MODE>
-            outer_tensorGraph;
+        outer_tensor_native_generated_graph outer_tensorGraph;
 
         // Make connections
         for (int i = 0; i < UUT_SSR; i++) {
@@ -96,11 +98,11 @@ class test_graph : public graph {
             out[i] = output_plio::create("PLIO_out_" + std::to_string(i), adf::plio_64_bits, filenameOut);
             connect<>(outer_tensorGraph.out[i], out[i].in[0]);
 #if (SINGLE_BUF == 1) // Single buffer constraint applies for windows implementations
-            single_buffer(outer_tensorGraph.getKernels()[i].in[0]);
-            single_buffer(outer_tensorGraph.getKernels()[i].in[1]);
+            single_buffer(outer_tensorGraph.outer_tensor.getKernels()[i].in[0]);
+            single_buffer(outer_tensorGraph.outer_tensor.getKernels()[i].in[1]);
             printf("INFO: Single Buffer Constraint applied to the input buffers of kernel %d.\n", i);
 #if (API_IO == 0)
-            single_buffer(outer_tensorGraph.getKernels()[i].out[0]);
+            single_buffer(outer_tensorGraph.outer_tensor.getKernels()[i].out[0]);
             printf("INFO: Single Buffer Constraint applied to the output buffer of kernel %d.\n", i);
 #endif
 #endif

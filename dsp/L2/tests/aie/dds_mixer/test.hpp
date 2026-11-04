@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,11 @@
 #define UUT_GRAPH dds_mixer_graph
 #endif
 
+#ifdef USING_UUT
+#include "dds_mixer_native_generated_graph/dds_mixer_generated_graph.h"
+#else
 #include QUOTE(UUT_GRAPH.hpp)
+#endif
 
 using namespace adf;
 
@@ -101,9 +105,13 @@ class test_graph : public graph {
         printf("initialPhaseOffset is %u or 0x%08X \n", initialPhaseOffset, initialPhaseOffset);
 
         namespace dsplib = xf::dsp::aie;
+#ifdef USING_UUT
+        dds_mixer_native_generated_graph ddsGraph(phaseInc, initialPhaseOffset);
+#else
         dsplib::mixer::dds_mixer::UUT_GRAPH<DATA_TYPE, INPUT_WINDOW_VSIZE, MIXER_MODE, P_API, P_SSR, ROUND_MODE,
                                             SAT_MODE, USE_PHASE_RELOAD, PHASE_RELOAD_API, USE_PHASE_INC_RELOAD>
             ddsGraph(phaseInc, initialPhaseOffset);
+#endif
 
 #if (USE_PHASE_RELOAD == 1 && PHASE_RELOAD_API == USE_PHASE_RELOAD_API_IOBUFF)
         std::string filenameInPO = QUOTE(INPUT_FILE_PO);
@@ -127,10 +135,11 @@ class test_graph : public graph {
 #if (PHASE_RELOAD_API == USE_PHASE_RELOAD_API_RTP)
             connect<parameter>(PhaseRTP[i], ddsGraph.PhaseRTP[i]);
 #else
-            connect<>(
-                inPO[0].out[0],
-                ddsGraph
-                    .PhaseRTP[i]); // 0 becomes i if SSR'd - broadcast from single PLIO for update to all SSR kernels
+#ifdef USING_UUT
+            connect<>(inPO[0].out[0], ddsGraph.PhaseIO[i]);
+#else
+            connect<>(inPO[0].out[0], ddsGraph.PhaseRTP[i]);
+#endif
 #endif
 #endif
 #if (MIXER_MODE == 2 || MIXER_MODE == 1)
@@ -157,16 +166,16 @@ class test_graph : public graph {
 #if (SINGLE_BUF == 1 && P_API == 0) // Single buffer constraint applies for windows implementations
 
 #if (MIXER_MODE == 2 || MIXER_MODE == 1)
-            single_buffer(ddsGraph.getKernels()[i].in[0]);
+            single_buffer(ddsGraph.mixer_graph.getKernels()[i].in[0]);
             printf("INFO: Single Buffer Constraint applied to the input buffer-1 of kernel %d.\n", i);
 #endif
 
 #if (MIXER_MODE == 2)
-            single_buffer(ddsGraph.getKernels()[i].in[1]);
+            single_buffer(ddsGraph.mixer_graph.getKernels()[i].in[1]);
             printf("INFO: Single Buffer Constraint applied to the input buffer-2 of kernel %d.\n", i);
 #endif
 
-            single_buffer(ddsGraph.getKernels()[i].out[0]);
+            single_buffer(ddsGraph.mixer_graph.getKernels()[i].out[0]);
             printf("INFO: Single Buffer Constraint applied to the output buffer of kernel %d.\n", i);
 #endif
 #endif

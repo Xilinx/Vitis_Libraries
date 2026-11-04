@@ -17,8 +17,12 @@
 import aie_common as com
 from aie_common import *
 
-# import json
+import json
 import math
+import os
+
+with open(os.path.join(os.path.dirname(__file__), "type_promotions.json")) as f:
+    out_mul_type_dict = json.load(f)["out_mul_type"]
 
 #### naming ####
 #
@@ -45,7 +49,7 @@ import math
 # PING_PONG_BUFFER_32kB = 32768
 TP_INPUT_NUM_FRAMES_min = 1
 TP_SSR_min = 1
-TP_SSR_max = 32
+TP_SSR_max = 16
 TP_SHIFT_max = 60
 TP_SHIFT_cint16_max = 32
 TP_CASC_LEN_min = 1
@@ -212,16 +216,24 @@ def update_TP_DIM(args):
     TT_DATA_B = args["TT_DATA_B"]
     TP_SSR = args["TP_SSR"]
 
-    return fn_update_tp_dim(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_SSR)
+    if "TP_DIM" in args and args["TP_DIM"]:
+        TP_DIM = args["TP_DIM"]
+    else:
+        TP_DIM = 0
+
+    return fn_update_tp_dim(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_SSR, TP_DIM)
 
 
-def fn_update_tp_dim(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_SSR):
-    TP_DIM_min = 16 * TP_SSR
+def fn_update_tp_dim(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_SSR, TP_DIM):
+
+    vecSampleNum = k_max_read_write_bytes[AIE_VARIANT] //  byte_size[com.fn_det_out_type(TT_DATA_A, TT_DATA_B, out_mul_type_dict)]
+    TP_DIM_min = vecSampleNum * TP_SSR
 
     BUFFER_SIZE = k_data_memory_bytes[AIE_VARIANT]
     buf_in_total = BUFFER_SIZE * TP_SSR
+
     TP_DIM_max = int(
-        math.floor(buf_in_total / byte_size[fn_det_out_type(TT_DATA_A, TT_DATA_B)])
+        math.floor(buf_in_total / byte_size[com.fn_det_out_type(TT_DATA_A, TT_DATA_B, out_mul_type_dict)])
     )
 
     param_dict = {}
@@ -230,14 +242,24 @@ def fn_update_tp_dim(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_SSR):
     param_dict.update({"maximum": TP_DIM_max})
     param_dict.update({"maximum_pingpong_buf": int(TP_DIM_max / 2)})
 
+    if TP_DIM!= 0:
+       actual_val = max(TP_DIM_min, ROUND_TO_NEAREST_MULTIPLE(TP_DIM, TP_SSR))
+       actual_val = min(actual_val, TP_DIM_max)
+       param_dict.update({"actual": actual_val})
+
     return param_dict
 
 
 def validate_TP_DIM(args):
     TP_DIM = args["TP_DIM"]
-    param_dict = update_TP_DIM(args)
-    range_TP_DIM = [param_dict["minimum"], param_dict["maximum"]]
-    return validate_range(range_TP_DIM, "TP_DIM", TP_DIM)
+    TP_SSR = args["TP_SSR"]
+
+    if TP_DIM % TP_SSR == 0:
+        param_dict = update_TP_DIM(args)
+        range_TP_DIM = [param_dict["minimum"], param_dict["maximum"]]
+        return validate_range(range_TP_DIM, "TP_DIM", TP_DIM)
+    else:
+        return fn_validate_divisible("TP_DIM", TP_DIM, TP_SSR)
 
 
 #######################################################
@@ -282,7 +304,7 @@ def calc_max_num_frames(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_SSR, TP_DI
     BUFFER_SIZE = k_data_memory_bytes[AIE_VARIANT]
     VEC_IN_FRAME = calc_vecinframe(TP_API, TT_DATA_A, TT_DATA_B)
     TP_DIM_PADDED = calc_padded_tp_dim(VEC_IN_FRAME, TP_DIM, TP_SSR)
-    OUT_BYTE = byte_size[fn_det_out_type(TT_DATA_A, TT_DATA_B)]
+    OUT_BYTE = byte_size[com.fn_det_out_type(TT_DATA_A, TT_DATA_B, out_mul_type_dict)]
     TP_DIM_PADDED_BYTE = TP_DIM_PADDED * OUT_BYTE
     TP_INPUT_NUM_FRAMES_max = math.floor(BUFFER_SIZE / TP_DIM_PADDED_BYTE)
     return TP_INPUT_NUM_FRAMES_max
@@ -370,33 +392,6 @@ def validate_TP_SAT(args):
     param_dict = update_TP_SAT(args)
     legal_set_TP_SAT = param_dict["enum"]
     return validate_legal_set(legal_set_TP_SAT, "TP_SAT", TP_SAT)
-
-
-def fn_det_out_type(TT_DATA_A, TT_DATA_B):
-    if TT_DATA_A == "int16" and TT_DATA_B == "int16":
-        return "int16"
-    if TT_DATA_A == "int16" and TT_DATA_B == "int32":
-        return "int32"
-    if TT_DATA_A == "int16" and TT_DATA_B == "cint16":
-        return "cint16"
-    if TT_DATA_A == "int32" and TT_DATA_B == "int16":
-        return "int32"
-    if TT_DATA_A == "int32" and TT_DATA_B == "int32":
-        return "int32"
-    if TT_DATA_A == "int32" and TT_DATA_B == "cint16":
-        return "cint32"
-    if TT_DATA_A == "cint16" and TT_DATA_B == "int16":
-        return "cint16"
-    if TT_DATA_A == "cint16" and TT_DATA_B == "int32":
-        return "cint32"
-    if TT_DATA_A == "cint16" and TT_DATA_B == "cint16":
-        return "cint16"
-    if TT_DATA_A == "cint32" or TT_DATA_B == "cint32":
-        return "cint32"
-    if TT_DATA_A == "float" and TT_DATA_B == "float":
-        return "float"
-    if TT_DATA_A == "cfloat" or TT_DATA_B == "cfloat":
-        return "cfloat"
 
 
 def fn_det_calc_byte(TT_DATA_A, TT_DATA_B):
@@ -488,6 +483,8 @@ def info_ports(args):
     TT_DATA_B = args["TT_DATA_B"]
     TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
+    TP_RND = args["TP_RND"]
+    TP_SAT = args["TP_SAT"]
     TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
     TP_DIM = args["TP_DIM"]
 
@@ -515,7 +512,7 @@ def info_ports(args):
         portsOut = get_port_info(
             portname="out",
             dir="out",
-            dataType=fn_det_out_type(TT_DATA_A, TT_DATA_B),
+            dataType=com.fn_det_out_type(TT_DATA_A, TT_DATA_B, out_mul_type_dict),
             windowVsize=TP_WINDOW_VSIZE,
             apiType="window",
             vectorLength=TP_SSR,
@@ -540,7 +537,7 @@ def info_ports(args):
         portsOut = get_port_info(
             portname="out",
             dir="out",
-            dataType=fn_det_out_type(TT_DATA_A, TT_DATA_B),
+            dataType=com.fn_det_out_type(TT_DATA_A, TT_DATA_B, out_mul_type_dict),
             windowVsize=TP_WINDOW_VSIZE,
             apiType="stream",
             vectorLength=TP_SSR,
@@ -561,6 +558,8 @@ def generate_graph(graphname, args):
     TP_SHIFT = args["TP_SHIFT"]
     TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
+    TP_RND = args["TP_RND"]
+    TP_SAT = args["TP_SAT"]
 
     # Use formatted multi-line string to avoid a lot of \n and \t
     code = f"""
@@ -581,7 +580,9 @@ public:
     {TP_NUM_FRAMES}, //TP_NUM_FRAMES
     {TP_SHIFT}, //TP_SHIFT
     {TP_API}, //TP_API
-    {TP_SSR} //TP_SSR
+    {TP_SSR}, //TP_SSR
+    {TP_RND}, //TP_RND
+    {TP_SAT} //TP_SAT
   > hadamard;
 
   {graphname}() : hadamard() {{

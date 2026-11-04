@@ -1,0 +1,6 @@
+Create a valid single-rate asymmetric FIR graph configuration for an AIE device.
+
+Use complex 16-bit input data and 16-bit integer coefficients. Use a 32-tap
+filter, window I/O, one input, one output, SSR 1, cascade length 1, and an input
+window containing 256 samples. Use static coefficients, truncation, no shift,
+and saturation mode 1. Use coefficient value 1 for every filter tap.

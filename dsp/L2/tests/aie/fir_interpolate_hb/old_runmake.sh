@@ -1,0 +1,1536 @@
+#!/bin/bash
+#
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+rm -rf runmake_logs
+mkdir -p runmake_logs
+# We may run the script from another directory. Recursive LSF call needs correct path to script. Can't assume cwd.
+echo "Running runmake located at `readlink -f \"$0\"`" | tee ./runmake_logs/runmake.log
+pathToRunmake=$(readlink -f "$0")
+runmakeDir=$(dirname $pathToRunmake)
+args=("$@")
+echo "inputs args are: ${args[*]}" | tee -a ./runmake_logs/runmake.log
+make_args=()
+# specify the test suite to run with "runmake.sh -run_type qor>"
+run_type="checkin"
+run_tests=1
+verify_tests=1
+for i in "${!args[@]}"; do
+    if [[ "${args[$i]}" == '-h' ]]
+    then
+            echo "This script contains a number of test suites such as checkin, qor etc. These suites contain a list of commands for a specific test (currently this should be in format: make all PARAM=PARAM_VALUE...)"
+            echo "All the tests in the specified suite are converted into a multi_params.json file which can then be used to run tests"
+            echo "Options:"
+            echo "   -run_type checkin | qor | commslib | randomized ## Specifies which test suite to use)"
+            echo "          (Use "-run_type jenkins" to create multi_params.json file containing PR, checkin, and qor tests."
+            echo "   -make_arg <MAKE_ARG>=<VALUE> ## used to add an argument to all tests list in the suite. For example, "-add_make TARGET=x86sim""
+            echo "   -no_test_run ## creates multi_params file but does not run tests."
+            echo ""
+            echo "Example Usage:"
+            echo "  runmake.sh -run_type qor                                (creates multi_params_qor.json, and runs all qor tests)"
+            echo "  runmake.sh -run_type qor -make_arg TARGET=x86sim    (appends TARGET=x86sim to all tests, creates multi_params_qor.json, and runs all qor tests)"
+            echo "  runmake.sh -run_type qor -no_test_run                   (creates multi_params_qor.json, but does not run tests)"
+            echo "  runmake.sh -run_type jenkins                            (creates multi_params.json. This will include all canary test, PR tests, checkin(daily), and qor)"
+
+            exit 0
+    fi
+    if [[ "${args[$i]}" == '-run_type' ]]
+    then
+        run_type=${args[($i+1)]}
+    fi
+    if [[ "${args[$i]}" == '-make_arg' ]]
+    then
+        echo "Make args will be passed directly to any make commands. The following will be used: ${args[($i+1)]}"  | tee -a ./runmake_logs/runmake.log
+        make_args[${#make_args[*]}]=${args[($i+1)]}
+    fi
+    # use this option if you do not want to run tests of the generated multi_params
+    if [[ "${args[$i]}" == '-no_test_run' ]]
+    then
+        run_tests=0
+    fi
+    # use this option if you do not want to verify tests of the generated multi_params
+    if [[ "${args[$i]}" == '-no_test_verify' ]]
+    then
+        verify_tests=0
+    fi
+done
+
+
+
+test_arr=()
+
+if [[ "$*" == *smoke* ]]
+then
+    test_arr[$LINENO]="make all AIE_VARIANT=1 "
+    test_arr[$LINENO]="make all AIE_VARIANT=2 "
+    test_arr[$LINENO]="make all AIE_VARIANT=22 "
+fi
+
+if [[ "$*" == *single_buf* || "$*" == *checkin*  || "$*" == *qor* ]]
+then
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=71 SHIFT=15 CASC_LEN=1 INPUT_WINDOW_VSIZE=256 USE_COEFF_RELOAD=0 NUM_OUTPUTS=2 SINGLE_BUF=1"
+fi
+
+if [[ "$*" == "" || "$*" == *checkin* ]]
+then
+    # Default
+    test_arr[$LINENO]="make all  "
+    # 2 buff arch
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=63   SHIFT=16 CASC_LEN=1"
+    # 1 buff arch TARGET=hw
+    test_arr[$LINENO]="make all  DATA_TYPE=cint32 COEFF_TYPE=cint32 FIR_LEN=19   SHIFT=16 CASC_LEN=1"
+    #rounding TARGET=hw
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=7    SHIFT=16 CASC_LEN=1 INPUT_WINDOW_VSIZE=256 ROUND_MODE=1 "
+    #saturation
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=7    SHIFT=16 CASC_LEN=1 INPUT_WINDOW_VSIZE=256 ROUND_MODE=1 SAT_MODE=0"
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=7    SHIFT=16 CASC_LEN=1 INPUT_WINDOW_VSIZE=256 ROUND_MODE=1 SAT_MODE=1"
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=7    SHIFT=16 CASC_LEN=1 INPUT_WINDOW_VSIZE=256 ROUND_MODE=1 SAT_MODe=3"
+
+    #Saturation mode : AIE_VARIANt=2
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=7    SHIFT=16 CASC_LEN=1 INPUT_WINDOW_VSIZE=256 ROUND_MODE=1 SAT_MODE=0 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=7    SHIFT=16 CASC_LEN=1 INPUT_WINDOW_VSIZE=256 ROUND_MODE=1 SAT_MODE=1 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=7    SHIFT=16 CASC_LEN=1 INPUT_WINDOW_VSIZE=256 ROUND_MODE=1 SAT_MODe=3 AIE_VARIANT=2"
+
+    # coefficient reload TARGET=hw
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=23   SHIFT=16 CASC_LEN=1 INPUT_WINDOW_VSIZE=128 USE_COEFF_RELOAD=1"
+    # coefficient reload with dual inpu TARGET=hw
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=15   SHIFT=16 CASC_LEN=1 INPUT_WINDOW_VSIZE=128 USE_COEFF_RELOAD=1 DUAL_IP=1"
+    # coefficient reload with cascades TARGET=hw
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=43   SHIFT=16 CASC_LEN=3 INPUT_WINDOW_VSIZE=128 USE_COEFF_RELOAD=1"
+    # coefficient reload with cascades   and dual input
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=83   SHIFT=16 CASC_LEN=3 INPUT_WINDOW_VSIZE=128 USE_COEFF_RELOAD=1 DUAL_IP=1"
+    # cascades TARGET=hw
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=43   SHIFT=16 CASC_LEN=3 INPUT_WINDOW_VSIZE=128 "
+    # cascades and dual input TARGET=hw
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=83   SHIFT=16 CASC_LEN=3 INPUT_WINDOW_VSIZE=128                    DUAL_IP=1"
+    # multiple outputs TARGET=hw
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=71   SHIFT=15 CASC_LEN=1 INPUT_WINDOW_VSIZE=256 USE_COEFF_RELOAD=0            NUM_OUTPUTS=2"
+    #streams TARGET=hw
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=23   SHIFT=15 CASC_LEN=1 INPUT_WINDOW_VSIZE=256                                             PORT_API=1"
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=23   SHIFT=15 CASC_LEN=1 INPUT_WINDOW_VSIZE=256                    DUAL_IP=1                PORT_API=1"
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=23   SHIFT=15 CASC_LEN=1 INPUT_WINDOW_VSIZE=256                    DUAL_IP=1  NUM_OUTPUTS=2 PORT_API=1"
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=23   SHIFT=15 CASC_LEN=1 INPUT_WINDOW_VSIZE=256                               NUM_OUTPUTS=2 PORT_API=1"
+    # Large FIRs TARGET=hw
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=2047 SHIFT=25 CASC_LEN=8 INPUT_WINDOW_VSIZE=512                                                        UPSHIFT_CT=1 "
+    #Upshift and streaming TARGET=hw
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=19   SHIFT=16 CASC_LEN=1 INPUT_WINDOW_VSIZE=256                                             PORT_API=1 UPSHIFT_CT=1 "
+    # CR-1101127 TARGET=hw
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=31   SHIFT=15 CASC_LEN=3 INPUT_WINDOW_VSIZE=256 USE_COEFF_RELOAD=0            NUM_OUTPUTS=1                          "
+    # x86sim TARGET=hw
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=63   SHIFT=16 CASC_LEN=1                                                                                             "
+    # CR-1149600 TARGET=hw
+    test_arr[$LINENO]="make all  DATA_TYPE=int16 COEFF_TYPE=int16  FIR_LEN=83    SHIFT=16 CASC_LEN=1  INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+    # ADL-953 TARGET=hw
+    test_arr[$LINENO]="make all  DATA_TYPE=cint32 COEFF_TYPE=cint32 FIR_LEN=63 CASC_LEN=1 SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=256 DUAL_IP=1 NUM_OUTPUTS=2  "
+    #SSR TARGET=hw
+    test_arr[$LINENO]="make all  UUT_SSR=1 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=47 INPUT_WINDOW_VSIZE=128 PORT_API=1 CASC_LEN=1"
+    test_arr[$LINENO]="make all  UUT_SSR=2 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=47 INPUT_WINDOW_VSIZE=256 PORT_API=1 CASC_LEN=1"
+    test_arr[$LINENO]="make all  UUT_SSR=3 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=47 INPUT_WINDOW_VSIZE=384 PORT_API=1 CASC_LEN=1"
+    #SSR with RTP Coeff Reload TARGET=hw
+    test_arr[$LINENO]="make all  UUT_SSR=1 UUT_PARA_INTERP_POLY=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=47 INPUT_WINDOW_VSIZE=128 PORT_API=1 CASC_LEN=1 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all  UUT_SSR=1 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=47 INPUT_WINDOW_VSIZE=128 PORT_API=1 CASC_LEN=1 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all  UUT_SSR=2 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=47 INPUT_WINDOW_VSIZE=256 PORT_API=1 CASC_LEN=1 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all  UUT_SSR=3 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=47 INPUT_WINDOW_VSIZE=384 PORT_API=1 CASC_LEN=1 USE_COEFF_RELOAD=1"
+    #New type combos TARGET=hw
+    test_arr[$LINENO]="make all  DATA_TYPE=int16 COEFF_TYPE=int32  FIR_LEN=43 INPUT_WINDOW_VSIZE=2560 CASC_LEN=1 UPSHIFT_CT=0"
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int32  FIR_LEN=31 INPUT_WINDOW_VSIZE=2560 CASC_LEN=3 UPSHIFT_CT=0"
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=cint32 FIR_LEN=31 INPUT_WINDOW_VSIZE=2560 CASC_LEN=1 UPSHIFT_CT=0"
+    #streams TARGET=hw
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int32  FIR_LEN=23   SHIFT=15 CASC_LEN=1 INPUT_WINDOW_VSIZE=256                                             PORT_API=1"
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int32  FIR_LEN=23   SHIFT=15 CASC_LEN=1 INPUT_WINDOW_VSIZE=256                    DUAL_IP=1  NUM_OUTPUTS=2 PORT_API=1"
+    #Float cases TARGET=hw
+    test_arr[$LINENO]="make all  DATA_TYPE=float COEFF_TYPE=float SHIFT=0 FIR_LEN=11 INPUT_WINDOW_VSIZE=2560 CASC_LEN=1 UPSHIFT_CT=0"
+    test_arr[$LINENO]="make all  DATA_TYPE=cfloat COEFF_TYPE=float SHIFT=0 FIR_LEN=11 INPUT_WINDOW_VSIZE=1280 CASC_LEN=1 UPSHIFT_CT=0" #GO originally 2560, but outwindow too big
+    test_arr[$LINENO]="make all  DATA_TYPE=cfloat COEFF_TYPE=float SHIFT=0 FIR_LEN=31 INPUT_WINDOW_VSIZE=1280 CASC_LEN=1 UPSHIFT_CT=0" #GO originally 2560, but outwindow too big
+fi
+
+if [[ "$*" == *commslib* || "$*" == ""  || "$*" == *checkin* ]]
+then
+    #commslib equivalents
+    test_arr[${#test_arr[*]}]="echo 'Performing CommsLib Equivalent Functions...' "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=11 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=15 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=19 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=23 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=27 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=43 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1 DUAL_IP=1"
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=47 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1 DUAL_IP=1"
+
+    # aie-ml
+    test_arr[$LINENO]="make all  AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=11 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all  AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=79 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all  AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+
+    test_arr[$LINENO]="make all  AIE_VARIANT=2 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=19 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all  AIE_VARIANT=2 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=159 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all  AIE_VARIANT=2 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+
+    test_arr[$LINENO]="make all  AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=15 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all  AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=139 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all  AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=159 CASC_LEN=6 SHIFT=16 INPUT_WINDOW_VSIZE=2560 NITER=2"
+
+    test_arr[$LINENO]="make all  NITER=4 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=15 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all  NITER=4 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=83 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all  NITER=4 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=111 CASC_LEN=4 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+
+    test_arr[$LINENO]="make all  NITER=4 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=11 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    #test_arr[$LINENO]="make all  NITER=4 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=203 CASC_LEN=7 SHIFT=16 INPUT_WINDOW_VSIZE=2560" FIFO Threshold Exceeded
+
+    test_arr[$LINENO]="make all  NITER=4 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=15 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all  NITER=4 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=259 CASC_LEN=9 SHIFT=16 INPUT_WINDOW_VSIZE=256" FIFO Threshold Exceeded
+
+    # aie-ml coeff reload
+    test_arr[$LINENO]="make all  NITER=4 AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=43 PORT_API=0 SHIFT=16 CASC_LEN=3 INPUT_WINDOW_VSIZE=128 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all  NITER=4 AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=43 PORT_API=1 SHIFT=16 CASC_LEN=3 INPUT_WINDOW_VSIZE=128 USE_COEFF_RELOAD=1"
+
+    # aie-ml ssr streams
+    test_arr[$LINENO]="make all AIE_VARIANT=2 UUT_SSR=1 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=47 INPUT_WINDOW_VSIZE=128 PORT_API=1 CASC_LEN=1"
+    #test_arr[$LINENO]="make all AIE_VARIANT=2 UUT_SSR=2 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=95 INPUT_WINDOW_VSIZE=256 PORT_API=1 CASC_LEN=3"
+    # routing fail test_arr[$LINENO]="make all AIE_VARIANT=2 UUT_SSR=3 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=47 INPUT_WINDOW_VSIZE=384 PORT_API=1 CASC_LEN=1"
+    # aie-ml ssr streams + coeff-reload
+    test_arr[$LINENO]="make all AIE_VARIANT=2 UUT_SSR=1 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=47 INPUT_WINDOW_VSIZE=128 PORT_API=1 CASC_LEN=1 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 UUT_SSR=2 UUT_PARA_INTERP_POLY=2 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=95 INPUT_WINDOW_VSIZE=256 PORT_API=1 CASC_LEN=3 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 UUT_SSR=3 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=47 INPUT_WINDOW_VSIZE=384 PORT_API=1 CASC_LEN=1 USE_COEFF_RELOAD=1"
+    # aie-ml ssr window
+    test_arr[$LINENO]="make all AIE_VARIANT=2 UUT_SSR=1 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=47 INPUT_WINDOW_VSIZE=128 PORT_API=0 CASC_LEN=1"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 UUT_SSR=2 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=143 INPUT_WINDOW_VSIZE=256 PORT_API=0 CASC_LEN=3"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 UUT_SSR=3 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=287 INPUT_WINDOW_VSIZE=384 PORT_API=0 CASC_LEN=2"
+    # aie-ml ssr window + coeff-reload
+    test_arr[$LINENO]="make all AIE_VARIANT=2 UUT_SSR=1 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=47 INPUT_WINDOW_VSIZE=128 PORT_API=0 CASC_LEN=1 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 UUT_SSR=2 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=199 INPUT_WINDOW_VSIZE=256 PORT_API=0 CASC_LEN=3 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 UUT_SSR=3 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=191 INPUT_WINDOW_VSIZE=384 PORT_API=0 CASC_LEN=2 USE_COEFF_RELOAD=1"
+
+    # 32 types on AIE-ML
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=int16 COEFF_TYPE=int32 FIR_LEN=47 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all UUT_SSR=2 UUT_PARA_INTERP_POLY=2 INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=int32 COEFF_TYPE=int16 FIR_LEN=83 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=int32 COEFF_TYPE=int32  CASC_LEN=1 FIR_LEN=35 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=cint32 COEFF_TYPE=int32  CASC_LEN=1 FIR_LEN=35  AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=cint32 COEFF_TYPE=int16  CASC_LEN=1 FIR_LEN=47  AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=cint32 COEFF_TYPE=cint16  CASC_LEN=1 FIR_LEN=31  AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=cint32 COEFF_TYPE=cint32  CASC_LEN=1 FIR_LEN=19  AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=cint16 COEFF_TYPE=int32  CASC_LEN=1 FIR_LEN=19  AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=cint16 COEFF_TYPE=cint32  CASC_LEN=1 FIR_LEN=19  AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=float COEFF_TYPE=float  CASC_LEN=1 FIR_LEN=19  AIE_VARIANT=2 SHIFT=0"
+
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int32 FIR_LEN=47 CASC_LEN=3 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=int32 COEFF_TYPE=int16 FIR_LEN=43 CASC_LEN=3 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=int32 COEFF_TYPE=int32  CASC_LEN=3 FIR_LEN=35 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=cint32 COEFF_TYPE=int32  CASC_LEN=4 FIR_LEN=35  AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  UUT_SSR=2 UUT_PARA_INTERP_POLY=2 INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=cint32 COEFF_TYPE=int16  CASC_LEN=2 FIR_LEN=47  AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=cint32 COEFF_TYPE=cint16  CASC_LEN=4 FIR_LEN=31  AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=cint32 COEFF_TYPE=cint32  CASC_LEN=4 FIR_LEN=19  AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int32  CASC_LEN=3 FIR_LEN=19  AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint32  CASC_LEN=3 FIR_LEN=19  AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=float COEFF_TYPE=float  CASC_LEN=3 FIR_LEN=19 AIE_VARIANT=2 SHIFT=0"
+
+    # AIE-MLv2
+    test_arr[$LINENO]="make all  AIE_VARIANT=22 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=11 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all  AIE_VARIANT=22 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=79 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all  AIE_VARIANT=22 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+
+    test_arr[$LINENO]="make all  AIE_VARIANT=22 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=19 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all  AIE_VARIANT=22 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=159 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all  AIE_VARIANT=22 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+
+    test_arr[$LINENO]="make all  AIE_VARIANT=22 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=15 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all  AIE_VARIANT=22 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=139 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all  AIE_VARIANT=22 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=159 CASC_LEN=6 SHIFT=16 INPUT_WINDOW_VSIZE=2560 NITER=2"
+
+    test_arr[$LINENO]="make all  NITER=4 AIE_VARIANT=22 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=15 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all  NITER=4 AIE_VARIANT=22 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=83 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all  NITER=4 AIE_VARIANT=22 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=111 CASC_LEN=4 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+
+    test_arr[$LINENO]="make all  NITER=4 AIE_VARIANT=22 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=11 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    #test_arr[$LINENO]="make all  NITER=4 AIE_VARIANT=22 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=203 CASC_LEN=7 SHIFT=16 INPUT_WINDOW_VSIZE=2560" FIFO Threshold Exceeded
+
+    test_arr[$LINENO]="make all  NITER=4 AIE_VARIANT=22 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=15 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all  NITER=4 AIE_VARIANT=22 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=259 CASC_LEN=9 SHIFT=16 INPUT_WINDOW_VSIZE=256" FIFO Threshold Exceeded
+
+    # aie-ml coeff reload
+    test_arr[$LINENO]="make all  NITER=4 AIE_VARIANT=22 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=43 PORT_API=0 SHIFT=16 CASC_LEN=3 INPUT_WINDOW_VSIZE=128 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all  NITER=4 AIE_VARIANT=22 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=43 PORT_API=1 SHIFT=16 CASC_LEN=3 INPUT_WINDOW_VSIZE=128 USE_COEFF_RELOAD=1"
+
+    # aie-ml ssr streams
+    test_arr[$LINENO]="make all AIE_VARIANT=22 UUT_SSR=1 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=47 INPUT_WINDOW_VSIZE=128 PORT_API=1 CASC_LEN=1"
+    #test_arr[$LINENO]="make all AIE_VARIANT=22 UUT_SSR=2 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=95 INPUT_WINDOW_VSIZE=256 PORT_API=1 CASC_LEN=3"
+    # routing fail test_arr[$LINENO]="make all AIE_VARIANT=22 UUT_SSR=3 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=47 INPUT_WINDOW_VSIZE=384 PORT_API=1 CASC_LEN=1"
+    # aie-ml ssr streams + coeff-reload
+    test_arr[$LINENO]="make all AIE_VARIANT=22 UUT_SSR=1 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=47 INPUT_WINDOW_VSIZE=128 PORT_API=1 CASC_LEN=1 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all AIE_VARIANT=22 UUT_SSR=2 UUT_PARA_INTERP_POLY=2 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=95 INPUT_WINDOW_VSIZE=256 PORT_API=1 CASC_LEN=3 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all AIE_VARIANT=22 UUT_SSR=3 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=47 INPUT_WINDOW_VSIZE=384 PORT_API=1 CASC_LEN=1 USE_COEFF_RELOAD=1"
+    # aie-ml ssr window
+    test_arr[$LINENO]="make all AIE_VARIANT=22 UUT_SSR=1 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=47 INPUT_WINDOW_VSIZE=128 PORT_API=0 CASC_LEN=1"
+    test_arr[$LINENO]="make all AIE_VARIANT=22 UUT_SSR=2 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=143 INPUT_WINDOW_VSIZE=256 PORT_API=0 CASC_LEN=3"
+    test_arr[$LINENO]="make all AIE_VARIANT=22 UUT_SSR=3 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=287 INPUT_WINDOW_VSIZE=384 PORT_API=0 CASC_LEN=2"
+    # aie-ml ssr window + coeff-reload
+    test_arr[$LINENO]="make all AIE_VARIANT=22 UUT_SSR=1 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=47 INPUT_WINDOW_VSIZE=128 PORT_API=0 CASC_LEN=1 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all AIE_VARIANT=22 UUT_SSR=2 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=199 INPUT_WINDOW_VSIZE=256 PORT_API=0 CASC_LEN=3 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all AIE_VARIANT=22 UUT_SSR=3 UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=191 INPUT_WINDOW_VSIZE=384 PORT_API=0 CASC_LEN=2 USE_COEFF_RELOAD=1"
+
+    # 32 types on AIE-ML
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=int16 COEFF_TYPE=int32 FIR_LEN=47 AIE_VARIANT=22"
+    test_arr[$LINENO]="make all UUT_SSR=2 UUT_PARA_INTERP_POLY=2 INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=int32 COEFF_TYPE=int16 FIR_LEN=83 AIE_VARIANT=22"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=int32 COEFF_TYPE=int32  CASC_LEN=1 FIR_LEN=35 AIE_VARIANT=22"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=cint32 COEFF_TYPE=int32  CASC_LEN=1 FIR_LEN=35  AIE_VARIANT=22"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=cint32 COEFF_TYPE=int16  CASC_LEN=1 FIR_LEN=47  AIE_VARIANT=22"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=cint32 COEFF_TYPE=cint16  CASC_LEN=1 FIR_LEN=31  AIE_VARIANT=22"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=cint32 COEFF_TYPE=cint32  CASC_LEN=1 FIR_LEN=19  AIE_VARIANT=22"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=cint16 COEFF_TYPE=int32  CASC_LEN=1 FIR_LEN=19  AIE_VARIANT=22"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=cint16 COEFF_TYPE=cint32  CASC_LEN=1 FIR_LEN=19  AIE_VARIANT=22"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=float COEFF_TYPE=float  CASC_LEN=1 FIR_LEN=19  AIE_VARIANT=22 SHIFT=0"
+
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int32 FIR_LEN=47 CASC_LEN=3 AIE_VARIANT=22"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=int32 COEFF_TYPE=int16 FIR_LEN=43 CASC_LEN=3 AIE_VARIANT=22"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=int32 COEFF_TYPE=int32  CASC_LEN=3 FIR_LEN=35 AIE_VARIANT=22"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=cint32 COEFF_TYPE=int32  CASC_LEN=4 FIR_LEN=35  AIE_VARIANT=22"
+    test_arr[$LINENO]="make all  UUT_SSR=2 UUT_PARA_INTERP_POLY=2 INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=cint32 COEFF_TYPE=int16  CASC_LEN=2 FIR_LEN=47  AIE_VARIANT=22"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=cint32 COEFF_TYPE=cint16  CASC_LEN=4 FIR_LEN=31  AIE_VARIANT=22"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=cint32 COEFF_TYPE=cint32  CASC_LEN=4 FIR_LEN=19  AIE_VARIANT=22"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int32  CASC_LEN=3 FIR_LEN=19  AIE_VARIANT=22"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint32  CASC_LEN=3 FIR_LEN=19  AIE_VARIANT=22"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=float COEFF_TYPE=float  CASC_LEN=3 FIR_LEN=19 AIE_VARIANT=22 SHIFT=0"
+fi
+
+if [[ "$*" == *aiemlwin* ]]
+then
+    #commslib equivalents
+    test_arr[${#test_arr[*]}]="echo 'Performing CommsLib Equivalent Functions...' "
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=11 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=15 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=19 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=23 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=27 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=43 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=47 CASC_LEN=2 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=95 CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=107 CASC_LEN=4 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=179 CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=195 CASC_LEN=6 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=203 CASC_LEN=7 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=255 CASC_LEN=8 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=255 CASC_LEN=9 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=11 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=15 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=19 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=23 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=27 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=43 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=47 CASC_LEN=2 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=95 CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=107 CASC_LEN=4 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=179 CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=195 CASC_LEN=6 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=203 CASC_LEN=7 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=255 CASC_LEN=8 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=255 CASC_LEN=9 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=11 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=15 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=19 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=23 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=27 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=43 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=51 CASC_LEN=2 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=99 CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=111 CASC_LEN=4 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=183 CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=203 CASC_LEN=6 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=207 CASC_LEN=7 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=259 CASC_LEN=8 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlstreamhw/ NITER=2 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=259 CASC_LEN=9 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+fi
+
+if [[ "$*" == *aieml* ]]
+then
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=11 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=19 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=23 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=27 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=43 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=79 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=159 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=2 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=4 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=6 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=7 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=8 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=11 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=19 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=23 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=27 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=43 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=79 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=159 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=2 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=4 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=6 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=7 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=8 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=11 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=19 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=23 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=27 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=43 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=79 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=159 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=159 CASC_LEN=2 SHIFT=16 INPUT_WINDOW_VSIZE=256 DUMP_VCD=1 NITER=2"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=159 CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=256 DUMP_VCD=1 NITER=2"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=159 CASC_LEN=4 SHIFT=16 INPUT_WINDOW_VSIZE=256 DUMP_VCD=1 NITER=2"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=159 CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=256 DUMP_VCD=1 NITER=2"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=159 CASC_LEN=6 SHIFT=16 INPUT_WINDOW_VSIZE=256 DUMP_VCD=1 NITER=2"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=159 CASC_LEN=7 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 RESULTS_PATH=./results/aiemlhw/ DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=159 CASC_LEN=8 SHIFT=16 INPUT_WINDOW_VSIZE=256"
+fi
+
+if [[ "$*" == *mlssr* ]]
+then
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlssr AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=159 SHIFT=16 INPUT_WINDOW_VSIZE=1024 UUT_PARA_INTERP_POLY=2 UUT_SSR=2"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlssr AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=191 SHIFT=16 PORT_API=1 UUT_PARA_INTERP_POLY=2 CASC_LEN=4 UUT_SSR=3 INPUT_WINDOW_VSIZE=1536"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlssr AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=159 SHIFT=16 INPUT_WINDOW_VSIZE=1024 UUT_PARA_INTERP_POLY=2 UUT_SSR=2"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlssr AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=159 SHIFT=16 INPUT_WINDOW_VSIZE=2048 CASC_LEN=3 PORT_API=1 UUT_PARA_INTERP_POLY=2 UUT_SSR=4"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlssr AIE_VARIANT=2 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=167 SHIFT=16 INPUT_WINDOW_VSIZE=1536 UUT_PARA_INTERP_POLY=2 UUT_SSR=3"
+    test_arr[$LINENO]="make all RESULTS_PATH=./results/mlssr AIE_VARIANT=2 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=159 SHIFT=16 INPUT_WINDOW_VSIZE=10240 CASC_LEN=2 PORT_API=1 UUT_PARA_INTERP_POLY=2 UUT_SSR=5"
+fi
+
+
+if [[ "$*" == *new32btypes* ]]
+then
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=int16 COEFF_TYPE=int32 FIR_LEN=47 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=int32 COEFF_TYPE=int16 FIR_LEN=43 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=int32 COEFF_TYPE=int32  CASC_LEN=1 FIR_LEN=35 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=cint32 COEFF_TYPE=int32  CASC_LEN=1 FIR_LEN=35  AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=cint32 COEFF_TYPE=int16  CASC_LEN=1 FIR_LEN=47  AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=cint32 COEFF_TYPE=cint16  CASC_LEN=1 FIR_LEN=31  AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=cint32 COEFF_TYPE=cint32  CASC_LEN=1 FIR_LEN=19  AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=cint16 COEFF_TYPE=int32  CASC_LEN=1 FIR_LEN=19  AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=cint16 COEFF_TYPE=cint32  CASC_LEN=1 FIR_LEN=19  AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=0 DATA_TYPE=float COEFF_TYPE=float  CASC_LEN=1 FIR_LEN=19  AIE_VARIANT=2 SHIFT=0"
+
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int32 FIR_LEN=47 CASC_LEN=3 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=int32 COEFF_TYPE=int16 FIR_LEN=43 CASC_LEN=3 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=int32 COEFF_TYPE=int32  CASC_LEN=3 FIR_LEN=35 AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=cint32 COEFF_TYPE=int32  CASC_LEN=4 FIR_LEN=35  AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=cint32 COEFF_TYPE=int16  CASC_LEN=4 FIR_LEN=47  AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=cint32 COEFF_TYPE=cint16  CASC_LEN=4 FIR_LEN=31  AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=cint32 COEFF_TYPE=cint32  CASC_LEN=4 FIR_LEN=19  AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int32  CASC_LEN=3 FIR_LEN=19  AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint32  CASC_LEN=3 FIR_LEN=19  AIE_VARIANT=2"
+    test_arr[$LINENO]="make all  INPUT_WINDOW_VSIZE=768 PORT_API=1 DATA_TYPE=float COEFF_TYPE=float  CASC_LEN=3 FIR_LEN=19 AIE_VARIANT=2 SHIFT=0"
+fi
+
+if [[ "$*" == *1buff* ]]
+then
+    lengths=( 7 11 15 19 23 27 31 35 39 43 47 51 55 59 63 )
+    for fLen in "${lengths[@]}"; do
+
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=int16 COEFF_TYPE=int16  FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=int16 COEFF_TYPE=int16  FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=512 UPSHIFT_CT=1 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=int16 COEFF_TYPE=int32  FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+    done
+    lengths=( 7 11 15 19 23 27 )
+    for fLen in "${lengths[@]}"; do
+
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=512 UPSHIFT_CT=1 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=512 UPSHIFT_CT=1 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=cint16 COEFF_TYPE=int32  FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=cint16 COEFF_TYPE=cint32 FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+    done
+    lengths=( 7 11 )
+    for fLen in "${lengths[@]}"; do
+
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=int32 COEFF_TYPE=int16   FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=int32 COEFF_TYPE=int32   FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=cint32 COEFF_TYPE=int16  FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=512 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=cint32 COEFF_TYPE=int32  FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=512 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=cint32 COEFF_TYPE=cint16 FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=512 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=cint32 COEFF_TYPE=cint32 FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=512 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=float COEFF_TYPE=float  FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=512 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=cfloat COEFF_TYPE=float  FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=512 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=cfloat COEFF_TYPE=cfloat FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=512 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+    done
+fi
+
+if [[ "$*" == *2buff* ]]
+then
+    # Lenghts up to 95 are actually 1buff for int16...
+    lengths=(83 87 91 95 99)
+    for fLen in "${lengths[@]}"; do
+
+
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=int16 COEFF_TYPE=int16  FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=int16 COEFF_TYPE=int16  FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=512 UPSHIFT_CT=1 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=int16 COEFF_TYPE=int32  FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+
+    done
+    lengths=(43 63)
+    for fLen in "${lengths[@]}"; do
+
+
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=512 UPSHIFT_CT=1 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=512 UPSHIFT_CT=1 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=cint16 COEFF_TYPE=int32  FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=cint16 COEFF_TYPE=cint32 FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=int32 COEFF_TYPE=int16  FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=int32 COEFF_TYPE=int32  FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=cint32 COEFF_TYPE=int16  FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=cint32 COEFF_TYPE=cint16 FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=cint32 COEFF_TYPE=int32  FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=cint32 COEFF_TYPE=cint32 FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=float COEFF_TYPE=float  FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+        test_arr[$LINENO]="make all TARGET=x86sim DATA_TYPE=cfloat COEFF_TYPE=cfloat FIR_LEN=$fLen SHIFT=0 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=0 DATA_STIM_TYPE=5 COEFF_STIM_TYPE=4"
+
+    done
+fi
+
+if [[ "$*" == *iobuffer*  ]]
+then
+    #windowed
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=0 CASC_LEN=1 DUAL_IP=0 NUM_OUTPUTS=1 USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=0 CASC_LEN=1 DUAL_IP=0 NUM_OUTPUTS=1 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=0 CASC_LEN=1 DUAL_IP=0 NUM_OUTPUTS=2 USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=0 CASC_LEN=1 DUAL_IP=0 NUM_OUTPUTS=2 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=0 CASC_LEN=1 DUAL_IP=1 NUM_OUTPUTS=1 USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=0 CASC_LEN=1 DUAL_IP=1 NUM_OUTPUTS=1 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=0 CASC_LEN=1 DUAL_IP=1 NUM_OUTPUTS=2 USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=0 CASC_LEN=1 DUAL_IP=1 NUM_OUTPUTS=2 USE_COEFF_RELOAD=1"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=0 CASC_LEN=3 DUAL_IP=0 NUM_OUTPUTS=1 USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=0 CASC_LEN=3 DUAL_IP=0 NUM_OUTPUTS=1 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=0 CASC_LEN=3 DUAL_IP=0 NUM_OUTPUTS=2 USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=0 CASC_LEN=3 DUAL_IP=0 NUM_OUTPUTS=2 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=0 CASC_LEN=3 DUAL_IP=1 NUM_OUTPUTS=1 USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=0 CASC_LEN=3 DUAL_IP=1 NUM_OUTPUTS=1 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=0 CASC_LEN=3 DUAL_IP=1 NUM_OUTPUTS=2 USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=0 CASC_LEN=3 DUAL_IP=1 NUM_OUTPUTS=2 USE_COEFF_RELOAD=1"
+
+    #streaming
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=1 CASC_LEN=1 DUAL_IP=0 NUM_OUTPUTS=1 USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=1 CASC_LEN=1 DUAL_IP=0 NUM_OUTPUTS=1 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=1 CASC_LEN=1 DUAL_IP=0 NUM_OUTPUTS=2 USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=1 CASC_LEN=1 DUAL_IP=0 NUM_OUTPUTS=2 USE_COEFF_RELOAD=1"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=1 CASC_LEN=1 DUAL_IP=1 NUM_OUTPUTS=1 USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=1 CASC_LEN=1 DUAL_IP=1 NUM_OUTPUTS=1 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=1 CASC_LEN=1 DUAL_IP=1 NUM_OUTPUTS=2 USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=1 CASC_LEN=1 DUAL_IP=1 NUM_OUTPUTS=2 USE_COEFF_RELOAD=1"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=1 CASC_LEN=3 DUAL_IP=0 NUM_OUTPUTS=1 USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=1 CASC_LEN=3 DUAL_IP=0 NUM_OUTPUTS=1 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=1 CASC_LEN=3 DUAL_IP=0 NUM_OUTPUTS=2 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=1 CASC_LEN=3 DUAL_IP=0 NUM_OUTPUTS=2 USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=1 CASC_LEN=3 DUAL_IP=1 NUM_OUTPUTS=1 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=1 CASC_LEN=3 DUAL_IP=1 NUM_OUTPUTS=1 USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=1 CASC_LEN=3 DUAL_IP=1 NUM_OUTPUTS=2 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256   PORT_API=1 CASC_LEN=3 DUAL_IP=1 NUM_OUTPUTS=2 USE_COEFF_RELOAD=0"
+
+fi
+
+
+
+if [[ "$*" == *valaccess*  ]]
+then
+    #optimal lengths
+    test_arr[$LINENO]="make all DATA_TYPE=int16 COEFF_TYPE=int16   FIR_LEN=63 CASC_LEN=1  SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=63 CASC_LEN=1  SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=63 CASC_LEN=2  SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all DATA_TYPE=int32 COEFF_TYPE=int16   FIR_LEN=63 CASC_LEN=1  SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all DATA_TYPE=int32 COEFF_TYPE=int32   FIR_LEN=63 CASC_LEN=2  SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=int16   FIR_LEN=63 CASC_LEN=2  SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=cint16  FIR_LEN=63 CASC_LEN=2  SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=int32   FIR_LEN=63 CASC_LEN=2  SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=cint32  FIR_LEN=63 CASC_LEN=4  SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all DATA_TYPE=float COEFF_TYPE=float   FIR_LEN=63 CASC_LEN=2  SHIFT=0  PORT_API=1 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat COEFF_TYPE=float   FIR_LEN=63 CASC_LEN=2  SHIFT=0  PORT_API=1 INPUT_WINDOW_VSIZE=256"
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat COEFF_TYPE=cfloat  FIR_LEN=63 CASC_LEN=4  SHIFT=0  PORT_API=1 INPUT_WINDOW_VSIZE=256"
+
+    test_arr[$LINENO]="make all DATA_TYPE=int16 COEFF_TYPE=int16   FIR_LEN=63 CASC_LEN=2  SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=256 DUAL_IP=1 NUM_OUTPUTS=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=63 CASC_LEN=2  SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=256 DUAL_IP=1 NUM_OUTPUTS=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=63 CASC_LEN=4  SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=256 DUAL_IP=1 NUM_OUTPUTS=2"
+    test_arr[$LINENO]="make all DATA_TYPE=int32 COEFF_TYPE=int16   FIR_LEN=63 CASC_LEN=2  SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=256 DUAL_IP=1 NUM_OUTPUTS=2"
+    test_arr[$LINENO]="make all DATA_TYPE=int32 COEFF_TYPE=int32   FIR_LEN=63 CASC_LEN=4  SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=256 DUAL_IP=1 NUM_OUTPUTS=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=int16   FIR_LEN=63 CASC_LEN=4  SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=256 DUAL_IP=1 NUM_OUTPUTS=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=cint16  FIR_LEN=63 CASC_LEN=4  SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=256 DUAL_IP=1 NUM_OUTPUTS=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=int32   FIR_LEN=63 CASC_LEN=4  SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=256 DUAL_IP=1 NUM_OUTPUTS=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=cint32  FIR_LEN=63 CASC_LEN=8 SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=256 DUAL_IP=1 NUM_OUTPUTS=2" #adl-953
+    test_arr[$LINENO]="make all DATA_TYPE=float COEFF_TYPE=float   FIR_LEN=63 CASC_LEN=4 SHIFT=0  PORT_API=1 INPUT_WINDOW_VSIZE=256 DUAL_IP=1 NUM_OUTPUTS=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat COEFF_TYPE=float   FIR_LEN=63 CASC_LEN=4 SHIFT=0  PORT_API=1 INPUT_WINDOW_VSIZE=256 DUAL_IP=1 NUM_OUTPUTS=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat COEFF_TYPE=cfloat  FIR_LEN=63 CASC_LEN=8 SHIFT=0  PORT_API=1 INPUT_WINDOW_VSIZE=256 DUAL_IP=1 NUM_OUTPUTS=2"
+
+    #max lengths
+    test_arr[$LINENO]="make all DATA_TYPE=int16 COEFF_TYPE=int16   FIR_LEN=1023 CASC_LEN=1  SHIFT=16 PORT_API=0 INPUT_WINDOW_VSIZE=1024"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=1023 CASC_LEN=1  SHIFT=16 PORT_API=0 INPUT_WINDOW_VSIZE=1024"
+    test_arr[$LINENO]="make all DATA_TYPE=int32 COEFF_TYPE=int16   FIR_LEN=1023 CASC_LEN=1  SHIFT=16 PORT_API=0 INPUT_WINDOW_VSIZE=1024"
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=int16   FIR_LEN=1023 CASC_LEN=1  SHIFT=16 PORT_API=0 INPUT_WINDOW_VSIZE=1024"
+    test_arr[$LINENO]="make all DATA_TYPE=float COEFF_TYPE=float   FIR_LEN=1023 CASC_LEN=1  SHIFT=0  PORT_API=0 INPUT_WINDOW_VSIZE=1024" #program size exceeded
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat COEFF_TYPE=float   FIR_LEN=1023 CASC_LEN=1  SHIFT=0  PORT_API=0 INPUT_WINDOW_VSIZE=1024" #program size exceeded
+
+    test_arr[$LINENO]="make all DATA_TYPE=int16 COEFF_TYPE=int16   FIR_LEN=1023 CASC_LEN=1  SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=1024"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=1023 CASC_LEN=1  SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=1024"
+    test_arr[$LINENO]="make all DATA_TYPE=int32 COEFF_TYPE=int16   FIR_LEN=1023 CASC_LEN=1  SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=1024"
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=int16   FIR_LEN=1023 CASC_LEN=1  SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=1024"
+    test_arr[$LINENO]="make all DATA_TYPE=float COEFF_TYPE=float   FIR_LEN=1023 CASC_LEN=1  SHIFT=0  PORT_API=1 INPUT_WINDOW_VSIZE=1024" #program size exceeded
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat COEFF_TYPE=float   FIR_LEN=1023 CASC_LEN=1  SHIFT=0  PORT_API=1 INPUT_WINDOW_VSIZE=1024" #program size exceeded
+fi
+
+if [[  "$*" == *PR* ]]
+then
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=63   SHIFT=16 CASC_LEN=1 DUMP_VCD=1"
+fi
+
+# same as ssr_verify suite of tests in fir_sr_asym
+if [[ "$*" == *ssrTest* ]]
+then
+    common="TARGET=x86sim NITER=4  PORT_API=1"
+
+    # 3rd columns is optimal fir length per kernel for a single stream.
+    types=(
+        int16 int16 16
+        cint16 int16 16
+        int32 int16 16
+        cint32 int16 12   # actually 16 in terms of macs, but that requires too much data to fit in buffer
+        cint16 cint16 8
+        int32 int32 8
+        cint32 int32 8
+        cint32 cint16 8
+        cint32 cint32 4
+        float float 8
+        cfloat float 8
+        cfloat cfloat 4
+    )
+
+    num_samples=4096
+
+    for (( typeI=0; typeI<${#types[@]}; typeI+=3 )); do
+        echo "${types[$typeI]},${types[`expr $typeI + 1 `]}"
+        dType=${types[$typeI]}
+        cType=${types[`expr $typeI + 1 `]}
+
+
+        if [[ $dType ==  *float* ]]; then
+            shiftVal=0
+        elif [[ $dType == *int32 ]]; then
+            shiftVal=32
+        else
+            shiftVal=16
+        fi
+
+        # optimal fir length per kernel for a single stream
+        coeffsPerKernel=${types[`expr $typeI + 2 `]}
+
+        ssrs=(2 3)
+        for ssr in "${ssrs[@]}"; do
+            cascades=(1 3)
+            for casc in "${cascades[@]}"; do
+                duals=(0 1)
+                for dual in "${duals[@]}"; do
+                    numStreams=$(( $dual + 1 ))
+                    # 16 taps gives us max performance for cint16 x int16and single stream. (will be 8 for dual stream)
+                    fir_len_base=$(( ($ssr * $casc * $coeffsPerKernel) / $numStreams ))
+                    fir_len=$(($fir_len_base * 2 - 1))
+                    test_arr[$LINENO]="make all $common COEFF_TYPE=$cType DATA_TYPE=$dType SHIFT=$shiftVal FIR_LEN=$fir_len INPUT_WINDOW_VSIZE=$num_samples UUT_SSR=$ssr UUT_PARA_INTERP_POLY=2 CASC_LEN=$casc DUAL_IP=$dual NUM_OUTPUTS=$numStreams"
+                done
+            done
+        done
+    done
+    #commslib equivalents
+    test_arr[${#test_arr[*]}]="echo 'Performing CommsLib Equivalent Functions...' "
+
+            #int32/int16
+            test_arr[$LINENO]="make all TARGET=x86sim UUT_SSR=$sVal UUT_PARA_INTERP_POLY=2 DATA_TYPE=int32 COEFF_TYPE=int16 FIR_LEN=43 INPUT_WINDOW_VSIZE=128 PORT_API=1 CASC_LEN=$cLen  RESULTS_PATH=./results//fir_ssr"
+            test_arr[$LINENO]="make all TARGET=x86sim UUT_SSR=$sVal UUT_PARA_INTERP_POLY=2 DATA_TYPE=int32 COEFF_TYPE=int16 FIR_LEN=63 INPUT_WINDOW_VSIZE=128 PORT_API=1 CASC_LEN=$cLen  RESULTS_PATH=./results//fir_ssr"
+            test_arr[$LINENO]="make all TARGET=x86sim UUT_SSR=$sVal UUT_PARA_INTERP_POLY=2 DATA_TYPE=int32 COEFF_TYPE=int16 FIR_LEN=79 INPUT_WINDOW_VSIZE=128 PORT_API=1 CASC_LEN=$cLen  RESULTS_PATH=./results//fir_ssr"
+            test_arr[$LINENO]="make all TARGET=x86sim UUT_SSR=$sVal UUT_PARA_INTERP_POLY=2 DATA_TYPE=int32 COEFF_TYPE=int16 FIR_LEN=95 INPUT_WINDOW_VSIZE=128 PORT_API=1 CASC_LEN=$cLen  RESULTS_PATH=./results//fir_ssr"
+            #cint32/cint16  RESULTS_PATH=./results//fir_ssr
+            test_arr[$LINENO]="make all TARGET=x86sim UUT_SSR=$sVal UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint32 COEFF_TYPE=cint16 FIR_LEN=15 INPUT_WINDOW_VSIZE=128 PORT_API=1 CASC_LEN=$cLen  RESULTS_PATH=./results//fir_ssr"
+            test_arr[$LINENO]="make all TARGET=x86sim UUT_SSR=$sVal UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint32 COEFF_TYPE=cint16 FIR_LEN=31 INPUT_WINDOW_VSIZE=128 PORT_API=1 CASC_LEN=$cLen  RESULTS_PATH=./results//fir_ssr"
+            test_arr[$LINENO]="make all TARGET=x86sim UUT_SSR=$sVal UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint32 COEFF_TYPE=cint16 FIR_LEN=47 INPUT_WINDOW_VSIZE=128 PORT_API=1 CASC_LEN=$cLen  RESULTS_PATH=./results//fir_ssr"
+
+            #cint32/int32
+            test_arr[$LINENO]="make all TARGET=x86sim UUT_SSR=$sVal UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint32 COEFF_TYPE=int32 FIR_LEN=15 INPUT_WINDOW_VSIZE=128 PORT_API=1 CASC_LEN=$cLen  RESULTS_PATH=./results//fir_ssr"
+            test_arr[$LINENO]="make all TARGET=x86sim UUT_SSR=$sVal UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint32 COEFF_TYPE=int32 FIR_LEN=31 INPUT_WINDOW_VSIZE=128 PORT_API=1 CASC_LEN=$cLen  RESULTS_PATH=./results//fir_ssr"
+            test_arr[$LINENO]="make all TARGET=x86sim UUT_SSR=$sVal UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint32 COEFF_TYPE=int32 FIR_LEN=47 INPUT_WINDOW_VSIZE=128 PORT_API=1 CASC_LEN=$cLen  RESULTS_PATH=./results//fir_ssr"
+
+
+
+            #float/float
+            test_arr[$LINENO]="make all TARGET=x86sim UUT_SSR=$sVal UUT_PARA_INTERP_POLY=2 DATA_TYPE=float COEFF_TYPE=float FIR_LEN=43 INPUT_WINDOW_VSIZE=128 PORT_API=1 CASC_LEN=$cLen  RESULTS_PATH=./results//fir_ssr"
+            test_arr[$LINENO]="make all TARGET=x86sim UUT_SSR=$sVal UUT_PARA_INTERP_POLY=2 DATA_TYPE=float COEFF_TYPE=float FIR_LEN=63 INPUT_WINDOW_VSIZE=128 PORT_API=1 CASC_LEN=$cLen  RESULTS_PATH=./results//fir_ssr"
+            test_arr[$LINENO]="make all TARGET=x86sim UUT_SSR=$sVal UUT_PARA_INTERP_POLY=2 DATA_TYPE=float COEFF_TYPE=float FIR_LEN=79 INPUT_WINDOW_VSIZE=128 PORT_API=1 CASC_LEN=$cLen  RESULTS_PATH=./results//fir_ssr"
+            test_arr[$LINENO]="make all TARGET=x86sim UUT_SSR=$sVal UUT_PARA_INTERP_POLY=2 DATA_TYPE=float COEFF_TYPE=float FIR_LEN=95 INPUT_WINDOW_VSIZE=128 PORT_API=1 CASC_LEN=$cLen  RESULTS_PATH=./results//fir_ssr"
+fi
+
+if [[ "$*" == *limitssr* ]]
+then
+    #ssr_vals=(1 2 3 4 5 6 7 8 9 )
+    ssr_vals=(10 11 12 13 14 15 16 17 18 19 )
+    for sVal in "${ssr_vals[@]}"; do
+        let "fLen=$sVal * 8 * 2 - 1"
+        test_arr[$LINENO]="make all UUT_SSR=$sVal UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=$fLen INPUT_WINDOW_VSIZE=12800 PORT_API=1 CASC_LEN=1 RESULTS_PATH=./results//limit_ssr"
+    done
+fi
+
+if [[ "$*" == *dual_ssr* ]]
+then
+    #ssr_vals=(1 2 3 4)
+    ssr_vals=(5 6 7 8 9)
+    for sVal in "${ssr_vals[@]}"; do
+        let "fLen=$sVal * 8 * 2 - 1"
+        test_arr[$LINENO]="make all UUT_SSR=$sVal UUT_PARA_INTERP_POLY=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=$fLen INPUT_WINDOW_VSIZE=12800 PORT_API=1 CASC_LEN=1 RESULTS_PATH=./results//dual_limit_ssr DUAL_IP=1 NUM_OUTPUTS=2"
+    done
+fi
+
+#Qor tests should be added to fit a suite with a collective purpose. There may be multiple suites with different purposes, e.g.
+#Parameter exploration - where a base case is augmented by additional cases which vary one parameter such that the user
+#  can see how QoR varies with a change in that parameter.
+#Bellwether - standalone cases which describe a known or typical customer usecase, e.g. 47tap HB FIR with cint16/int16
+#Anomaly. Where there is a known anomaly in QoR, such as a step change at a particular FIR length, cases may be added
+# to highlight the non-linearity.
+#Other. If there are other cases or other suites added for a different purpose, please add a description of the suite here.
+if [[ "$*" == *qor* || "$*" == *all* ]]
+then
+    test_arr[${#test_arr[*]}]="echo 'Performing QoR run' "
+    #The following commslib equivalents are run in an earlier section if qor is set.
+    #fir_11t_sym_hb_2i
+    #fir_15t_sym_hb_2i
+    #fir_23t_sym_hb_2i
+    #fir_27t_sym_hb_2i
+    #fir_43t_sym_hb_2i
+    target=hw
+
+    #commslib similar with streams
+    test_arr[${#test_arr[*]}]="echo 'Performing CommsLib Equivalent Functions...' "
+    #fir_11t_sym_hb_2i
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=11 SHIFT=15 INPUT_WINDOW_VSIZE=256 PORT_API=1  NITER=8 "
+    #fir_15t_sym_hb_2i
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=15 SHIFT=15 INPUT_WINDOW_VSIZE=256 PORT_API=1  NITER=8 "
+    #fir_23t_sym_hb_2i
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=23 SHIFT=15 INPUT_WINDOW_VSIZE=256 PORT_API=1  NITER=8 "
+    #fir_27t_sym_hb_2i
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=27 SHIFT=15 INPUT_WINDOW_VSIZE=256 PORT_API=1  NITER=8 "
+    #fir_43t_sym_hb_2i
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=43 SHIFT=15 INPUT_WINDOW_VSIZE=256 PORT_API=1  NITER=8 "
+    # from spreadsheet
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=47 SHIFT=15 INPUT_WINDOW_VSIZE=256 PORT_API=1  NITER=8 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=11 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1 PORT_API=1  NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=15 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1 PORT_API=1  NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=19 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1 PORT_API=1  NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=23 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1 PORT_API=1  NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=27 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1 PORT_API=1  NITER=8 "
+
+    #commslib equivalents
+    test_arr[${#test_arr[*]}]="echo 'Performing CommsLib Equivalent Functions...'   NITER=8 "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=11 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1  NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=15 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1  NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=19 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1  NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=23 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1  NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=27 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1  NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=43 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1 DUAL_IP=1  NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=47 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1 DUAL_IP=1  NITER=8 "
+
+    # Large FIRs
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  NITER=86 UPSHIFT_CT=1  FIR_LEN=1023 CASC_LEN=1 INPUT_WINDOW_VSIZE=512  NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  NITER=86 UPSHIFT_CT=1  FIR_LEN=2047 CASC_LEN=2 INPUT_WINDOW_VSIZE=512  NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  NITER=86 UPSHIFT_CT=1  FIR_LEN=3071 CASC_LEN=3 INPUT_WINDOW_VSIZE=512  NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  NITER=86 UPSHIFT_CT=1  FIR_LEN=4095 CASC_LEN=4 INPUT_WINDOW_VSIZE=512  NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  NITER=86 UPSHIFT_CT=1  FIR_LEN=5119 CASC_LEN=5 INPUT_WINDOW_VSIZE=512  NITER=8 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  NITER=86 UPSHIFT_CT=1  FIR_LEN=6143 CASC_LEN=6 INPUT_WINDOW_VSIZE=512  NITER=8 "
+
+    #explore FIR_LEN (spanning both architectures)
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=7   SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=11  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=15  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=19  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=27  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=99  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=239 SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+
+    #explore FIR_LEN with RTPs
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=7   SHIFT=16 INPUT_WINDOW_VSIZE=256 USE_COEFF_RELOAD=1  NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=11  SHIFT=16 INPUT_WINDOW_VSIZE=256 USE_COEFF_RELOAD=1  NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=15  SHIFT=16 INPUT_WINDOW_VSIZE=256 USE_COEFF_RELOAD=1  NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=19  SHIFT=16 INPUT_WINDOW_VSIZE=256 USE_COEFF_RELOAD=1  NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=27  SHIFT=16 INPUT_WINDOW_VSIZE=256 USE_COEFF_RELOAD=1  NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=99  SHIFT=16 INPUT_WINDOW_VSIZE=256 USE_COEFF_RELOAD=1  NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=239 SHIFT=16 INPUT_WINDOW_VSIZE=256 USE_COEFF_RELOAD=1  NITER=8 "
+
+    #Explore shift (not expected to make any difference to QoR)
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=7 SHIFT=0 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=7 SHIFT=24 INPUT_WINDOW_VSIZE=256   NITER=8 "
+
+    #Explore rounding/saturation (not expected to make any difference to QoR)
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=7 SHIFT=16 ROUND_MODE=1 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=7 SHIFT=24 ROUND_MODE=2 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=7 SHIFT=16 ROUND_MODE=3 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=7 SHIFT=24 ROUND_MODE=4 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=7 SHIFT=16 ROUND_MODE=5 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=7 SHIFT=24 ROUND_MODE=6 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=7 SHIFT=24 ROUND_MODE=6 INPUT_WINDOW_VSIZE=256 NITER=8 SAT_MODE=0"
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=7 SHIFT=24 ROUND_MODE=6 INPUT_WINDOW_VSIZE=256 NITER=8 SAT_MODE=1"
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=7 SHIFT=24 ROUND_MODE=6 INPUT_WINDOW_VSIZE=256 NITER=8 SAT_MODE=3"
+
+
+    #Explore window size
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=7   SHIFT=16 INPUT_WINDOW_VSIZE=32     NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=7   SHIFT=16 INPUT_WINDOW_VSIZE=64     NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=7   SHIFT=16 INPUT_WINDOW_VSIZE=128    NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16   FIR_LEN=7   SHIFT=16 INPUT_WINDOW_VSIZE=512    NITER=8 "
+
+    #Explore type combos versus FIR LEN
+    #Points chosen are smallest possible, largest within 1buff, smallest in 2 buff, large and largest possible.
+    #The last 3 should show how linear the 'curve' is.
+
+    #Explore cascade length
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=99 CASC_LEN=2 SHIFT=16   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=99 CASC_LEN=3 SHIFT=16   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=99 CASC_LEN=4 SHIFT=16   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=99 CASC_LEN=5 SHIFT=16   NITER=8 "
+
+    #cint16/cint16
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=7   SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=23  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=27  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=99  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=239 SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+
+    #int32/int16
+    test_arr[$LINENO]="make all  DATA_TYPE=int32 COEFF_TYPE=int16  FIR_LEN=7   SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=int32 COEFF_TYPE=int16  FIR_LEN=15  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=int32 COEFF_TYPE=int16  FIR_LEN=19  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=int32 COEFF_TYPE=int16  FIR_LEN=99  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=int32 COEFF_TYPE=int16  FIR_LEN=239 SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+
+    #int32/int32
+    test_arr[$LINENO]="make all  DATA_TYPE=int32 COEFF_TYPE=int32  FIR_LEN=7   SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=int32 COEFF_TYPE=int32  FIR_LEN=23  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=int32 COEFF_TYPE=int32  FIR_LEN=27  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=int32 COEFF_TYPE=int32  FIR_LEN=99  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=int32 COEFF_TYPE=int32  FIR_LEN=239 SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+
+    #int16/int32
+    test_arr[$LINENO]="make all  DATA_TYPE=int16 COEFF_TYPE=int32  FIR_LEN=7   SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=int16 COEFF_TYPE=int32  FIR_LEN=23  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=int16 COEFF_TYPE=int32  FIR_LEN=27  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=int16 COEFF_TYPE=int32  FIR_LEN=99  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=int16 COEFF_TYPE=int32  FIR_LEN=239 SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+
+    #cint16/int32
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int32  FIR_LEN=7   SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int32  FIR_LEN=15  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int32  FIR_LEN=19  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int32  FIR_LEN=99  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=int32  FIR_LEN=239 SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+
+    #cint16/cint32
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=cint32  FIR_LEN=7   SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=cint32  FIR_LEN=23  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=cint32  FIR_LEN=27  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=cint32  FIR_LEN=99  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint16 COEFF_TYPE=cint32  FIR_LEN=239 SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+
+    #cint32/int16
+    test_arr[$LINENO]="make all  DATA_TYPE=cint32 COEFF_TYPE=int16  FIR_LEN=7   SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint32 COEFF_TYPE=int16  FIR_LEN=11  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint32 COEFF_TYPE=int16  FIR_LEN=15  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint32 COEFF_TYPE=int16  FIR_LEN=99  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint32 COEFF_TYPE=int16  FIR_LEN=239 SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+
+    #cint32/cint16
+    test_arr[$LINENO]="make all  DATA_TYPE=cint32 COEFF_TYPE=cint16  FIR_LEN=7   SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint32 COEFF_TYPE=cint16  FIR_LEN=11  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint32 COEFF_TYPE=cint16  FIR_LEN=15  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint32 COEFF_TYPE=cint16  FIR_LEN=99  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint32 COEFF_TYPE=cint16  FIR_LEN=239 SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+
+    #cint32/int32
+    test_arr[$LINENO]="make all  DATA_TYPE=cint32 COEFF_TYPE=int32  FIR_LEN=7   SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint32 COEFF_TYPE=int32  FIR_LEN=11  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint32 COEFF_TYPE=int32  FIR_LEN=15  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint32 COEFF_TYPE=int32  FIR_LEN=99  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint32 COEFF_TYPE=int32  FIR_LEN=239 SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+
+    #cint32/cint32
+    test_arr[$LINENO]="make all  DATA_TYPE=cint32 COEFF_TYPE=cint32  FIR_LEN=7   SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint32 COEFF_TYPE=cint32  FIR_LEN=11  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint32 COEFF_TYPE=cint32  FIR_LEN=15  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint32 COEFF_TYPE=cint32  FIR_LEN=99  SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cint32 COEFF_TYPE=cint32  FIR_LEN=239 SHIFT=16 INPUT_WINDOW_VSIZE=256   NITER=8 "
+
+    #float/float
+    test_arr[$LINENO]="make all  DATA_TYPE=float COEFF_TYPE=float  FIR_LEN=7   SHIFT=0 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=float COEFF_TYPE=float  FIR_LEN=15  SHIFT=0 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=float COEFF_TYPE=float  FIR_LEN=19  SHIFT=0 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=float COEFF_TYPE=float  FIR_LEN=99  SHIFT=0 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=float COEFF_TYPE=float  FIR_LEN=239 SHIFT=0 INPUT_WINDOW_VSIZE=256   NITER=8 "
+
+    #cfloat/float for cfloat, only FIR_LEN = 7 fits in 1buff arch.
+    test_arr[$LINENO]="make all  DATA_TYPE=cfloat COEFF_TYPE=float  FIR_LEN=7   SHIFT=0 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cfloat COEFF_TYPE=float  FIR_LEN=11  SHIFT=0 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cfloat COEFF_TYPE=float  FIR_LEN=15  SHIFT=0 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cfloat COEFF_TYPE=float  FIR_LEN=99  SHIFT=0 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cfloat COEFF_TYPE=float  FIR_LEN=239 SHIFT=0 INPUT_WINDOW_VSIZE=256   NITER=8 "
+
+    #cfloat/cfloat
+    test_arr[$LINENO]="make all  DATA_TYPE=cfloat COEFF_TYPE=cfloat NITER=84 FIR_LEN=7   SHIFT=0 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cfloat COEFF_TYPE=cfloat NITER=84 FIR_LEN=11  SHIFT=0 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cfloat COEFF_TYPE=cfloat NITER=84 FIR_LEN=15  SHIFT=0 INPUT_WINDOW_VSIZE=256 DEBUG_COEFF_SEED=0  NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cfloat COEFF_TYPE=cfloat NITER=84 FIR_LEN=99  SHIFT=0 INPUT_WINDOW_VSIZE=256   NITER=8 "
+    test_arr[$LINENO]="make all  DATA_TYPE=cfloat COEFF_TYPE=cfloat NITER=84 FIR_LEN=239 SHIFT=0 INPUT_WINDOW_VSIZE=256 DEBUG_COEFF_SEED=100 NITER=8 " # occasional timeout - reduce niter to avoid spurious issues.
+
+    #ssr
+    test_arr[$LINENO]="make all NITER=8 PORT_API=1 COEFF_TYPE=int32 DATA_TYPE=int32 SHIFT=32 FIR_LEN=71 INPUT_WINDOW_VSIZE=7680 UUT_SSR=3 UUT_PARA_INTERP_POLY=2 CASC_LEN=3 DUAL_IP=1 NUM_OUTPUTS=2  NITER=8 "
+    test_arr[$LINENO]="make all NITER=8 PORT_API=1 COEFF_TYPE=int16 DATA_TYPE=cint16 SHIFT=16 FIR_LEN=127 INPUT_WINDOW_VSIZE=5120 UUT_SSR=4 UUT_PARA_INTERP_POLY=2 CASC_LEN=1 DUAL_IP=0 NUM_OUTPUTS=1  NITER=8 "
+    test_arr[$LINENO]="make all NITER=8 PORT_API=1 COEFF_TYPE=cint16 DATA_TYPE=cint32 SHIFT=32 FIR_LEN=95 INPUT_WINDOW_VSIZE=2560 UUT_SSR=2 UUT_PARA_INTERP_POLY=2 CASC_LEN=3 DUAL_IP=0 NUM_OUTPUTS=1  NITER=8 "
+    #ssr with coeff reload
+    test_arr[$LINENO]="make all NITER=8 PORT_API=1 COEFF_TYPE=int32  DATA_TYPE=int32  SHIFT=32 FIR_LEN=71  INPUT_WINDOW_VSIZE=7680 UUT_SSR=3 UUT_PARA_INTERP_POLY=2 CASC_LEN=3 DUAL_IP=1 NUM_OUTPUTS=2 USE_COEFF_RELOAD=1  NITER=8 "
+    test_arr[$LINENO]="make all NITER=8 PORT_API=1 COEFF_TYPE=int16  DATA_TYPE=cint16 SHIFT=16 FIR_LEN=127 INPUT_WINDOW_VSIZE=5120 UUT_SSR=4 UUT_PARA_INTERP_POLY=2 CASC_LEN=1 DUAL_IP=0 NUM_OUTPUTS=1 USE_COEFF_RELOAD=1  NITER=8 "
+    test_arr[$LINENO]="make all NITER=8 PORT_API=1 COEFF_TYPE=cint16 DATA_TYPE=cint32 SHIFT=32 FIR_LEN=95  INPUT_WINDOW_VSIZE=2560 UUT_SSR=2 UUT_PARA_INTERP_POLY=2 CASC_LEN=3 DUAL_IP=0 NUM_OUTPUTS=1 USE_COEFF_RELOAD=1  NITER=8 "
+
+    # aie-ml
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=11 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=19 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=23 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=27 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=43 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=79 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=159 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=2 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=4 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=6 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=7 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=8 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # Disabling int16 int16 due to metadata fail. Metadata likely needs updated
+    # test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=11 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=19 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=23 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=27 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=43 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=79 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=159 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=2 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=4 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=6 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=7 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=159 CASC_LEN=8 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=11 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=19 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=23 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=27 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=43 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=79 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=159 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=159 CASC_LEN=2 SHIFT=16 INPUT_WINDOW_VSIZE=2560 NITER=8"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=159 CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=2560 NITER=8"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=159 CASC_LEN=4 SHIFT=16 INPUT_WINDOW_VSIZE=2560 NITER=8"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=159 CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=2560 NITER=8"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=159 CASC_LEN=6 SHIFT=16 INPUT_WINDOW_VSIZE=2560 NITER=8"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=159 CASC_LEN=7 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all AIE_VARIANT=2 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=159 CASC_LEN=8 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=11 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=15 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=19 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=23 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=27 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=43 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=47 CASC_LEN=2 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=95 CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=107 CASC_LEN=4 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=179 CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=195 CASC_LEN=6 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=203 CASC_LEN=7 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=255 CASC_LEN=8 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=int16 COEFF_TYPE=int16 FIR_LEN=255 CASC_LEN=9 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=11 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=15 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=19 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=23 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=27 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=43 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=47 CASC_LEN=2 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=95 CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=107 CASC_LEN=4 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=179 CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=195 CASC_LEN=6 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=203 CASC_LEN=7 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=255 CASC_LEN=8 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=int16 FIR_LEN=255 CASC_LEN=9 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=11 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=15 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=19 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=23 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=27 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=43 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=51 CASC_LEN=2 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=99 CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=111 CASC_LEN=4 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=183 CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=203 CASC_LEN=6 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=207 CASC_LEN=7 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # # test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=259 CASC_LEN=8 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+    # test_arr[$LINENO]="make all NITER=8 AIE_VARIANT=2 PORT_API=1 DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=259 CASC_LEN=9 SHIFT=16 INPUT_WINDOW_VSIZE=2560"
+
+fi
+
+if [[ "$*" == *dual_op*  ]]
+then
+    test_arr[${#test_arr[*]}]="echo 'Performing exploratory tests...' "
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=1 USE_COEFF_RELOAD=0 NUM_OUTPUTS=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=1 USE_COEFF_RELOAD=0 NUM_OUTPUTS=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=1 USE_COEFF_RELOAD=1 NUM_OUTPUTS=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=1 USE_COEFF_RELOAD=1 NUM_OUTPUTS=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=3 USE_COEFF_RELOAD=0 NUM_OUTPUTS=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=3 USE_COEFF_RELOAD=0 NUM_OUTPUTS=2"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=3 USE_COEFF_RELOAD=1 NUM_OUTPUTS=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=3 USE_COEFF_RELOAD=1 NUM_OUTPUTS=2"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=1 USE_COEFF_RELOAD=0 NUM_OUTPUTS=1 DUAL_IP=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=1 USE_COEFF_RELOAD=0 NUM_OUTPUTS=2 DUAL_IP=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=1 USE_COEFF_RELOAD=1 NUM_OUTPUTS=1 DUAL_IP=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=1 USE_COEFF_RELOAD=1 NUM_OUTPUTS=2 DUAL_IP=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=3 USE_COEFF_RELOAD=0 NUM_OUTPUTS=1 DUAL_IP=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=3 USE_COEFF_RELOAD=0 NUM_OUTPUTS=2 DUAL_IP=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=3 USE_COEFF_RELOAD=1 NUM_OUTPUTS=1 DUAL_IP=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=3 USE_COEFF_RELOAD=1 NUM_OUTPUTS=2 DUAL_IP=1"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=1 USE_COEFF_RELOAD=0 NUM_OUTPUTS=1 PORT_API=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=1 USE_COEFF_RELOAD=0 NUM_OUTPUTS=2 PORT_API=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=1 USE_COEFF_RELOAD=1 NUM_OUTPUTS=1 PORT_API=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=1 USE_COEFF_RELOAD=1 NUM_OUTPUTS=2 PORT_API=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=3 USE_COEFF_RELOAD=0 NUM_OUTPUTS=1 PORT_API=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=3 USE_COEFF_RELOAD=0 NUM_OUTPUTS=2 PORT_API=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=3 USE_COEFF_RELOAD=1 NUM_OUTPUTS=1 PORT_API=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=3 USE_COEFF_RELOAD=1 NUM_OUTPUTS=2 PORT_API=1"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=1 USE_COEFF_RELOAD=0 NUM_OUTPUTS=1 DUAL_IP=1 PORT_API=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=1 USE_COEFF_RELOAD=0 NUM_OUTPUTS=2 DUAL_IP=1 PORT_API=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=1 USE_COEFF_RELOAD=1 NUM_OUTPUTS=1 DUAL_IP=1 PORT_API=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=1 USE_COEFF_RELOAD=1 NUM_OUTPUTS=2 DUAL_IP=1 PORT_API=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=3 USE_COEFF_RELOAD=0 NUM_OUTPUTS=1 DUAL_IP=1 PORT_API=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=3 USE_COEFF_RELOAD=0 NUM_OUTPUTS=2 DUAL_IP=1 PORT_API=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=3 USE_COEFF_RELOAD=1 NUM_OUTPUTS=1 DUAL_IP=1 PORT_API=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=71 SHIFT=15 INPUT_WINDOW_VSIZE=256 CASC_LEN=3 USE_COEFF_RELOAD=1 NUM_OUTPUTS=2 DUAL_IP=1 PORT_API=1"
+fi
+
+if [[  "$*" == *adl_953* ]]
+then
+    targets=(x86sim)
+    lengths=(63 )
+    # lengths=( 320 384 448 512 1024)
+    for target in "${targets[@]}"; do
+        for fLen in "${lengths[@]}"; do
+            test_arr[$LINENO]="make all TARGET=$target DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=$fLen CASC_LEN=1 SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=512 DUAL_IP=1 NUM_OUTPUTS=2 "
+            test_arr[$LINENO]="make all TARGET=$target DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=$fLen CASC_LEN=1 SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=512 DUAL_IP=1 NUM_OUTPUTS=2 "
+            test_arr[$LINENO]="make all TARGET=$target DATA_TYPE=cint32 COEFF_TYPE=int16  FIR_LEN=$fLen CASC_LEN=1 SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=512 DUAL_IP=1 NUM_OUTPUTS=2 "
+            test_arr[$LINENO]="make all TARGET=$target DATA_TYPE=cint32 COEFF_TYPE=cint16 FIR_LEN=$fLen CASC_LEN=1 SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=512 DUAL_IP=1 NUM_OUTPUTS=2 "
+            test_arr[$LINENO]="make all TARGET=$target DATA_TYPE=cint32 COEFF_TYPE=int32  FIR_LEN=$fLen CASC_LEN=1 SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=512 DUAL_IP=1 NUM_OUTPUTS=2 "
+            test_arr[$LINENO]="make all TARGET=$target DATA_TYPE=cint32 COEFF_TYPE=cint32 FIR_LEN=$fLen CASC_LEN=1 SHIFT=16 PORT_API=1 INPUT_WINDOW_VSIZE=512 DUAL_IP=1 NUM_OUTPUTS=2 "
+        done #fLen
+    done #target
+fi
+
+if [[  "$*" == *adl_850* ]]
+then
+    targets=(x86sim)
+    lengths=(95 127 159 191 223 239 255 319 383 447 )
+    # lengths=( 320 384 448 512 1024)
+    for target in "${targets[@]}"; do
+        for fLen in "${lengths[@]}"; do
+            # window size must be greater of equal to coefficient array
+            # each must be lesser than 16kB.
+            windowSize=512
+            let "casc_len=($fLen + 511) / 512"
+            test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  UPSHIFT_CT=1 SHIFT=16 TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize "
+            test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  UPSHIFT_CT=0 SHIFT=15 TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize "
+        done #fLen
+    done #target
+fi
+
+if [[  "$*" == *adl_857* ]]
+then
+    lengths=(103 111 119 127 135 143 )
+    windowSize=1384
+    cascLen=6
+    for fLen in "${lengths[@]}"; do
+        test_arr[$LINENO]="make all DATA_TYPE=int32 COEFF_TYPE=int32  UPSHIFT_CT=0 SHIFT=16 FIR_LEN=$fLen CASC_LEN=$cascLen INPUT_WINDOW_VSIZE=$windowSize "
+        test_arr[$LINENO]="make all DATA_TYPE=int32 COEFF_TYPE=int32  UPSHIFT_CT=0 SHIFT=16 FIR_LEN=$fLen CASC_LEN=$cascLen INPUT_WINDOW_VSIZE=$windowSize DUAL_IP=1"
+    done #fLen
+fi
+
+if [[  "$*" == *max_fir* ]]
+then
+    targets=(hw)
+    lengths=(95 127 159 191 223 239 255 319 383 447 )
+    # lengths=( 320 384 448 512 1024)
+    for target in "${targets[@]}"; do
+        for fLen in "${lengths[@]}"; do
+            # window size must be greater of equal to coefficient array
+            # each must be lesser than 16kB.
+            windowSize=512
+            let "casc_len=($fLen + 511) / 512"
+            # test_arr[$LINENO]="make all DATA_TYPE=int16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize " // not supported
+            test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  UPSHIFT_CT=1 TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize "
+            test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16 UPSHIFT_CT=1 TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize "
+            test_arr[$LINENO]="make all DATA_TYPE=int32 COEFF_TYPE=int16  TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize "
+            test_arr[$LINENO]="make all DATA_TYPE=int32 COEFF_TYPE=int32  TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize "
+            test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=int16  TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize "
+            test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=cint16 TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize "
+            test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=int32  TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize "
+            test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=cint32 TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize "
+            test_arr[$LINENO]="make all DATA_TYPE=float COEFF_TYPE=float  TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize "
+            test_arr[$LINENO]="make all DATA_TYPE=cfloat COEFF_TYPE=float  TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize "
+            test_arr[$LINENO]="make all DATA_TYPE=cfloat COEFF_TYPE=cfloat TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize "
+        done #fLen
+    done #target
+    lengths=(511 1023 1535 2047 2559 3071 4095)
+    for target in "${targets[@]}"; do
+        for fLen in "${lengths[@]}"; do
+            # window size must be greater of equal to coefficient array
+            # each must be lesser than 16kB.
+            windowSize=512
+            let "casc_len=($fLen + 511) / 512"
+            # test_arr[$LINENO]="make all DATA_TYPE=int16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize  NITER=4" // not supported
+            test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  UPSHIFT_CT=1 TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize  NITER=4"
+            test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16 UPSHIFT_CT=1 TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize  NITER=4"
+            test_arr[$LINENO]="make all DATA_TYPE=int32 COEFF_TYPE=int16  TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize  NITER=4"
+            test_arr[$LINENO]="make all DATA_TYPE=int32 COEFF_TYPE=int32  TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize  NITER=4"
+            test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=int16  TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize  NITER=4"
+            test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=cint16 TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize  NITER=4"
+            test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=int32  TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize  NITER=4"
+            test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=cint32 TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize  NITER=4"
+        done #fLen
+    done #target
+    lengths=(5119 6399 7679 8191)
+    for target in "${targets[@]}"; do
+        for fLen in "${lengths[@]}"; do
+            # window size must be greater of equal to coefficient array
+            # each must be lesser than 16kB.
+            windowSize=512
+            let "casc_len=($fLen + 511) / 512"
+            # test_arr[$LINENO]="make all DATA_TYPE=int16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize  NITER=4" // not supported
+            test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  UPSHIFT_CT=1 TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize  NITER=4"
+            test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16 UPSHIFT_CT=1 TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize  NITER=4"
+            test_arr[$LINENO]="make all DATA_TYPE=int32 COEFF_TYPE=int16  TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize  NITER=4"
+            test_arr[$LINENO]="make all DATA_TYPE=int32 COEFF_TYPE=int32  TARGET=$target FIR_LEN=$fLen CASC_LEN=$casc_len INPUT_WINDOW_VSIZE=$windowSize  NITER=4"
+        done #fLen
+    done #target
+fi
+
+if [[  "$*" == "" || "$*" == *uct* ]]
+then
+    # targets=(hw x86sim)
+    targets=(x86sim)
+    for target in "${targets[@]}"; do
+        # with UCT
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=7  SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=11 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=15 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=19 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=23 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=27 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=31 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=35 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=39 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=43 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=47 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=51 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=55 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=59 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=63 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=67 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=71 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=75 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=79 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=83 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=87 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=91 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1"
+
+        # test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=43 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1 GEN_COEFF_DATA=false GEN_INPUT_DATA=false SHIFT=0"
+        # test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=47 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1 GEN_COEFF_DATA=false GEN_INPUT_DATA=false SHIFT=0"
+        # test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=51 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1 GEN_COEFF_DATA=false GEN_INPUT_DATA=false SHIFT=0"
+        # test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=55 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1 GEN_COEFF_DATA=false GEN_INPUT_DATA=false SHIFT=0"
+        # test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=59 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1 GEN_COEFF_DATA=false GEN_INPUT_DATA=false SHIFT=0"
+        # test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=63 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1 GEN_COEFF_DATA=false GEN_INPUT_DATA=false SHIFT=0"
+        # test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=79 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1 GEN_COEFF_DATA=false GEN_INPUT_DATA=false SHIFT=0"
+
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=43 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1 CASC_LEN=2"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=47 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1 CASC_LEN=2"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=51 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1 CASC_LEN=2"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=55 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1 CASC_LEN=2"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=59 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1 CASC_LEN=2"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=63 SHIFT=16 INPUT_WINDOW_VSIZE=256 UPSHIFT_CT=1 CASC_LEN=2"
+
+    done #target
+
+fi
+
+if [[ "$*" == *cr_bugs* ]]
+then
+    # cr-1081181
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=31 SHIFT=15 INPUT_WINDOW_VSIZE=128 CASC_LEN=1 TARGET=x86sim"
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat COEFF_TYPE=float  FIR_LEN=31 SHIFT=15 INPUT_WINDOW_VSIZE=128 CASC_LEN=1 TARGET=x86sim"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=31 SHIFT=15 INPUT_WINDOW_VSIZE=128 CASC_LEN=2 TARGET=x86sim"
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat COEFF_TYPE=float  FIR_LEN=31 SHIFT=0  INPUT_WINDOW_VSIZE=128 CASC_LEN=2 TARGET=x86sim"
+    # ADL- 360
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=83 CASC_LEN=2 SHIFT=16 INPUT_WINDOW_VSIZE=128 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=83 CASC_LEN=2 SHIFT=16 INPUT_WINDOW_VSIZE=128 DUAL_IP=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=83 CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=128 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=83 CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=128 DUAL_IP=1"
+    # ADL- 363
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=99 CASC_LEN=1 SHIFT=16 INPUT_WINDOW_VSIZE=128 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=99 CASC_LEN=2 SHIFT=16 INPUT_WINDOW_VSIZE=128 "
+fi
+
+if [[  "$*" == *reload_coeff* ]]
+then
+    # Tests RTP with a wide variety of FIR lengths with various cascade lengths, expanding coverage scope.
+    target=hw
+    lengths=(23 27 31 43 59)
+    for fLen in "${lengths[@]}"; do
+        # cascde length 1/3
+        #coefficient static
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 TARGET=$target FIR_LEN=$fLen CASC_LEN=1 SHIFT=16 INPUT_WINDOW_VSIZE=384 USE_COEFF_RELOAD=0 DUAL_IP=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 TARGET=$target FIR_LEN=$fLen CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=384 USE_COEFF_RELOAD=0 DUAL_IP=1"
+        # coefficient reload DP=0
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 TARGET=$target FIR_LEN=$fLen CASC_LEN=1 SHIFT=16 INPUT_WINDOW_VSIZE=384 USE_COEFF_RELOAD=1 DUAL_IP=0"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 TARGET=$target FIR_LEN=$fLen CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=384 USE_COEFF_RELOAD=1 DUAL_IP=0"
+        # coefficient reload DP=1
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 TARGET=$target FIR_LEN=$fLen CASC_LEN=1 SHIFT=16 INPUT_WINDOW_VSIZE=384 USE_COEFF_RELOAD=1 DUAL_IP=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 TARGET=$target FIR_LEN=$fLen CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=384 USE_COEFF_RELOAD=1 DUAL_IP=1"
+        done #fLen
+    lengths=(39 43 59)
+    for fLen in "${lengths[@]}"; do
+        # cascde length >=5
+        #coefficient static
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 TARGET=$target FIR_LEN=$fLen CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=384 USE_COEFF_RELOAD=0 DUAL_IP=1"
+        # coefficient reload
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16 TARGET=$target FIR_LEN=$fLen CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=384 USE_COEFF_RELOAD=1 DUAL_IP=1"
+        done #fLen
+fi
+
+if [[  "$*" == *reload_check_comp_size* ]]
+then
+    # Tests RTPs with all the distinctive sizes in RTP comparison and update structure
+    target=hw
+    lengths=(63 67 71 75 79 83 87 91 95 99)
+    for fLen in "${lengths[@]}"; do
+        #coefficient static
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=$fLen CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=384 USE_COEFF_RELOAD=0 DUAL_IP=1"
+        # coefficient reload
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  TARGET=$target FIR_LEN=$fLen CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=384 USE_COEFF_RELOAD=1 DUAL_IP=1 DEBUG_ADL=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16 TARGET=$target FIR_LEN=$fLen CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=384 USE_COEFF_RELOAD=1 DUAL_IP=1 DEBUG_ADL=1"
+        test_arr[$LINENO]="make all DATA_TYPE=int32 COEFF_TYPE=int16  TARGET=$target FIR_LEN=$fLen CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=384 USE_COEFF_RELOAD=1 DUAL_IP=1 DEBUG_ADL=1"
+        test_arr[$LINENO]="make all DATA_TYPE=int32 COEFF_TYPE=int32  TARGET=$target FIR_LEN=$fLen CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=384 USE_COEFF_RELOAD=1 DUAL_IP=1 DEBUG_ADL=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=int16  TARGET=$target FIR_LEN=$fLen CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=384 USE_COEFF_RELOAD=1 DUAL_IP=1 DEBUG_ADL=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=cint16 TARGET=$target FIR_LEN=$fLen CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=384 USE_COEFF_RELOAD=1 DUAL_IP=1 DEBUG_ADL=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=int32  TARGET=$target FIR_LEN=$fLen CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=384 USE_COEFF_RELOAD=1 DUAL_IP=1 DEBUG_ADL=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=cint32 TARGET=$target FIR_LEN=$fLen CASC_LEN=5 SHIFT=16 INPUT_WINDOW_VSIZE=384 USE_COEFF_RELOAD=1 DUAL_IP=1 DEBUG_ADL=1"
+        test_arr[$LINENO]="make all DATA_TYPE=float COEFF_TYPE=float  TARGET=$target FIR_LEN=$fLen CASC_LEN=5 SHIFT=0 INPUT_WINDOW_VSIZE=384 USE_COEFF_RELOAD=1 DUAL_IP=1 DEBUG_ADL=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cfloat COEFF_TYPE=float  TARGET=$target FIR_LEN=$fLen CASC_LEN=5 SHIFT=0 INPUT_WINDOW_VSIZE=384 USE_COEFF_RELOAD=1 DUAL_IP=1 DEBUG_ADL=1"
+        test_arr[$LINENO]="make all DATA_TYPE=cfloat COEFF_TYPE=cfloat TARGET=$target FIR_LEN=$fLen CASC_LEN=5 SHIFT=0 INPUT_WINDOW_VSIZE=384 USE_COEFF_RELOAD=1 DUAL_IP=1 DEBUG_ADL=1"
+        done #fLen
+fi
+
+if [[  "$*" == "" || "$*" == *coeff_reload* ]]
+then
+    test_arr[${#test_arr[*]}]="echo 'Running limited number of check-in tests.'"
+    # coefficient reload
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=23 CASC_LEN=1 SHIFT=16 INPUT_WINDOW_VSIZE=128 USE_COEFF_RELOAD=1"
+    # coefficient reload with dual input
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=15 CASC_LEN=1 SHIFT=16 INPUT_WINDOW_VSIZE=128 USE_COEFF_RELOAD=1 DUAL_IP=1"
+    # coefficient reload with cascades
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=43 CASC_LEN=2 SHIFT=16 INPUT_WINDOW_VSIZE=128 USE_COEFF_RELOAD=1"
+    # coefficient reload with cascades
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=43 CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=128 USE_COEFF_RELOAD=1"
+    # coefficient reload with cascades and dual input
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=83 CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=128 USE_COEFF_RELOAD=1 DUAL_IP=1"
+
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=43 CASC_LEN=2 SHIFT=16 INPUT_WINDOW_VSIZE=128 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=43 CASC_LEN=2 SHIFT=16 INPUT_WINDOW_VSIZE=128 DUAL_IP=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=83 CASC_LEN=2 SHIFT=16 INPUT_WINDOW_VSIZE=128 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=83 CASC_LEN=2 SHIFT=16 INPUT_WINDOW_VSIZE=128 DUAL_IP=1"
+
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=43 CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=128 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=43 CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=128 DUAL_IP=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=83 CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=128 "
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16  FIR_LEN=83 CASC_LEN=3 SHIFT=16 INPUT_WINDOW_VSIZE=128 DUAL_IP=1"
+fi
+
+if [[ "$*" == *more* || "$*" == "" ]]
+then
+    test_arr[${#test_arr[*]}]="echo 'Running more extensive tests...' "
+
+    #int16/int16 not supported due to xsquare range
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=7 SHIFT=16  USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=11 SHIFT=16 USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=15 SHIFT=16 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=19 SHIFT=16 USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=11 SHIFT=16 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all DATA_TYPE=int32 COEFF_TYPE=int16  FIR_LEN=7  SHIFT=16 USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=int32 COEFF_TYPE=int32  FIR_LEN=7  SHIFT=16 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=int16  FIR_LEN=7  SHIFT=16 USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=cint16 FIR_LEN=7  SHIFT=16 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=int32  FIR_LEN=7  SHIFT=16 USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=cint32 FIR_LEN=7  SHIFT=16 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all DATA_TYPE=float COEFF_TYPE=float  FIR_LEN=7  SHIFT=0  USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat COEFF_TYPE=float  FIR_LEN=7  SHIFT=0  USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat COEFF_TYPE=cfloat FIR_LEN=7  SHIFT=0  USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=int32 COEFF_TYPE=int16  FIR_LEN=27 SHIFT=16 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all DATA_TYPE=int32 COEFF_TYPE=int32  FIR_LEN=31 SHIFT=16 USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=int16  FIR_LEN=59 SHIFT=16 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=cint16 FIR_LEN=31 SHIFT=16 USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=int32  FIR_LEN=27 SHIFT=16 USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cint32 COEFF_TYPE=cint32 FIR_LEN=27 SHIFT=16 USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=float COEFF_TYPE=float  FIR_LEN=27 SHIFT=0  USE_COEFF_RELOAD=1"
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat COEFF_TYPE=float  FIR_LEN=27 SHIFT=0  USE_COEFF_RELOAD=0"
+    test_arr[$LINENO]="make all DATA_TYPE=cfloat COEFF_TYPE=cfloat FIR_LEN=31 SHIFT=0  USE_COEFF_RELOAD=1"
+fi
+
+if [[ "$*" == *cascade* || "$*" == "" ]]
+then
+    test_arr[${#test_arr[*]}]="echo 'Running more extensive tests...' "
+    target=hw
+
+    # Small architecture - FIR length 23
+    #Cascade length 2
+    test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=int16 COEFF_TYPE=int16  FIR_LEN=23 SHIFT=16 CASC_LEN=2"
+    test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=23 SHIFT=16 CASC_LEN=2"
+    test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=23 SHIFT=16 CASC_LEN=2"
+    test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=int32 COEFF_TYPE=int16  FIR_LEN=23 SHIFT=16 CASC_LEN=2"
+    test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=int32 COEFF_TYPE=int32  FIR_LEN=23 SHIFT=16 CASC_LEN=2"
+    test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cint32 COEFF_TYPE=int16  FIR_LEN=23 SHIFT=16 CASC_LEN=2"
+    test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cint32 COEFF_TYPE=cint16 FIR_LEN=23 SHIFT=16 CASC_LEN=2"
+    test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cint32 COEFF_TYPE=int32  FIR_LEN=23 SHIFT=16 CASC_LEN=2"
+    test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cint32 COEFF_TYPE=cint32 FIR_LEN=23 SHIFT=16 CASC_LEN=2"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=float COEFF_TYPE=float  FIR_LEN=23 SHIFT=16 CASC_LEN=2"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cfloat COEFF_TYPE=float  FIR_LEN=23 SHIFT=16 CASC_LEN=2"
+    test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cfloat COEFF_TYPE=cfloat FIR_LEN=23 SHIFT=0 CASC_LEN=2"
+
+    # #Cascade length 3
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=int16 COEFF_TYPE=int16  FIR_LEN=23 SHIFT=16 CASC_LEN=3"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=23 SHIFT=16 CASC_LEN=3"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=23 SHIFT=16 CASC_LEN=3"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=int32 COEFF_TYPE=int16  FIR_LEN=23 SHIFT=16 CASC_LEN=3"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=int32 COEFF_TYPE=int32  FIR_LEN=23 SHIFT=16 CASC_LEN=3"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cint32 COEFF_TYPE=int16  FIR_LEN=23 SHIFT=16 CASC_LEN=3"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cint32 COEFF_TYPE=cint16 FIR_LEN=23 SHIFT=16 CASC_LEN=3"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cint32 COEFF_TYPE=int32  FIR_LEN=23 SHIFT=16 CASC_LEN=3"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cint32 COEFF_TYPE=cint32 FIR_LEN=23 SHIFT=16 CASC_LEN=3"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=float COEFF_TYPE=float  FIR_LEN=23 SHIFT=0 CASC_LEN=3"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cfloat COEFF_TYPE=float  FIR_LEN=23 SHIFT=0 CASC_LEN=3"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cfloat COEFF_TYPE=cfloat FIR_LEN=23 SHIFT=0 CASC_LEN=3"
+
+    # Big architecture - FIR length 83
+    #Cascade length 2
+    test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=int16 COEFF_TYPE=int16  FIR_LEN=83 SHIFT=16 CASC_LEN=2"
+    test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=83 SHIFT=16 CASC_LEN=2"
+    test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=83 SHIFT=16 CASC_LEN=2"
+    test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=int32 COEFF_TYPE=int16  FIR_LEN=83 SHIFT=16 CASC_LEN=2"
+    test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=int32 COEFF_TYPE=int32  FIR_LEN=83 SHIFT=16 CASC_LEN=2"
+    test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cint32 COEFF_TYPE=int16  FIR_LEN=83 SHIFT=16 CASC_LEN=2"
+    test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cint32 COEFF_TYPE=cint16 FIR_LEN=83 SHIFT=16 CASC_LEN=2"
+    test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cint32 COEFF_TYPE=int32  FIR_LEN=83 SHIFT=16 CASC_LEN=2"
+    test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cint32 COEFF_TYPE=cint32 FIR_LEN=83 SHIFT=16 CASC_LEN=2"
+    test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=float COEFF_TYPE=float  FIR_LEN=83 SHIFT=0 CASC_LEN=2"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cfloat COEFF_TYPE=float  FIR_LEN=83 SHIFT=0 CASC_LEN=2"
+    test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cfloat COEFF_TYPE=cfloat FIR_LEN=83 SHIFT=0 CASC_LEN=2"
+
+    # #Cascade length 3
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=int16 COEFF_TYPE=int16  FIR_LEN=83 SHIFT=16 CASC_LEN=3"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cint16 COEFF_TYPE=int16  FIR_LEN=83 SHIFT=16 CASC_LEN=3"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cint16 COEFF_TYPE=cint16 FIR_LEN=83 SHIFT=16 CASC_LEN=3"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=int32 COEFF_TYPE=int16  FIR_LEN=83 SHIFT=16 CASC_LEN=3"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=int32 COEFF_TYPE=int32  FIR_LEN=83 SHIFT=16 CASC_LEN=3"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cint32 COEFF_TYPE=int16  FIR_LEN=83 SHIFT=16 CASC_LEN=3"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cint32 COEFF_TYPE=cint16 FIR_LEN=83 SHIFT=16 CASC_LEN=3"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cint32 COEFF_TYPE=int32  FIR_LEN=83 SHIFT=16 CASC_LEN=3"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cint32 COEFF_TYPE=cint32 FIR_LEN=83 SHIFT=16 CASC_LEN=3"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=float COEFF_TYPE=float  FIR_LEN=83 SHIFT=0 CASC_LEN=3"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cfloat COEFF_TYPE=float  FIR_LEN=83 SHIFT=0 CASC_LEN=3"
+    # test_arr[$LINENO]="make all  TARGET=$target   DATA_TYPE=cfloat COEFF_TYPE=cfloat FIR_LEN=83 SHIFT=0 CASC_LEN=3"
+fi
+
+
+if [[ "$*" == *fullSweep* || "$*" == *all* ]]
+then
+
+    types=(
+        int16 int16
+        cint16 int16
+        int32 int16
+        cint32 int16
+        cint16 cint16
+        int32 int32
+        cint32 int32
+        cint32 cint32
+        float float
+        cfloat float
+        cfloat cfloat
+    )
+
+    # Original ideal set of params to sweep across
+    lengths=(4 8 12 16 20 32 44 56 64 96 128 156 188 220 240)
+    windows=(4 8 16 32 64 128 156 188 220 256 320 384 512 1024)
+    cascades=(1 2 3 4 5 6 7)
+
+    #reduced to limit number of tests
+    lengths=(16 20 44 56 96 128 188 240)
+    windows=(16 32 64 128 188 256 320 512 1024)
+    #todo cascades
+    cascades=(1)
+    # Leave this out for now, implied 2 for each config
+    interps=(1)
+    decimates=(1)
+
+    for (( typeI=0; typeI<${#types[@]}; typeI+=2 )); do
+        echo "${types[$typeI]},${types[`expr $typeI + 1 `]}"
+        dType=${types[$typeI]}
+        cType=${types[`expr $typeI + 1 `]}
+        # Scrape int number from coef type
+        shift=${cType#*int}
+        if [[ $cType == *float ]]; then
+            shift=0
+        fi
+        for fLen in "${lengths[@]}"; do
+            for iRate in "${interps[@]}"; do
+                for dRate in "${decimates[@]}"; do
+                    for cLen in "${cascades[@]}"; do
+                        redWindows=(${windows[@]})
+                        # to reduce number of tests, limited number of windows
+                        # for cascades
+                        if [ $cLen -gt 1 ]; then
+                            redWindows=(256 1024)
+                        fi
+                        # Always use a window of FIR Len
+                        test_arr[$LINENO]="make all DATA_TYPE=$dType COEFF_TYPE=$cType FIR_LEN=$fLen  CASC_LEN=$cLen SHIFT=$shift INPUT_WINDOW_VSIZE=$fLen"
+                        #echo ${redWindows[@]}
+                        for wSize in "${redWindows[@]}"; do
+                            if [ $wSize -gt $fLen ]
+                            then
+                                #echo "DATA_TYPE=$dType COEFF_TYPE=$cType FIR_LEN=$fLen  CASC_LEN=$cLen SHIFT=$shift"
+                                test_arr[$LINENO]="make all DATA_TYPE=$dType COEFF_TYPE=$cType FIR_LEN=$fLen  CASC_LEN=$cLen SHIFT=$shift INPUT_WINDOW_VSIZE=$wSize"
+                                #test_arr[${#test_arr[*]}]
+                                #echo "wSize $wSize"
+                            fi
+                        done #wSize
+                    done #cLen
+                done #dRate
+            done #iRate
+        done #fLen
+    done #typeI
+fi
+
+# Randomized testing
+if [[ "$*" == *randomized* ]]
+then
+    # read from randomized test file
+    while IFS= read -r line; do
+        test_arr[${#test_arr[*]}]="$line"
+    done < randomized_tests.txt
+fi
+
+# echo "Adding the following args to make commands: ${make_args[@]}"
+# Ensure each test goes into a seperate runmake
+for i in "${!test_arr[@]}"; do
+    # append make args to each make command
+    if [[ ${test_arr[$i]} == make* ]]
+    then
+        test_arr[$i]="${test_arr[$i]} ${make_args[@]}"
+    fi
+    test_arr[$i]="${test_arr[$i]} |& tee runmake_logs/runmake_${i}.log "
+done
+
+makeCmd_raw=()
+otherCmd_raw=()
+
+for i in "${!test_arr[@]}"; do
+    # append make args to each make command
+    if [[ ${test_arr[$i]} == make* ]]; then
+        makeCmd_raw[${#makeCmd_raw[*]}]=${test_arr[$i]}
+    else
+        otherCmd_raw[${#otherCmd_raw[*]}]=${test_arr[$i]}
+    fi
+done
+# for i in "${!makeCmd_raw[@]}"; do
+#     echo ${makeCmd_raw[$i]}
+# done
+
+if [[ "$*" == *-append* ]]
+then
+    verify_tests=0
+    new_test_names=$(python3 $runmakeDir/../common/scripts/populate_params.py $run_type $runmakeDir "${makeCmd_raw[@]}" -append)
+else
+    new_test_names=$(python3 $runmakeDir/../common/scripts/populate_params.py $run_type $runmakeDir "${makeCmd_raw[@]}")
+fi
+multi_params_file=multi_params_$run_type
+
+if [[ $run_type == "jenkins" ]]
+then
+    python3 $runmakeDir/../common/scripts/populate_params.py clear_params $runmakeDir
+    $runmakeDir/runmake.sh -run_type checkin -no_test_run
+    exit_code1=$?
+    $runmakeDir/runmake.sh -run_type qor -no_test_run
+    exit_code2=$?
+    if [[ $exit_code1 -eq 1 || $exit_code2 -eq 1 ]]; then
+        exit 1
+    fi
+    $runmakeDir/runmake.sh -run_type checkin -append -no_test_run -no_test_verify
+    $runmakeDir/runmake.sh -run_type qor -append -no_test_run -no_test_verify
+    multi_params_file=multi_params
+    run_tests=0
+    verify_tests=0
+fi
+
+if [[ $verify_tests == 1 ]]
+then
+    test_lines_string=${!test_arr[@]}
+    echo Verifying $run_type test suite...
+    python3 $runmakeDir/../common/scripts/verify_multi_params.py --ip $(basename $runmakeDir) --multi_params $runmakeDir/$multi_params_file.json --test_lines "$test_lines_string" --gen_test_file --test_suite $run_type
+    exit_code=$?
+    if [[ $exit_code -eq 1 ]]; then
+        exit 1
+    fi
+fi
+
+if [[ $run_tests == 1 ]]
+then
+    timestamp=$(date +"%y%m%d_%H%M")
+    echo "Start of Batch Run ($timestamp)" | tee ./runmake_logs/runmake.log
+    $runmakeDir/../common/scripts/run_batch.sh -func $runmakeDir -params $multi_params_file -batch_suffix $timestamp
+fi

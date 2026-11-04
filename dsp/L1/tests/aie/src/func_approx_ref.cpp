@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,10 @@ void func_approx_ref<TT_DATA,
                 fineData = d_in & fineMask;
                 slopeVal = lutPtr[2 * lutAddr];
                 offsetVal = lutPtr[(2 * lutAddr) + 1];
-                accum = (T_accRef<TT_DATA>)((offsetVal << (TP_FINE_BITS + TP_SHIFT)) + fineData * slopeVal);
+                // Widen before arithmetic: int32 LUT values can overflow a 32-bit intermediate.
+                int64_t offsetAccum = static_cast<int64_t>(offsetVal) * (int64_t{1} << (TP_FINE_BITS + TP_SHIFT));
+                int64_t slopeAccum = static_cast<int64_t>(fineData) * static_cast<int64_t>(slopeVal);
+                accum = (T_accRef<TT_DATA>)(offsetAccum + slopeAccum);
                 roundAcc(TP_RND, TP_SHIFT + TP_FINE_BITS, accum);
                 saturateAcc(accum, TP_SAT);
                 d_out = castAcc(accum);

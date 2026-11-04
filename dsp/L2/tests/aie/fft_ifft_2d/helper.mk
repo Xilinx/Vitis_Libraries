@@ -23,6 +23,7 @@ HELPER_CUR_DIR ?= .
 HELPER_ROOT_DIR ?= ./../../../../
 
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
+STATUS_JSON = ./logs/status_$(UUT_KERNEL)_$(PARAMS).json
 
 TAPYTHON = $(shell find $(XILINX_VITIS)/tps/lnx64/ -maxdepth 1 -type d -name "python-3*" | head -n 1)
 VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3
@@ -81,6 +82,9 @@ NUM_OUTPUTS = $(NUM_INPUTS)
 
 PARAM_MAP = DATA_TYPE_D1 $(DATA_TYPE_D1) DATA_TYPE_D2 $(DATA_TYPE_D2) TWIDDLE_TYPE $(TWIDDLE_TYPE) POINT_SIZE_D1 $(POINT_SIZE_D1)  POINT_SIZE_D2 $(POINT_SIZE_D2) FFT_NIFFT $(FFT_NIFFT) SHIFT $(SHIFT) CASC_LEN $(CASC_LEN) WINDOW_VSIZE_D1 $(WINDOW_VSIZE_D1) WINDOW_VSIZE_D2 $(WINDOW_VSIZE_D2) API_IO $(API_IO) USE_WIDGETS $(USE_WIDGETS) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE) TWIDDLE_MODE $(TWIDDLE_MODE) DATA_OUT_TYPE $(DATA_OUT_TYPE) AIE_VARIANT $(AIE_VARIANT)
 
+# one iteration = (WINDOW_VSIZE_D1*WINDOW_VSIZE_D2)/(POINT_SIZE_D1*POINT_SIZE_D2) 2D matrices
+FRAMES_PER_ITER = $(shell echo $$(( ($(WINDOW_VSIZE_D1) * $(WINDOW_VSIZE_D2)) / ($(POINT_SIZE_D1) * $(POINT_SIZE_D2)) )))
+
 HELPER:= $(HELPER_CUR_DIR)/.HELPER
 
 $(HELPER):s create_input
@@ -119,6 +123,7 @@ get_diff:
 	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(DATA_TYPE_D2) --ssr $(NUM_OUTPUTS) --zip --dual 0 -k $(DYN_PT_HEADER_MODE) -w ${INPUT_WINDOW_VSIZE} --plioWidth 64
 	@tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) $(DIFF_MODE);\
     tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) $(DIFF_MODE)
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py functional_check $(STATUS_JSON) ./logs/diff.txt
 
 get_latency:
 	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT)
@@ -126,7 +131,12 @@ get_latency:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_input_0_0.txt ./data/uut_output_0_0.txt $(STATUS_FILE) $(INPUT_WINDOW_VSIZE) $(NITER)
 
 	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_qor.py -t_in_file T_input_0_0.txt -t_out_file uut_output_0_0.txt -status_file_dir $(STATUS_FILE) -num_of_samples $(INPUT_WINDOW_VSIZE) -niter $(NITER) -casc_len $(CASC_LEN) -aiesim_out_dir ./aiesimulator_output -ip fftMain 
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py qor $(STATUS_JSON) Work $(NITER) $(FRAMES_PER_ITER) T_input_ uut_output_ 64 $(DATA_TYPE_D2) --verbose
+
+get_memory:
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py harvest $(STATUS_JSON) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts Work
 
 get_status:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py init $(STATUS_JSON) UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP) NITER $(NITER)
 

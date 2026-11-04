@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -303,6 +303,7 @@ class dds_mixer_lut_graph : public graph {
                         constexpr(TP_API == 0) {
                             connect<>(in1[ssrIdx], m_ddsKernel[ssrIdx].in[0]);
                             dimensions(m_ddsKernel[ssrIdx].in[0]) = {KINPUT_WINDOW_VSIZE};
+                            conditional_single_buffer<TT_DATA, KINPUT_WINDOW_VSIZE>(m_ddsKernel[ssrIdx].in[0]);
                         }
                     else {
                         connect<stream>(in1[ssrIdx], m_ddsKernel[ssrIdx].in[0]);
@@ -315,6 +316,7 @@ class dds_mixer_lut_graph : public graph {
                         constexpr(TP_API == 0) {
                             connect<>(in2[ssrIdx], m_ddsKernel[ssrIdx].in[1]);
                             dimensions(m_ddsKernel[ssrIdx].in[1]) = {KINPUT_WINDOW_VSIZE};
+                            conditional_single_buffer<TT_DATA, KINPUT_WINDOW_VSIZE>(m_ddsKernel[ssrIdx].in[1]);
                         }
                     else {
                         connect<stream>(in2[ssrIdx], m_ddsKernel[ssrIdx].in[1]);
@@ -340,6 +342,7 @@ class dds_mixer_lut_graph : public graph {
                 constexpr(TP_API == 0) {
                     connect<>(m_ddsKernel[ssrIdx].out[0], out[ssrIdx]);
                     dimensions(m_ddsKernel[ssrIdx].out[0]) = {KINPUT_WINDOW_VSIZE};
+                    conditional_single_buffer<TT_DATA, KINPUT_WINDOW_VSIZE>(m_ddsKernel[ssrIdx].out[0]);
                 }
             else {
                 connect<stream>(m_ddsKernel[ssrIdx].out[0], out[ssrIdx]);

@@ -18,7 +18,7 @@ Software Platform
 
 This library is designed to work with AMD Vitis |trade|, and therefore inherits the system requirements of Vitis and XRT.
 
-Supported operating systems are: RHEL 8.10, 9.6, 9.7, 10.0, and 10.1, Ubuntu 22.04.5 LTS, Ubuntu 24.04.2 LTS, and 24.04.3 LTS, as well as AlmaLinux OS ver. 8.10, 9.6, 9.7, 10.0 and 10.1, Rocky 8.10, 9.6, 9.7, 10.0 and 10.1.
+Supported operating systems are: RHEL 8.10, 9.6, 9.7, 9.8, 10.0, 10.1, and 10.2, Ubuntu 22.04.5 LTS, Ubuntu 24.04.2 LTS, 24.04.3 LTS, and 24.04.4 LTS, Ubuntu 26.04 LTS, as well as AlmaLinux OS ver. 8.10, 9.6, 9.7, 9.8, 10.0, 10.1 and 10.2, Rocky 8.10, 9.6, 9.7, 9.8, 10.0, 10.1 and 10.2.
 
 
 Hardware Platform

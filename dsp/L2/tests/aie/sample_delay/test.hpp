@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,11 @@
 #define UUT_GRAPH sample_delay_graph
 #endif
 
+#ifdef USING_UUT
+#include "sample_delay_native_generated_graph/sample_delay_generated_graph.h"
+#else
 #include QUOTE(UUT_GRAPH.hpp)
+#endif
 
 using namespace adf;
 
@@ -66,8 +70,12 @@ class test_graph : public graph {
         printf("MAX_DELAY      = %d \n", MAX_DELAY);
         namespace dsplib = xf::dsp::aie;
 
-        // sample delay sub-graph
+// sample delay sub-graph
+#ifdef USING_UUT
+        sample_delay_native_generated_graph sampleDelayGraph;
+#else
         dsplib::sample_delay::UUT_GRAPH<DATA_TYPE, WINDOW_VSIZE, PORT_API, MAX_DELAY> sampleDelayGraph;
+#endif
         // Make connections
         std::string filenameIn = QUOTE(INPUT_FILE);
         filenameIn.insert(filenameIn.length() - 4, ("_" + std::to_string(0) + "_0"));
@@ -82,8 +90,8 @@ class test_graph : public graph {
 
 #ifdef USING_UUT
 #if (SINGLE_BUF == 1 && PORT_API == 0) // Single buffer constraint applies for windows implementations
-        single_buffer(sampleDelayGraph.getKernels()[0].in[0]);
-        single_buffer(sampleDelayGraph.getKernels()[0].out[0]);
+        single_buffer(sampleDelayGraph.sample_delay_graph.getKernels()[0].in[0]);
+        single_buffer(sampleDelayGraph.sample_delay_graph.getKernels()[0].out[0]);
         printf("INFO: Single Buffer Constraint applied to input and output buffers of kernel %d.\n");
 
 #endif

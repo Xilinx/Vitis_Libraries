@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,16 @@
 #include "aie_api/utils.hpp" // for vector print function
 #include "device_defs.h"
 #include "fir_ref_utils.hpp"
-#include "single_mul_ref_out_types.hpp"
-#include "single_mul_ref_acc_types.hpp"
+#include "promotions_mul.hpp"
+using xf::dsp::aie::promotions_mul::outType_t;
 
 // determine the output type depending on the input type combinations
 template <typename TT_A, typename TT_B>
 struct vectByte {
-    unsigned val_byteA = sizeof(outTypeMult_t<TT_A, TT_B>);
-    unsigned val_byteB = sizeof(outTypeMult_t<TT_A, TT_B>);
-    unsigned val_byteOut = sizeof(outTypeMult_t<TT_A, TT_B>);
-    unsigned val_byteBuffWin = sizeof(outTypeMult_t<TT_A, TT_B>);
+    unsigned val_byteA = sizeof(outType_t<TT_A, TT_B>);
+    unsigned val_byteB = sizeof(outType_t<TT_A, TT_B>);
+    unsigned val_byteOut = sizeof(outType_t<TT_A, TT_B>);
+    unsigned val_byteBuffWin = sizeof(outType_t<TT_A, TT_B>);
     unsigned val_byteBuffStream = ::std::min(sizeof(TT_A), sizeof(TT_B));
     unsigned int kCaptureDataA = 1;
     unsigned int kCaptureDataB = 1;

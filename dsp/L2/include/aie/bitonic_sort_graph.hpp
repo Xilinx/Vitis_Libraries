@@ -133,12 +133,8 @@ class bitonic_sort_graph : public graph {
     static_assert(fnLog2<TP_DIM>(), "ERROR: TP_DIM must be a power of 2.");
     static_assert(fnLog2<TP_SSR>(), "ERROR: TP_SSR must be a power of 2.");
     static_assert(TP_SSR <= 8, "ERROR: TP_SSR must be less than or equal to 8.");
-    static_assert(
-        kLocalListSize * sizeof(TT_DATA) >= 2 * 256 / 8,
-        "ERROR: TP_DIM * sizeof(TT_DATA) / TP_SSR  must be greater than or equal to 2 * 256 / 8 bytes."); // TODO: Trial
-                                                                                                          // changing
-                                                                                                          // this to
-    // __MIN_READ_WRITE__
+    static_assert(kLocalListSize % fnVecSampleNumMax<TT_DATA>() == 0,
+                  "ERROR: kLocalListSize must be a multiple of number of samples that can fit in a vector.");
     static_assert(
         kLocalListSize * sizeof(TT_DATA) * TP_NUM_FRAMES <= __DATA_MEM_BYTES__,
         "ERROR: TP_DIM * sizeof(TT_DATA) * TP_NUM_FRAMES / TP_SSR must be less than or equal to I/O buffer bytes.");
@@ -149,7 +145,6 @@ class bitonic_sort_graph : public graph {
         "ERROR: TP_CASC_LEN must be less or equal to the number of bitonic stages (log2(TP_DIM)+1)*log2(TP_DIM)/2.");
     static_assert(!(TP_SSR > 1 && TP_NUM_FRAMES > 1),
                   "ERROR: TP_SSR > 1 and TP_NUM_FRAMES > 1 are mutually exclusive.");
-    static_assert(!(TP_SSR > 1 && TP_CASC_LEN > 1), "ERROR: TP_SSR > 1 and TP_CASC_LEN > 1 are mutually exclusive.");
     /**
      * The input data to be sorted.
      **/
@@ -212,6 +207,7 @@ class bitonic_sort_graph : public graph {
             dimensions(merge_sorter.in[0]) = {TP_DIM / 2};
             connect(bitonic_merge_subframe1.out[0], merge_sorter.in[1]);
             dimensions(merge_sorter.in[1]) = {TP_DIM / 2};
+            conditional_single_buffer<TT_DATA, TP_DIM / 2>(merge_sorter.in[0], merge_sorter.in[1]);
         } else { // kStreamCascAPI - streams to in[0] and casc to in[1]
             connect<stream>(bitonic_merge_subframe0.out[0], merge_sorter.in[0]);
             connect<cascade>(bitonic_merge_subframe1.out[0], merge_sorter.in[1]);
@@ -284,6 +280,7 @@ class bitonic_sort_graph<TT_DATA, TP_DIM, TP_NUM_FRAMES, TP_ASCENDING, TP_CASC_L
 
             dimensions(m_kernels[k].in[0]) = {TP_DIM * TP_NUM_FRAMES};
             dimensions(m_kernels[k].out[0]) = {TP_DIM * TP_NUM_FRAMES};
+            conditional_single_buffer<TT_DATA, TP_DIM * TP_NUM_FRAMES>(m_kernels[k].in[0], m_kernels[k].out[0]);
         }
     }; // constructor
 };

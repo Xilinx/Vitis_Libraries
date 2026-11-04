@@ -1,0 +1,3 @@
+Configure a matrix-vector multiply for an AIE1 device: a 64x32 cint16 matrix A (static,
+not reloadable, column-major) times a 32-element cint16 vector B, one frame per call, on
+a single kernel. Shift the result down by 15 bits with round-half-up and saturation.

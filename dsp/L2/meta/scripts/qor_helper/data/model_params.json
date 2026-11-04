@@ -11,10 +11,13 @@
             "TP_CASC_LEN"
         ],
         "dependent": [
-            "THROUGHPUT",
-            "LATENCY",
-            "NUM_AIE",
-            "NUM_BANKS"
+            "first shortest latency (us)",
+            "first critical latency (us)",
+            "steady shortest latency (us)",
+            "steady critical latency (us)",
+            "throughput (MSa/s)",
+            "frame rate (kHz)",
+            "num aie"
         ]
     },
 
@@ -34,10 +37,13 @@
             "TP_PARALLEL_POWER"
         ],
         "dependent": [
-            "THROUGHPUT",
-            "LATENCY",
-            "NUM_AIE",
-            "NUM_BANKS"
+            "first shortest latency (us)",
+            "first critical latency (us)",
+            "steady shortest latency (us)",
+            "steady critical latency (us)",
+            "throughput (MSa/s)",
+            "frame rate (kHz)",
+            "num aie"
         ],
         "restricted": {
             "TP_DYN_PT_SIZE": [0]
@@ -59,10 +65,13 @@
             "TP_SSR"
         ],
         "dependent": [
-            "THROUGHPUT",
-            "LATENCY",
-            "NUM_AIE",
-            "NUM_BANKS"
+            "first shortest latency (us)",
+            "first critical latency (us)",
+            "steady shortest latency (us)",
+            "steady critical latency (us)",
+            "throughput (MSa/s)",
+            "frame rate (kHz)",
+            "num aie"
         ],
         "restricted": {
             "TP_ADD_TILING_A": [0],
@@ -89,10 +98,60 @@
             "TP_NUM_OUTPUTS"
         ],
         "dependent": [
-            "THROUGHPUT",
-            "LATENCY",
-            "NUM_AIE",
-            "NUM_BANKS"
+            "first shortest latency (us)",
+            "first critical latency (us)",
+            "steady shortest latency (us)",
+            "steady critical latency (us)",
+            "throughput (MSa/s)",
+            "frame rate (kHz)",
+            "num aie"
+        ]
+    },
+
+    "outer_tensor": {
+        "categorical": [
+            "AIE_VARIANT",
+            "TT_DATA_A",
+            "TT_DATA_B",
+            "TP_API"
+        ],
+        "ordinal": [
+            "TP_SSR",
+            "TP_NUM_FRAMES",
+            "TP_DIM_A",
+            "TP_DIM_B"
+        ],
+        "dependent": [
+            "first shortest latency (us)",
+            "first critical latency (us)",
+            "steady shortest latency (us)",
+            "steady critical latency (us)",
+            "throughput (MSa/s)",
+            "frame rate (kHz)",
+            "num aie"
+        ]
+    },
+
+    "hadamard": {
+        "categorical": [
+            "AIE_VARIANT",
+            "TT_DATA_A",
+            "TT_DATA_B",
+            "TP_API"
+        ],
+        "ordinal": [
+            "TP_SSR",
+            "TP_DIM",
+            "TP_NUM_FRAMES"
+        ],
+        "dependent": [
+            "first shortest latency (us)",
+            "first critical latency (us)",
+            "steady shortest latency (us)",
+            "steady critical latency (us)",
+            "throughput (MSa/s)",
+            "frame rate (kHz)",
+            "num aie"
         ]
     },
 
@@ -113,10 +172,13 @@
             "TP_NUM_OUTPUTS"
         ],
         "dependent": [
-            "THROUGHPUT",
-            "LATENCY",
-            "NUM_AIE",
-            "NUM_BANKS"
+            "first shortest latency (us)",
+            "first critical latency (us)",
+            "steady shortest latency (us)",
+            "steady critical latency (us)",
+            "throughput (MSa/s)",
+            "frame rate (kHz)",
+            "num aie"
         ],
         "restricted": {
             "TP_USE_RTP_VECTOR_LENGTHS": [0]
@@ -136,10 +198,13 @@
             "TP_CASC_LEN"
         ],
         "dependent": [
-            "THROUGHPUT",
-            "LATENCY",
-            "NUM_AIE",
-            "NUM_BANKS"
+            "first shortest latency (us)",
+            "first critical latency (us)",
+            "steady shortest latency (us)",
+            "steady critical latency (us)",
+            "throughput (MSa/s)",
+            "frame rate (kHz)",
+            "num aie"
         ]
     },
 
@@ -155,10 +220,13 @@
             "TP_GRID_DIM"
         ],
         "dependent": [
-            "THROUGHPUT",
-            "LATENCY",
-            "NUM_AIE",
-            "NUM_BANKS"
+            "first shortest latency (us)",
+            "first critical latency (us)",
+            "steady shortest latency (us)",
+            "steady critical latency (us)",
+            "throughput (MSa/s)",
+            "frame rate (kHz)",
+            "num aie"
         ]
     },
 
@@ -174,11 +242,62 @@
             "TP_CASC_LEN"
         ],
         "dependent": [
-            "THROUGHPUT",
-            "LATENCY",
-            "NUM_AIE",
-            "NUM_BANKS"
+            "first shortest latency (us)",
+            "first critical latency (us)",
+            "steady shortest latency (us)",
+            "steady critical latency (us)",
+            "throughput (MSa/s)",
+            "frame rate (kHz)",
+            "num aie"
         ]
+    },
+
+    "qrd_hh": {
+        "categorical": [
+            "AIE_VARIANT",
+            "TT_DATA"
+        ],
+        "ordinal": [
+            "TP_DIM_ROWS",
+            "TP_DIM_COLS",
+            "TP_NUM_FRAMES",
+            "TP_CASC_LEN"
+        ],
+        "dependent": [
+            "first shortest latency (us)",
+            "first critical latency (us)",
+            "steady shortest latency (us)",
+            "steady critical latency (us)",
+            "throughput (MSa/s)",
+            "frame rate (kHz)",
+            "num aie"
+        ]
+    },
+
+    "svd": {
+        "categorical": [
+            "AIE_VARIANT",
+            "TT_DATA"
+        ],
+        "ordinal": [
+            "TP_DIM_COLS",
+            "TP_DIM_ROWS",
+            "TP_CASC_LEN",
+            "TP_PASSES",
+            "TP_PASSES_SSR"
+        ],
+        "dependent": [
+            "first shortest latency (us)",
+            "first critical latency (us)",
+            "steady shortest latency (us)",
+            "steady critical latency (us)",
+            "throughput (MSa/s)",
+            "frame rate (kHz)",
+            "num aie"
+        ],
+        "restricted": {
+            "TP_DIAG_INV": [0]
+        }
     },
 
     "no_iterate_params": ["TP_SHIFT", "TP_RND", "TP_SAT"]

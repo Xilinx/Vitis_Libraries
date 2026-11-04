@@ -1,0 +1,2 @@
+Configure a real-to-complex widget for an AIE1 device converting int16 input to cint16
+output, 256 samples per window.

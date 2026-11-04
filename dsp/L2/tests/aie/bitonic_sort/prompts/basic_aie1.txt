@@ -1,0 +1,2 @@
+Configure a bitonic sort for an AIE1 device that sorts lists of 512 int16 values into
+ascending order, one list per kernel call, on a single tile (no cascade).

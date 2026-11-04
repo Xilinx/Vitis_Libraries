@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -694,175 +694,257 @@ template <typename TT_DATA_F,
           unsigned int TP_PHASES,
           unsigned int TP_G_LEN,
           unsigned int TP_FUNCT_TYPE,
-          unsigned int streamsPerCore>
+          unsigned int streamsPerCore,
+          unsigned int TP_CASC_LEN>
 INLINE_DECL void gDataReArrange(
     ::aie::vector<TT_DATA_G, (kMaxSamplesInShuffleVec / sizeof(TT_DATA_G))>* g_buff_ptr,
     ::aie::vector<TT_DATA_G, (kMaxSamplesInShuffleVec / sizeof(TT_DATA_G))>* g_rearrange_ptr) {
-    static constexpr int kVsize =
-        kBuffSize64Byte / sizeof(TT_DATA_G); // vector size with 512-bit buffer interms of Bytes
-    static constexpr int kVsize1 =
-        kBuffSize16Byte / sizeof(TT_DATA_G); // vector size with 128-bit buffer interms of Bytes
+    static constexpr int kVsize = kBuffSize64Byte / sizeof(TT_DATA_G); // element count of a 512-bit (64-byte) vector
+    static constexpr int kVsize128Elems =
+        kBuffSize16Byte /
+        sizeof(TT_DATA_G); // element count of a 128-bit (16-byte) vector; used as the G-data read granularity
+    // kHalfVecElems128: half the 128-bit vector element count; threshold for TP_PHASES to select
+    // between the per-phase/lane buffer layout and the ceiling-over-kVsize buffer layout.
+    static constexpr int kHalfVecElems128 = kVsize128Elems / 2;
 
     // Alias for for different size of vectors to define.
     using buff_vector = ::aie::vector<TT_DATA_G, kVsize>;
-    using t_vect = ::aie::vector<TT_DATA_G, kVsize1>;
+    using t_vect = ::aie::vector<TT_DATA_G, kVsize128Elems>;
     using t_VectInt16 = ::aie::vector<int16, (kMinDataBuffLen << 1)>;
     using t_VectCint16 = ::aie::vector<cint16, kMinDataBuffLen>;
 
-    t_vect __aie_dm_resource_a* ppin = (t_vect __aie_dm_resource_a*)g_buff_ptr;
-    t_vect __aie_dm_resource_b* ppout0 = (t_vect __aie_dm_resource_b*)g_rearrange_ptr;
-    t_vect __aie_dm_resource_a* ppin_alias = (t_vect __aie_dm_resource_a*)g_buff_ptr;
+    t_vect __aie_dm_resource_a* gDataReadPtr = (t_vect __aie_dm_resource_a*)g_buff_ptr;
+    t_vect __aie_dm_resource_b* gDataWritePtr = (t_vect __aie_dm_resource_b*)g_rearrange_ptr;
+    t_vect __aie_dm_resource_a* gDataBasePtr = (t_vect __aie_dm_resource_a*)g_buff_ptr;
 
     static constexpr unsigned int kLanes = fnNumOfLanesForMac4Rot<TT_DATA_F>();
-    static constexpr unsigned int reqNumBuff =
-        ((TP_PHASES > ((kBuffSize16Byte >> 1) / sizeof(TT_DATA_G))) ? ((TP_G_LEN / TP_PHASES) / kLanes)
-                                                                    : (CEIL(TP_G_LEN, kVsize) / kVsize));
-    static constexpr unsigned int buffPtrInc = (CEIL(TP_PHASES, kVsize1) / kVsize1);
-    static constexpr unsigned int maxBuffIndx = (TP_G_LEN < kVsize) ? kMaxIndexOf16ByteVector : kMaxIndexOf32ByteVector;
+    // kReqNumBuffers: total buff[] entries needed — one per G-data vector group.
+    // kVsize128Elems/2: threshold = half the 128-bit vector element count; selects the per-phase/lane
+    // formula when TP_PHASES exceeds it, otherwise the ceiling-over-kVsize formula.
+    static constexpr unsigned int kReqNumBuffers =
+        ((TP_PHASES > kHalfVecElems128) ? ((TP_G_LEN / TP_PHASES) / kLanes) : (CEIL(TP_G_LEN, kVsize) / kVsize));
+    // kNumPhaseChunks: number of kVsize128Elems-sized chunks needed to cover one phase's G data;
+    // also the outer-loop count (buffering passes) and the gDataReadPtr stride between phase groups.
+    static constexpr unsigned int kNumPhaseChunks = (CEIL(TP_PHASES, kVsize128Elems) / kVsize128Elems);
+    // kMaxPhaseChunks: compiler hint for chess_loop_range — maximum value kNumPhaseChunks can reach
+    // (= kBuffSize16Byte / 2 = 8, corresponding to the largest supported TP_PHASES / kVsize128Elems).
+    static constexpr unsigned int kMaxPhaseChunks = kBuffSize16Byte >> 1;
+    // kNumSlotsPerBuff: number of kVsize128Elems sub-slots per buff[] entry (loop bound for k).
+    static constexpr unsigned int kNumSlotsPerBuff =
+        (TP_G_LEN < kVsize) ? kMaxIndexOf16ByteVector : kMaxIndexOf32ByteVector;
+    // kHalfNumBuffers: midpoint of buff[]; split-point and loop bound for buffer-pair processing.
+    static constexpr unsigned int kHalfNumBuffers = kReqNumBuffers / 2;
+    // kPairStride = 2: step when indexing shuffledBuff in consecutive pairs (even index = j*2).
+    static constexpr int kPairStride = 2;
+    // kInterleaveFactor = 2: number of coefficient halves in the interleave split; also the stride
+    // in the outGroupIdx permutation and the modulus/divisor used to compute kNumHalfGroups.
+    static constexpr int kInterleaveFactor = 2;
     auto[xbuffOffset, xbuffOffsetHi, ybuffOffset, ybuffOffsetHi, select, xsquare, ysquare] =
         getRearrangeOffsets<TT_DATA_G>(streamsPerCore, TP_PHASES, TP_FUNCT_TYPE);
-    static constexpr unsigned int numrd = (TP_PHASES > TWO_PHASES) ? (TWO_PHASES / streamsPerCore) : 1;
+    // kNumBuffsPerGroup: number of buff[] entries consumed per output group iteration.
+    // For TP_PHASES > 2: TWO_PHASES / streamsPerCore (2 for single-stream, 1 for dual-stream).
+    // For TP_PHASES <= 2: always 1.
+    static constexpr unsigned int kNumBuffsPerGroup = (TP_PHASES > TWO_PHASES) ? (TWO_PHASES / streamsPerCore) : 1;
 
-    buff_vector buff[reqNumBuff];
-    buff_vector aShuffleBuff[reqNumBuff];
+    buff_vector buff[kReqNumBuffers];
+    buff_vector shuffledBuff[kReqNumBuffers];
     t_vect tempGdata;
-    t_VectInt16 vectInt16Buff1, vectInt16Buff2;
-    t_VectCint16 VectCint16;
+    t_VectInt16 int16LowerHalf;       // first (lower) output half from select32 re-interleave split
+    t_VectInt16 int16UpperHalf;       // second (upper) output half from select32 re-interleave split
+    t_VectCint16 cint16ShuffleResult; // temporary result of shuffle16 for complex G-data lane reorder
 
-    for (int i = 0; i < buffPtrInc; i++) chess_prepare_for_pipelining chess_loop_range((kBuffSize16Byte >> 1), ) {
-            ppin = (TP_FUNCT_TYPE == CONV) ? (ppin_alias + i) : (ppin_alias + (buffPtrInc - 1 - i));
+    for (int i = 0; i < kNumPhaseChunks; i++) chess_prepare_for_pipelining chess_loop_range(kMaxPhaseChunks, ) {
+            gDataReadPtr = (TP_FUNCT_TYPE == CONV) ? (gDataBasePtr + i) : (gDataBasePtr + (kNumPhaseChunks - 1 - i));
 
-            for (int j = 0; j < reqNumBuff; j++) {
+            for (int j = 0; j < kReqNumBuffers; j++) {
                 for (int k = 0; k < kMaxIndexOf32ByteVector /* 4 */; k++) {
-                    buff[j].insert(k, *ppin);
-                    ppin = ppin + buffPtrInc;
+                    // Guard: only read valid G samples within TP_G_LEN to avoid
+                    // out-of-bounds memory access on AIE hardware when G_LEN is
+                    // not a multiple of kVsize (e.g. G_LEN=24 with kVsize=16).
+                    if (j * (int)kVsize + k * (int)kVsize128Elems < (int)TP_G_LEN) {
+                        buff[j].insert(k, *gDataReadPtr);
+                    } else {
+                        buff[j].insert(k, t_vect{}); // zero-fill beyond G_LEN
+                    }
+                    // gDataReadPtr is advanced unconditionally to keep the stride constant
+                    // whether or not valid G data was read.  The final gDataReadPtr value
+                    // after the loop is never dereferenced.
+                    gDataReadPtr = gDataReadPtr + kNumPhaseChunks;
                 }
 
                 if (isComplex<TT_DATA_G>()) {
-                    VectCint16 = as_v16cint16(shuffle16(as_v16cint16(buff[j]), 0, xbuffOffset, xbuffOffsetHi));
-                    aShuffleBuff[j] = ::aie::vector_cast<TT_DATA_G>(VectCint16);
+                    cint16ShuffleResult = as_v16cint16(shuffle16(as_v16cint16(buff[j]), 0, xbuffOffset, xbuffOffsetHi));
+                    shuffledBuff[j] = ::aie::vector_cast<TT_DATA_G>(cint16ShuffleResult);
                     if (TP_FUNCT_TYPE == CORR) {
-                        aShuffleBuff[j] =
-                            ::aie::vector_cast<TT_DATA_G>(::aie::conj(::aie::vector_cast<cint16>(aShuffleBuff[j])));
+                        shuffledBuff[j] =
+                            ::aie::vector_cast<TT_DATA_G>(::aie::conj(::aie::vector_cast<cint16>(shuffledBuff[j])));
                     }
                 } else {
-                    vectInt16Buff1 = as_v32int16(select32(select, as_v32int16(buff[j]), 0, xbuffOffset, xbuffOffsetHi,
+                    int16LowerHalf = as_v32int16(select32(select, as_v32int16(buff[j]), 0, xbuffOffset, xbuffOffsetHi,
                                                           xsquare, 0, ybuffOffset, ybuffOffsetHi, ysquare));
-                    aShuffleBuff[j] = ::aie::vector_cast<TT_DATA_G>(vectInt16Buff1);
+                    shuffledBuff[j] = ::aie::vector_cast<TT_DATA_G>(int16LowerHalf);
                 }
             }
 
-            if (((kVsize / TP_PHASES) < kVsize1) && (!(isComplex<TT_DATA_G>()))) {
-                for (int j = 0; j < (reqNumBuff >> 1); j++) {
+            if (((kVsize / TP_PHASES) < kVsize128Elems) && (!(isComplex<TT_DATA_G>()))) {
+                for (int j = 0; j < kHalfNumBuffers; j++) {
                     if (streamsPerCore == SINGLE_STREAM) {
                         if (TP_FUNCT_TYPE == CONV) {
-                            vectInt16Buff1 = as_v32int16(select32(
+                            int16LowerHalf = as_v32int16(select32(
                                 INT16_G_FOUR_PHASE_SINGLE_STREAM_LANE_SELECT_CONV,
-                                as_v64int16(concat(aShuffleBuff[(j << 1)], aShuffleBuff[(j << 1) + 1])), 0,
-                                INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE,
+                                as_v64int16(concat(shuffledBuff[j * kPairStride], shuffledBuff[j * kPairStride + 1])),
+                                0, INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE,
                                 (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE + INT16_G_FOUR_PHASE_SELECT32_OFFSET),
                                 0x3210, kBuffSize32Byte, INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE,
                                 (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE + INT16_G_FOUR_PHASE_SELECT32_OFFSET),
                                 0x3210));
-                            vectInt16Buff2 = as_v32int16(
-                                select32(INT16_G_FOUR_PHASE_SINGLE_STREAM_LANE_SELECT_CONV,
-                                         as_v64int16(concat(aShuffleBuff[(j << 1)], aShuffleBuff[(j << 1) + 1])), 0,
-                                         (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE +
-                                          (INT16_G_FOUR_PHASE_SELECT32_OFFSET << 1)),
-                                         (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE +
-                                          MAC4ROTDELAY * INT16_G_FOUR_PHASE_SELECT32_OFFSET),
-                                         0x3210, kBuffSize32Byte, (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE +
-                                                                   (INT16_G_FOUR_PHASE_SELECT32_OFFSET << 1)),
-                                         (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE +
-                                          MAC4ROTDELAY * INT16_G_FOUR_PHASE_SELECT32_OFFSET),
-                                         0x3210));
+                            int16UpperHalf = as_v32int16(select32(
+                                INT16_G_FOUR_PHASE_SINGLE_STREAM_LANE_SELECT_CONV,
+                                as_v64int16(concat(shuffledBuff[j * kPairStride], shuffledBuff[j * kPairStride + 1])),
+                                0, (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE +
+                                    (INT16_G_FOUR_PHASE_SELECT32_OFFSET << 1)),
+                                (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE +
+                                 MAC4ROTDELAY * INT16_G_FOUR_PHASE_SELECT32_OFFSET),
+                                0x3210, kBuffSize32Byte, (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE +
+                                                          (INT16_G_FOUR_PHASE_SELECT32_OFFSET << 1)),
+                                (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE +
+                                 MAC4ROTDELAY * INT16_G_FOUR_PHASE_SELECT32_OFFSET),
+                                0x3210));
                         } else {
-                            vectInt16Buff1 = as_v32int16(select32(
+                            int16LowerHalf = as_v32int16(select32(
                                 INT16_G_FOUR_PHASE_SINGLE_STREAM_LANE_SELECT_CORR,
-                                as_v64int16(concat(aShuffleBuff[(j << 1)], aShuffleBuff[(j << 1) + 1])), 0,
-                                INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE,
+                                as_v64int16(concat(shuffledBuff[j * kPairStride], shuffledBuff[j * kPairStride + 1])),
+                                0, INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE,
                                 (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE + INT16_G_FOUR_PHASE_SELECT32_OFFSET),
                                 0x3210, kBuffSize32Byte, INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE,
                                 (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE + INT16_G_FOUR_PHASE_SELECT32_OFFSET),
                                 0x3210));
-                            vectInt16Buff2 = as_v32int16(
-                                select32(INT16_G_FOUR_PHASE_SINGLE_STREAM_LANE_SELECT_CORR,
-                                         as_v64int16(concat(aShuffleBuff[(j << 1)], aShuffleBuff[(j << 1) + 1])), 0,
-                                         (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE +
-                                          (INT16_G_FOUR_PHASE_SELECT32_OFFSET << 1)),
-                                         (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE +
-                                          MAC4ROTDELAY * INT16_G_FOUR_PHASE_SELECT32_OFFSET),
-                                         0x3210, kBuffSize32Byte, (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE +
-                                                                   (INT16_G_FOUR_PHASE_SELECT32_OFFSET << 1)),
-                                         (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE +
-                                          MAC4ROTDELAY * INT16_G_FOUR_PHASE_SELECT32_OFFSET),
-                                         0x3210));
+                            int16UpperHalf = as_v32int16(select32(
+                                INT16_G_FOUR_PHASE_SINGLE_STREAM_LANE_SELECT_CORR,
+                                as_v64int16(concat(shuffledBuff[j * kPairStride], shuffledBuff[j * kPairStride + 1])),
+                                0, (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE +
+                                    (INT16_G_FOUR_PHASE_SELECT32_OFFSET << 1)),
+                                (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE +
+                                 MAC4ROTDELAY * INT16_G_FOUR_PHASE_SELECT32_OFFSET),
+                                0x3210, kBuffSize32Byte, (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE +
+                                                          (INT16_G_FOUR_PHASE_SELECT32_OFFSET << 1)),
+                                (INT16_G_FOUR_PHASE_SELECT32_SINGLE_STREAM_BASE +
+                                 MAC4ROTDELAY * INT16_G_FOUR_PHASE_SELECT32_OFFSET),
+                                0x3210));
                         }
                     } else {
                         if (TP_FUNCT_TYPE == CONV) {
-                            vectInt16Buff1 = as_v32int16(select32(
+                            int16LowerHalf = as_v32int16(select32(
                                 INT16_G_FOUR_PHASE_TWO_STREAM_LANE_SELECT_CONV,
-                                as_v64int16(concat(aShuffleBuff[(j << 1)], aShuffleBuff[(j << 1) + 1])), 0,
-                                INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CONV_BASE,
+                                as_v64int16(concat(shuffledBuff[j * kPairStride], shuffledBuff[j * kPairStride + 1])),
+                                0, INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CONV_BASE,
                                 (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CONV_BASE + INT16_G_FOUR_PHASE_SELECT32_OFFSET),
                                 0x3210, kBuffSize32Byte, INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CONV_BASE,
                                 (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CONV_BASE + INT16_G_FOUR_PHASE_SELECT32_OFFSET),
                                 0x1032));
-                            vectInt16Buff2 = as_v32int16(
-                                select32(INT16_G_FOUR_PHASE_TWO_STREAM_LANE_SELECT_CONV,
-                                         as_v64int16(concat(aShuffleBuff[(j << 1)], aShuffleBuff[(j << 1) + 1])), 0,
-                                         (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CONV_BASE +
-                                          (INT16_G_FOUR_PHASE_SELECT32_OFFSET << 1)),
-                                         (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CONV_BASE +
-                                          MAC4ROTDELAY * INT16_G_FOUR_PHASE_SELECT32_OFFSET),
-                                         0x3210, kBuffSize32Byte, (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CONV_BASE +
-                                                                   (INT16_G_FOUR_PHASE_SELECT32_OFFSET << 1)),
-                                         (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CONV_BASE +
-                                          MAC4ROTDELAY * INT16_G_FOUR_PHASE_SELECT32_OFFSET),
-                                         0x1032));
+                            int16UpperHalf = as_v32int16(select32(
+                                INT16_G_FOUR_PHASE_TWO_STREAM_LANE_SELECT_CONV,
+                                as_v64int16(concat(shuffledBuff[j * kPairStride], shuffledBuff[j * kPairStride + 1])),
+                                0, (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CONV_BASE +
+                                    (INT16_G_FOUR_PHASE_SELECT32_OFFSET << 1)),
+                                (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CONV_BASE +
+                                 MAC4ROTDELAY * INT16_G_FOUR_PHASE_SELECT32_OFFSET),
+                                0x3210, kBuffSize32Byte, (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CONV_BASE +
+                                                          (INT16_G_FOUR_PHASE_SELECT32_OFFSET << 1)),
+                                (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CONV_BASE +
+                                 MAC4ROTDELAY * INT16_G_FOUR_PHASE_SELECT32_OFFSET),
+                                0x1032));
                         } else {
-                            vectInt16Buff1 = as_v32int16(select32(
+                            int16LowerHalf = as_v32int16(select32(
                                 INT16_G_FOUR_PHASE_TWO_STREAM_LANE_SELECT_CORR,
-                                as_v64int16(concat(aShuffleBuff[(j << 1)], aShuffleBuff[(j << 1) + 1])), 0,
-                                INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CORR_BASE,
+                                as_v64int16(concat(shuffledBuff[j * kPairStride], shuffledBuff[j * kPairStride + 1])),
+                                0, INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CORR_BASE,
                                 (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CORR_BASE + INT16_G_FOUR_PHASE_SELECT32_OFFSET),
                                 0x1032, kBuffSize32Byte, INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CORR_BASE,
                                 (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CORR_BASE + INT16_G_FOUR_PHASE_SELECT32_OFFSET),
                                 0x3210));
-                            vectInt16Buff2 = as_v32int16(
-                                select32(INT16_G_FOUR_PHASE_TWO_STREAM_LANE_SELECT_CORR,
-                                         as_v64int16(concat(aShuffleBuff[(j << 1)], aShuffleBuff[(j << 1) + 1])), 0,
-                                         (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CORR_BASE +
-                                          (INT16_G_FOUR_PHASE_SELECT32_OFFSET << 1)),
-                                         (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CORR_BASE +
-                                          MAC4ROTDELAY * INT16_G_FOUR_PHASE_SELECT32_OFFSET),
-                                         0x1032, kBuffSize32Byte, (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CORR_BASE +
-                                                                   (INT16_G_FOUR_PHASE_SELECT32_OFFSET << 1)),
-                                         (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CORR_BASE +
-                                          MAC4ROTDELAY * INT16_G_FOUR_PHASE_SELECT32_OFFSET),
-                                         0x3210));
+                            int16UpperHalf = as_v32int16(select32(
+                                INT16_G_FOUR_PHASE_TWO_STREAM_LANE_SELECT_CORR,
+                                as_v64int16(concat(shuffledBuff[j * kPairStride], shuffledBuff[j * kPairStride + 1])),
+                                0, (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CORR_BASE +
+                                    (INT16_G_FOUR_PHASE_SELECT32_OFFSET << 1)),
+                                (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CORR_BASE +
+                                 MAC4ROTDELAY * INT16_G_FOUR_PHASE_SELECT32_OFFSET),
+                                0x1032, kBuffSize32Byte, (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CORR_BASE +
+                                                          (INT16_G_FOUR_PHASE_SELECT32_OFFSET << 1)),
+                                (INT16_G_FOUR_PHASE_SELECT32_TWO_STREAM_CORR_BASE +
+                                 MAC4ROTDELAY * INT16_G_FOUR_PHASE_SELECT32_OFFSET),
+                                0x3210));
                         }
                     }
-                    buff[j] = ::aie::vector_cast<TT_DATA_G>(vectInt16Buff1);
-                    buff[(reqNumBuff >> 1) + j] = ::aie::vector_cast<TT_DATA_G>(vectInt16Buff2);
+                    buff[j] = ::aie::vector_cast<TT_DATA_G>(int16LowerHalf);
+                    buff[kHalfNumBuffers + j] = ::aie::vector_cast<TT_DATA_G>(int16UpperHalf);
                 }
             } else {
-                for (int j = 0; j < reqNumBuff; j++) {
-                    buff[j] = aShuffleBuff[j];
+                for (int j = 0; j < kReqNumBuffers; j++) {
+                    buff[j] = shuffledBuff[j];
                 }
             }
 
-            for (int j = 0; j < reqNumBuff / numrd; j++) {
-                for (int k = 0; k < maxBuffIndx; k++) {
-                    for (int l = 0; l < numrd; l++) {
+            // kValidChunks: actual G-data chunks; kPadChunks: surplus from CEIL() rounding.
+            // CORR reversal would place padding at the front — kUseValidChunkReverse corrects this.
+            static constexpr int kValidChunks = (int)((TP_G_LEN + kVsize128Elems - 1) / kVsize128Elems);
+            static constexpr int kTotalChunks = (int)kReqNumBuffers * (int)kNumSlotsPerBuff;
+            static constexpr int kPadChunks = kTotalChunks - kValidChunks;
+            // Apply reversed-chunk fix only for the CEIL()/kNumBuffsPerGroup==1 path with padding;
+            // the (TP_G_LEN/TP_PHASES)/kLanes path has a different layout and needs no fix.
+            static constexpr bool kUseValidChunkReverse =
+                ((TP_PHASES <= kHalfVecElems128) && (kNumBuffsPerGroup == 1) && (kPadChunks != 0));
+
+            // Group-major/pass-minor chunk ordering ensures each cascade core gets one chunk per pass.
+            // Natural (pass-major) order mis-assigns coefficients when TP_CASC_LEN > TP_PHASES.
+            // Reduces to sequential order when kNumPhaseChunks==1 or kNumGroups==1.
+            static constexpr int kNumGroups = (int)kReqNumBuffers / (int)kNumBuffsPerGroup;
+            static constexpr int kChunksPerGroup = (int)kNumSlotsPerBuff * (int)kNumBuffsPerGroup;
+            // int16: the two interleave halves come from select32 (not a second pass), folding
+            // a factor-of-2 into kNumGroups. Transpose operates over (2, kNumGroups/2) pairs;
+            // identity when TP_CASC_LEN <= TP_PHASES.
+            static constexpr bool kIsHalfBufInterleave =
+                (((int)kVsize / (int)TP_PHASES) < (int)kVsize128Elems) && (!(isComplex<TT_DATA_G>()));
+            // Reordering is valid only when TP_CASC_LEN > TP_PHASES; test TP_CASC_LEN directly —
+            // derived quantities (kNumGroups, kNumPhaseChunks) are unreliable for this check.
+            static constexpr bool kMultiCascPerPhase = (TP_CASC_LEN > TP_PHASES);
+            static constexpr int kNumHalfGroups =
+                (kMultiCascPerPhase && kIsHalfBufInterleave && ((kNumGroups % kInterleaveFactor) == 0))
+                    ? (kNumGroups / kInterleaveFactor)
+                    : 0;
+            for (int j = 0; j < kNumGroups; j++) {
+                // outGroupIdx: output destination group index for writing rearranged G-data chunks.
+                // Equals loop index j when no interleaving is needed (kNumHalfGroups==0).
+                // When kNumHalfGroups > 0, applies a stride-2 permutation of j to interleave
+                // the two coefficient halves correctly across cascade passes.
+                const int outGroupIdx =
+                    (kNumHalfGroups > 0) ? (((j % kNumHalfGroups) * kInterleaveFactor) + (j / kNumHalfGroups)) : j;
+                for (int k = 0; k < kNumSlotsPerBuff; k++) {
+                    for (int l = 0; l < kNumBuffsPerGroup; l++) {
                         if (TP_FUNCT_TYPE == CONV) {
-                            tempGdata = buff[j * numrd + l].template extract<kVsize1>(k);
+                            tempGdata = buff[j * kNumBuffsPerGroup + l].template extract<kVsize128Elems>(k);
+                        } else if (!kUseValidChunkReverse) {
+                            tempGdata = buff[(kReqNumBuffers / kNumBuffsPerGroup - 1 - j) * kNumBuffsPerGroup +
+                                             (kNumBuffsPerGroup - 1 - l)]
+                                            .template extract<kVsize128Elems>((kNumSlotsPerBuff - 1) - k);
                         } else {
-                            tempGdata =
-                                buff[(reqNumBuff / numrd - 1 - j) * numrd + (numrd - 1 - l)].template extract<kVsize1>(
-                                    (maxBuffIndx - 1) - k);
+                            // Reverse over the valid chunks only, so the padding is emitted
+                            // last (as it is for CONV) instead of first.
+                            int outPos = (j * (int)kNumSlotsPerBuff + k) * (int)kNumBuffsPerGroup + l;
+                            int srcChunk = kValidChunks - 1 - outPos;
+                            if (srcChunk < 0) {
+                                tempGdata = t_vect{};
+                            } else {
+                                tempGdata = buff[srcChunk / (int)kNumSlotsPerBuff].template extract<kVsize128Elems>(
+                                    srcChunk % (int)kNumSlotsPerBuff);
+                            }
                         }
-                        *ppout0++ = tempGdata;
+                        const int outChunk =
+                            kMultiCascPerPhase ? (outGroupIdx * ((int)kNumPhaseChunks * kChunksPerGroup) +
+                                                  i * kChunksPerGroup) // transposed
+                                               : (i * (kNumGroups * kChunksPerGroup) + j * kChunksPerGroup); // original
+                        gDataWritePtr[outChunk + k * (int)kNumBuffsPerGroup + l] = tempGdata;
                     }
                 }
             }

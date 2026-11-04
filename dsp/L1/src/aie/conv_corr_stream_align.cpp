@@ -36,8 +36,8 @@ namespace conv_corr {
 
 #if (__HAS_ACCUM_PERMUTES__ == 1)
 
-// conv_corr_stream_align - Output synchronization kernel to remove cascade startup transients in stream-based
-// convolution/correlation
+// conv_corr_stream_align: discards MAC4_ROT startup-transient samples from each per-phase output
+// stream on the first invocation; passes all subsequent samples unchanged to the output port.
 template <typename TT_DATA_F,
           typename TT_DATA_G,
           typename TT_DATA_OUT,
@@ -61,26 +61,25 @@ conv_corr_stream_align<TT_DATA_F, TT_DATA_G, TT_DATA_OUT, TP_F_LEN, TP_G_LEN, TP
         for (unsigned int i = 0; i < (unsigned int)kDiscardVecCount; i++)
             chess_prepare_for_pipelining chess_loop_count(kDiscardVecCount) { readincr_v<kLanes>(inStream); }
 
-        // full-vector pass of first kFirstVecs vectors containing valid samples in first batch from cascade
-        constexpr unsigned int kFirstVecs =
-            (unsigned int)kFirstInvocValidSamples /
-            kLanes; // Number of full vectors of valid samples in first batch from cascade
-        for (unsigned int i = 0; i < kFirstVecs; i++) chess_prepare_for_pipelining chess_loop_count(kFirstVecs) {
+        // Pass the first kFirstInvocVecCount full vectors of valid output samples.
+        constexpr unsigned int kFirstInvocVecCount = (unsigned int)kFirstInvocationValidSamples / kLanes;
+        for (unsigned int i = 0; i < kFirstInvocVecCount; i++)
+            chess_prepare_for_pipelining chess_loop_count(kFirstInvocVecCount) {
                 writeincr(outStream, readincr_v<kLanes>(inStream));
             }
 
-        // scalar pass of remaining kFirstTail samples in first batch from cascade
-        constexpr unsigned int kFirstTail = (unsigned int)kFirstInvocValidSamples %
-                                            kLanes; // Number of remaining valid samples in first batch from cascade
-        for (unsigned int i = 0; i < kFirstTail; i++) chess_prepare_for_pipelining chess_loop_count(kFirstTail) {
+        // Pass the remaining kFirstInvocTailSamples individual samples that did not fill a full vector.
+        constexpr unsigned int kFirstInvocTailSamples = (unsigned int)kFirstInvocationValidSamples % kLanes;
+        for (unsigned int i = 0; i < kFirstInvocTailSamples; i++)
+            chess_prepare_for_pipelining chess_loop_count(kFirstInvocTailSamples) {
                 writeincr(outStream, readincr(inStream));
             }
 
         doInit = 0;
 
     } else {
-        // Normal pass-through: forward all kSamplesPerInvoc samples
-        constexpr unsigned int kNormalVecs = kSamplesPerInvoc / kLanes;
+        // Normal pass-through: forward all kSamplesPerInvocation samples
+        constexpr unsigned int kNormalVecs = kSamplesPerInvocation / kLanes;
         for (unsigned int i = 0; i < kNormalVecs; i++) chess_prepare_for_pipelining chess_loop_count(kNormalVecs) {
                 writeincr(outStream, readincr_v<kLanes>(inStream));
             }

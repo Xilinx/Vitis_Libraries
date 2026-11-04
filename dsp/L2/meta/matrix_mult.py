@@ -757,6 +757,62 @@ def validate_TP_SAT(args):
 
 
 #######################################################
+########### TP_CONJ_A Updater and Validator ###########
+#######################################################
+def update_TP_CONJ_A(args):
+    TT_DATA_A = args["TT_DATA_A"]
+    param_dict = {}
+    param_dict.update({"name": "TP_CONJ_A"})
+    # Conjugation is only meaningful for complex A; for real types only 0 is legal
+    if fn_is_complex(TT_DATA_A):
+        param_dict.update({"enum": [0, 1]})
+    else:
+        param_dict.update({"enum": [0]})
+    return param_dict
+
+
+def validate_TP_CONJ_A(args):
+    TT_DATA_A = args["TT_DATA_A"]
+    TP_CONJ_A = args["TP_CONJ_A"]
+    param_dict = {}
+    param_dict.update({"name": "TP_CONJ_A"})
+    if not fn_is_complex(TT_DATA_A) and TP_CONJ_A != 0:
+        param_dict.update({"is_valid": False,
+                           "err_message": f"TP_CONJ_A must be 0 when TT_DATA_A ({TT_DATA_A}) is a real type."})
+    else:
+        param_dict.update({"is_valid": True})
+    return param_dict
+
+
+#######################################################
+########### TP_CONJ_B Updater and Validator ###########
+#######################################################
+def update_TP_CONJ_B(args):
+    TT_DATA_B = args["TT_DATA_B"]
+    param_dict = {}
+    param_dict.update({"name": "TP_CONJ_B"})
+    # Conjugation is only meaningful for complex B; for real types only 0 is legal
+    if fn_is_complex(TT_DATA_B):
+        param_dict.update({"enum": [0, 1]})
+    else:
+        param_dict.update({"enum": [0]})
+    return param_dict
+
+
+def validate_TP_CONJ_B(args):
+    TT_DATA_B = args["TT_DATA_B"]
+    TP_CONJ_B = args["TP_CONJ_B"]
+    param_dict = {}
+    param_dict.update({"name": "TP_CONJ_B"})
+    if not fn_is_complex(TT_DATA_B) and TP_CONJ_B != 0:
+        param_dict.update({"is_valid": False,
+                           "err_message": f"TP_CONJ_B must be 0 when TT_DATA_B ({TT_DATA_B}) is a real type."})
+    else:
+        param_dict.update({"is_valid": True})
+    return param_dict
+
+
+#######################################################
 ################## Helper Functions ###################
 #######################################################
 def getTilingScheme(typeA, typeB, AIE_VARIANT):
@@ -899,6 +955,8 @@ def generate_graph(graphname, args):
     TP_CASC_LEN = args["TP_CASC_LEN"]
     TP_SSR = args["TP_SSR"]
     TT_OUT_DATA = args["TT_OUT_DATA"]
+    TP_CONJ_A = args["TP_CONJ_A"]
+    TP_CONJ_B = args["TP_CONJ_B"]
 
     code = f"""
 class {graphname} : public adf::graph {{
@@ -925,7 +983,9 @@ public:
     {TP_CASC_LEN}, // TP_CASC_LEN
     {TP_SAT}, // TP_SAT
     {TP_SSR}, // TP_SSR
-    {TT_OUT_DATA} // TT_OUT_DATA
+    {TT_OUT_DATA}, // TT_OUT_DATA
+    {TP_CONJ_A}, // TP_CONJ_A
+    {TP_CONJ_B} // TP_CONJ_B
   > mmult;
 
   {graphname}() : mmult() {{

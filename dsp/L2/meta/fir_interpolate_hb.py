@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -982,6 +982,15 @@ def generate_graph(graphname, args):
 
     taps = sr_asym.fn_get_taps_vector(TT_COEFF, coeff_list)
     constr_args_str = f"taps" if TP_USE_COEFF_RELOAD == 0 else ""
+    taps_ctor_str = (
+        f"""
+    // Constructor using taps passed as an argument
+    {graphname}(const std::vector<{TT_COEFF}>& taps) : filter(taps) {{
+        create_connections();
+    }}"""
+            if TP_USE_COEFF_RELOAD == 0
+            else "// No taps-argument constructor: TP_USE_COEFF_RELOAD is enabled"
+    )
     dual_ip_declare_str = (
         f"ssr_port_array<input> in2;" if TP_DUAL_IP == 1 else "// No dual input"
     )
@@ -1073,7 +1082,12 @@ public:
 
   > filter;
 
+  {taps_ctor_str}
+  // Constructor using internal taps
   {graphname}() : filter({constr_args_str}) {{
+    create_connections();
+  }}
+  void create_connections() {{
     adf::kernel *filter_kernels = filter.getKernels();
 
     for (int i=0; i < TP_SSR; i++) {{

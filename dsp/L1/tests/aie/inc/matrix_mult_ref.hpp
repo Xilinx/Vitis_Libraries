@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,35 @@ namespace matrix_mult {
 #define COL_MAJOR 1
 #endif // COL_MAJOR
 
+// Helper: conjugate an element. For real types this is a no-op; for complex
+// types it negates the imaginary part.  Used to implement TP_CONJ_B.
+template <typename T>
+inline T conjElm(T val) {
+    return val;
+} // real types: identity
+
+template <>
+inline cint16 conjElm<cint16>(cint16 val) {
+    cint16 r;
+    r.real = val.real;
+    r.imag = -val.imag;
+    return r;
+}
+template <>
+inline cint32 conjElm<cint32>(cint32 val) {
+    cint32 r;
+    r.real = val.real;
+    r.imag = -val.imag;
+    return r;
+}
+template <>
+inline cfloat conjElm<cfloat>(cfloat val) {
+    cfloat r;
+    r.real = val.real;
+    r.imag = -val.imag;
+    return r;
+}
+
 //-----------------------------------------------------------------------------------------------------
 // Single Rate class
 template <typename TT_DATA_A,
@@ -63,7 +92,9 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_B_LEADING = COL_MAJOR,
           unsigned int TP_DIM_OUT_LEADING = ROW_MAJOR,
           unsigned int TP_INPUT_WINDOW_VSIZE_A = TP_DIM_A* TP_DIM_AB,
-          unsigned int TP_INPUT_WINDOW_VSIZE_B = TP_DIM_B* TP_DIM_AB>
+          unsigned int TP_INPUT_WINDOW_VSIZE_B = TP_DIM_B* TP_DIM_AB,
+          unsigned int TP_CONJ_A = 0,
+          unsigned int TP_CONJ_B = 0>
 class matrix_mult_ref {
    public:
     // Constructor

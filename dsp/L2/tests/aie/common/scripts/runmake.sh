@@ -30,6 +30,7 @@ run_tests=1
 ignore_fails=""
 no_test_verify=""
 static_default=""
+nolsf=""
 random_count=""
 
 while [[ $# -gt 0 ]]; do
@@ -44,7 +45,7 @@ run_type options:
   qor        : Run the qor suite (test_suites/qor.txt) and run tests
   suite      : Run the named suite in test_suites/<suite>.txt and run tests
   /path/to/suite.txt : Run a custom suite file by absolute or relative path and run tests
-  jenkins    : Prepare multi_params.json for both checkin and qor suites, does NOT run tests
+  jenkins    : Prepare multi_params.json for checkin, qor, and (if present) prompt suites, does NOT run tests
 
 Options:
   -ip_path <path>         Set IP path
@@ -53,6 +54,7 @@ Options:
   -ignore_fails           Ignore invalid tests, continue with valid ones
   -no_test_verify         Disable test verification
   -static_default         Enable static default mode
+  -nolsf                  Run tests on the local machine instead of submitting to LSF
 EOF
             exit 0
             ;;
@@ -70,6 +72,8 @@ EOF
             no_test_verify="--no_test_verify"; shift;;
         -static_default)
             static_default="--static_default"; shift;;
+        -nolsf)
+            nolsf="-nolsf"; shift;;
         *)
             shift;;
     esac
@@ -95,7 +99,7 @@ if [[ -n "$random_count" ]]; then
     qor_helper_dir="$runmake_dir/../../../../meta/scripts/qor_helper"
     current_dir=$(pwd)
     cd "$qor_helper_dir"
-    output=$(python generate_database.py -ip "$func" --num_generated_configs "$random_count" --runmake 1 2>&1)
+    output=$(python generate_database.py -ip "$func" --num_generated_configs "$random_count" --runmake --blue 2>&1)
     exit_status=$?
     cd "$current_dir"
     echo "$output" | tee /dev/tty
@@ -127,5 +131,5 @@ if [[ $run_tests == 1 ]]; then
     timestamp=$(date +"%y%m%d_%H%M")
     echo "Start of Batch Run ($timestamp)" | tee -a "$logfile"
     json_name=$(basename "$json_file" .json)
-    $runmake_dir/run_batch.sh -func $pathToLibElem -params "$json_name" -batch_suffix "$timestamp"
+    $runmake_dir/run_batch.sh -func $pathToLibElem -params "$json_name" -batch_suffix "$timestamp" $nolsf
 fi

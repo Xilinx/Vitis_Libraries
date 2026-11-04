@@ -42,27 +42,15 @@ namespace conv_corr {
 #if (__HAS_ACCUM_PERMUTES__ == 1)
 
 // ---------------------------------------------------------------------------
-// Stream Output Alignment Kernel
+// AIE-1 stream output alignment kernel for conv/corr.
+// Discards kStartSampleUUT MAC4_ROT startup-transient samples from each per-phase
+// output stream on the first invocation; forwards all subsequent samples unchanged.
 //
-// Discards the MAC4_ROT pipeline startup-transient samples from each
-// per-phase conv_corr UUT output stream so that only valid, aligned samples
-// are forwarded to the graph output port.
-//
-// UUT startup-transient discard formula:
-//
-//   streams_per_core = (TP_G_LEN > (kMuls * TP_PHASES) / 2) ? 1 : 2
-//   phase_incr       = TP_PHASES / streams_per_core
-//   delay_offset     = MAC4ROTDELAY * TP_PHASES * (phase_incr - 1)
-//
-//   casc_delay_last  = kCascDelay of the final cascade kernel
-//                    = (MAC4ROTDELAY - kMacsPerCore*kPoints*kDataBuffLenFactor)
-//                      * (kLastKernelPos >> (kPhaseIncr-1))
-//                      + MAC4ROTDELAY * ((kLastKernelPos >> (kPhaseIncr-1)) - 1)
-//                        * (kPhaseIncr-1)
-//                      + MAC4ROTDELAY * (kLastKernelPos & (kPhaseIncr-1))
-//   (all unsigned arithmetic; negative delays wrap as UINT_MAX+1-|delay|)
-//
-//   kStartSampleUUT  = (TP_G_LEN + delay_offset) / TP_PHASES + casc_delay_last
+// kStartSampleUUT = (G_LEN + delay_offset) / PHASES + int32(casc_delay_last)
+//   delay_offset    = MAC4ROTDELAY * PHASES * (phase_incr - 1)
+//   casc_delay_last = 0 for CASC_LEN=1 (→ kStart=G_LEN);
+//                   = uint32(kCascDelayComp + kPhaseDelayComp) for CASC_LEN>1
+//                     (uint32 wrap encodes the signed correction)
 // ---------------------------------------------------------------------------
 template <typename TT_DATA_F,
           typename TT_DATA_G,
@@ -73,74 +61,77 @@ template <typename TT_DATA_F,
           unsigned int TP_CASC_LEN>
 class conv_corr_stream_align {
    private:
-    static constexpr unsigned int kLanes =
-        fnNumOfLanesForMac4Rot<TT_DATA_F>(); // Number of lanes in MAC4_ROT intrinsic (always 4 for AIE-1)
-    static constexpr unsigned int kMuls =
-        getNumofMULs<TT_DATA_F, TT_DATA_G>();               // Number of multiplications per MAC4_ROT operation
-    static constexpr unsigned int kPoints = kMuls / kLanes; // Number of points per MAC4_ROT operation
+    static constexpr unsigned int kLanes = fnNumOfLanesForMac4Rot<TT_DATA_F>(); // MAC4_ROT lane count (= 4 on AIE-1)
+    static constexpr unsigned int kMuls = getNumofMULs<TT_DATA_F, TT_DATA_G>(); // multiplications per MAC4_ROT
+    static constexpr unsigned int kPoints = kMuls / kLanes;                     // G-data points per lane per MAC4_ROT
 
-    // Threshold for determining if G_LEN requires 1 or 2 streams per core
-    static constexpr unsigned int kStreamPerCoreVar = (kMuls * TP_PHASES) >> 1;
+    // TP_G_LEN threshold: single stream per core when exceeded, two streams otherwise.
+    static constexpr unsigned int kSingleStreamThreshold = (kMuls * TP_PHASES) >> 1;
 
-    // Number of output streams per core (1 or 2)
-    static constexpr unsigned int kStreamsPerCore = (TP_G_LEN > kStreamPerCoreVar) ? 1u : kMaxNumOfStreams;
+    // Output streams per core: 1 (large G fills single-stream bandwidth) or 2 (small G).
+    static constexpr unsigned int kStreamsPerCore = (TP_G_LEN > kSingleStreamThreshold) ? 1u : kMaxNumOfStreams;
 
-    // Phase increment between consecutive outputs from the same core
+    // Phases processed per core pass (= TP_PHASES / kStreamsPerCore).
     static constexpr int kPhaseIncr = static_cast<int>(TP_PHASES) / static_cast<int>(kStreamsPerCore);
 
-    // Phase increment minus 1 (used in delay calculations)
-    static constexpr int kPhaseIncr_m1 = kPhaseIncr - 1;
+    // Phase increment minus 1; used as multiplier and bit-mask in cascade delay formulas.
+    static constexpr int kPhaseIncrMinusOne = kPhaseIncr - 1;
 
-    // UUT startup delay offset based on phase increment
-    static constexpr int kDelayOffset = static_cast<int>(MAC4ROTDELAY) * static_cast<int>(TP_PHASES) * kPhaseIncr_m1;
+    // Startup delay offset: MAC4ROTDELAY * PHASES * (kPhaseIncr - 1).
+    // For CASC_LEN > PHASES, the extra broadcast latency shifts only the REF window (handled in Tcl).
+    static constexpr int kDelayOffset =
+        static_cast<int>(MAC4ROTDELAY) * static_cast<int>(TP_PHASES) * kPhaseIncrMinusOne;
 
-    // Total multiplications across all cascade kernels and phases
+    // Total MACs across all cascade kernels and phases; used to derive per-core G-tap count.
     static constexpr unsigned int kMaxMuls = kMuls * TP_CASC_LEN * TP_PHASES;
 
-    // Number of MAC operations per core per stream
+    // MAC4_ROT operations per core per stream: CEIL(G_LEN, kMaxMuls) / kMaxMuls groups of G taps.
     static constexpr unsigned int kMacsPerCoreStream = CEIL(TP_G_LEN, kMaxMuls) / kMaxMuls;
 
-    // Position index of the last cascade kernel (0-based)
+    // 0-based index of the last cascade kernel; when 0 (CASC_LEN=1), kCascDelayLast=0.
     static constexpr unsigned int kLastKernelPos = TP_CASC_LEN - 1;
 
-    // Cascade delay component (uses unsigned wrap for negative delays)
+    // Cascade delay component for the last kernel; uint32 wrap represents a signed correction
+    // (negative values wrap as UINT_MAX+1-|val|, reinterpreted as int32 in kStartSampleUUT).
     static constexpr unsigned int kCascDelayComp = (MAC4ROTDELAY - ((kMacsPerCoreStream * kPoints) << kShiftFactor2)) *
-                                                   (kLastKernelPos >> static_cast<unsigned int>(kPhaseIncr_m1));
+                                                   (kLastKernelPos >> getLog2<static_cast<unsigned int>(kPhaseIncr)>());
 
-    // Per-phase delay component of the last cascade kernel
+    // Per-phase MAC4_ROT latency of the last cascade kernel: inter-phase + intra-phase terms.
     static constexpr unsigned int kPhaseDelayComp =
-        MAC4ROTDELAY * ((kLastKernelPos >> static_cast<unsigned int>(kPhaseIncr_m1)) - 1u) *
-            static_cast<unsigned int>(kPhaseIncr_m1) +
-        MAC4ROTDELAY * (kLastKernelPos & static_cast<unsigned int>(kPhaseIncr_m1));
+        MAC4ROTDELAY * ((kLastKernelPos >> getLog2<static_cast<unsigned int>(kPhaseIncr)>()) - 1u) *
+            static_cast<unsigned int>(kPhaseIncrMinusOne) +
+        MAC4ROTDELAY * (kLastKernelPos & static_cast<unsigned int>(kPhaseIncrMinusOne));
 
-    // Total delay of the last cascade kernel
+    // Total last-kernel pipeline delay: 0 for CASC_LEN=1 (kStartSampleUUT=G_LEN, REF trimmed to
+    // F*NITER-G_LEN in Tcl). CASC_LEN>1: uint32(kCascDelayComp + kPhaseDelayComp).
     static constexpr unsigned int kCascDelayLast = (kLastKernelPos == 0) ? 0u : (kCascDelayComp + kPhaseDelayComp);
 
-    // Initialization flag: 1 = discard startup transients, 0 = forward all samples
+    // Flag: 1 on first invocation (discard startup transients), 0 on all subsequent invocations.
     int doInit = 1;
 
    public:
-    // Number of startup-transient samples to discard from each per-phase UUT stream
+    // Startup-transient samples to discard per per-phase stream on first invocation.
+    // = (G_LEN + kDelayOffset) / PHASES + int32(kCascDelayLast).
     static constexpr int kStartSampleUUT =
         (static_cast<int>(TP_G_LEN) + kDelayOffset) / static_cast<int>(TP_PHASES) + static_cast<int>(kCascDelayLast);
 
-    // Number of samples produced per kernel invocation (F samples split across phases)
-    static constexpr unsigned int kSamplesPerInvoc = TP_F_LEN / TP_PHASES;
+    // Output samples per per-phase UUT kernel per invocation (= TP_F_LEN / TP_PHASES).
+    static constexpr unsigned int kSamplesPerInvocation = TP_F_LEN / TP_PHASES;
 
-    // Number of valid samples remaining in first invocation after startup discard
-    static constexpr int kFirstInvocValidSamples = static_cast<int>(kSamplesPerInvoc) - kStartSampleUUT;
+    // Valid samples remaining in the first invocation after discarding kStartSampleUUT transients (must be >= 0).
+    static constexpr int kFirstInvocationValidSamples = static_cast<int>(kSamplesPerInvocation) - kStartSampleUUT;
 
-    // Number of full vectors to discard from startup transient
+    // Full kLanes-wide vectors to discard from the startup transient (maximises read throughput).
     static constexpr int kDiscardVecCount = kStartSampleUUT / static_cast<int>(kLanes);
 
-    // Number of remaining samples to discard after vector-aligned discard
+    // Remaining samples to discard element-by-element after the vector-aligned discard (= kStartSampleUUT % kLanes).
     static constexpr int kDiscardRemainder = kStartSampleUUT % static_cast<int>(kLanes);
 
     conv_corr_stream_align() {
         static_assert(kStartSampleUUT >= 0,
                       "conv_corr_stream_align: kStartSampleUUT is negative – "
                       "check TP_CASC_LEN / TP_PHASES / TP_G_LEN combination.");
-        static_assert(kFirstInvocValidSamples >= 0,
+        static_assert(kFirstInvocationValidSamples >= 0,
                       "conv_corr_stream_align: startup transient exceeds one invocation "
                       "(kStartSampleUUT > TP_F_LEN/TP_PHASES). Increase TP_F_LEN or "
                       "reduce TP_G_LEN.");

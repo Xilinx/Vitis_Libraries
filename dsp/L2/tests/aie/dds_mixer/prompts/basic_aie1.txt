@@ -1,0 +1,4 @@
+Configure a DDS mixer for an AIE1 device in mixer mode 1 (DDS mixed with one cint16 input
+stream), buffer I/O, SSR 1, 512 samples per iteration, static phase increment of
+0x10000000 and zero initial phase offset, no runtime phase reload, round-half-up and
+saturation.

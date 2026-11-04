@@ -27,6 +27,7 @@ SEED_DATA_F ?= 0
 USE_RTP_VECTOR_LENGTHS ?= 0
 ceil = $(shell echo $$(((($1 + $2 - 1)/ $2) * $2)))
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
+STATUS_JSON = ./logs/status_$(UUT_KERNEL)_$(PARAMS).json
 
 PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) DATA_F $(DATA_F) DATA_G $(DATA_G) DATA_OUT $(DATA_OUT) FUNCT_TYPE $(FUNCT_TYPE) COMPUTE_MODE $(COMPUTE_MODE) F_LEN $(F_LEN) G_LEN $(G_LEN) SHIFT $(SHIFT) API_IO $(API_IO) RND $(RND) SAT $(SAT) NUM_FRAMES $(NUM_FRAMES) CASC_LEN $(CASC_LEN) PHASES $(PHASES) USE_RTP_VECTOR_LENGTHS $(USE_RTP_VECTOR_LENGTHS)
 
@@ -284,6 +285,7 @@ get_diff:
 		tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/conv_corr/align_ref_stream_output.tcl $(REF_SIM_FILE) $(UUT_SIM_FILE) $(PHASES) $(CASC_LEN) $(REF_F_LEN) $(G_LEN) $(DATA_G) ; \
 	fi
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl $(UUT_SIM_FILE) $(REF_SIM_FILE) ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) PERCENT
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py functional_check $(STATUS_JSON) ./logs/diff.txt
 
 get_latency:
 	@sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT);\
@@ -291,9 +293,14 @@ get_latency:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_inData_F_0.txt ./data/uut_output_0_0.txt $(STATUS_FILE) $(F_LEN) $(NITER_UUT)
 
 	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_qor.py -t_in_file T_inData_F_0.txt -t_out_file uut_output_0_0.txt -status_file_dir $(STATUS_FILE) -num_of_samples $(F_LEN) -niter $(NITER_UUT) -casc_len $(CASC_LEN) -aiesim_out_dir ./aiesimulator_output -ip conv_corr 
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py qor $(STATUS_JSON) Work $(NITER) $(NUM_FRAMES) T_inData_F_ uut_output_ 64 $(DATA_OUT) --verbose
+
+get_memory:
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py harvest $(STATUS_JSON) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts Work
 
 get_status:
 	@tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP) SINGLE_BUF $(SINGLE_BUF)
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py init $(STATUS_JSON) UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP) NITER $(NITER)
 
 cleanup:
 	make cleanall

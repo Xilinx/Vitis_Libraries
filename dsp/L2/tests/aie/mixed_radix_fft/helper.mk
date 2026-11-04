@@ -45,6 +45,7 @@ CC_TOLERANCE   ?= 0.05  # TODO a -1 is present in the ref output (dynamic dft re
 DATA_DYN_PT_SIZE = 0
 
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
+STATUS_JSON = ./logs/status_$(UUT_KERNEL)_$(PARAMS).json
 PT_SIZE_PWR    = 4
 
 ifeq ($(AIE_VARIANT), 1)
@@ -90,6 +91,8 @@ ifeq ($(DYN_PT_SIZE), 1)
 endif
 
 PLIO_WIDTH  = 64
+
+FRAMES_PER_ITER = $(shell echo $$(( $(WINDOW_VSIZE) / $(POINT_SIZE) )))
 
 PARAM_MAP = DATA_TYPE $(DATA_TYPE) TWIDDLE_TYPE $(TWIDDLE_TYPE) POINT_SIZE $(POINT_SIZE) FFT_NIFFT $(FFT_NIFFT) SHIFT $(SHIFT) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE) WINDOW_VSIZE $(WINDOW_VSIZE) CASC_LEN $(CASC_LEN) API_IO $(API_IO) DYN_PT_SIZE $(DYN_PT_SIZE) AIE_VARIANT $(AIE_VARIANT)
 
@@ -145,15 +148,22 @@ get_diff:
 		tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/mixed_radix_fft/output_post_proc.tcl $(HELPER_CUR_DIR)/data/uut_output.txt $(WINDOW_VSIZE) $(NITER) $(POINT_SIZE) $(HELPER_CUR_DIR)/header_pointsizes.txt $(DATA_TYPE) 64 ;\
 	fi ;\
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) $(DIFF_MODE)
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py functional_check $(STATUS_JSON) ./logs/diff.txt
 
 
 get_latency:
 	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT)
 
 	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_qor.py -t_in_file T_input_0_0.txt -t_out_file uut_output_0_0.txt -status_file_dir $(STATUS_FILE) -num_of_samples $(WINDOW_VSIZE) -niter $(NITER) -casc_len $(CASC_LEN) -aiesim_out_dir ./aiesimulator_output -ip mixed_radix_
+	# one iteration = WINDOW_VSIZE/POINT_SIZE point-size frames
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py qor $(STATUS_JSON) Work $(NITER) $(FRAMES_PER_ITER) T_input_ uut_output_ $(PLIO_WIDTH) $(DATA_TYPE) --verbose
+
+get_memory:
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py harvest $(STATUS_JSON) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts Work
 
 get_status:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP) SINGLE_BUF $(SINGLE_BUF)
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py init $(STATUS_JSON) UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP) NITER $(NITER)
 
 cleanup:
 	make cleanall

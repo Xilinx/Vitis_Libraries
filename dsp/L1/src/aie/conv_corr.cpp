@@ -83,48 +83,50 @@ conv_corr<TT_DATA_F,
     set_sat_mode<TP_SAT>(); //  Saturation to avoid the overflow issue.
 
     using T_accum = T_acc_ConCor<TT_DATA_F, TT_DATA_G>;
-    using T_buff_Xbuff = T_InOut_Y_buff<TT_DATA_F>;            // Y_REG_BITS buffer for X Reg.
-    using T_buff_Zbuff = T_InOut_W_buff<TT_DATA_G>;            // W_REG_BITS buffer for W Reg
-    using T_buff_FSig = T_InOut_W_buff<TT_DATA_F>;             // W_REG_BITS buffer for reading F Data
-    using T_buff_GSig = T_InOut_W_buff<TT_DATA_G>;             // W_REG_BITS buffer for reading G Data
-    using dataVecOut_t = ::aie::vector<TT_DATA_OUT, m_kLanes>; // Output vector based on output data type and lanes
-    T_accum acc;                                               // Declaration of Accumulator
-    T_buff_Xbuff xbuff;                                        // Declaration of xbuff using X(1024b) Reg.
-    T_buff_Zbuff zbuff;                                        // Declaration of zbuff using W(256b) Reg.
-    dataVecOut_t dataVecOut; // Declaration of Output Vector to store results into Out buffer.
+    using T_buff_Xbuff = T_InOut_Y_buff<TT_DATA_F>;            // 1024-bit Y/X register buffer for F signal
+    using T_buff_Zbuff = T_InOut_W_buff<TT_DATA_G>;            // 256-bit W register buffer for G signal
+    using T_buff_FSig = T_InOut_W_buff<TT_DATA_F>;             // 256-bit W register buffer for F data reads
+    using T_buff_GSig = T_InOut_W_buff<TT_DATA_G>;             // 256-bit W register buffer for G data reads
+    using dataVecOut_t = ::aie::vector<TT_DATA_OUT, m_kLanes>; // Output vector type
+    T_accum acc;                                               // MAC accumulator
+    T_buff_Xbuff xbuff;                                        // 1024-bit X register buffer for F signal
+    T_buff_Zbuff zbuff;                                        // 256-bit W register buffer for G signal
+    dataVecOut_t dataVecOut;                                   // Output vector for conv/corr results
     dataVecOut_t dataOut =
-        ::aie::zeros<TT_DATA_OUT, m_kLanes>(); // Declaration of Output Vector to store results after masking.
+        ::aie::zeros<TT_DATA_OUT, m_kLanes>(); // Zero vector for partial-lane masking on last output vector
 
-    constexpr unsigned int DataStepX = 1;                       // Initilization of slidingmul parameter i.e. DataStepX
-    constexpr unsigned int DataStepZ = 1;                       // Initilization of slidingmul parameter i.e. DataStepZ
-    constexpr unsigned int DataStepY = 1;                       // Initilization of slidingmul parameter i.e. DataStepY
-    constexpr unsigned int Lanes = m_kLanes;                    // Num of Lanes
-    constexpr unsigned int Points = m_kPoints;                  // Num of Points
-    constexpr unsigned int kFLoadbits = getLog2<m_kVecLoadF>(); // No of bits for FLoad
-    constexpr unsigned int kAccumLen = ROUND(TP_G_LEN, m_kVecLoadG);               // Len. of Accumulator
-    constexpr unsigned int kInLoopLen = ROUND(m_kVecLoadF, m_kPoints);             // In loop Length
-    constexpr unsigned int kGandFLoadRatio = FLOOR(m_kVecLoadG, m_kVecLoadF);      // Ratio of G load to F Load
-    constexpr unsigned int kLoopCount = (CEIL(m_kLoopCount, m_kLanes) / m_kLanes); // Loopcount
-    constexpr unsigned int kDataLoadofF = (kMaxBytesLoadOnAie / sizeof(TT_DATA_F));
-    constexpr unsigned int kDataLoadofG = (kMaxBytesLoadOnAie / sizeof(TT_DATA_G));
-    constexpr unsigned int kFrameoffsetF = (m_kPaddedLenData / kDataLoadofF);        // Offset of F ptr
-    constexpr unsigned int kFrameoffsetG = (TP_G_LEN / kDataLoadofG);                // Offset of F ptr
-    constexpr unsigned int kIncrOffsetGSig = ((TP_G_LEN / kDataLoadofG) - 1);        // Offset to increment G Sig
-    constexpr unsigned int kPaddedVecLoopCnt = ROUND(m_kPaddedLenData, m_kVecLoadF); // Loop count for padded vector
+    constexpr unsigned int DataStepX = 1;                       // sliding_mul data step X (stride in F signal)
+    constexpr unsigned int DataStepZ = 1;                       // sliding_mul data step Z (stride in G signal)
+    constexpr unsigned int DataStepY = 1;                       // sliding_mul data step Y (stride in output)
+    constexpr unsigned int Lanes = m_kLanes;                    // SIMD lane count
+    constexpr unsigned int Points = m_kPoints;                  // G-data points per MAC4_ROT operation
+    constexpr unsigned int kFLoadbits = getLog2<m_kVecLoadF>(); // log2 of F vector load size; used as pointer bit-shift
+    constexpr unsigned int kAccumLen = ROUND(TP_G_LEN, m_kVecLoadG);          // G accumulation length in G-vector units
+    constexpr unsigned int kInLoopLen = ROUND(m_kVecLoadF, m_kPoints);        // Inner loop unroll count
+    constexpr unsigned int kGandFLoadRatio = FLOOR(m_kVecLoadG, m_kVecLoadF); // F vector loads per G vector load
+    constexpr unsigned int kLoopCount = (CEIL(m_kLoopCount, m_kLanes) / m_kLanes); // Number of output vector iterations
+    constexpr unsigned int kDataLoadOfF = (kMaxBytesLoadOnAie / sizeof(TT_DATA_F));
+    constexpr unsigned int kDataLoadOfG = (kMaxBytesLoadOnAie / sizeof(TT_DATA_G));
+    constexpr unsigned int kFrameOffsetF =
+        (m_kPaddedLenData / kDataLoadOfF);                            // Per-frame F pointer stride (vector units)
+    constexpr unsigned int kFrameOffsetG = (TP_G_LEN / kDataLoadOfG); // Per-frame G pointer stride (vector units)
+    constexpr unsigned int kIncrOffsetGSig = ((TP_G_LEN / kDataLoadOfG) - 1); // Index of the last G data vector
+    constexpr unsigned int kPaddedVecLoopCount =
+        ROUND(m_kPaddedLenData, m_kVecLoadF); // Padded F data length in vector units
     constexpr unsigned int kDataStartIndex =
         m_kFdataStartIndx; // Start index (in vectors) for F data to be copied into buffer
     constexpr unsigned int kDataEndIndex = m_kFdataEndIndx; // End index (in vectors) to stop F data copy
-    constexpr unsigned int kXStartIdxAdj =
+    constexpr unsigned int kXStartIndexAdj =
         (TP_COMPUTE_MODE == SAME_MODE)
             ? ((m_kFdataStartIndx * m_kVecLoadF) - (CEIL((TP_G_LEN >> 1), kSameModeRoundFactor) - 1))
             : (TP_COMPUTE_MODE == VALID_MODE) ? 0 : ((m_kFdataStartIndx * m_kVecLoadF) -
                                                      (TP_G_LEN - 1)); // Offset accounting for vector-aligned padding
 
     // True when the sliding MAC window reaches beyond the two loaded xbuff slots.
-    // Derivation: innerloop max xstart = (m_kVecLoadF - m_kPoints) + kXStartIdxAdj;
-    // sliding_mul reads up to xstart + m_kLanes + m_kPoints - 2 = m_kVecLoadF + kXStartIdxAdj + m_kLanes - 2
+    // Derivation: innerloop max xstart = (m_kVecLoadF - m_kPoints) + kXStartIndexAdj;
+    // sliding_mul reads up to xstart + m_kLanes + m_kPoints - 2 = m_kVecLoadF + kXStartIndexAdj + m_kLanes - 2
     // (m_kPoints cancels). 3rd slot needed when this >= 2*m_kVecLoadF, i.e.:
-    constexpr bool kRequiresThirdXbuffSlot = ((kXStartIdxAdj + m_kLanes) >= (m_kVecLoadF + kBuffIndx2));
+    constexpr bool kRequiresThirdXbuffSlot = ((kXStartIndexAdj + m_kLanes) >= (m_kVecLoadF + kBuffIndx2));
 
     // Pointers to do Padding zeros to the F data based on compute mode
     T_buff_FSig* __restrict inPtrF = (T_buff_FSig*)inWindowF.data(); // Alias Input pointer for Sig_F
@@ -146,7 +148,7 @@ conv_corr<TT_DATA_F,
     for (unsigned int frameIndx = 0; frameIndx < TP_NUM_FRAMES; frameIndx++)
         chess_prepare_for_pipelining chess_loop_count(TP_NUM_FRAMES) {
             // Initialize pointer to start of current frame
-            T_buff_FSig* paddedFdataPtr = (T_buff_FSig*)paddedFdata + (frameIndx * kFrameoffsetF);
+            T_buff_FSig* paddedFdataPtr = (T_buff_FSig*)paddedFdata + (frameIndx * kFrameOffsetF);
 
             // ========== Copy F data (kDataStartIndex to kDataEndIndex) ==========
             // Padding regions (prefix 0..kDataStartIndex and suffix kDataEndIndex..totalVecs) stay zero
@@ -160,13 +162,11 @@ conv_corr<TT_DATA_F,
             // If the function type is conv (1), then we need to reverse the G data.
             if (TP_FUNCT_TYPE == CONV) {
                 T_buff_GSig* __restrict inDataEndPtrG; // Local Pointer to fetch end address of G data
-                constexpr int kVsize =
-                    (kMaxBytesLoadOnAie /
-                     sizeof(TT_DATA_G)); // Size of vector (256/8/sizeof(DATA) as per given data type.
-                using t_vect = ::aie::vector<TT_DATA_G, kVsize>; // definition using the vec size.
-                t_vect zbuffs, zbuffe; // Registers to hold Start and End data samples of G sig.
+                constexpr int kVsize = (kMaxBytesLoadOnAie / sizeof(TT_DATA_G)); // G elements per 256-bit vector load
+                using t_vect = ::aie::vector<TT_DATA_G, kVsize>;
+                t_vect zbuffs, zbuffe; // Start and end vector registers for in-place G reversal.
 
-                inDataPtrG = (rdInDataGPtr + (frameIndx * kFrameoffsetG));
+                inDataPtrG = (rdInDataGPtr + (frameIndx * kFrameOffsetG));
                 inDataEndPtrG = (inDataPtrG + kIncrOffsetGSig); // Move the pointer to End address of G sig.
 
                 // Vector pointers for efficient in-place data reversal
@@ -178,8 +178,8 @@ conv_corr<TT_DATA_F,
                 t_vect* outEndPtrG = (t_vect*)inDataEndPtrG; // Output pointer pointing to End of G buffer, used to
                                                              // write the swapped data of G sig
 
-                // Calculate number of full vector swaps and remaining elements
-                constexpr unsigned int kFullVecSwaps = (TP_G_LEN / kVsize) >> 1;
+                // Half the G vector count: swap pairs inward from both ends toward center.
+                constexpr unsigned int kFullVecSwaps = (TP_G_LEN / kVsize) >> 1; // = numGVectors / 2
                 constexpr unsigned int kRemElements = TP_G_LEN % kVsize;
                 constexpr bool kPartialVec = (kRemElements > 0);
 
@@ -212,8 +212,8 @@ conv_corr<TT_DATA_F,
                 chess_prepare_for_pipelining chess_loop_count(kLoopCount) {
                     // Updation of F and G pointer to fetch respective data from both signal
                     inDataPtrF = (rdInDataFPtr + (outIndx * (m_kLanes >> kFLoadbits)) +
-                                  (frameIndx * kFrameoffsetF));                // Reset F Sig Pointer.
-                    inDataPtrG = (rdInDataGPtr + (frameIndx * kFrameoffsetG)); // Reset G Sig Pointer.
+                                  (frameIndx * kFrameOffsetF));                // Reset F Sig Pointer.
+                    inDataPtrG = (rdInDataGPtr + (frameIndx * kFrameOffsetG)); // Reset G Sig Pointer.
 
                     // Initialization of Accumulator with Zeros to flush the previous data.
                     acc.val = ::aie::zeros<tConvCorrAccType_t<TT_DATA_F, TT_DATA_G>,
@@ -250,7 +250,7 @@ conv_corr<TT_DATA_F,
                             for (unsigned int l = 0; l < kInLoopLen; l++) {
                                 // Sliding Multiplication of given signals
                                 acc.val = mul_ops::mac(acc.val, zbuff.val, ((k * kInLoopLen + l) * m_kPoints),
-                                                       xbuff.val, ((l * m_kPoints) + kXStartIdxAdj));
+                                                       xbuff.val, ((l * m_kPoints) + kXStartIndexAdj));
 
                             } // End of kInLoopLen
                         }     // End of kGandFLoadRatio
@@ -360,15 +360,15 @@ NOINLINE_DECL void conv_corr<TT_DATA_F,
     const unsigned int kLoopCountDynamic =
         (CEIL(kRuntimeLoopCount, m_kLanes) / m_kLanes);           // Runtime output vector count
     constexpr unsigned int kLoopCountStatic = m_kMaxLoopCountVec; // Compile-time output vector count
-    constexpr unsigned int kDataLoadofF = (kMaxBytesLoadOnAie / sizeof(TT_DATA_F));
-    constexpr unsigned int kDataLoadofG = (kMaxBytesLoadOnAie / sizeof(TT_DATA_G));
-    const unsigned int kFrameoffsetF = (kPaddedLenData / kDataLoadofF);        // Runtime F frame stride
-    const unsigned int kAccumLen = ROUND(vecLenG, m_kVecLoadG);                // G accumulation length in vectors
-    const unsigned int kFrameoffsetG = (vecLenG / kDataLoadofG);               // Runtime G frame stride
-    const unsigned int kIncrOffsetGSig = ((vecLenG / kDataLoadofG) - 1);       // Index of last G vector
-    const unsigned int kPaddedVecLoopCnt = ROUND(kPaddedLenData, m_kVecLoadF); // Padded F data length in vectors
+    constexpr unsigned int kDataLoadOfF = (kMaxBytesLoadOnAie / sizeof(TT_DATA_F));
+    constexpr unsigned int kDataLoadOfG = (kMaxBytesLoadOnAie / sizeof(TT_DATA_G));
+    const unsigned int kFrameOffsetF = (kPaddedLenData / kDataLoadOfF);          // Runtime F frame stride
+    const unsigned int kAccumLen = ROUND(vecLenG, m_kVecLoadG);                  // G accumulation length in vectors
+    const unsigned int kFrameOffsetG = (vecLenG / kDataLoadOfG);                 // Runtime G frame stride
+    const unsigned int kIncrOffsetGSig = ((vecLenG / kDataLoadOfG) - 1);         // Index of last G vector
+    const unsigned int kPaddedVecLoopCount = ROUND(kPaddedLenData, m_kVecLoadF); // Padded F data length in vectors
     // MAC xbuff start offset accounting for runtime zero-padding
-    const unsigned int kXStartIdxAdj =
+    const unsigned int kXStartIndexAdj =
         (TP_COMPUTE_MODE == SAME_MODE)
             ? ((kDataStartIndex * m_kVecLoadF) - (CEIL((vecLenG >> 1), kSameModeRoundFactor) - 1))
             : (TP_COMPUTE_MODE == VALID_MODE) ? 0u : ((kDataStartIndex * m_kVecLoadF) - (vecLenG - 1));
@@ -393,7 +393,7 @@ NOINLINE_DECL void conv_corr<TT_DATA_F,
     for (unsigned int frameIndx = 0; frameIndx < TP_NUM_FRAMES; frameIndx++)
         chess_prepare_for_pipelining chess_loop_count(TP_NUM_FRAMES) {
             // Initialize pointer to start of current frame
-            T_buff_FSig* paddedFdataPtr = (T_buff_FSig*)paddedFdata + (frameIndx * kFrameoffsetF);
+            T_buff_FSig* paddedFdataPtr = (T_buff_FSig*)paddedFdata + (frameIndx * kFrameOffsetF);
 
             // ========== Zero padding before F data(0 to kDataStartIndex) ==========
             for (unsigned int dataIndx = 0; dataIndx < kDataStartIndex; dataIndx++) chess_prepare_for_pipelining {
@@ -407,7 +407,7 @@ NOINLINE_DECL void conv_corr<TT_DATA_F,
                 }
 
             // ========== Zero padding after F data (kDataEndIndex to end) ==========
-            for (unsigned int dataIndx = kDataEndIndex; dataIndx < kPaddedVecLoopCnt; dataIndx++)
+            for (unsigned int dataIndx = kDataEndIndex; dataIndx < kPaddedVecLoopCount; dataIndx++)
                 chess_prepare_for_pipelining {
                     *paddedFdataPtr++ = (T_buff_FSig)zeroVec; // Write zeroVec, increment paddedFdataPtr
                 }
@@ -419,7 +419,7 @@ NOINLINE_DECL void conv_corr<TT_DATA_F,
                 using t_vect = ::aie::vector<TT_DATA_G, kVsize>;
                 t_vect zbuffs, zbuffe; // Start and end vector registers for G reversal
 
-                inDataPtrG = (rdInDataGPtr + (frameIndx * kFrameoffsetG));
+                inDataPtrG = (rdInDataGPtr + (frameIndx * kFrameOffsetG));
                 inDataEndPtrG = (inDataPtrG + kIncrOffsetGSig); // Point to last G vector
 
                 t_vect* startPtr = (t_vect*)inDataPtrG;      // Read pointer at G start
@@ -450,16 +450,17 @@ NOINLINE_DECL void conv_corr<TT_DATA_F,
             for (unsigned int outIndx = 0; outIndx < kLoopCountDynamic; outIndx++) chess_prepare_for_pipelining {
                     // Reset F and G pointers for this output index
                     inDataPtrF =
-                        (rdInDataFPtr + (outIndx * (m_kLanes >> kFLoadbits)) + (frameIndx * kPaddedVecLoopCnt));
-                    inDataPtrG = (rdInDataGPtr + (frameIndx * kFrameoffsetG));
+                        (rdInDataFPtr + (outIndx * (m_kLanes >> kFLoadbits)) + (frameIndx * kPaddedVecLoopCount));
+                    inDataPtrG = (rdInDataGPtr + (frameIndx * kFrameOffsetG));
 
                     // Bounds check for 3rd/4th F vector loads, evaluated once per output vector
                     const unsigned int kInnerLoopFptrIncr = kAccumLen * kGandFLoadRatio + 1;
                     const unsigned int kThirdVecLoadOffset =
-                        (kInnerLoopFptrIncr < kPaddedVecLoopCnt) ? (kPaddedVecLoopCnt - kInnerLoopFptrIncr) : 0;
+                        (kInnerLoopFptrIncr < kPaddedVecLoopCount) ? (kPaddedVecLoopCount - kInnerLoopFptrIncr) : 0;
                     // 4th-vector threshold is one less because the pre-increment advances one extra vector.
-                    const unsigned int kFourthVecLoadOffset =
-                        (kInnerLoopFptrIncr + 1 < kPaddedVecLoopCnt) ? (kPaddedVecLoopCnt - kInnerLoopFptrIncr - 1) : 0;
+                    const unsigned int kFourthVecLoadOffset = (kInnerLoopFptrIncr + 1 < kPaddedVecLoopCount)
+                                                                  ? (kPaddedVecLoopCount - kInnerLoopFptrIncr - 1)
+                                                                  : 0;
 
                     unsigned int baseOffset = (outIndx * (m_kLanes >> kFLoadbits));
                     bool load3rdVec = (baseOffset < kThirdVecLoadOffset);
@@ -498,7 +499,7 @@ NOINLINE_DECL void conv_corr<TT_DATA_F,
 #pragma unroll(kInLoopLen)
                             for (unsigned int l = 0; l < kInLoopLen; l++) {
                                 acc.val = mul_ops::mac(acc.val, zbuff.val, ((k * kInLoopLen + l) * m_kPoints),
-                                                       xbuff.val, ((l * m_kPoints) + kXStartIdxAdj));
+                                                       xbuff.val, ((l * m_kPoints) + kXStartIndexAdj));
                             } // End of kInLoopLen
                         }     // End of kGandFLoadRatio
                     }         // End of inner loop
@@ -600,17 +601,18 @@ conv_corr<TT_DATA_F,
     constexpr unsigned int kXstartShift = ((kStreamsPerCore - 1) << kShiftFactor2);
 
     constexpr unsigned int kCascDelayComponent =
-        (MAC4ROTDELAY - ((kMacsPerCore * kPoints) << kShiftFactor2)) * (TP_KERNEL_POSITION >> (kPhaseIncr - 1));
+        (MAC4ROTDELAY - ((kMacsPerCore * kPoints) << kShiftFactor2)) * (TP_KERNEL_POSITION >> (getLog2<kPhaseIncr>()));
     constexpr unsigned int kPhaseDelayComponent =
-        (MAC4ROTDELAY * ((TP_KERNEL_POSITION >> (kPhaseIncr - 1)) - 1) * (kPhaseIncr - 1) +
-         (MAC4ROTDELAY * (TP_KERNEL_POSITION & (kPhaseIncr - 1))));
+        MAC4ROTDELAY * ((TP_KERNEL_POSITION >> (getLog2<kPhaseIncr>())) - 1) * (kPhaseIncr - 1) -
+        MAC4ROTDELAY * (TP_CASC_LEN >> (getLog2<TP_PHASES>())) * (kPhaseIncr - 1) +
+        MAC4ROTDELAY * (TP_KERNEL_POSITION & (kPhaseIncr - 1));
 
     constexpr int kCascDelay = kCascDelayComponent + kPhaseDelayComponent;
     constexpr int kCascDelay1 =
         ((TP_PH_POSITION + 1) > (TP_PHASES - kStreamsPerCore * (TP_KERNEL_POSITION & (kPhaseIncr - 1))))
             ? (kCascDelay - 1)
             : kCascDelay;
-    constexpr unsigned int kCascDelay2 =
+    constexpr int kCascDelay2 =
         ((TP_PH_POSITION + 1) > (TP_PHASES - kStreamsPerCore * (TP_KERNEL_POSITION & (kPhaseIncr - 1)) - 1))
             ? (kCascDelay - 1)
             : kCascDelay;
@@ -641,16 +643,17 @@ conv_corr<TT_DATA_F,
 
     // consuming samples from stream to adjust delay
     if (doInit == 1) {
-        for (unsigned int del = 0; del < -kCascDelay1; del++) chess_prepare_for_pipelining {
+        for (int del = 0; del < -kCascDelay1; del++) chess_prepare_for_pipelining {
                 readincr(instream1F);
             }
-        for (unsigned int del = 0; del < -kCascDelay2; del++) chess_prepare_for_pipelining {
+        for (int del = 0; del < -kCascDelay2; del++) chess_prepare_for_pipelining {
                 readincr(instream2F);
             }
     }
 
     // Coefficients are stored in xbuffer
-    gDataReArrange<TT_DATA_F, TT_DATA_G, TP_PHASES, TP_G_LEN, TP_FUNCT_TYPE, kStreamsPerCore>(vInDataPtrG, tempPtr);
+    gDataReArrange<TT_DATA_F, TT_DATA_G, TP_PHASES, TP_G_LEN, TP_FUNCT_TYPE, kStreamsPerCore, TP_CASC_LEN>(vInDataPtrG,
+                                                                                                           tempPtr);
 
     for (unsigned int i = 0;
          i < ((kLanes * kPoints) * (TP_CASC_LEN - TP_KERNEL_POSITION - 1) * kMacsPerCore) / kCascVecSizeOfCoeff; i++) {
@@ -748,10 +751,10 @@ conv_corr<TT_DATA_F,
     constexpr unsigned int kLanes = fnNumOfLanesForMac4Rot<TT_DATA_F>(); // Num of Lanes
     constexpr unsigned int kPoints = m_kMuls / kLanes;                   // Num of Points
     constexpr unsigned int kMuls = (kLanes * kPoints);                   // Num of Muls for MAC4_ROT()
-    constexpr unsigned int kStreamPerCoreVar =
-        ((m_kMuls * TP_PHASES) >> 1); // a factor to compute how many stream per Core.
+    constexpr unsigned int kSingleStreamThreshold =
+        ((m_kMuls * TP_PHASES) >> 1); // TP_G_LEN threshold: single stream per core when exceeded.
     constexpr unsigned int kStreamsPerCore =
-        (TP_G_LEN > kStreamPerCoreVar) ? 1 : kMaxNumOfStreams; // Selection of Streams needs to be processed.
+        (TP_G_LEN > kSingleStreamThreshold) ? 1 : kMaxNumOfStreams; // Streams per core: 1 (large G) or 2 (small G).
 
     constexpr unsigned int kCoeffShuffle =
         (kPoints > kNumPoints2 && kStreamsPerCore > 1) ? 1 : 0; // factor to shuffle given coeff.
@@ -767,7 +770,7 @@ conv_corr<TT_DATA_F,
                                               : ((kMacsPerCore * kPoints) << kShiftFactor2); // Data Buffer Length
 
     constexpr unsigned int kLoopCount = CEIL((TP_F_LEN / TP_PHASES), kDataBuffLen) / kDataBuffLen; // Loopcount
-    constexpr unsigned int kPhaseIncr = TP_PHASES >> (kStreamsPerCore - 1); // offset to increase Phase.
+    constexpr unsigned int kPhaseIncr = TP_PHASES >> (kStreamsPerCore - 1); // Phase increment per core pass.
     constexpr unsigned int kCoeffPerCore = (TP_PHASES * kMuls * kMacsPerCore) >> (kStreamsPerCore - 1);
 
     constexpr unsigned int kPtrStart =
@@ -783,16 +786,17 @@ conv_corr<TT_DATA_F,
     constexpr unsigned int kZoffset = kMacOffsetIncr * kBaseOffset; // Offset
     constexpr unsigned int kXstartShift = (kStreamsPerCore - 1) << kShiftFactor2;
     constexpr unsigned int kCascDelayComponent =
-        (MAC4ROTDELAY - ((kMacsPerCore * kPoints) << kShiftFactor2)) * (TP_KERNEL_POSITION >> (kPhaseIncr - 1));
+        (MAC4ROTDELAY - ((kMacsPerCore * kPoints) << kShiftFactor2)) * (TP_KERNEL_POSITION >> (getLog2<kPhaseIncr>()));
     constexpr unsigned int kPhaseDelayComponent =
-        MAC4ROTDELAY * ((TP_KERNEL_POSITION >> (kPhaseIncr - 1)) - 1) * (kPhaseIncr - 1) +
+        MAC4ROTDELAY * ((TP_KERNEL_POSITION >> (getLog2<kPhaseIncr>())) - 1) * (kPhaseIncr - 1) -
+        MAC4ROTDELAY * (TP_CASC_LEN >> (getLog2<TP_PHASES>())) * (kPhaseIncr - 1) +
         MAC4ROTDELAY * (TP_KERNEL_POSITION & (kPhaseIncr - 1));
-    constexpr unsigned int kCascDelay = kCascDelayComponent + kPhaseDelayComponent;
-    constexpr unsigned int kCascDelay1 =
+    constexpr int kCascDelay = kCascDelayComponent + kPhaseDelayComponent;
+    constexpr int kCascDelay1 =
         ((TP_PH_POSITION + 1) > (TP_PHASES - kStreamsPerCore * (TP_KERNEL_POSITION & (kPhaseIncr - 1))))
             ? (kCascDelay - 1)
             : kCascDelay;
-    constexpr unsigned int kCascDelay2 =
+    constexpr int kCascDelay2 =
         ((TP_PH_POSITION + 1) > (TP_PHASES - kStreamsPerCore * (TP_KERNEL_POSITION & (kPhaseIncr - 1)) - 1))
             ? (kCascDelay - 1)
             : kCascDelay;
@@ -821,10 +825,10 @@ conv_corr<TT_DATA_F,
 
     // consuming samples from stream to adjust delay
     if (doInit == 1) {
-        for (unsigned int del = 0; del < -kCascDelay1; del++) chess_prepare_for_pipelining {
+        for (int del = 0; del < -kCascDelay1; del++) chess_prepare_for_pipelining {
                 readincr(instream1F);
             }
-        for (unsigned int del = 0; del < -kCascDelay2; del++) chess_prepare_for_pipelining {
+        for (int del = 0; del < -kCascDelay2; del++) chess_prepare_for_pipelining {
                 readincr(instream2F);
             }
     }
@@ -925,8 +929,8 @@ conv_corr<TT_DATA_F,
 
     constexpr unsigned int kLanes = fnNumOfLanesForMac4Rot<TT_DATA_F>(); // Num of kLanes
     constexpr unsigned int kPoints = m_kMuls / kLanes;                   // m_kPoints;   // Num of kPoints
-    constexpr unsigned int kStreamPerCoreVar = ((kLanes * kPoints * TP_PHASES) >> 1);
-    constexpr unsigned int kStreamsPerCore = (TP_G_LEN > kStreamPerCoreVar) ? 1 : kMaxNumOfStreams;
+    constexpr unsigned int kSingleStreamThreshold = ((kLanes * kPoints * TP_PHASES) >> 1);
+    constexpr unsigned int kStreamsPerCore = (TP_G_LEN > kSingleStreamThreshold) ? 1 : kMaxNumOfStreams;
     constexpr unsigned int kCoeffShuffle = ((kPoints > kNumPoints2) && (kStreamsPerCore > 1)) ? 1 : 0;
 
     constexpr unsigned int kMacOffsetIncr = (kCoeffShuffle == 1) ? kPoints : kStreamsPerCore; // TP_PHASES;
@@ -954,16 +958,17 @@ conv_corr<TT_DATA_F,
     constexpr unsigned int kZoffset = kMacOffsetIncr * kBaseOffset; // Offset
     constexpr unsigned int kXstartShift = (kStreamsPerCore - 1) << kShiftFactor2;
     constexpr unsigned int kCascDelayComponent =
-        (MAC4ROTDELAY - ((kMacsPerCore * kPoints) << kShiftFactor2)) * (TP_KERNEL_POSITION >> (kPhaseIncr - 1));
+        (MAC4ROTDELAY - ((kMacsPerCore * kPoints) << kShiftFactor2)) * (TP_KERNEL_POSITION >> (getLog2<kPhaseIncr>()));
     constexpr unsigned int kPhaseDelayComponent =
-        MAC4ROTDELAY * ((TP_KERNEL_POSITION >> (kPhaseIncr - 1)) - 1) * (kPhaseIncr - 1) +
+        MAC4ROTDELAY * ((TP_KERNEL_POSITION >> (getLog2<kPhaseIncr>())) - 1) * (kPhaseIncr - 1) -
+        MAC4ROTDELAY * (TP_CASC_LEN >> (getLog2<TP_PHASES>())) * (kPhaseIncr - 1) +
         MAC4ROTDELAY * (TP_KERNEL_POSITION & (kPhaseIncr - 1));
-    constexpr unsigned int kCascDelay = kCascDelayComponent + kPhaseDelayComponent;
-    constexpr unsigned int kCascDelay1 =
+    constexpr int kCascDelay = kCascDelayComponent + kPhaseDelayComponent;
+    constexpr int kCascDelay1 =
         ((TP_PH_POSITION + 1) > (TP_PHASES - kStreamsPerCore * (TP_KERNEL_POSITION & (kPhaseIncr - 1))))
             ? (kCascDelay - 1)
             : kCascDelay;
-    constexpr unsigned int kCascDelay2 =
+    constexpr int kCascDelay2 =
         ((TP_PH_POSITION + 1) > (TP_PHASES - kStreamsPerCore * (TP_KERNEL_POSITION & (kPhaseIncr - 1)) - 1))
             ? (kCascDelay - 1)
             : kCascDelay;
@@ -993,10 +998,10 @@ conv_corr<TT_DATA_F,
 
     // consuming samples from stream to adjust delayBuff
     if (doInit == 1) {
-        for (unsigned int del = 0; del < -kCascDelay1; del++) chess_prepare_for_pipelining {
+        for (int del = 0; del < -kCascDelay1; del++) chess_prepare_for_pipelining {
                 readincr(instream1F);
             }
-        for (unsigned int del = 0; del < -kCascDelay2; del++) chess_prepare_for_pipelining {
+        for (int del = 0; del < -kCascDelay2; del++) chess_prepare_for_pipelining {
                 readincr(instream2F);
             }
     }
@@ -1093,8 +1098,8 @@ conv_corr<TT_DATA_F,
 
     constexpr unsigned int kLanes = fnNumOfLanesForMac4Rot<TT_DATA_F>(); // Num of kLanes
     constexpr unsigned int kPoints = m_kMuls / kLanes;                   // m_kPoints;   // Num of kPoints
-    constexpr unsigned int kStreamPerCoreVar = ((kLanes * kPoints * TP_PHASES) >> 1);
-    constexpr unsigned int kStreamsPerCore = (TP_G_LEN > kStreamPerCoreVar) ? 1 : kMaxNumOfStreams;
+    constexpr unsigned int kSingleStreamThreshold = ((kLanes * kPoints * TP_PHASES) >> 1);
+    constexpr unsigned int kStreamsPerCore = (TP_G_LEN > kSingleStreamThreshold) ? 1 : kMaxNumOfStreams;
     constexpr unsigned int kCoeffShuffle = ((kPoints > kNumPoints2) && (kStreamsPerCore > 1)) ? 1 : 0;
 
     constexpr unsigned int kMacOffsetIncr = (kCoeffShuffle == 1) ? kPoints : kStreamsPerCore; // TP_PHASES;
@@ -1122,16 +1127,17 @@ conv_corr<TT_DATA_F,
     constexpr unsigned int kZoffset = kMacOffsetIncr * kBaseOffset; // Offset
     constexpr unsigned int kXstartShift = (kStreamsPerCore - 1) << kShiftFactor2;
     constexpr unsigned int kCascDelayComponent =
-        (MAC4ROTDELAY - ((kMacsPerCore * kPoints) << kShiftFactor2)) * (TP_KERNEL_POSITION >> (kPhaseIncr - 1));
+        (MAC4ROTDELAY - ((kMacsPerCore * kPoints) << kShiftFactor2)) * (TP_KERNEL_POSITION >> (getLog2<kPhaseIncr>()));
     constexpr unsigned int kPhaseDelayComponent =
-        MAC4ROTDELAY * ((TP_KERNEL_POSITION >> (kPhaseIncr - 1)) - 1) * (kPhaseIncr - 1) +
+        MAC4ROTDELAY * ((TP_KERNEL_POSITION >> (getLog2<kPhaseIncr>())) - 1) * (kPhaseIncr - 1) -
+        MAC4ROTDELAY * (TP_CASC_LEN >> (getLog2<TP_PHASES>())) * (kPhaseIncr - 1) +
         MAC4ROTDELAY * (TP_KERNEL_POSITION & (kPhaseIncr - 1));
-    constexpr unsigned int kCascDelay = kCascDelayComponent + kPhaseDelayComponent;
-    constexpr unsigned int kCascDelay1 =
+    constexpr int kCascDelay = kCascDelayComponent + kPhaseDelayComponent;
+    constexpr int kCascDelay1 =
         ((TP_PH_POSITION + 1) > (TP_PHASES - kStreamsPerCore * (TP_KERNEL_POSITION & (kPhaseIncr - 1))))
             ? (kCascDelay - 1)
             : kCascDelay;
-    constexpr unsigned int kCascDelay2 =
+    constexpr int kCascDelay2 =
         ((TP_PH_POSITION + 1) > (TP_PHASES - kStreamsPerCore * (TP_KERNEL_POSITION & (kPhaseIncr - 1)) - 1))
             ? (kCascDelay - 1)
             : kCascDelay;
@@ -1164,16 +1170,17 @@ conv_corr<TT_DATA_F,
 
     // consuming samples from stream to adjust delayBuff
     if (doInit == 1) {
-        for (unsigned int del = 0; del < -kCascDelay1; del++) chess_prepare_for_pipelining {
+        for (int del = 0; del < -kCascDelay1; del++) chess_prepare_for_pipelining {
                 readincr(instream1F);
             }
-        for (unsigned int del = 0; del < -kCascDelay2; del++) chess_prepare_for_pipelining {
+        for (int del = 0; del < -kCascDelay2; del++) chess_prepare_for_pipelining {
                 readincr(instream2F);
             }
     }
 
     // Coefficients are stored in xbuffer
-    gDataReArrange<TT_DATA_F, TT_DATA_G, TP_PHASES, TP_G_LEN, TP_FUNCT_TYPE, kStreamsPerCore>(vInDataPtrG, tempPtr);
+    gDataReArrange<TT_DATA_F, TT_DATA_G, TP_PHASES, TP_G_LEN, TP_FUNCT_TYPE, kStreamsPerCore, TP_CASC_LEN>(vInDataPtrG,
+                                                                                                           tempPtr);
 
     for (unsigned int i = 0; i < kMacsPerCore; i++) {
         for (unsigned int j = 0; j < (kLanes * kPoints) / kCascVecSizeOfCoeff; j++) {

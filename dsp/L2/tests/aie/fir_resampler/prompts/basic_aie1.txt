@@ -1,0 +1,4 @@
+Configure a fractional resampler FIR for an AIE1 device on cint16 data with int16
+coefficients, interpolate by 3 and decimate by 2, 48 taps, window I/O, static
+coefficients, single output, no cascade, 256 input samples per iteration, shift 15,
+round-half-up, saturate.

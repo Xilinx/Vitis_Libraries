@@ -566,6 +566,7 @@ def update_TP_INPUT_WINDOW_VSIZE(args):
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
+    TP_CASC_LEN = args["TP_CASC_LEN"]
     if "TP_INPUT_WINDOW_VSIZE" in args and args["TP_INPUT_WINDOW_VSIZE"]:
         TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
     else:
@@ -577,24 +578,25 @@ def update_TP_INPUT_WINDOW_VSIZE(args):
         TP_FIR_LEN,
         TP_API,
         TP_SSR,
+        TP_CASC_LEN,
         TP_INPUT_WINDOW_VSIZE,
     )
 
 
 def fn_update_input_window_size(
-    AIE_VARIANT, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_API, TP_SSR, TP_INPUT_WINDOW_VSIZE
+    AIE_VARIANT, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_API, TP_SSR, TP_CASC_LEN, TP_INPUT_WINDOW_VSIZE
 ):
 
-    # CAUTION: this constant overlaps many factors. The main need is a "strobe" concept that means we unroll until xbuff is back to starting conditions.
-    streamRptFactor = 8
-    # Need to take unrolloing into account
+    # Stream loop iterations cover one 1024-bit input buffer (m_kSamplesInBuff).
     windowSizeMultiplier = (
-        (fnNumLanes(TT_DATA, TT_COEFF, TP_API))
+        fnNumLanes(TT_DATA, TT_COEFF, TP_API=TP_API, AIE_VARIANT=AIE_VARIANT)
         if TP_API == API_BUFFER
-        else (fnNumLanes(TT_DATA, TT_COEFF, TP_API) * streamRptFactor)
+        else (1024 // 8) // fn_size_by_byte(TT_DATA)
     )
 
     lcm_ws = TP_SSR * windowSizeMultiplier
+    if TP_API == API_BUFFER and TP_CASC_LEN > 1:
+        lcm_ws = find_lcm(lcm_ws, TP_SSR * ((256 // 8) // fn_size_by_byte(TT_DATA)))
 
     if TP_API == API_BUFFER:
         TP_INPUT_WINDOW_VSIZE_max = comFirUpd.fn_max_windowsize_for_buffer_update(
@@ -638,6 +640,7 @@ def validate_TP_INPUT_WINDOW_VSIZE(args):
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
+    TP_CASC_LEN = args["TP_CASC_LEN"]
     return fn_validate_input_window_size(
         AIE_VARIANT,
         TT_DATA,
@@ -646,19 +649,22 @@ def validate_TP_INPUT_WINDOW_VSIZE(args):
         TP_INPUT_WINDOW_VSIZE,
         TP_API,
         TP_SSR,
+        TP_CASC_LEN,
     )
 
 
 def fn_validate_input_window_size(
-    AIE_VARIANT, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR
+    AIE_VARIANT, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR, TP_CASC_LEN
 ):
-    streamRptFactor = 8
+    # Match the stream loop's m_kLsize % streamRptFactor assertion.
     windowSizeMultiplier = (
-        (fnNumLanes(TT_DATA, TT_COEFF, TP_API))
+        fnNumLanes(TT_DATA, TT_COEFF, TP_API=TP_API, AIE_VARIANT=AIE_VARIANT)
         if TP_API == API_BUFFER
-        else (fnNumLanes(TT_DATA, TT_COEFF, TP_API) * streamRptFactor)
+        else (1024 // 8) // fn_size_by_byte(TT_DATA)
     )
     lcm_ws = TP_SSR * windowSizeMultiplier
+    if TP_API == API_BUFFER and TP_CASC_LEN > 1:
+        lcm_ws = find_lcm(lcm_ws, TP_SSR * ((256 // 8) // fn_size_by_byte(TT_DATA)))
     if TP_INPUT_WINDOW_VSIZE % lcm_ws != 0:
         return isError(f"TP_INPUT_WINDOW_VSIZE should be a multiple of {lcm_ws}!")
     else:
@@ -669,6 +675,7 @@ def fn_validate_input_window_size(
             TP_FIR_LEN,
             TP_API,
             TP_SSR,
+            TP_CASC_LEN,
             TP_INPUT_WINDOW_VSIZE,
         )
         range_TP_INPUT_WINDOW_VSIZE = [param_dict["minimum"], param_dict["maximum"]]
@@ -1235,6 +1242,15 @@ def generate_graph(graphname, args):
 
     taps = fn_get_taps_vector(TT_COEFF, coeff_list)
     constr_args_str = f"taps" if TP_USE_COEFF_RELOAD == 0 else ""
+    taps_ctor_str = (
+        f"""
+    // Constructor using taps passed as an argument
+    {graphname}(const std::vector<{TT_COEFF}>& taps) : filter(taps) {{
+        create_connections();
+    }}"""
+            if TP_USE_COEFF_RELOAD == 0
+            else "// No taps-argument constructor: TP_USE_COEFF_RELOAD is enabled"
+    )
     dual_ip_declare_str = (
         f"ssr_port_array<input> in2;" if TP_DUAL_IP == 1 else "// No dual input"
     )
@@ -1293,7 +1309,12 @@ public:
     {TP_SAT} //TP_SAT
   > filter;
 
+  {taps_ctor_str}
+  // Constructor using internal taps
   {graphname}() : filter({constr_args_str}) {{
+    create_connections();
+  }}
+  void create_connections() {{
     adf::kernel *filter_kernels = filter.getKernels();
 
     for (int i=0; i < TP_SSR; i++) {{

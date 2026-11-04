@@ -28,28 +28,24 @@ VITIS_PYTHON3 = LD_LIBRARY_PATH=$(TAPYTHON)/lib $(TAPYTHON)/bin/python3
 
 ifeq ($(T_DATA_A), int16)
 	ifeq ($(T_DATA_B), int16)
-		T_DATA_OUT := int16
 		ifeq ($(API_IO), 0)
 			VEC_IN_FRAME := 16
 			else
 			VEC_IN_FRAME := 8
 			endif
 	else ifeq ($(T_DATA_B), int32)
-		T_DATA_OUT := int32
 		ifeq ($(API_IO), 0)
 			VEC_IN_FRAME := 8
 			else
 			VEC_IN_FRAME := 4
 			endif
 	else ifeq ($(T_DATA_B), cint16)
-		T_DATA_OUT := cint16
 		ifeq ($(API_IO), 0)
 			VEC_IN_FRAME := 8
 			else
 			VEC_IN_FRAME := 4
 			endif
 	else ifeq ($(T_DATA_B), cint32)
-		T_DATA_OUT := cint32
 		ifeq ($(API_IO), 0)
 			VEC_IN_FRAME := 4
 			else
@@ -59,28 +55,24 @@ ifeq ($(T_DATA_A), int16)
 
 else ifeq ($(T_DATA_A), int32)
 	ifeq ($(T_DATA_B), int16)
-		T_DATA_OUT := int32
 		ifeq ($(API_IO), 0)
 			VEC_IN_FRAME := 8
 			else
 			VEC_IN_FRAME := 4
 			endif
 	else ifeq ($(T_DATA_B), int32)
-		T_DATA_OUT := int32
 		ifeq ($(API_IO), 0)
 			VEC_IN_FRAME := 8
 			else
 			VEC_IN_FRAME := 4
 			endif
 	else ifeq ($(T_DATA_B), cint16)
-		T_DATA_OUT := cint32
 		ifeq ($(API_IO), 0)
 			VEC_IN_FRAME := 4
 			else
 			VEC_IN_FRAME := 2
 			endif
 	else ifeq ($(T_DATA_B), cint32)
-		T_DATA_OUT := cint32
 		ifeq ($(API_IO), 0)
 			VEC_IN_FRAME := 4
 			else
@@ -90,28 +82,24 @@ else ifeq ($(T_DATA_A), int32)
 
 else ifeq ($(T_DATA_A), cint16)
 	ifeq ($(T_DATA_B), int16)
-		T_DATA_OUT := cint16
 		ifeq ($(API_IO), 0)
 			VEC_IN_FRAME := 8
 			else
 			VEC_IN_FRAME := 4
 			endif
 	else ifeq ($(T_DATA_B), int32)
-		T_DATA_OUT := cint32
 		ifeq ($(API_IO), 0)
 			VEC_IN_FRAME := 4
 			else
 			VEC_IN_FRAME := 2
 			endif
 	else ifeq ($(T_DATA_B), cint16)
-		T_DATA_OUT := cint16
 		ifeq ($(API_IO), 0)
 			VEC_IN_FRAME := 8
 			else
 			VEC_IN_FRAME := 4
 			endif
 	else ifeq ($(T_DATA_B), cint32)
-		T_DATA_OUT := cint32
 		ifeq ($(API_IO), 0)
 			VEC_IN_FRAME := 4
 			else
@@ -121,28 +109,24 @@ else ifeq ($(T_DATA_A), cint16)
 
 else ifeq ($(T_DATA_A), cint32)
 	ifeq ($(T_DATA_B), int16)
-		T_DATA_OUT := cint32
 		ifeq ($(API_IO), 0)
 			VEC_IN_FRAME := 8
 			else
 			VEC_IN_FRAME := 8
 			endif
 	else ifeq ($(T_DATA_B), int32)
-		T_DATA_OUT := cint32
 		ifeq ($(API_IO), 0)
 			VEC_IN_FRAME := 4
 			else
 			VEC_IN_FRAME := 2
 			endif
 	else ifeq ($(T_DATA_B), cint16)
-		T_DATA_OUT := cint32
 		ifeq ($(API_IO), 0)
 			VEC_IN_FRAME := 4
 			else
 			VEC_IN_FRAME := 2
 			endif
 	else ifeq ($(T_DATA_B), cint32)
-		T_DATA_OUT := cint32
 		ifeq ($(API_IO), 0)
 			VEC_IN_FRAME := 4
 			else
@@ -152,14 +136,12 @@ else ifeq ($(T_DATA_A), cint32)
 
 else ifeq ($(T_DATA_A), float)
 	ifeq ($(T_DATA_B), float)
-		T_DATA_OUT := float
 		ifeq ($(API_IO), 0)
 			VEC_IN_FRAME := 8
 			else
 			VEC_IN_FRAME := 4
 			endif
 	else ifeq ($(T_DATA_B), cfloat)
-		T_DATA_OUT := cfloat
 		ifeq ($(API_IO), 0)
 			VEC_IN_FRAME := 4
 			else
@@ -167,13 +149,16 @@ else ifeq ($(T_DATA_A), float)
 			endif
 	endif
 else ifeq ($(T_DATA_A), cfloat)
-	T_DATA_OUT := cfloat
 		ifeq ($(API_IO), 0)
 			VEC_IN_FRAME := 4
 			else
 			VEC_IN_FRAME := 2
 			endif
 endif
+
+include $(HELPER_ROOT_DIR)/L2/tests/aie/out_mul_types.mk
+T_DATA_OUT := $(call fn_det_out_type,$(T_DATA_A),$(T_DATA_B))
+
 DIM_SIZE_PADDED := $(shell echo $$(( $(DIM_SIZE) / $(UUT_SSR))) )
 DIM_SIZE_PADDED := $(shell echo $$(( $$(($$(( $(DIM_SIZE_PADDED) + $(VEC_IN_FRAME) - 1)) / $(VEC_IN_FRAME))) * $(VEC_IN_FRAME))) )
 WINDOW_VSIZE := $(shell echo $$(( $(DIM_SIZE_PADDED) * $(NUM_FRAMES) * $(UUT_SSR))))
@@ -254,13 +239,8 @@ else
 	DYN_PT_HEADER_MODE = 0
 endif
 
-ifeq ($(T_DATA_B), float)
-	T_DATA_OUT := float
-else ifeq ($(T_DATA_B), cfloat)
-	T_DATA_OUT := cfloat
-endif
-
 STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
+STATUS_JSON = ./logs/status_$(UUT_KERNEL)_$(PARAMS).json
 PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) T_DATA_A $(T_DATA_A) T_DATA_B $(T_DATA_B) DIM_SIZE $(DIM_SIZE) NUM_FRAMES $(NUM_FRAMES) SHIFT $(SHIFT) UUT_SSR $(UUT_SSR) API_IO $(API_IO) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE)
 
 HELPER:= $(HELPER_CUR_DIR)/.HELPER
@@ -309,9 +289,14 @@ get_diff:
 	@perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(T_DATA_OUT) --ssr $(NUM_PORTS) --zip --dual 0 -k $(DYN_PT_HEADER_MODE) -w $(WINDOW_VSIZE) --plioWidth 64 ;\
 	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(T_DATA_OUT) --ssr $(NUM_PORTS) --zip --dual 0 -k $(DYN_PT_HEADER_MODE) -w $(WINDOW_VSIZE) --plioWidth 64 ;\
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE)
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py functional_check $(STATUS_JSON) ./logs/diff.txt
 
 get_status:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)  SINGLE_BUF $(SINGLE_BUF)
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py init $(STATUS_JSON) UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP) NITER $(NITER)
+
+get_memory:
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py harvest $(STATUS_JSON) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts Work
 
 get_latency:
 	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_VARIANT)
@@ -319,3 +304,4 @@ get_latency:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_input_A_0_0.txt ./data/uut_output_0_0.txt $(STATUS_FILE) $(WINDOW_VSIZE) $(NITER)
 
 	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_qor.py -t_in_file T_input_A_0_0.txt -t_out_file uut_output_0_0.txt -status_file_dir $(STATUS_FILE) -num_of_samples $(WINDOW_VSIZE) -niter $(NITER) -casc_len 1 -aiesim_out_dir ./aiesimulator_output -ip hadamard_main
+	$(VITIS_PYTHON3) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/status_json/update_status.py qor $(STATUS_JSON) Work $(NITER) $(NUM_FRAMES) T_input_A_ uut_output_ 64 $(T_DATA_OUT) --verbose

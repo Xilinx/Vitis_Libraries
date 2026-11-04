@@ -1,0 +1,1 @@
+Multiply an int16 matrix by an int16 vector on an AIE-ML device.

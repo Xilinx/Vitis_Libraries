@@ -38,6 +38,8 @@
     "P_DIM_B" : "TP_DIM_B",
     "DIM_ROWS" : "TP_DIM_ROWS",
     "DIM_COLS" : "TP_DIM_COLS",
+    "PASSES" : "TP_PASSES",
+    "PASSES_SSR" : "TP_PASSES_SSR",
     "DIM_A" : "TP_DIM_A",
     "DIM_B" : "TP_DIM_B",
     "DIM_SIZE_A" : "TP_DIM_A",
@@ -56,6 +58,8 @@
     "P_INPUT_WINDOW_VSIZE_A" : "TP_INPUT_WINDOW_VSIZE_A",
     "P_INPUT_WINDOW_VSIZE_B" : "TP_INPUT_WINDOW_VSIZE_B",
     "P_CASC_LEN" : "TP_CASC_LEN",
+    "P_CONJ_A" : "TP_CONJ_A",
+    "P_CONJ_B" : "TP_CONJ_B",
     "NUM_FRAMES" : "TP_NUM_FRAMES",
     "MIXER_MODE" : "TP_MIXER_MODE",
     "USE_PHASE_RELOAD" : "TP_USE_PHASE_RELOAD",
@@ -114,10 +118,15 @@
     "L_LEADING": "TP_L_LEADING",
     "SUBST_TYPE": "TP_SUBST_TYPE",
 
-    "THROUGHPUT (MSA/S)": "THROUGHPUT",
-    "LATENCY (NS)": "LATENCY",
-    "NUM_AIE": "NUM_AIE",
     "FIR_TYPE": "FIR_TYPE",
-    "CYCLECOUNTAVG": "CYCLES",
-    "NUM_BANKS": "NUM_BANKS"
+    "NUM_AIE": "num aie",
+    "NUM_BANKS": "num banks",
+
+    "first shortest latency (us)" : "first shortest latency (us)",
+    "first critical latency (us)" : "first critical latency (us)",
+    "steady shortest latency (us)" : "steady shortest latency (us)",
+    "steady critical latency (us)" : "steady critical latency (us)",
+    "initiation interval (us)" : "initiation interval (us)",
+    "throughput (MSa/s)" : "throughput (MSa/s)",
+    "frame rate (kHz)" : "frame rate (kHz)"
 }

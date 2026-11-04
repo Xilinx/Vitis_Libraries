@@ -1,0 +1,16 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["value", "reason"],
+    "properties": {
+        "value": {
+            "description": "Answer for the single scalar parameter being asked about.",
+            "type": ["integer", "string"]
+        },
+        "reason": {
+            "type": "string",
+            "description": "One sentence: why this value satisfies the user's request and the parameter's stated constraints."
+        }
+    }
+}

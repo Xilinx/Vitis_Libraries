@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.10
+# vitis makefile-generator v2.0.12
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -48,7 +48,7 @@ MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L2/*}')
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XFLIB_DIR = $(XF_PROJ_ROOT)
-SCRIPTS_DIR := ${CUR_DIR}/scripts_mk
+EDF_SCRIPT := $(XFLIB_DIR)/scripts/edf
 VITIS_LIB_ROOT = $(dir $(XF_PROJ_ROOT))
 export XF_PROJ_ROOT
 export VITIS_LIB_ROOT
@@ -61,19 +61,7 @@ ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := vck190
-endif
-
-#setting SYSROOT
-ifneq (,$(findstring vek385, $(PLATFORM)))
-ifeq (,$(wildcard $(YOCTO_ARTIFACTS)))
-$(error YOCTO_ARTIFACTS ENV variable is not set, please set ENV variable correctly and rerun)
-endif
-export YOCTO_ARTIFACTS
-export SYSROOT = ${YOCTO_ARTIFACTS}/amd-cortexa78-mali-common_meta-edf-app-sdk/sdk/sysroots/cortexa72-cortexa53-amd-linux
-VPP_FLAGS_CFG += --part xc2ve3858-ssva2112-2MP-e-S
-else
-VPP_FLAGS_CFG += -t hw --platform $(XPLATFORM)
+PLATFORM := vck190_base
 endif
 
 # add warnning for sw_emu
@@ -81,10 +69,24 @@ ifeq ($(TARGET),sw_emu)
 $(error Error: The sw_emu target is no longer supported starting from 2025.1.)
 endif
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST += vck190
+PLATFORM_ALLOWLIST += vck190_base
 PLATFORM_BLOCKLIST += 
 
+# #################### EDF (Embedded Device Flow) platforms ##########################
+EDF_BOARDS := vck190
+
 include ./utils.mk
+
+# EDF board settings
+ifeq ($(EDF_BOARD), vck190)
+EDF_TOOLCHAIN_DIR   := amd-cortexa72-common_meta-edf-app-sdk
+EDF_QEMU_PREBUILT   := amd-cortexa72-common_vck190_qemu_prebuilt
+EDF_BOOT_BIN        := BOOT-versal-vck190-multidomain.bin
+EDF_WIC_SUFFIX      := wic.qemu-sd
+EDF_FLASH_BIN       := qemu-qspi.bin
+EDF_BOOT_MEDIA      := sd
+EDF_GUEST_DEV       := /dev/mmcblk0p2
+endif
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
 TEMP_REPORT_DIR := $(CUR_DIR)/reports/_x.$(TARGET).$(PLATFORM_NAME)
 BUILD_DIR := build_dir.$(TARGET).$(PLATFORM_NAME)
@@ -138,7 +140,15 @@ VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/hw
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 $(EXE_FILE): $(EXE_FILE_DEPS)
 	mkdir -p $(BUILD_DIR)
+ifeq ($(EDF_FLOW), on)
+	unset LD_LIBRARY_PATH; \
+	source $(EDF_TOOLCHAIN_SETUP); \
+	export LOPPER_DTC_FLAGS="-b 0 -@"; \
+	echo "INFO: Compiling host with EDF toolchain: $(EDF_TOOLCHAIN_DIR)"; \
+	$$CXX $$CXXFLAGS -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^) $(CXXFLAGS) $(LDFLAGS) $$LDFLAGS
+else
 	$(CXX) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^) $(CXXFLAGS) $(LDFLAGS)
+endif
 
 $(EMCONFIG):
 	emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
@@ -156,17 +166,21 @@ RUN_SCRIPT := $(BUILD_DIR)/run_script.sh
 $(RUN_SCRIPT):
 	rm -rf $(RUN_SCRIPT)
 	@echo 'export LD_LIBRARY_PATH=/mnt:/tmp${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}} ' >> $(RUN_SCRIPT)
+	@echo 'export XILINX_VITIS=/mnt' >> $(RUN_SCRIPT)
+	@echo 'export XILINX_XRT=/usr' >> $(RUN_SCRIPT)
 ifneq ($(filter hw_emu, $(TARGET)),)
 	@echo 'export XCL_EMULATION_MODE=$(TARGET)' >> $(RUN_SCRIPT)
 endif
-	@echo 'export XILINX_VITIS=/mnt' >> $(RUN_SCRIPT)
-	@echo 'export XILINX_XRT=/usr' >> $(RUN_SCRIPT)
 	@echo 'if [ -f platform_desc.txt  ]; then' >> $(RUN_SCRIPT)
 	@echo '        cp platform_desc.txt /etc/xocl.txt' >> $(RUN_SCRIPT)
 	@echo 'fi' >> $(RUN_SCRIPT)
-ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
-	@echo 'echo "INFO: Load the pdi and dtbo using fpgautil"' >> $(RUN_SCRIPT)
-	@echo 'fpgautil -b $(BINARY_NAME).pdi -o ${BINARY_NAME}.dtbo' >> $(RUN_SCRIPT)
+ifeq ($(EDF_FLOW), on)
+	@echo 'export PATH=$$PATH:/sbin' >> $(RUN_SCRIPT)
+# load the PL only when the platform ships an overlay
+	@echo 'if [ -f $(EDF_PL_NAME).dtbo ]; then' >> $(RUN_SCRIPT)
+	@echo '        echo "INFO: Load the pdi and dtbo using fpgautil"' >> $(RUN_SCRIPT)
+	@echo '        fpgautil -b $(EDF_PL_NAME).pdi -o $(EDF_PL_NAME).dtbo' >> $(RUN_SCRIPT)
+	@echo 'fi' >> $(RUN_SCRIPT)
 endif
 	@echo './$(EXE_NAME) $(PKG_HOST_ARGS)' >> $(RUN_SCRIPT)
 	@echo 'return_code=$$?' >> $(RUN_SCRIPT)
@@ -192,47 +206,65 @@ PACKAGE_FILES := $(BINARY_CONTAINERS)
 PACKAGE_FILES += $(AIE_CONTAINER)
 PACKAGE_DIR := $(CUR_DIR)/package_$(TARGET)
 PACKAGE_DIR_HW := $(CUR_DIR)/package.$(TARGET)
-SD_CARD := $(CUR_DIR)/package_$(TARGET)
-$(PACKAGE_DIR): host xclbin $(RUN_SCRIPT) $(EMCONFIG) #check_kimage check_rootfs
+EDF_PACKAGE_OUT := $(PACKAGE_DIR)/sd_card
+EDF_PL_NAME := $(basename $(notdir $(BINARY_CONTAINERS_PKG)))
+EDF_PL_DTBO := $(EDF_PACKAGE_OUT)/$(EDF_PL_NAME).dtbo
+EDF_PL_PDI  := $(EDF_PACKAGE_OUT)/$(EDF_PL_NAME).pdi
+$(PACKAGE_DIR): host xclbin $(RUN_SCRIPT) $(EMCONFIG) check_kimage check_rootfs check_edf
 	@echo "Generating sd_card folder...."
 	mkdir -p $(PACKAGE_DIR)
 	chmod a+rx $(BUILD_DIR)/run_script.sh
+# 0. EDF flow
+ifeq ($(EDF_FLOW), on)
+ifneq ($(filter hw_emu, $(TARGET)),)
+	bash $(EDF_SCRIPT)/edf_pre_package_cleanup.sh $(PACKAGE_DIR)
+endif
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir $(EDF_PACKAGE_OUT)
+ifeq ($(TARGET), hw)
+# stage the application as plain files, v++ needs a rootfs to do it
+	@for f in $(SD_FILES) $(BINARY_CONTAINERS_PKG); do \
+	   [ -e "$$f" ] || { echo "WARNING: skip missing: $$f"; continue; }; \
+	   cp -Lf "$$f" $(EDF_PACKAGE_OUT)/ && echo "INFO: staged $$(basename $$f)"; \
+	 done
+	@for d in $(DATA_DIR); do \
+	   [ -e "$$d" ] || { echo "WARNING: skip missing: $$d"; continue; }; \
+	   cp -Lrf "$${d%/}" $(EDF_PACKAGE_OUT)/ && echo "INFO: staged $$(basename $${d%/})"; \
+	 done
+	@[ -f $(EDF_PACKAGE_OUT)/BOOT.bin ] || for c in $(EDF_PACKAGE_OUT)/../_x/package/BOOT.bin \
+	   $(EDF_PACKAGE_OUT)/../../_x/package/BOOT.bin $(EDF_PACKAGE_OUT)/boot.bin; do \
+	   [ -f "$$c" ] && cp -f "$$c" $(EDF_PACKAGE_OUT)/BOOT.bin && echo "INFO: staged BOOT.bin from $$c" && break; \
+	 done; \
+	 [ -f $(EDF_PACKAGE_OUT)/BOOT.bin ] || { echo "ERROR: v++ package emitted no BOOT.bin in $(EDF_PACKAGE_OUT)"; exit 1; }
+else
+# hw_emu boots the WIC inside the QEMU prebuilt, inject the application into it
+	bash $(EDF_SCRIPT)/edf_hw_emu_prepare.sh $(PACKAGE_DIR) $(EDF_PACKAGE_OUT)
+	bash $(EDF_SCRIPT)/edf_wic_deploy.sh $(BINARY_CONTAINERS_PKG) $(EXE_FILE) $(EDF_PL_DTBO) $(EDF_PL_PDI) $(RUN_SCRIPT) $(EDF_PACKAGE_OUT) "$(DATA_DIR)" $(EMCONFIG) xrt.ini $(DATA_FILE)
+endif
+else
 # 1. DFX HW Flow
 ifeq ($(dfx_hw), on)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p $(PACKAGE_FILES) $(VPP_PACKAGE) -o $(BINARY_CONTAINERS_PKG)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(PACKAGE_DIR) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
-	@echo "### ***** sd_card generation done! ***** ###"
 endif
 # 2. General Embeded flow
 ifeq ($(dfx_hw), off)
 ifeq ($(pcie_versal), off)
-ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
-	$(VPP) -s -t $(TARGET) -p -f $(PACKAGE_FILES) -o $(BINARY_CONTAINERS_PKG) $(VPP_PACKAGE) --package.out_dir $(PACKAGE_DIR)
-ifeq (${TARGET},hw)
-	@mkdir -p $(PACKAGE_DIR)/sd_card
-	@cp -rf $(PACKAGE_DIR)/${BINARY_NAME}.dtbo $(PACKAGE_DIR)/*.bif $(BINARY_CONTAINERS_PKG) $(EXE_FILE) $(RUN_SCRIPT) $(PACKAGE_DIR)/sd_card
-	mv $(PACKAGE_DIR)/${BINARY_NAME}.pdi $(PACKAGE_DIR)/sd_card/${BINARY_NAME}.pdi
-	@for dir in $(DATA_DIR); do \
-	    cp -r $$dir/* $(PACKAGE_DIR)/sd_card/ ; \
-	done
-	@for f in $(DATA_FILE); do \
-	    [ -e "$$f" ] && cp -r $$f $(PACKAGE_DIR)/sd_card/ ; \
-	done
-	@ln -sfn $(PACKAGE_DIR) $(PACKAGE_DIR_HW)
-endif	
-else
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(PACKAGE_DIR) --package.rootfs $(ROOTFS) --package.generate_sdcard --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 endif
+endif
+endif
+	@ln -sfn $(PACKAGE_DIR) $(PACKAGE_DIR_HW)
 	@echo "### ***** sd_card generation done! ***** ###"
-endif
-endif
 
 .PHONY: sd_card
 sd_card: $(PACKAGE_DIR)
 endif
 
-############################## Call pre_build, example.mk will the rest ##############################
-RUN_DEPS+=pre_build
+############################## Setting Essential Checks and Building Rules ##############################
+RUN_DEPS += host xclbin $(EMCONFIG)
+ifeq ($(SD_CARD_NEEDED), on)
+RUN_DEPS += $(PACKAGE_DIR)
+endif
 
 .PHONY: mkflag all run
 mkflag:
@@ -240,7 +272,7 @@ mkflag:
 	rm -rf $(BUILD_DIR)/makefile_args.txt
 	@for var in $(MAKEFLAGS); do echo $$var >> $(BUILD_DIR)/makefile_args.txt; done
 
-all: check_device check_vpp check_platform mkflag $(RUN_DEPS)
+all: check_device check_vpp check_platform check_edf mkflag $(RUN_DEPS)
 
 run: all
 #hw_emu
@@ -254,17 +286,21 @@ ifeq ($(pcie_versal), on)
 	
 else
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(BINARY_CONTAINERS_PKG) $(HOST_ARGS)
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(BINARY_CONTAINERS_PKG) $(HOST_ARGS) 
 	
 endif
 else
-ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
-	cd ${PACKAGE_DIR} && ./launch_hw_emu.sh -qemu-config ${QEMU_COMBINED}/combined.qemuboot.conf -login "amd-edf" -password "amd-edf" -run-app " mount /dev/sda2 /media; cd /media; ls; bash $(notdir $(RUN_SCRIPT)) " 2>&1 | tee qemu_output.log
-else
 	@echo $(RUN_DEPS)
-	$(PACKAGE_DIR)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+ifeq ($(EDF_FLOW), on)
+	@echo "INFO: Running hw_emu (linux_edf)"
+	bash $(EDF_SCRIPT)/edf_pre_package_cleanup.sh $(PACKAGE_DIR) kill-only
+	cd ${PACKAGE_DIR} && bash $(EDF_SCRIPT)/hw_emu_run.sh linux_edf ${PACKAGE_DIR} $(RUN_SCRIPT) 2>&1 | tee qemu_output.log; exit $${PIPESTATUS[0]}
+else
+	@echo "INFO: Running hw_emu (legacy)"
+	cd ${PACKAGE_DIR} && bash $(EDF_SCRIPT)/hw_emu_run.sh legacy ${PACKAGE_DIR} $(RUN_SCRIPT) 2>&1 | tee qemu_output.log; exit $${PIPESTATUS[0]}
 endif
-	grep "TEST PASSED, RC=0" $(PACKAGE_DIR)/qemu_output.log || exit 1
+	@grep -qE 'TEST PASSED|Test passed\.' $(PACKAGE_DIR)/qemu_output.log \
+	  || { echo "ERROR: no TEST PASSED in $(PACKAGE_DIR)/qemu_output.log"; exit 1; }
 	
 endif
 endif
@@ -272,32 +308,11 @@ endif
 ifeq ($(TARGET), hw)
 ifeq ($(HOST_ARCH), x86)
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	$(EXE_FILE) $(HOST_ARGS)
+	$(EXE_FILE) $(HOST_ARGS) 
 	
 else
 	$(ECHO) "Please copy the content of sd_card folder and data to an SD Card and run on the board"
 endif
-endif
-
-############################## qemu combined and config ##############################
-ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
-QEMU_COMBINED := ${PACKAGE_DIR}/base_camp_images
-QEMU_PREBUILT := amd-cortexa78-mali-common_vek385_qemu_prebuilt
-
-qemu_combined:
-	cd ${PACKAGE_DIR}; \
-	rm -rf ${QEMU_COMBINED}; \
-	mkdir -p ${QEMU_COMBINED}; \
-	cp -prf ${YOCTO_ARTIFACTS}/${QEMU_PREBUILT}/* ${QEMU_COMBINED}/.; 
-endif
-
-############################## copy files to quem ##############################
-ifneq (,$(findstring AIE2PS, $(AIE_TYPE)))
-PDI_DIR := ${PACKAGE_DIR}/${BINARY_NAME}.pdi
-DTBO_DIR := ${PACKAGE_DIR}/${BINARY_NAME}.dtbo
-WIC_PARTITION := edf-linux-disk-image-amd-cortexa78-mali-common.rootfs.wic.ufs:2
-copy_wic:
-	bash ${SCRIPTS_DIR}/run_copy_wic.sh ${BINARY_CONTAINERS_PKG} ${EXE_FILE} ${DTBO_DIR} ${PDI_DIR} ${RUN_SCRIPT} ${QEMU_COMBINED} ${WIC_PARTITION} "${DATA_DIR}" ${DATA_FILE}
 endif
 
 ############################## Setting Targets ##############################
@@ -336,7 +351,7 @@ cleank:
 	-$(RMDIR) _x_temp.* _x* $(INST_FILES)
 
 cleanall: cleanh cleank
-	-$(RMDIR) $(BUILD_DIR)  emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
+	-$(RMDIR) $(BUILD_DIR)  emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_* package.* $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR)  $(AIE_WORK_DIR) $(AIE_PKG_DIR) $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
 	-$(RMDIR)  *.html $(GENERATED_FILES)
 

@@ -67,8 +67,8 @@ template <typename TT_DATA_A,
 class outer_tensor {
    private:
    public:
-    using acc_t = accTypeMult_t<TT_DATA_A, TT_DATA_B>;
-    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using acc_t = accType_t<TT_DATA_A, TT_DATA_B>;
+    using out_t = outType_t<TT_DATA_A, TT_DATA_B>;
 
     static constexpr unsigned int kVecSampleNumA = fnVecSampleNumMax<TT_DATA_A>();
     static constexpr unsigned int kVecSampleNumB = fnVecSampleNumMax<TT_DATA_B>();
@@ -126,8 +126,8 @@ template <typename TT_DATA_A,
 class outer_tensor<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_SHIFT, 1, TP_SSR, TP_RND, TP_SAT> {
    private:
    public:
-    using acc_t = accTypeMult_t<TT_DATA_A, TT_DATA_B>;
-    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using acc_t = accType_t<TT_DATA_A, TT_DATA_B>;
+    using out_t = outType_t<TT_DATA_A, TT_DATA_B>;
 
     static constexpr unsigned int kVecSampleNumA = fnVecSampleNumMax<TT_DATA_A>();
     static constexpr unsigned int kVecSampleNumB = fnVecSampleNumMax<TT_DATA_B>();

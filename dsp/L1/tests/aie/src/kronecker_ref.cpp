@@ -28,8 +28,8 @@ namespace kronecker {
 
 // Generic implementation of a multiplier
 template <typename T_A, typename T_B>
-outTypeMult_t<T_A, T_B> scalar_mult(T_A a, T_B b, const int shift, unsigned int t_rnd, unsigned int t_sat) {
-    using out_t = outTypeMult_t<T_A, T_B>;
+outType_t<T_A, T_B> scalar_mult(T_A a, T_B b, const int shift, unsigned int t_rnd, unsigned int t_sat) {
+    using out_t = outType_t<T_A, T_B>;
     out_t ret_val;
     T_accRef<T_A> aAcc;
     T_accRef<T_B> bAcc;

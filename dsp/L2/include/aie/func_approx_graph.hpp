@@ -316,6 +316,7 @@ class func_approx_graph : public graph {
         dimensions(m_kernel[0].in[0]) = {TP_WINDOW_VSIZE};
         connect(m_kernel[0].out[0], out[0]);
         dimensions(m_kernel[0].out[0]) = {TP_WINDOW_VSIZE};
+        conditional_single_buffer<TT_DATA, TP_WINDOW_VSIZE>(m_kernel[0].in[0], m_kernel[0].out[0]);
         // Connect RTP ports for LUTs
         for (int i = 0; i < rtpPortsPerKernel; i++) {
             connect<parameter>(rtpLut[i], async(m_kernel[0].in[i + 1]));
@@ -341,6 +342,7 @@ class func_approx_graph : public graph {
         dimensions(m_kernel[0].in[0]) = {TP_WINDOW_VSIZE};
         connect(m_kernel[0].out[0], out[0]);
         dimensions(m_kernel[0].out[0]) = {TP_WINDOW_VSIZE};
+        conditional_single_buffer<TT_DATA, TP_WINDOW_VSIZE>(m_kernel[0].in[0], m_kernel[0].out[0]);
     }; // constructor
 };
 }

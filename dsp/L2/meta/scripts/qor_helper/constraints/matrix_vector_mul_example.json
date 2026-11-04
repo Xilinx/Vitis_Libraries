@@ -6,6 +6,12 @@
         "TP_DIM_B": 128,
         "TP_NUM_OUTPUTS": 1
     },
-    "qor_constraints": "throughput>1400",
-    "confidence": 2
+    "qor_constraints": {
+        "throughput (MSa/s)": ">1000"
+    },
+    "sort_by": {
+        "num aie": "ascending",
+        "throughput (MSa/s)": "descending"
+    },
+    "confidence": 1
 }

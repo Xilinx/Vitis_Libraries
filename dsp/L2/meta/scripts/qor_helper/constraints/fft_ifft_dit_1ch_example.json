@@ -1,5 +1,6 @@
 {
     "parameter_constraints": {
+        "AIE_VARIANT": 1,
         "TP_POINT_SIZE": 256,
         "TP_FFT_NIFFT": 0,
         "TP_DYN_PT_SIZE": 0,
@@ -10,8 +11,13 @@
         "TP_CASC_LEN": [],
         "TP_PARALLEL_POWER": []
     },
-    "qor_constraints": "throughput>800 and latency<10000",
-    "sort_by": ["num_aie", "throughput"],
-    "ascending": [true, false],
-    "confidence" : 2
+    "qor_constraints": {
+        "throughput (MSa/s)": ">800",
+        "steady shortest latency (us)": "<10"
+    },
+    "sort_by": {
+        "num aie": "ascending",
+        "throughput (MSa/s)": "descending"
+    },
+    "confidence" : 1
 }

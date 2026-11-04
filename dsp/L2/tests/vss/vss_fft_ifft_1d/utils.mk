@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# vitis makefile-generator v2.0.12
 #
 
 REPORT := no
@@ -83,7 +84,7 @@ ifeq (,$(XPLATFORM))
 # 2.1 as exact name vitis < 2022.2
 XPLATFORM := $(strip $(wildcard $(XILINX_VITIS)/platforms/$(PLATFORM)/$(PLATFORM).xpfm))
 ifeq (,$(XPLATFORM))
-# 2.2 as exact name vitis >= 2022.2 (base_platforms)
+# 2.2 as exact name vitis >= 2022.2
 XPLATFORM := $(strip $(wildcard $(XILINX_VITIS)/base_platforms/$(PLATFORM)/$(PLATFORM).xpfm))
 # 2.3 as a pattern vitis < 2022.2
 ifeq (,$(XPLATFORM))
@@ -118,18 +119,6 @@ Available platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable or point PLATFORM variable to the full path of platform .xpfm file.
 endef
 export MSG_PLATFORM
-
-define CONFIG_GEN_PY
-import os, string
-import sys
-tmpl_file = sys.argv[1]
-out_file = sys.argv[2]
-with open(tmpl_file, 'r') as fr:
-    t = fr.read()
-with open(out_file, 'w') as f:
-    f.write(string.Template(t).safe_substitute(**os.environ))
-endef
-export CONFIG_GEN_PY
 
 .PHONY: check_platform
 check_platform:
@@ -180,6 +169,38 @@ pcie_versal := on
 endif
 endif
 
+# 4) EDF (Embedded Device Flow)
+EDF_PLATFORMS_ALL := $(addsuffix _base,$(EDF_BOARDS))
+# match the platform exactly, not by board substring
+EDF_BOARD := $(strip $(foreach b,$(EDF_BOARDS),\
+                     $(if $(filter $(b)_base,$(PLATFORM_NAME)),$(b))))
+
+EDF_SYSROOT_NAME    := cortexa72-cortexa53-amd-linux
+EDF_TOOLCHAIN_ENV   ?= environment-setup-$(EDF_SYSROOT_NAME)
+EDF_TOOLCHAIN_SETUP = $(YOCTO_ARTIFACTS)/$(EDF_TOOLCHAIN_DIR)/sdk/$(EDF_TOOLCHAIN_ENV)
+
+# override with EDF_FLOW=on|off
+ifeq ($(HOST_ARCH), x86)
+EDF_FLOW ?= off
+else ifeq (,$(EDF_BOARD))
+EDF_FLOW ?= off
+else ifeq (,$(wildcard $(YOCTO_ARTIFACTS)))
+EDF_FLOW ?= off
+else
+EDF_FLOW ?= on
+endif
+
+ifeq ($(EDF_FLOW), on)
+ifneq (,$(EDF_BOARD))
+SHELL := /bin/bash
+SYSROOT ?= $(YOCTO_ARTIFACTS)/$(EDF_TOOLCHAIN_DIR)/sdk/sysroots/$(EDF_SYSROOT_NAME)
+export SYSROOT
+export YOCTO_ARTIFACTS EDF_TOOLCHAIN_DIR EDF_TOOLCHAIN_ENV EDF_QEMU_PREBUILT EDF_BOOT_BIN
+export EDF_WIC_SUFFIX EDF_FLASH_BIN EDF_BOOT_MEDIA EDF_GUEST_DEV
+export EDF_WIC_SECTOR_SIZE EDF_AIE_SIM_DIR EDF_AIE_SIM_JSON EDF_SEGMENTED_XSA
+endif
+endif
+
 #when x86 arch, check XRT setup
 ifeq ($(HOST_ARCH), x86)
 ifndef XILINX_XRT
@@ -217,7 +238,7 @@ ifneq ($(HOST_ARCH), $(filter $(HOST_ARCH),aarch64 aarch32 x86))
 $(error HOST_ARCH variable not set, please set correctly and rerun)
 endif
 
-.PHONY: check_version check_sysroot check_kimage check_rootfs
+.PHONY: check_version check_sysroot check_kimage check_rootfs check_edf
 check_version:
 ifneq (, $(shell which git))
 ifneq (,$(wildcard $(XFLIB_DIR)/.git))
@@ -227,6 +248,7 @@ endif
 
 #Set/Check SYSROOT/K_IMAGE/ROOTFS
 ifneq ($(HOST_ARCH), x86)
+ifneq ($(EDF_FLOW), on)
 ifneq (,$(findstring zc706, $(PLATFORM_NAME)))
 K_IMAGE ?= $(SYSROOT)/../../uImage
 else
@@ -234,29 +256,52 @@ K_IMAGE ?= $(SYSROOT)/../../Image
 endif
 ROOTFS ?= $(SYSROOT)/../../rootfs.ext4
 endif
+endif
 
 check_sysroot:
 ifneq ($(HOST_ARCH), x86)
-ifeq (,$(wildcard $(SYSROOT)))
+ifeq ($(EDF_FLOW), on)
+	@[ -d "$(SYSROOT)" ] || { echo "ERROR: SYSROOT ENV variable is not set, please set ENV variable correctly and rerun. Got: '$(SYSROOT)'"; exit 1; }
+else ifeq (,$(wildcard $(SYSROOT)))
 	$(error SYSROOT ENV variable is not set, please set ENV variable correctly and rerun)
 endif
 endif
 check_kimage:
 ifneq ($(HOST_ARCH), x86)
+ifneq ($(EDF_FLOW), on)
 ifeq (,$(wildcard $(K_IMAGE)))
 	$(error K_IMAGE ENV variable is not set, please set ENV variable correctly and rerun)
 endif
 endif
+endif
 check_rootfs:
 ifneq ($(HOST_ARCH), x86)
+ifneq ($(EDF_FLOW), on)
 ifeq (,$(wildcard $(ROOTFS)))
 	$(error ROOTFS ENV variable is not set, please set ENV variable correctly and rerun)
+endif
+endif
+endif
+check_edf:
+ifeq ($(EDF_FLOW), on)
+ifeq (,$(EDF_BOARD))
+	$(error EDF_FLOW=on but '$(PLATFORM_NAME)' is not an EDF platform of this case. Declared EDF platforms: $(EDF_PLATFORMS_ALL). Add the board to platform_allowlist and regenerate, or force a declared one with EDF_BOARD=<$(EDF_BOARDS)>)
+endif
+ifeq (,$(wildcard $(YOCTO_ARTIFACTS)))
+	$(error YOCTO_ARTIFACTS is not set or does not exist, please set it to the Yocto EDF artifacts directory)
+endif
+	@[ -n "$(EDF_TOOLCHAIN_DIR)" ] || { echo "ERROR: EDF board '$(EDF_BOARD)' has no settings in the Makefile. Declared EDF boards: $(EDF_BOARDS)"; exit 1; }
+	@[ -f "$(EDF_TOOLCHAIN_SETUP)" ] || { echo "ERROR: EDF toolchain setup script not found: $(EDF_TOOLCHAIN_SETUP)"; exit 1; }
+ifneq ($(TARGET), hw)
+	@[ -d "$(YOCTO_ARTIFACTS)/$(EDF_QEMU_PREBUILT)" ] || { echo "ERROR: EDF QEMU prebuilt not found: $(YOCTO_ARTIFACTS)/$(EDF_QEMU_PREBUILT)"; exit 1; }
 endif
 endif
 
 CXX := g++
 ifeq ($(HOST_ARCH), x86)
-ifeq ($(shell expr $(VITIS_VER) \>= 2022.1), 1)
+ifeq ($(shell expr $(VITIS_VER) \>= 2026.2), 1)
+CXX_VER := 12.2.0
+else ifeq ($(shell expr $(VITIS_VER) \>= 2022.1), 1)
 CXX_VER := 8.3.0
 else
 CXX_VER := 6.2.0

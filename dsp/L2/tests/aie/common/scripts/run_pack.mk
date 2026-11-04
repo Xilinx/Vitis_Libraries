@@ -104,6 +104,15 @@ all_pack:
 		mkdir -p $(RESULTS_DIR)/scripts_mk ;\
 		cp -rf scripts_mk/* $(RESULTS_DIR)/scripts_mk/ ;\
 	fi
+	@if [ -f run_codex_config.py ]; then \
+		cp -f run_codex_config.py $(RESULTS_DIR) ;\
+	fi
+	@if [ -f codex_output_schema.json ]; then \
+		cp -f codex_output_schema.json $(RESULTS_DIR) ;\
+	fi
+	@if [ -d prompts ]; then \
+		cp -rf prompts $(RESULTS_DIR) ;\
+	fi
 	@make -C $(RESULTS_DIR) cleanall $(PART_OR_PLATFORM)=$(PART_OR_PLATFORM_VAL) >  $(RESULTS_DIR)/logs/log_$(PARAMS).txt
 	@ echo "make -C $(RESULTS_DIR) run TARGET=$(TARGET) PARAMS=$(PARAMS) PARAMS_FILE=$(PARAMS_FILE) $(PART_OR_PLATFORM)=$(PART_OR_PLATFORM_VAL) 2>&1 | tee $(RESULTS_DIR)/logs/log_$(PARAMS).txt"
 	@make -C $(RESULTS_DIR) run TARGET=$(TARGET) PARAMS=$(PARAMS) PARAMS_FILE=$(PARAMS_FILE) $(PART_OR_PLATFORM)=$(PART_OR_PLATFORM_VAL) 2>&1 | tee $(RESULTS_DIR)/logs/log_$(PARAMS).txt

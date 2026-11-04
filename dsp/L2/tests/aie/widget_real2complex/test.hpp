@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,11 @@
 #define UUT_GRAPH widget_real2complex_graph
 #endif
 
+#ifdef USING_UUT
+#include "widget_real2complex_native_generated_graph/widget_real2complex_generated_graph.h"
+#else
 #include QUOTE(UUT_GRAPH.hpp)
+#endif
 
 using namespace adf;
 
@@ -65,27 +69,39 @@ class test_graph : public graph {
         printf("WINDOW_VSIZE      = %d \n", WINDOW_VSIZE);
         namespace dsplib = xf::dsp::aie;
 
-        // Widget sub-graph
+// Widget sub-graph
+#ifdef USING_UUT
+        widget_real2complex_native_generated_graph widgetGraph;
+#else
         dsplib::widget::real2complex::UUT_GRAPH<DATA_TYPE, DATA_OUT_TYPE, WINDOW_VSIZE> widgetGraph;
+#endif
 
         // Make connections
         std::string filenameIn = QUOTE(INPUT_FILE);
         filenameIn.insert(filenameIn.length() - 4, ("_" + std::to_string(0) + "_0"));
         in[0] = input_plio::create("PLIO_in_" + std::to_string(0), adf::plio_64_bits, filenameIn);
+#ifdef USING_UUT
+        connect<>(in[0].out[0], widgetGraph.in[0]);
+#else
         connect<>(in[0].out[0], widgetGraph.in);
+#endif
 
         std::string filenameOut = QUOTE(OUTPUT_FILE);
         filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(0) + "_0"));
         out[0] = output_plio::create("PLIO_out_" + std::to_string(0), adf::plio_64_bits, filenameOut);
+#ifdef USING_UUT
+        connect<>(widgetGraph.out[0], out[0].in[0]);
+#else
         connect<>(widgetGraph.out, out[0].in[0]);
+#endif
 
 #ifdef USING_UUT
 #define CASC_LEN 1
 // Report out for AIE Synthesizer QoR harvest
 // Nothing to report
 #if (SINGLE_BUF == 1)
-        single_buffer(widgetGraph.in);
-        single_buffer(widgetGraph.out);
+        single_buffer(widgetGraph.in[0]);
+        single_buffer(widgetGraph.out[0]);
         printf("INFO: Single Buffer Constraint applied to input and output buffers of the kernel.\n");
 
 #endif

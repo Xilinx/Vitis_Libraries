@@ -210,12 +210,20 @@ def validate_TP_DIM(args):
 ######### TP_IS_OUTPUT_SQUARED Updater and Validator #########
 #######################################################
 def update_TP_IS_OUTPUT_SQUARED(args):
-  return fn_update_is_output_squared()
+  return fn_update_is_output_squared(args["AIE_VARIANT"], args["TP_LEN"])
 
-def fn_update_is_output_squared():
+def fn_update_is_output_squared(AIE_VARIANT=None, TP_LEN=None):
+  enum = [SQRT_OUTPUT, SQUARED_OUTPUT]
+  # Mirror fn_validate_is_output_squared()'s AIE-ML/AIE-MLv2 sqrt-output restriction here too,
+  # so the offered set is never a choice the validator would then reject. TP_LEN is already
+  # decided by the time this parameter is reached (see euclidean_distance.json's param order),
+  # in every consumer that walks parameters in that order (ParamWizard, config_helper.py, etc).
+  lut_granularity = AIE_X_REG_BYTES // com.fn_size_by_byte("bfloat16")
+  if AIE_VARIANT in [com.AIE_ML, com.AIE_MLv2] and TP_LEN is not None and int(TP_LEN) % lut_granularity != 0:
+    enum = [SQUARED_OUTPUT]
   param_dict={
     "name" : "TP_IS_OUTPUT_SQUARED",
-    "enum" : [SQRT_OUTPUT, SQUARED_OUTPUT]
+    "enum" : enum
   }
   return param_dict
 
@@ -226,7 +234,7 @@ def validate_TP_IS_OUTPUT_SQUARED(args):
   return fn_validate_is_output_squared(TP_IS_OUTPUT_SQUARED, AIE_VARIANT, TP_LEN)
 
 def fn_validate_is_output_squared(TP_IS_OUTPUT_SQUARED, AIE_VARIANT, TP_LEN):
-  param_dict = fn_update_is_output_squared()
+  param_dict = fn_update_is_output_squared(AIE_VARIANT, TP_LEN)
   legal_set_check = com.validate_legal_set(param_dict["enum"], "TP_IS_OUTPUT_SQUARED", TP_IS_OUTPUT_SQUARED)
   if not legal_set_check["is_valid"]:
     return legal_set_check
@@ -386,8 +394,6 @@ f"""
 class {graphname} : public adf::graph {{
 public:
   // ports
-  //template <typename dir>
-  template <typename dir>
   std::array<adf::port<input>, 1> inP;
   std::array<adf::port<input>, 1> inQ;
   std::array<adf::port<output>, 1> out;
@@ -399,7 +405,7 @@ public:
     {TP_API}, //TP_API
     {TP_RND}, //TP_RND
     {TP_SAT}, // TP_SAT
-    {TP_IS_OUTPUT_SQUARED}, //TP_IS_OUTPUT_SQUARED
+    {TP_IS_OUTPUT_SQUARED} //TP_IS_OUTPUT_SQUARED
     > euclidean_distance_graph;
 
   {graphname}() : euclidean_distance_graph() {{
@@ -407,9 +413,9 @@ public:
     for (int i=0; i < 1; i++) {{
       adf::runtime<ratio>(euclidean_distance_kernels[i]) = 0.9;
     }}
-    adf::connect<> net_in(inP, euclidean_distance_graph.inP[0]);
-    adf::connect<> net_in(inQ, euclidean_distance_graph.inQ[1]);
-    adf::connect<> net_out(euclidean_distance_graph.out, out[0]);
+    adf::connect<> net_inP(inP[0], euclidean_distance_graph.inWindowP);
+    adf::connect<> net_inQ(inQ[0], euclidean_distance_graph.inWindowQ);
+    adf::connect<> net_out(euclidean_distance_graph.outWindow, out[0]);
 
   }}
 }};

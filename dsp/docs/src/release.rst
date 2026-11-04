@@ -14,6 +14,30 @@ Release Notes
    :hidden:
    :maxdepth: 1
 
+2026.2
+======
+
+The following features have been added to the library in this release:
+
+* **GEMM** - Added ``TP_CONJ_A`` and ``TP_CONJ_B`` template parameters to conjugate the A and/or B input on the fly during
+  multiplication, with no change in performance versus the non-conjugated operation.
+
+* **Transpose** - New library element.
+
++---------------------------------------+-----------------------------------------------------------------------------+
+| **Function**                          | **Namespace and class name**                                                |
++=======================================+=============================================================================+
+| Transpose                             |  xf::dsp::aie::transpose::transpose_graph                                   |
++---------------------------------------+-----------------------------------------------------------------------------+
+
+This element adds an implementation of matrix transpose, using the ``::aie::transpose()`` AI
+Engine API intrinsic. Supports multi-kernel operation via ``TP_SSR`` and ``TP_CASC_LEN``, two
+column/row splitting strategies via ``TP_SPLIT_MODE``, and complex conjugation via
+``TP_CONJUGATE`` with no reduction in throughput.
+
+Supports AIE, AIE-ML and AIE-MLv2 devices.
+
+
 2026.1
 ======
 

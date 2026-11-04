@@ -1,0 +1,4 @@
+Configure a function approximation (lookup-table with linear interpolation) for an AIE1
+device on int16 input data in the [0, 1) domain, using 6 coarse bits to address the table
+and 8 fine bits for interpolation, 256 samples per call, static lookup table, no shift,
+round-half-up and saturation.

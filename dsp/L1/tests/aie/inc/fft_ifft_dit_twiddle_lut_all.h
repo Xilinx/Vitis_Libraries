@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
  */
 #ifndef __FFT_TWIDDLE_LUT_DIT_ALL_H__
 #define __FFT_TWIDDLE_LUT_DIT_ALL_H__
+
 #include "device_defs.h" //for _SUPPORTS_CBFLOAT_
 #include "fft_com_inc.h"
-// DO NOT HAND EDIT THIS FILE. IT WAS CREATED using ../tests/inc/twiddle_32.c
+// DO NOT HAND EDIT THIS FILE. IT WAS CREATED using L1/tests/aie/inc/twiddle_gen.c
 
 const cfloat twiddle_master_cfloat[2048] = {{1.000000, -0.000000},  {0.999999, -0.001534},  {0.999995, -0.003068},
                                             {0.999989, -0.004602},  {0.999981, -0.006136},  {0.999971, -0.007670},
@@ -2074,6 +2075,7 @@ const cbfloat16 twiddle_master_cbfloat16[2048] = {
     {-0.999995, -0.003068}, {-0.999999, -0.001534}
 
 };
+
 #endif //_SUPPORTS_CBFLOAT16_
 
 const cint32 twiddle_master_cint32[2048] = {{2147483647, 0},

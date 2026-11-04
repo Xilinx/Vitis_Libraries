@@ -37,6 +37,7 @@ The DSPLib consists of the following DSP elements:
    Outer Tensor Product <func-outer-tensor.rst>
    Packet Switch Graph <func-pkt_switch.rst>
    Sample Delay <func-sample_delay.rst>
+   Transpose <func-transpose.rst>
    Widget API Casts <func-widget-apicast.rst>
    Widget Real to Complex <func-widget-real2comp.rst>
 

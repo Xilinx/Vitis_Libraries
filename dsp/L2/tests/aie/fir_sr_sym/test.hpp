@@ -32,6 +32,7 @@ Single Rate Symmetrical FIR graph class.
 #include "test_utils.hpp"
 #include "fir_common_traits.hpp"
 #include "device_defs.h"
+#include "fir_sr_sym_native_generated_graph/fir_sr_sym_generated_graph.h"
 
 #define Q(x) #x
 #define QUOTE(x) Q(x)
@@ -120,11 +121,19 @@ class test_graph : public graph {
 #endif
 
 // FIR sub-graph
-#if (USE_COEFF_RELOAD == 1) // Reloadable coefficients
+#if (USE_COEFF_RELOAD == 1)
         static_assert(NITER % 2 == 0,
                       "ERROR: Please set NITER to be a multiple of 2 when reloadable coefficients are used");
+#endif
+#ifdef USING_UUT
+#if (USE_COEFF_RELOAD == 1)
+        fir_sr_sym_native_generated_graph firGraph;
+#else
+        fir_sr_sym_native_generated_graph firGraph(m_taps_v);
+#endif
+#elif (USE_COEFF_RELOAD == 1) // Reloadable coefficients
         uut_g firGraph;
-#else // Static coefficients
+#else                         // Static coefficients
         uut_g firGraph(m_taps_v);
 #endif
 
@@ -181,33 +190,33 @@ class test_graph : public graph {
 #if (P_SSR == 1) // Check buffer size is within limits, when buffer interface is used.
         const int bufferSize = (PORT_API == 1 ? 0 : (FIR_LEN + INPUT_SAMPLES) * sizeof(DATA_TYPE));
         if (bufferSize > MAX_PING_PONG_SIZE || (SINGLE_BUF == 1 && PORT_API == 0)) {
-            single_buffer(firGraph.getKernels()->in[0]);
-            single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[0]);
+            single_buffer(firGraph.filter.getKernels()->in[0]);
+            single_buffer(firGraph.filter.getKernels()[CASC_LEN - 1].out[0]);
             if (DUAL_IP == 1) {
-                single_buffer(firGraph.getKernels()->in[1]);
+                single_buffer(firGraph.filter.getKernels()->in[1]);
             }
             if (NUM_OUTPUTS == 2) {
-                single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[1]);
+                single_buffer(firGraph.filter.getKernels()[CASC_LEN - 1].out[1]);
             }
         }
 
         if (bufferSize > MAX_PING_PONG_SIZE || (SINGLE_BUF == 1 && PORT_API == 0)) {
             for (int ssr = 0; ssr < P_SSR; ssr++) {
-                single_buffer(firGraph.getKernels()[CASC_LEN * ssr * P_SSR].in[0]);
+                single_buffer(firGraph.filter.getKernels()[CASC_LEN * ssr * P_SSR].in[0]);
                 printf("INFO: Single Buffer Constraint applied to input buffer-0 of kernel %d.\n",
                        CASC_LEN * ssr * P_SSR);
 
-                single_buffer(firGraph.getKernels()[CASC_LEN * (ssr + 1) * P_SSR - 1].out[0]);
+                single_buffer(firGraph.filter.getKernels()[CASC_LEN * (ssr + 1) * P_SSR - 1].out[0]);
                 printf("INFO: Single Buffer Constraint applied to output buffer-0 of kernel %d.\n",
                        CASC_LEN * (ssr + 1) * P_SSR - 1);
 
                 if (DUAL_IP == 1) {
-                    single_buffer(firGraph.getKernels()[CASC_LEN * ssr * P_SSR].in[1]);
+                    single_buffer(firGraph.filter.getKernels()[CASC_LEN * ssr * P_SSR].in[1]);
                     printf("INFO: Single Buffer Constraint applied to input buffer-1 of kernel %d.\n",
                            CASC_LEN * ssr * P_SSR);
                 }
                 if (NUM_OUTPUTS == 2) {
-                    single_buffer(firGraph.getKernels()[CASC_LEN * (ssr + 1) * P_SSR - 1].out[1]);
+                    single_buffer(firGraph.filter.getKernels()[CASC_LEN * (ssr + 1) * P_SSR - 1].out[1]);
                     printf("INFO: Single Buffer Constraint applied to output buffer-1 of kernel %d.\n",
                            CASC_LEN * (ssr + 1) * P_SSR - 1);
                 }
@@ -218,9 +227,9 @@ class test_graph : public graph {
 
 #ifdef USING_UUT
         // Report out for AIE Synthesizer QoR harvest
-        if (&firGraph.getKernels()[0] != NULL) {
+        if (&firGraph.filter.getKernels()[0] != NULL) {
             printf("KERNEL_ARCHS: [");
-            int arch = firGraph.getKernelArchs();
+            int arch = firGraph.filter.getKernelArchs();
             printf("%d", arch);
             printf("]\n");
         }

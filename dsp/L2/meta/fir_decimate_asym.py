@@ -1300,6 +1300,15 @@ def generate_graph(graphname, args):
 
     taps = sr_asym.fn_get_taps_vector(TT_COEFF, coeff_list)
     constr_args_str = f"taps" if TP_USE_COEFF_RELOAD == 0 else ""
+    taps_ctor_str = (
+        f"""
+  // Constructor using taps passed as an argument
+  {graphname}(const std::vector<{TT_COEFF}>& taps) : filter(taps) {{
+    create_connections();
+  }}"""
+        if TP_USE_COEFF_RELOAD == 0
+        else "// No taps-argument constructor: TP_USE_COEFF_RELOAD is enabled"
+    )
     dual_ip_declare_str = (
         f"std::array<adf::port<input>, TP_SSR*TP_PARA_DECI_POLY> in2;"
         if TP_DUAL_IP == 1
@@ -1362,7 +1371,12 @@ public:
     {TP_SAT} //TP_SAT
   > filter;
 
+  {taps_ctor_str}
+  // Constructor using internal taps
   {graphname}() : filter({constr_args_str}) {{
+    create_connections();
+  }}
+  void create_connections() {{
     adf::kernel *filter_kernels = filter.getKernels();
 
     for (int paraPolyIdx=0; paraPolyIdx < TP_PARA_DECI_POLY; paraPolyIdx++) {{

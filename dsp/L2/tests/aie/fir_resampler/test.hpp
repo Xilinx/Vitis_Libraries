@@ -31,6 +31,7 @@ fir_resampler graph class.
 #include "test_utils.hpp"
 #include "fir_common_traits.hpp"
 #include "device_defs.h"
+#include "fir_resampler_native_generated_graph/fir_resampler_generated_graph.h"
 
 #ifndef UUT_GRAPH
 #define UUT_GRAPH fir_resampler_graph
@@ -132,7 +133,13 @@ class test_graph : public graph {
                       "ERROR: Please set NITER to be a multiple of 2 when reloadable coefficients are used");
 #endif
 
-#if (USE_COEFF_RELOAD == 0)
+#ifdef USING_UUT
+#if (USE_COEFF_RELOAD == 1)
+        fir_resampler_native_generated_graph firGraph;
+#else
+        fir_resampler_native_generated_graph firGraph(m_taps_v);
+#endif
+#elif (USE_COEFF_RELOAD == 0)
         // Static coefficients
         uut_g<INPUT_SAMPLES> firGraph(m_taps_v);
 #elif (USE_COEFF_RELOAD == 1)
@@ -196,15 +203,15 @@ class test_graph : public graph {
         int LOC_XBASE = 20;
         int LOC_YBASE = 0;
         for (int i = 1; i < CASC_LEN; i++) {
-            location<kernel>(*firGraph.getKernels(i)) = tile(LOC_XBASE + i, LOC_YBASE);
+            location<kernel>(*firGraph.filter.getKernels(i)) = tile(LOC_XBASE + i, LOC_YBASE);
         }
 
         // overwrite the internally calculated fifo depth with some other value.
         for (int i = 1; i < CASC_LEN; i++) {
-            connect<stream, stream>* net = firGraph.getInNet(i);
+            connect<stream, stream>* net = firGraph.filter.getInNet(i);
             fifo_depth(*net) = 384 + 16 * i;
 #if (DUAL_IP == 1)
-            connect<stream, stream>* net2 = firGraph.getIn2Net(i);
+            connect<stream, stream>* net2 = firGraph.filter.getIn2Net(i);
             fifo_depth(*net2) = 384 + 16 * i;
 #endif
         }
@@ -219,16 +226,16 @@ class test_graph : public graph {
                                                                               // FIR with margin.
 
         if ((inputBufferSize > MAX_PING_PONG_SIZE) || (SINGLE_BUF == 1 && PORT_API == 0)) {
-            single_buffer(firGraph.getKernels()[0].in[0]);
+            single_buffer(firGraph.filter.getKernels()[0].in[0]);
 #if (DUAL_IP == 1)
-            single_buffer(firGraph.getKernels()[0].in[1]);
+            single_buffer(firGraph.filter.getKernels()[0].in[1]);
 #endif
             printf("INFO: Single Buffer Constraint applied to input buffers of kernel 0.\n");
         }
         if ((outputBufferSize > MAX_PING_PONG_SIZE) || (SINGLE_BUF == 1 && PORT_API == 0)) {
-            single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[0]);
+            single_buffer(firGraph.filter.getKernels()[CASC_LEN - 1].out[0]);
 #if (NUM_OUTPUTS == 2)
-            single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[1]);
+            single_buffer(firGraph.filter.getKernels()[CASC_LEN - 1].out[1]);
 #endif
             printf("INFO: Single Buffer Constraint applied to output buffers of kernel %d.\n", CASC_LEN - 1);
         }
@@ -237,12 +244,12 @@ class test_graph : public graph {
 
 #ifdef USING_UUT
         // Report out for AIE Synthesizer QoR harvest
-        if (&firGraph.getKernels()[0] != NULL) {
+        if (&firGraph.filter.getKernels()[0] != NULL) {
             printf("KERNEL_ARCHS: [");
-            int arch = firGraph.getKernelArchs();
+            int arch = firGraph.filter.getKernelArchs();
             printf("%d", arch);
             printf("]\n");
-            printf("polyphaseLaneAlias = %d\n", firGraph.getPolyphaseLaneAlias());
+            printf("polyphaseLaneAlias = %d\n", firGraph.filter.getPolyphaseLaneAlias());
         }
 #endif
     };

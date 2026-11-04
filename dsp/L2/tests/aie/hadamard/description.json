@@ -93,7 +93,7 @@
                         "default": {
                             "COMPILER_ARGS": "",
                             "AIE_VARIANT": "22",
-                            "FIFO_THRESHOLD": "--aie.swfifo-threshold=120 "
+                            "FIFO_THRESHOLD": ""
                         }
                     }
                 }
@@ -103,6 +103,15 @@
     "pre_build": [
         {
             "build_cmd": " mkdir -p logs"
+        },
+        {
+            "build_cmd": "$(if $(PROMPT_FILE), $(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/prompt_config/run_prompt_config.py --ip hadamard --params_file $(PARAMS_FILE) --instance $(PARAMS) --prompt_file $(PROMPT_FILE) --prompt_dir PROJECT/prompts --lib_dir LIB_DIR --out_dir PROJECT/logs))"
+        },
+        {
+            "build_cmd": "$(if $(QOR_HELPER_CONSTRAINTS_PATH_OVERRIDE), $(if $(filter-out REF,$(TAG)), cd LIB_DIR/$(DSP_DIR)/L2/meta/scripts/qor_helper && $(VITIS_PYTHON3) config_qor_helper.py --ip hadamard --constraints_file LIB_DIR/$(DSP_DIR)/L2/meta/scripts/qor_helper/constraints/$(QOR_HELPER_CONSTRAINTS_PATH_OVERRIDE) --out_csv_file PROJECT/logs/qor_helper_recommendations.csv))"
+        },
+        {
+            "build_cmd": "$(if $(QOR_HELPER_CONSTRAINTS_PATH_OVERRIDE), $(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/$(DSP_DIR)/L2/meta/scripts/qor_helper/apply_qor_helper_recommendation.py --csv_file PROJECT/logs/qor_helper_recommendations.csv --multi_params_file $(PARAMS_FILE) --param_set_name $(PARAMS)))"
         },
         {
             "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f helper.mk create_config HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\")"
@@ -127,8 +136,11 @@
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk prep_aie_out HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)\"",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_diff HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)\"",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f $(CUR_DIR)/helper.mk get_memory HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f $(CUR_DIR)/helper.mk get_latency HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
-                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./"
+                "$(if $(QOR_HELPER_CONSTRAINTS_PATH_OVERRIDE), $(VITIS_PYTHON3) LIB_DIR/$(DSP_DIR)/L2/meta/scripts/qor_helper/check_qor_helper_prediction.py --constraints_file LIB_DIR/$(DSP_DIR)/L2/meta/scripts/qor_helper/constraints/$(QOR_HELPER_CONSTRAINTS_PATH_OVERRIDE) --qor_csv PROJECT/logs/qor_helper_recommendations.csv --status_json PROJECT/logs/status_$(UUT_KERNEL)_$(PARAMS).json)",
+                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./",
+                "$(if $(filter-out REF,$(TAG)), $(if $(filter 1,$(CLEAN_TEST)), make ultraclean))"
             ]
         },
         {
@@ -137,7 +149,8 @@
                 "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk prep_x86_out HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)\")",
                 "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_diff HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)\")",
                 "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)\")",
-                "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./)"
+                "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./)",
+                "$(if $(filter-out REF,$(TAG)), $(if $(filter 1,$(CLEAN_TEST)), make ultraclean))"
             ]
         }
     ],
@@ -261,11 +274,11 @@
                     "vitis_aie_sim",
                     "vitis_aie_x86sim"
                 ],
-                "*_hw_qor": [
+                "*_hw_checkin": [
                     "vitis_aie_sim",
                     "vitis_aie_x86sim"
                 ],
-                "*_x86sim_qor": [
+                "*_x86sim_checkin": [
                     "vitis_aie_x86sim"
                 ]
             }

@@ -180,10 +180,12 @@ class outer_tensor_graph : public graph {
             connect(inB[i], m_kernels[i].in[1]);
             dimensions(m_kernels[i].in[0]) = {kKernelDimA * TP_NUM_FRAMES};
             dimensions(m_kernels[i].in[1]) = {kKernelDimB * TP_NUM_FRAMES};
+
+            conditional_single_buffer<TT_DATA_A, kKernelDimA * TP_NUM_FRAMES>(m_kernels[i].in[0]);
+            conditional_single_buffer<TT_DATA_B, kKernelDimB * TP_NUM_FRAMES>(m_kernels[i].in[1]);
+
             if (TP_API == 0) {
-                if (kKernelMatrixSize * TP_NUM_FRAMES * sizeof(out_t) > __DATA_MEM_BYTES__ / 2) {
-                    single_buffer(m_kernels[i].out[0]);
-                }
+                conditional_single_buffer<out_t, kKernelMatrixSize * TP_NUM_FRAMES>(m_kernels[i].out[0]);
                 connect(m_kernels[i].out[0], out[i]);
                 dimensions(m_kernels[i].out[0]) = {kKernelMatrixSize * TP_NUM_FRAMES};
             } else {

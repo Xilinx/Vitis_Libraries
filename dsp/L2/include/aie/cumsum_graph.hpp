@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -188,8 +188,10 @@ class cumsum_graph : public graph {
             // make connections
             connect(in[i], m_kernels[i].in[0]);
             dimensions(m_kernels[i].in[0]) = {kKernelWindowVsize};
+            conditional_single_buffer<TT_DATA, kKernelWindowVsize>(m_kernels[i].in[0]);
             connect(m_kernels[i].out[0], out[i]);
             dimensions(m_kernels[i].out[0]) = {kKernelWindowVsize};
+            conditional_single_buffer<TT_OUT_DATA, kKernelWindowVsize>(m_kernels[i].out[0]);
         }
     }; // constructor
 };

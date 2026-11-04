@@ -1,0 +1,176 @@
+{
+    "out_mul_type": {
+        "int16": {
+            "int16": "int16",
+            "int32": "int32",
+            "cint16": "cint16",
+            "cint32": "cint32"
+        },
+        "int32": {
+            "int16": "int32",
+            "int32": "int32",
+            "cint16": "cint32",
+            "cint32": "cint32"
+        },
+        "cint16": {
+            "int16": "cint16",
+            "int32": "cint32",
+            "cint16": "cint16",
+            "cint32": "cint32"
+        },
+        "cint32": {
+            "int16": "cint32",
+            "int32": "cint32",
+            "cint16": "cint32",
+            "cint32": "cint32"
+        },
+        "float": {
+            "float": "float",
+            "cfloat": "cfloat"
+        },
+        "cfloat": {
+            "float": "cfloat",
+            "cfloat": "cfloat"
+        }
+    },
+    "acc_mul_type": {
+        "acc64": {
+            "int16": {
+                "int16": "acc32",
+                "int32": "acc64",
+                "cint16": "cacc32",
+                "cint32": "cacc64"
+            },
+            "int32": {
+                "int16": "acc64",
+                "int32": "acc64",
+                "cint16": "cacc64",
+                "cint32": "cacc64"
+            },
+            "cint16": {
+                "int16": "cacc32",
+                "int32": "cacc64",
+                "cint16": "cacc32",
+                "cint32": "cacc64"
+            },
+            "cint32": {
+                "int16": "cacc64",
+                "int32": "cacc64",
+                "cint16": "cacc64",
+                "cint32": "cacc64"
+            },
+            "float": {
+                "float": "accfloat",
+                "cfloat": "caccfloat"
+            },
+            "cfloat": {
+                "float": "caccfloat",
+                "cfloat": "caccfloat"
+            }
+        },
+        "acc48": {
+            "int16": {
+                "int16": "acc48",
+                "int32": "acc48",
+                "cint16": "cacc48",
+                "cint32": "cacc48"
+            },
+            "int32": {
+                "int16": "acc48",
+                "int32": "acc80",
+                "cint16": "cacc48",
+                "cint32": "cacc80"
+            },
+            "cint16": {
+                "int16": "cacc48",
+                "int32": "cacc48",
+                "cint16": "cacc48",
+                "cint32": "cacc48"
+            },
+            "cint32": {
+                "int16": "cacc48",
+                "int32": "cacc80",
+                "cint16": "cacc48",
+                "cint32": "cacc80"
+            },
+            "float": {
+                "float": "accfloat",
+                "cfloat": "caccfloat"
+            },
+            "cfloat": {
+                "float": "caccfloat",
+                "cfloat": "caccfloat"
+            }
+        }
+    },
+    "acc_mac_type": {
+        "acc64": {
+            "int16": {
+                "int16": "acc64",
+                "int32": "acc64",
+                "cint16": "cacc64",
+                "cint32": "cacc64"
+            },
+            "int32": {
+                "int16": "acc64",
+                "int32": "acc64",
+                "cint16": "cacc64",
+                "cint32": "cacc64"
+            },
+            "cint16": {
+                "int16": "cacc64",
+                "int32": "cacc64",
+                "cint16": "cacc64",
+                "cint32": "cacc64"
+            },
+            "cint32": {
+                "int16": "cacc64",
+                "int32": "cacc64",
+                "cint16": "cacc64",
+                "cint32": "cacc64"
+            },
+            "float": {
+                "float": "accfloat",
+                "cfloat": "caccfloat"
+            },
+            "cfloat": {
+                "float": "caccfloat",
+                "cfloat": "caccfloat"
+            }
+        },
+        "acc48": {
+            "int16": {
+                "int16": "acc48",
+                "int32": "acc80",
+                "cint16": "cacc48",
+                "cint32": "cacc80"
+            },
+            "int32": {
+                "int16": "acc80",
+                "int32": "acc80",
+                "cint16": "cacc80",
+                "cint32": "cacc80"
+            },
+            "cint16": {
+                "int16": "cacc48",
+                "int32": "cacc80",
+                "cint16": "cacc48",
+                "cint32": "cacc80"
+            },
+            "cint32": {
+                "int16": "cacc80",
+                "int32": "cacc80",
+                "cint16": "cacc80",
+                "cint32": "cacc80"
+            },
+            "float": {
+                "float": "accfloat",
+                "cfloat": "caccfloat"
+            },
+            "cfloat": {
+                "float": "caccfloat",
+                "cfloat": "caccfloat"
+            }
+        }
+    }
+}

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,7 +116,9 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_AB_RANGE = TP_DIM_AB,
           unsigned int TP_DIM_B_RANGE = TP_DIM_B,
           unsigned int TP_KERNEL_POSITION = 0,
-          unsigned int TP_CASC_LEN = 1>
+          unsigned int TP_CASC_LEN = 1,
+          unsigned int TP_CONJ_A = 0,
+          unsigned int TP_CONJ_B = 0>
 class kernelMatMultClass {
    protected:
     // Members defined here can be changed in derived classes to support customer inheritance.
@@ -173,6 +175,12 @@ class kernelMatMultClass {
                                                                                                   // TT_DATA_B will also
                                                                                                   // be float or integer
                                                                                                   // to match TT_DATA_A.
+    static_assert(TP_CONJ_B == 0 || std::is_same<TT_DATA_B, cfloat>::value || std::is_same<TT_DATA_B, cint16>::value ||
+                      std::is_same<TT_DATA_B, cint32>::value,
+                  "ERROR: TP_CONJ_B=1 requires a complex TT_DATA_B type (cfloat, cint16, or cint32).");
+    static_assert(TP_CONJ_A == 0 || std::is_same<TT_DATA_A, cfloat>::value || std::is_same<TT_DATA_A, cint16>::value ||
+                      std::is_same<TT_DATA_A, cint32>::value,
+                  "ERROR: TP_CONJ_A=1 requires a complex TT_DATA_A type (cfloat, cint16, or cint32).");
 
     static constexpr unsigned int m_kArch = 0; // no other arch right now
 
@@ -243,7 +251,9 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_AB_RANGE = TP_DIM_AB,
           unsigned int TP_DIM_B_RANGE = TP_DIM_B,
           unsigned int TP_KERNEL_POSITION = 0,
-          unsigned int TP_CASC_LEN = 1>
+          unsigned int TP_CASC_LEN = 1,
+          unsigned int TP_CONJ_A = 0,
+          unsigned int TP_CONJ_B = 0>
 class matrix_mult : public kernelMatMultClass<TT_DATA_A,
                                               TT_DATA_B,
                                               TT_OUT_DATA,
@@ -264,7 +274,9 @@ class matrix_mult : public kernelMatMultClass<TT_DATA_A,
                                               TP_DIM_AB,
                                               TP_DIM_B,
                                               TP_KERNEL_POSITION,
-                                              TP_CASC_LEN> {
+                                              TP_CASC_LEN,
+                                              TP_CONJ_A,
+                                              TP_CONJ_B> {
    private:
    public:
     // Constructor calls base class constructor (neither of which have anything to do)
@@ -289,7 +301,9 @@ class matrix_mult : public kernelMatMultClass<TT_DATA_A,
                              TP_DIM_AB,
                              TP_DIM_B,
                              TP_KERNEL_POSITION,
-                             TP_CASC_LEN>() {}
+                             TP_CASC_LEN,
+                             TP_CONJ_A,
+                             TP_CONJ_B>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(matrix_mult::matMult); }
@@ -320,7 +334,9 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_AB_RANGE,
           unsigned int TP_DIM_B_RANGE,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_CONJ_A,
+          unsigned int TP_CONJ_B>
 class matrix_mult<TT_DATA_A,
                   TT_DATA_B,
                   TT_OUT_DATA,
@@ -341,27 +357,31 @@ class matrix_mult<TT_DATA_A,
                   TP_DIM_AB_RANGE,
                   TP_DIM_B_RANGE,
                   TP_KERNEL_POSITION,
-                  TP_CASC_LEN> : public kernelMatMultClass<TT_DATA_A,
-                                                           TT_DATA_B,
-                                                           TT_OUT_DATA,
-                                                           TP_DIM_A,
-                                                           TP_DIM_AB,
-                                                           TP_DIM_B,
-                                                           TP_SHIFT,
-                                                           TP_RND,
-                                                           TP_SAT,
-                                                           TP_DIM_A_LEADING,
-                                                           TP_DIM_B_LEADING,
-                                                           TP_DIM_OUT_LEADING,
-                                                           TP_INPUT_WINDOW_VSIZE_A,
-                                                           TP_INPUT_WINDOW_VSIZE_B,
-                                                           CASC_IN_TRUE,
-                                                           CASC_OUT_FALSE,
-                                                           TP_DIM_A_RANGE,
-                                                           TP_DIM_AB_RANGE,
-                                                           TP_DIM_B_RANGE,
-                                                           TP_KERNEL_POSITION,
-                                                           TP_CASC_LEN> {
+                  TP_CASC_LEN,
+                  TP_CONJ_A,
+                  TP_CONJ_B> : public kernelMatMultClass<TT_DATA_A,
+                                                         TT_DATA_B,
+                                                         TT_OUT_DATA,
+                                                         TP_DIM_A,
+                                                         TP_DIM_AB,
+                                                         TP_DIM_B,
+                                                         TP_SHIFT,
+                                                         TP_RND,
+                                                         TP_SAT,
+                                                         TP_DIM_A_LEADING,
+                                                         TP_DIM_B_LEADING,
+                                                         TP_DIM_OUT_LEADING,
+                                                         TP_INPUT_WINDOW_VSIZE_A,
+                                                         TP_INPUT_WINDOW_VSIZE_B,
+                                                         CASC_IN_TRUE,
+                                                         CASC_OUT_FALSE,
+                                                         TP_DIM_A_RANGE,
+                                                         TP_DIM_AB_RANGE,
+                                                         TP_DIM_B_RANGE,
+                                                         TP_KERNEL_POSITION,
+                                                         TP_CASC_LEN,
+                                                         TP_CONJ_A,
+                                                         TP_CONJ_B> {
    private:
    public:
     // Constructor (does nothing and neither does the base class, but this is left as a placeholder)
@@ -386,7 +406,9 @@ class matrix_mult<TT_DATA_A,
                              TP_DIM_AB_RANGE,
                              TP_DIM_B_RANGE,
                              TP_KERNEL_POSITION,
-                             TP_CASC_LEN>() {}
+                             TP_CASC_LEN,
+                             TP_CONJ_A,
+                             TP_CONJ_B>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(matrix_mult::matMult); }
@@ -418,7 +440,9 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_AB_RANGE,
           unsigned int TP_DIM_B_RANGE,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_CONJ_A,
+          unsigned int TP_CONJ_B>
 class matrix_mult<TT_DATA_A,
                   TT_DATA_B,
                   TT_OUT_DATA,
@@ -439,27 +463,31 @@ class matrix_mult<TT_DATA_A,
                   TP_DIM_AB_RANGE,
                   TP_DIM_B_RANGE,
                   TP_KERNEL_POSITION,
-                  TP_CASC_LEN> : public kernelMatMultClass<TT_DATA_A,
-                                                           TT_DATA_B,
-                                                           TT_OUT_DATA,
-                                                           TP_DIM_A,
-                                                           TP_DIM_AB,
-                                                           TP_DIM_B,
-                                                           TP_SHIFT,
-                                                           TP_RND,
-                                                           TP_SAT,
-                                                           TP_DIM_A_LEADING,
-                                                           TP_DIM_B_LEADING,
-                                                           TP_DIM_OUT_LEADING,
-                                                           TP_INPUT_WINDOW_VSIZE_A,
-                                                           TP_INPUT_WINDOW_VSIZE_B,
-                                                           CASC_IN_FALSE,
-                                                           CASC_OUT_TRUE,
-                                                           TP_DIM_A_RANGE,
-                                                           TP_DIM_AB_RANGE,
-                                                           TP_DIM_B_RANGE,
-                                                           TP_KERNEL_POSITION,
-                                                           TP_CASC_LEN> {
+                  TP_CASC_LEN,
+                  TP_CONJ_A,
+                  TP_CONJ_B> : public kernelMatMultClass<TT_DATA_A,
+                                                         TT_DATA_B,
+                                                         TT_OUT_DATA,
+                                                         TP_DIM_A,
+                                                         TP_DIM_AB,
+                                                         TP_DIM_B,
+                                                         TP_SHIFT,
+                                                         TP_RND,
+                                                         TP_SAT,
+                                                         TP_DIM_A_LEADING,
+                                                         TP_DIM_B_LEADING,
+                                                         TP_DIM_OUT_LEADING,
+                                                         TP_INPUT_WINDOW_VSIZE_A,
+                                                         TP_INPUT_WINDOW_VSIZE_B,
+                                                         CASC_IN_FALSE,
+                                                         CASC_OUT_TRUE,
+                                                         TP_DIM_A_RANGE,
+                                                         TP_DIM_AB_RANGE,
+                                                         TP_DIM_B_RANGE,
+                                                         TP_KERNEL_POSITION,
+                                                         TP_CASC_LEN,
+                                                         TP_CONJ_A,
+                                                         TP_CONJ_B> {
    private:
    public:
     // Constructor
@@ -484,7 +512,9 @@ class matrix_mult<TT_DATA_A,
                              TP_DIM_AB_RANGE,
                              TP_DIM_B_RANGE,
                              TP_KERNEL_POSITION,
-                             TP_CASC_LEN>() {}
+                             TP_CASC_LEN,
+                             TP_CONJ_A,
+                             TP_CONJ_B>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(matrix_mult::matMult); }
@@ -515,7 +545,9 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_AB_RANGE,
           unsigned int TP_DIM_B_RANGE,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_CONJ_A,
+          unsigned int TP_CONJ_B>
 class matrix_mult<TT_DATA_A,
                   TT_DATA_B,
                   TT_OUT_DATA,
@@ -536,27 +568,31 @@ class matrix_mult<TT_DATA_A,
                   TP_DIM_AB_RANGE,
                   TP_DIM_B_RANGE,
                   TP_KERNEL_POSITION,
-                  TP_CASC_LEN> : public kernelMatMultClass<TT_DATA_A,
-                                                           TT_DATA_B,
-                                                           TT_OUT_DATA,
-                                                           TP_DIM_A,
-                                                           TP_DIM_AB,
-                                                           TP_DIM_B,
-                                                           TP_SHIFT,
-                                                           TP_RND,
-                                                           TP_SAT,
-                                                           TP_DIM_A_LEADING,
-                                                           TP_DIM_B_LEADING,
-                                                           TP_DIM_OUT_LEADING,
-                                                           TP_INPUT_WINDOW_VSIZE_A,
-                                                           TP_INPUT_WINDOW_VSIZE_B,
-                                                           CASC_IN_TRUE,
-                                                           CASC_OUT_TRUE,
-                                                           TP_DIM_A_RANGE,
-                                                           TP_DIM_AB_RANGE,
-                                                           TP_DIM_B_RANGE,
-                                                           TP_KERNEL_POSITION,
-                                                           TP_CASC_LEN> {
+                  TP_CASC_LEN,
+                  TP_CONJ_A,
+                  TP_CONJ_B> : public kernelMatMultClass<TT_DATA_A,
+                                                         TT_DATA_B,
+                                                         TT_OUT_DATA,
+                                                         TP_DIM_A,
+                                                         TP_DIM_AB,
+                                                         TP_DIM_B,
+                                                         TP_SHIFT,
+                                                         TP_RND,
+                                                         TP_SAT,
+                                                         TP_DIM_A_LEADING,
+                                                         TP_DIM_B_LEADING,
+                                                         TP_DIM_OUT_LEADING,
+                                                         TP_INPUT_WINDOW_VSIZE_A,
+                                                         TP_INPUT_WINDOW_VSIZE_B,
+                                                         CASC_IN_TRUE,
+                                                         CASC_OUT_TRUE,
+                                                         TP_DIM_A_RANGE,
+                                                         TP_DIM_AB_RANGE,
+                                                         TP_DIM_B_RANGE,
+                                                         TP_KERNEL_POSITION,
+                                                         TP_CASC_LEN,
+                                                         TP_CONJ_A,
+                                                         TP_CONJ_B> {
    private:
    public:
     // Constructor
@@ -581,7 +617,9 @@ class matrix_mult<TT_DATA_A,
                              TP_DIM_AB_RANGE,
                              TP_DIM_B_RANGE,
                              TP_KERNEL_POSITION,
-                             TP_CASC_LEN>() {}
+                             TP_CASC_LEN,
+                             TP_CONJ_A,
+                             TP_CONJ_B>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(matrix_mult::matMult); }

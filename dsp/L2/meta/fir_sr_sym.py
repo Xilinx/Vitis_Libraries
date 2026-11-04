@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -420,6 +420,7 @@ def update_TP_INPUT_WINDOW_VSIZE(args):
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
+    TP_CASC_LEN = args["TP_CASC_LEN"]
     if ("TP_INPUT_WINDOW_VSIZE" in args) and args["TP_INPUT_WINDOW_VSIZE"]:
         TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
     else:
@@ -431,15 +432,24 @@ def update_TP_INPUT_WINDOW_VSIZE(args):
         TP_API,
         TP_FIR_LEN,
         TP_SSR,
+        TP_CASC_LEN,
         TP_INPUT_WINDOW_VSIZE,
     )
 
 
 def fn_update_TP_INPUT_WINDOW_VSIZE(
-    AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_SSR, TP_INPUT_WINDOW_VSIZE
+    AIE_VARIANT, TT_DATA, TT_COEFF, TP_API, TP_FIR_LEN, TP_SSR, TP_CASC_LEN, TP_INPUT_WINDOW_VSIZE
 ):
-    num_lanes = fnNumLanesSym(TT_DATA, TT_COEFF, AIE_VARIANT)
-    lcm_ws = num_lanes * TP_SSR
+    num_lanes = fnNumLanesSym(TT_DATA, TT_COEFF, AIE_VARIANT, TP_API)
+    # ML variants and AIE1 SSR use the asymmetric kernel's stream loop.
+    window_multiplier = (
+        (1024 // 8) // fn_size_by_byte(TT_DATA)
+        if TP_API == API_STREAM and (AIE_VARIANT != AIE or TP_SSR > 1)
+        else num_lanes
+    )
+    lcm_ws = window_multiplier * TP_SSR
+    if TP_API == API_BUFFER and TP_CASC_LEN > 1:
+        lcm_ws = find_lcm(lcm_ws, TP_SSR * ((256 // 8) // fn_size_by_byte(TT_DATA)))
 
     if TP_API == API_BUFFER:
         TP_INPUT_WINDOW_VSIZE_max = comFirUpd.fn_max_windowsize_for_buffer_update(
@@ -482,6 +492,7 @@ def validate_TP_INPUT_WINDOW_VSIZE(args):
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
+    TP_CASC_LEN = args["TP_CASC_LEN"]
     return fn_validate_input_window_size(
         AIE_VARIANT,
         TT_DATA,
@@ -490,14 +501,22 @@ def validate_TP_INPUT_WINDOW_VSIZE(args):
         TP_INPUT_WINDOW_VSIZE,
         TP_API,
         TP_SSR,
+        TP_CASC_LEN,
     )
 
 
 def fn_validate_input_window_size(
-    AIE_VARIANT, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR
+    AIE_VARIANT, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR, TP_CASC_LEN
 ):
-    num_lanes = fnNumLanesSym(TT_DATA, TT_COEFF, AIE_VARIANT)
-    lcm_ws = TP_SSR * num_lanes
+    num_lanes = fnNumLanesSym(TT_DATA, TT_COEFF, AIE_VARIANT, TP_API)
+    window_multiplier = (
+        (1024 // 8) // fn_size_by_byte(TT_DATA)
+        if TP_API == API_STREAM and (AIE_VARIANT != AIE or TP_SSR > 1)
+        else num_lanes
+    )
+    lcm_ws = TP_SSR * window_multiplier
+    if TP_API == API_BUFFER and TP_CASC_LEN > 1:
+        lcm_ws = find_lcm(lcm_ws, TP_SSR * ((256 // 8) // fn_size_by_byte(TT_DATA)))
     if TP_INPUT_WINDOW_VSIZE % lcm_ws != 0:
         return isError(f"TP_INPUT_WINDOW_VSIZE should be a multiple of {lcm_ws}!")
     else:
@@ -508,6 +527,7 @@ def fn_validate_input_window_size(
             TP_API,
             TP_FIR_LEN,
             TP_SSR,
+            TP_CASC_LEN,
             TP_INPUT_WINDOW_VSIZE,
         )
         range_TP_INPUT_WINDOW_VSIZE = [param_dict["minimum"], param_dict["maximum"]]
@@ -620,21 +640,12 @@ def fn_validate_coeff(TT_COEFF, TP_FIR_LEN, coeff_list, TP_USE_COEFF_RELOAD):
 
 
 # Logic derived from sr_sym_traits
-def fnNumLanesSym(TT_DATA, TT_COEFF, AIE_VARIANT):
-    return (
-        fnNumLanes(TT_DATA, TT_COEFF, AIE_VARIANT)
-        if (
-            not (
-                (TT_DATA == "cint16" and TT_COEFF == "int16")
-                or (TT_DATA == "cint32" and TT_COEFF == "cint32")
-            )
-        )
-        else (
-            fnNumLanes384b(TT_DATA, TT_COEFF, AIE_VARIANT)
-            if (TT_DATA == "cint16" and TT_COEFF == "int16")
-            else 2  # cint32 cint32 only has 2 lanes
-        )
-    )
+def fnNumLanesSym(TT_DATA, TT_COEFF, AIE_VARIANT, TP_API=API_BUFFER):
+    # AIE-ML and AIE-MLv2 implement symmetric FIRs with the asymmetric kernel.
+    if AIE_VARIANT != AIE:
+        return fnNumLanes(TT_DATA, TT_COEFF, TP_API=TP_API, AIE_VARIANT=AIE_VARIANT)
+
+    return fnNumLanes384b(TT_DATA, TT_COEFF, AIE_VARIANT)
 
 
 #### port ####
@@ -753,6 +764,15 @@ def generate_graph(graphname, args):
 
     taps = sr_asym.fn_get_taps_vector(TT_COEFF, coeff_list)
     constr_args_str = f"taps" if TP_USE_COEFF_RELOAD == 0 else ""
+    taps_ctor_str = (
+        f"""
+    // Constructor using taps passed as an argument
+    {graphname}(const std::vector<{TT_COEFF}>& taps) : filter(taps) {{
+        create_connections();
+    }}"""
+            if TP_USE_COEFF_RELOAD == 0
+            else "// No taps-argument constructor: TP_USE_COEFF_RELOAD is enabled"
+    )
     dual_ip_declare_str = (
         f"ssr_port_array<input> in2;" if TP_DUAL_IP == 1 else "// No dual input"
     )
@@ -810,7 +830,12 @@ public:
     {TP_SAT} //TP_SAT
   > filter;
 
+  {taps_ctor_str}
+  // Constructor using internal taps
   {graphname}() : filter({constr_args_str}) {{
+    create_connections();
+  }}
+  void create_connections() {{
     adf::kernel *filter_kernels = filter.getKernels();
 
     for (int i=0; i < TP_SSR; i++) {{

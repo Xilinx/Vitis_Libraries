@@ -1,0 +1,3 @@
+Configure a convolution for an AIE1 device with window (buffer) I/O: signal F is 256
+cint16 samples, signal G is 32 int16 samples, full-length output. Use a single kernel,
+static vector lengths, shift down by 8 bits with round-half-up and saturation.

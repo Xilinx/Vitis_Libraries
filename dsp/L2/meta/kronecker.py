@@ -17,7 +17,11 @@
 import aie_common as com
 from aie_common import *
 
-# import json
+import json
+import os
+
+with open(os.path.join(os.path.dirname(__file__), "type_promotions.json")) as f:
+    out_mul_type_dict = json.load(f)["out_mul_type"]
 
 #### naming ####
 #
@@ -213,7 +217,7 @@ def fn_update_TP_DIM_A_ROWS(AIE_VARIANT, TT_DATA_A, TT_DATA_B, TP_API, TP_DIM_A_
         TP_DIM_B_ROWS = VEC_SIZE
         TP_DIM_B_COLS = 1
         TP_WINDOW_VSIZE_max_size = TP_WINDOW_VSIZE_max / fn_size_by_byte(
-            fn_det_out_type(TT_DATA_A, TT_DATA_B)
+            com.fn_det_out_type(TT_DATA_A, TT_DATA_B, out_mul_type_dict)
         )
         TP_DIM_A_ROWS_max = TP_WINDOW_VSIZE_max_size / (
             TP_DIM_A_COLS_SSR * TP_DIM_B_ROWS * TP_DIM_B_COLS
@@ -301,7 +305,7 @@ def fn_update_TP_DIM_A_COLS(
         TP_DIM_B_ROWS = VEC_SIZE
         TP_DIM_B_COLS = 1
         TP_WINDOW_VSIZE_max_size = TP_WINDOW_VSIZE_max / fn_size_by_byte(
-            fn_det_out_type(TT_DATA_A, TT_DATA_B)
+            com.fn_det_out_type(TT_DATA_A, TT_DATA_B, out_mul_type_dict)
         )
         TP_DIM_A_COLS_max = (TP_WINDOW_VSIZE_max_size * TP_SSR) / (
             TP_DIM_A_ROWS * TP_DIM_B_ROWS * TP_DIM_B_COLS
@@ -404,7 +408,7 @@ def fn_update_TP_DIM_B_ROWS(
     if TP_API == API_BUFFER:
         # minimum possible values
         TP_WINDOW_VSIZE_max_size = TP_WINDOW_VSIZE_max / fn_size_by_byte(
-            fn_det_out_type(TT_DATA_A, TT_DATA_B)
+            com.fn_det_out_type(TT_DATA_A, TT_DATA_B, out_mul_type_dict)
         )
         TP_DIM_A_COLS_SSR = TP_DIM_A_COLS / TP_SSR
         TP_DIM_B_ROWS_max = TP_WINDOW_VSIZE_max_size / (
@@ -524,7 +528,7 @@ def fn_update_TP_DIM_B_COLS(
 
     if TP_API == API_BUFFER:
         TP_WINDOW_VSIZE_max_size = TP_WINDOW_VSIZE_max / fn_size_by_byte(
-            fn_det_out_type(TT_DATA_A, TT_DATA_B)
+            com.fn_det_out_type(TT_DATA_A, TT_DATA_B, out_mul_type_dict)
         )
         TP_DIM_A_COLS_SSR = TP_DIM_A_COLS / TP_SSR
         TP_DIM_B_COLS_max = TP_WINDOW_VSIZE_max_size / (
@@ -634,7 +638,7 @@ def fn_update_TP_NUM_FRAMES(
             TP_DIM_A_ROWS * TP_DIM_A_COLS_SSR * TP_DIM_B_ROWS * TP_DIM_B_COLS
         )
         OUT_FRAME_SIZE_BYTES = OUT_FRAME_SIZE * fn_size_by_byte(
-            fn_det_out_type(TT_DATA_A, TT_DATA_B)
+            com.fn_det_out_type(TT_DATA_A, TT_DATA_B, out_mul_type_dict)
         )
         TP_NUM_FRAMES_max = TP_WINDOW_VSIZE_max / OUT_FRAME_SIZE_BYTES
     elif TP_API == API_STREAM:
@@ -718,7 +722,7 @@ def update_TP_SHIFT(args):
 
 
 def fn_update_TP_SHIFT(TT_DATA_A, TT_DATA_B):
-    out_t = fn_det_out_type(TT_DATA_A, TT_DATA_B)
+    out_t = com.fn_det_out_type(TT_DATA_A, TT_DATA_B, out_mul_type_dict)
     range_TP_SHIFT = fn_range_shift(out_t)
 
     param_dict = {
@@ -780,49 +784,6 @@ def validate_TP_SAT(args):
 # helper functions
 
 
-def fn_det_out_type(TT_DATA_A, TT_DATA_B):
-    if TT_DATA_A == "int16" and TT_DATA_B == "int16":
-        return "int16"
-    if TT_DATA_A == "int16" and TT_DATA_B == "int32":
-        return "int32"
-    if TT_DATA_A == "int16" and TT_DATA_B == "cint16":
-        return "cint16"
-    if TT_DATA_A == "int16" and TT_DATA_B == "cint32":
-        return "cint32"
-    if TT_DATA_A == "int32" and TT_DATA_B == "int16":
-        return "int32"
-    if TT_DATA_A == "int32" and TT_DATA_B == "int32":
-        return "int32"
-    if TT_DATA_A == "int32" and TT_DATA_B == "cint16":
-        return "cint32"
-    if TT_DATA_A == "int32" and TT_DATA_B == "cint32":
-        return "cint32"
-    if TT_DATA_A == "cint16" and TT_DATA_B == "int16":
-        return "cint16"
-    if TT_DATA_A == "cint16" and TT_DATA_B == "int32":
-        return "cint32"
-    if TT_DATA_A == "cint16" and TT_DATA_B == "cint16":
-        return "cint16"
-    if TT_DATA_A == "cint16" and TT_DATA_B == "cint32":
-        return "cint32"
-    if TT_DATA_A == "cint32" and TT_DATA_B == "int16":
-        return "cint32"
-    if TT_DATA_A == "cint32" and TT_DATA_B == "int32":
-        return "cint32"
-    if TT_DATA_A == "cint32" and TT_DATA_B == "cint16":
-        return "cint32"
-    if TT_DATA_A == "cint32" and TT_DATA_B == "cint32":
-        return "cint32"
-    if TT_DATA_A == "float" and TT_DATA_B == "float":
-        return "float"
-    if TT_DATA_A == "float" and TT_DATA_B == "cfloat":
-        return "cfloat"
-    if TT_DATA_A == "cfloat" and TT_DATA_B == "float":
-        return "cfloat"
-    if TT_DATA_A == "cfloat" or TT_DATA_B == "cfloat":
-        return "cfloat"
-
-
 #### port ####
 def get_port_info(portname, dir, dataType, dim, numFrames, apiType, vectorLength):
     windowSize = dim * fn_size_by_byte(dataType)
@@ -877,7 +838,7 @@ def info_ports(args):
         portsOut = get_port_info(
             portname="out",
             dir="out",
-            dataType=fn_det_out_type(TT_DATA_A, TT_DATA_B),
+            dataType=com.fn_det_out_type(TT_DATA_A, TT_DATA_B, out_mul_type_dict),
             dim=TP_DIM_A_ROWS * TP_DIM_B_ROWS * TP_DIM_A_COLS * TP_DIM_B_COLS / TP_SSR,
             numFrames=TP_NUM_FRAMES,
             apiType="window",
@@ -905,7 +866,7 @@ def info_ports(args):
         portsOut = get_port_info(
             portname="out",
             dir="out",
-            dataType=fn_det_out_type(TT_DATA_A, TT_DATA_B),
+            dataType=com.fn_det_out_type(TT_DATA_A, TT_DATA_B, out_mul_type_dict),
             dim=TP_DIM_A_ROWS * TP_DIM_B_ROWS * TP_DIM_A_COLS * TP_DIM_B_COLS / TP_SSR,
             numFrames=TP_NUM_FRAMES,
             apiType="stream",
@@ -930,6 +891,8 @@ def generate_graph(graphname, args):
     TP_SHIFT = args["TP_SHIFT"]
     TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
+    TP_RND = args["TP_RND"]
+    TP_SAT = args["TP_SAT"]
 
     # Use formatted multi-line string to avoid a lot of \n and \t
     code = f"""
@@ -953,7 +916,9 @@ public:
     {TP_NUM_FRAMES}, //TP_NUM_FRAMES
     {TP_API}, //TP_API
     {TP_SHIFT}, //TP_SHIFT
-    {TP_SSR} //TP_SSR
+    {TP_SSR}, //TP_SSR
+    {TP_RND}, //TP_RND
+    {TP_SAT} //TP_SAT
   > kronecker;
 
   {graphname}() : kronecker() {{

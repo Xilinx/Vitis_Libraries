@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ template <typename TT_DATA_A,
 class kronecker_ref {
    private:
    public:
-    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using out_t = outType_t<TT_DATA_A, TT_DATA_B>;
     static constexpr unsigned int sizeMatA = TP_DIM_A_ROWS * TP_DIM_A_COLS;
     static constexpr unsigned int sizeMatB = TP_DIM_B_ROWS * TP_DIM_B_COLS;
     static constexpr unsigned int rowsMatOut = TP_DIM_A_ROWS * TP_DIM_B_ROWS;

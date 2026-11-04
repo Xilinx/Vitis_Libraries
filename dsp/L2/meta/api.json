@@ -478,6 +478,16 @@
                         "type": "typename",
                         "name": "TT_OUT_DATA",
                         "description": "describes the type of data samples in the output matrix."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_CONJ_A",
+                        "description": "describes the selection of whether or not to conjugate the elements of input A during multiplication. This parameter has no effect on real-only data types. - 0: no conjugation (default) - 1: Elements of A are conjugated prior to multiplication. This allows the matrix multiplier to perform A*xB = out where A* is the conjugate of A. TP_CONJ_A requires a complex TT_DATA_A type (cfloat, cint16, or cint32)."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_CONJ_B",
+                        "description": "describes the selection of whether or not to conjugate the elements of input B during multiplication. This parameter has no effect on real-only data types. - 0: no conjugation (default) - 1: Elements of B are conjugated prior to multiplication. This allows the matrix multiplier to perform AxB* = out where B* is the conjugate of B. TP_CONJ_B requires a complex TT_DATA_B type (cfloat, cint16, or cint32). TP_CONJ_A and TP_CONJ_B may be combined to compute A*xB* = out (Hermitian product)."
                     }
                 ],
                 "header_file_name": [
@@ -1623,6 +1633,21 @@
                         "type": "unsigned int",
                         "name": "TP_TWIDDLE_MODE",
                         "description": "describes the magnitude of integer twiddles. It has no effect for cfloat."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_POINT_SIZE_D1",
+                        "description": "specifies how an expert user wants the FFT to be decomposed. It specifies the size of first dimension of the decomposed FFT."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_CASC_LEN",
+                        "description": "selects the number of kernels the first dimension of the FFT will be divided over in series to improve throughput"
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_USE_WIDGETS",
+                        "description": "controls the use of widgets in the underlying FFT graphs, for configurations which either use TP_API=1 or TP_PARALLEL_POWER>0."
                     }
                 ],
                 "header_file_name": [
@@ -2320,96 +2345,6 @@
                         "direction": "output",
                         "type": "port_conditional_array<output, (TP_NUM_OUTPUTS == 2), OUT_SSR> xf::dsp::aie::fir::interpolate_asym::fir_interpolate_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_DUAL_IP, TP_NUM_OUTPUTS, TP_API, TP_SSR, TP_PARA_INTERP_POLY, TP_SAT >::out2",
                         "name": "out2"
-                    }
-                ],
-                "schema": "vitis_libraries_api_list_schema-1.0"
-            }
-        },
-        {
-            "api_name": "xf::dsp::aie::fir::interpolate_fract_asym::fir_interpolate_fract_asym_graph",
-            "target_domain": "AIE",
-            "spec": {
-                "brief": "fir_resampler is an Asymmetric Fractional Interpolation FIR filter",
-                "search_paths": [
-                    "L1/include/aie",
-                    "L1/src/aie",
-                    "L2/include/aie"
-                ],
-                "visible": true,
-                "target_domain": "AIE",
-                "display_name": "fir_interpolate_fract_asym_graph",
-                "parameters": [
-                    {
-                        "type": "typename",
-                        "name": "TT_DATA",
-                        "description": "describes the type of individual data samples input to and output from the filter function."
-                    },
-                    {
-                        "type": "typename",
-                        "name": "TT_COEFF",
-                        "description": "describes the type of individual coefficients of the filter taps."
-                    },
-                    {
-                        "type": "unsigned int",
-                        "name": "TP_FIR_LEN",
-                        "description": "is an unsigned integer which describes the number of taps in the filter."
-                    },
-                    {
-                        "type": "unsigned int",
-                        "name": "TP_INTERPOLATE_FACTOR",
-                        "description": "is an unsigned integer which describes the interpolation factor of the filter."
-                    },
-                    {
-                        "type": "unsigned int",
-                        "name": "TP_DECIMATE_FACTOR",
-                        "description": "is an unsigned integer which describes the decimation factor of the filter. TP_DECIMATE_FACTOR must be in the range 2 to 16. The decimation factor should be less that the interpolation factor and should not be divisible factor of the interpolation factor."
-                    },
-                    {
-                        "type": "unsigned int",
-                        "name": "TP_SHIFT",
-                        "description": "describes power of 2 shift down applied to the accumulation of FIR terms before output."
-                    },
-                    {
-                        "type": "unsigned int",
-                        "name": "TP_RND",
-                        "description": "describes the selection of rounding to be applied during the shift down stage of processing. TP_RND must be in the range 0 to 7 where"
-                    },
-                    {
-                        "type": "unsigned int",
-                        "name": "TP_INPUT_WINDOW_VSIZE",
-                        "description": "describes the number of samples in the window API used for input to the filter function."
-                    },
-                    {
-                        "type": "unsigned int",
-                        "name": "TP_CASC_LEN",
-                        "description": "describes the number of AIE processors to split the operation over."
-                    },
-                    {
-                        "type": "unsigned int",
-                        "name": "TP_USE_COEFF_RELOAD",
-                        "description": "allows the user to select if runtime coefficient reloading should be used."
-                    },
-                    {
-                        "type": "unsigned int",
-                        "name": "TP_NUM_OUTPUTS",
-                        "description": "sets the number of ports to broadcast the output to."
-                    }
-                ],
-                "header_file_name": [
-                    "fir_interpolate_fract_asym_graph.hpp"
-                ],
-                "instance": "class",
-                "api_name": "xf::dsp::aie::fir::interpolate_fract_asym::fir_interpolate_fract_asym_graph",
-                "ports": [
-                    {
-                        "direction": "input",
-                        "type": "port<input> xf::dsp::aie::fir::interpolate_fract_asym::fir_interpolate_fract_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS >::in",
-                        "name": "in"
-                    },
-                    {
-                        "direction": "output",
-                        "type": "port<output> xf::dsp::aie::fir::interpolate_fract_asym::fir_interpolate_fract_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS >::out",
-                        "name": "out"
                     }
                 ],
                 "schema": "vitis_libraries_api_list_schema-1.0"
@@ -3484,6 +3419,76 @@
                     {
                         "direction": "output",
                         "type": "port<output> xf::dsp::aie::widget::real2complex::widget_real2complex_graph< TT_DATA, TT_OUT_DATA, TP_WINDOW_VSIZE >::out",
+                        "name": "out"
+                    }
+                ],
+                "schema": "vitis_libraries_api_list_schema-1.0"
+            }
+        },
+        {
+            "api_name": "xf::dsp::aie::transpose::transpose_graph",
+            "target_domain": "AIE",
+            "spec": {
+                "brief": "transpose_graph transposes a TP_DIM_ROWS x TP_DIM_COLS matrix of TT_DATA held in an input iobuffer, producing a TP_DIM_COLS x TP_DIM_ROWS output iobuffer.",
+                "search_paths": [
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
+                ],
+                "visible": true,
+                "target_domain": "AIE",
+                "display_name": "transpose_graph",
+                "parameters": [
+                    {
+                        "type": "typename",
+                        "name": "TT_DATA",
+                        "description": "describes the type of individual data samples input to and output from the transpose. This is a typename and must be one of the following: int16, cint16, int32, cint32, float, cfloat."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIM_ROWS",
+                        "description": "describes the number of rows in the input matrix. It can be any positive integer. When TP_SSR > 1, this dimension is the one split across SSR lanes."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_DIM_COLS",
+                        "description": "describes the number of columns in the input matrix (equivalently, the number of rows in the output matrix). It can be any positive integer. When TP_CASC_LEN > 1, this dimension is the one split across cascaded kernels."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_SSR",
+                        "description": "describes the number of parallel lanes that TP_DIM_ROWS is split across. Lane `s` owns a full-width, contiguous row-range of the input and produces the corresponding contiguous column-range of the output."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_CASC_LEN",
+                        "description": "describes the number of kernels that TP_DIM_COLS is split across, within each TP_SSR lane. Kernel `c` owns a full-height, contiguous column-range of the input and produces the corresponding contiguous row-range of the output. Together, TP_SSR and TP_CASC_LEN form a TP_SSR x TP_CASC_LEN grid of independent kernels (indexed `ssrIdx*TP_CASC_LEN + cascIdx`), each transposing one (row-range x column-range) tile of the input. Because transposing swaps rows and columns, lane/kernel `(s, c)`'s output tile lands at block position `(c, s)` (columns become rows and vice versa) in the overall output matrix - the same axis swap that gives a block matrix `M = [[A,B],[C,D]]` the transpose `M^T = [[A^T,C^T],[B^T,D^T]]`. Routing each kernel's output port to the correct block position of the final output is the responsibility of the parent graph/testbench, exactly as for TP_SSR in other DSPLib cores (e.g. matrix_mult) - this graph does no on-chip combination across ports."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_SPLIT_MODE",
+                        "description": "selects how TP_DIM_ROWS is divided across TP_SSR lanes, and how TP_DIM_COLS is divided across TP_CASC_LEN kernels, when they do not divide evenly: - 0 (kSplitModeEqual): as equal as possible, with any remainder distributed one at a time to the first lanes/kernels. - 1 (kSplitModeAligned): every lane/kernel but the last is sized to a multiple of the device's memory access width; the last one takes whatever remains (the \"runt\")."
+                    },
+                    {
+                        "type": "unsigned int",
+                        "name": "TP_CONJUGATE",
+                        "description": "describes the selection of whether or not to conjugate the elements of the input during the transpose, with no reduction in throughput. TP_CONJUGATE requires a complex TT_DATA type (cint16, cint32 or cfloat)."
+                    }
+                ],
+                "header_file_name": [
+                    "transpose_graph.hpp"
+                ],
+                "instance": "class",
+                "api_name": "xf::dsp::aie::transpose::transpose_graph",
+                "ports": [
+                    {
+                        "direction": "input",
+                        "type": "port_array<input, TP_SSR * TP_CASC_LEN> xf::dsp::aie::transpose::transpose_graph< TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_SSR, TP_CASC_LEN, TP_SPLIT_MODE, TP_CONJUGATE >::in",
+                        "name": "in"
+                    },
+                    {
+                        "direction": "output",
+                        "type": "port_array<output, TP_SSR * TP_CASC_LEN> xf::dsp::aie::transpose::transpose_graph< TT_DATA, TP_DIM_ROWS, TP_DIM_COLS, TP_SSR, TP_CASC_LEN, TP_SPLIT_MODE, TP_CONJUGATE >::out",
                         "name": "out"
                     }
                 ],

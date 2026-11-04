@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ for {set i 3} { $i < [llength $argv] } { incr i 2 } {
         # Don't put a comma on the last parameter if we still have dummy constructor coeffs/weights to generate
         if { [expr ($i+1)] == [expr [llength $argv]-1] } {
             # FIRs and FFT Window both need a comma
-            if { $libElement eq "fft_ifft_dit_1ch" || $libElement eq "matrix_mult" || $libElement eq "dds_mixer" || $libElement eq "dds_mixer_lut" || $libElement eq "mixed_radix_fft" || $libElement eq "dft" || $libElement eq "matrix_vector_mul" || $libElement eq "sample_delay" || $libElement eq "widget_real2complex"  || $libElement eq "widget_api_cast" || $libElement eq "hadamard" || $libElement eq "kronecker" || $libElement eq "outer_tensor" || $libElement eq "conv_corr" || $libElement eq "bitonic_sort" || $libElement eq "euclidean_distance" || $libElement eq "cumsum" } {
+            if { $libElement eq "fft_ifft_dit_1ch" || $libElement eq "matrix_mult" || $libElement eq "dds_mixer" || $libElement eq "dds_mixer_lut" || $libElement eq "mixed_radix_fft" || $libElement eq "dft" || $libElement eq "matrix_vector_mul" || $libElement eq "sample_delay" || $libElement eq "widget_real2complex"  || $libElement eq "widget_api_cast" || $libElement eq "hadamard" || $libElement eq "kronecker" || $libElement eq "outer_tensor" || $libElement eq "conv_corr" || $libElement eq "bitonic_sort" || $libElement eq "euclidean_distance" || $libElement eq "cumsum" || $libElement eq "transpose" } {
                 set isComma ""
             } elseif { $libElement eq "fir_sr_asym" || $libElement eq "fir_sr_sym" || $libElement eq "fir_interpolate_hb" || $libElement eq "fir_decimate_hb" || $libElement eq "fir_interpolate_asym" || $libElement eq "fir_decimate_asym" || $libElement eq "fir_decimate_sym" || $libElement eq "fir_resampler" || $libElement eq "fir_tdm" || $libElement eq "fft_window"   || $libElement eq "func_approx"    } {
                 set isComma ","
@@ -123,7 +123,7 @@ if { $firLen != -1 } {
     # double taps generated if complex
     set cplx [expr $isCmplxCoeff + 1]
     for {set i 0} {$i < [expr $cplx * $firLen * $tdmChannels]} {incr i} {
-        lappend coeffs [expr $i % 32768]
+        lappend coeffs [expr ($i + 1) % 32768]
     }
     set coeffVectorStr [join $coeffs ","]
     puts $outFile "    \"coeff\": \[$coeffVectorStr\]"

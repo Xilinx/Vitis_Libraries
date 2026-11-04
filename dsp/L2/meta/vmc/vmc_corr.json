@@ -126,12 +126,11 @@
         {
             "key": "TP_USE_RTP_VECTOR_LENGTHS",
             "name": "USE_RTP_VECTOR_LENGTHS",
-            "description": "enable runtime parameter input port to specify G input length at runtime",
+            "description": "Selects Vector Lengths of F and G as Real Time Mode: 0 - no RTP F and G LEN, 1 - RTP port based ",
             "default": false,
-            "label": "Specify G input length via input port",
+            "label": "Specify F and G input length via input port",
             "callback": "xmcDisplayRtpPortGLengthAcceptableRangeCallback(gcbh);",
             "tablabel": "Main",
-            "visible": "off",
             "parameterType": "checkbox"
         },
         {

@@ -1,0 +1,3 @@
+Configure an element-wise (Hadamard) product for an AIE1 device of two cint16 vectors of
+256 samples, window I/O, SSR 1, one frame per call, shift down by 15 bits with
+round-half-up and saturation.

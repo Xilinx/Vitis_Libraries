@@ -289,7 +289,9 @@ class create_casc_kernel<1,
  *         - TT_TWIDDLE must be an integer type if TT_DATA is an integer type
  *         - TT_TWIDDLE must be cfloat type if TT_DATA is a cfloat type.
  * @tparam TP_POINT_SIZE is an unsigned integer which describes the number of samples in
- *         the transform. This values must factorize to powers of 2, 3 and 5.
+ *         the transform. This values must factorize to powers of 2, 3 and 5, and must
+ *         also be a multiple of a per-device minimum: 8 on AIE1, 16 on AIE-ML, 32 on
+ *         AIE-MLv2.
  *         When TP_DYN_PT_SIZE is set, TP_POINT_SIZE describes the maximum
  *         point size possible.
  * @tparam TP_FFT_NIFFT selects whether the transform to perform is an FFT (1) or IFFT (0).
@@ -608,10 +610,12 @@ class mixed_radix_fft_graph : public graph {
                 // input
                 connect(in[0], m_mixed_radix_fftKernels[0].in[0]);
                 dimensions(m_mixed_radix_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE};
+                conditional_single_buffer<TT_DATA, TP_WINDOW_VSIZE>(m_mixed_radix_fftKernels[0].in[0]);
 
                 // connect final kernel output to output of the graph
                 connect(m_mixed_radix_fftKernels[TP_CASC_LEN - 1].out[0], out[0]);
                 dimensions(m_mixed_radix_fftKernels[TP_CASC_LEN - 1].out[0]) = {TP_WINDOW_VSIZE};
+                conditional_single_buffer<TT_DATA, TP_WINDOW_VSIZE>(m_mixed_radix_fftKernels[TP_CASC_LEN - 1].out[0]);
             }
         else {
             kernel m_inWidgetKernel =
@@ -626,10 +630,14 @@ class mixed_radix_fft_graph : public graph {
             connect(m_inWidgetKernel.out[0], m_mixed_radix_fftKernels[0].in[0]);
             dimensions(m_inWidgetKernel.out[0]) = {TP_WINDOW_VSIZE};
             dimensions(m_mixed_radix_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE};
+            conditional_single_buffer<TT_DATA, TP_WINDOW_VSIZE>(m_inWidgetKernel.out[0],
+                                                                m_mixed_radix_fftKernels[0].in[0]);
 
             connect(m_mixed_radix_fftKernels[TP_CASC_LEN - 1].out[0], m_outWidgetKernel.in[0]);
             dimensions(m_mixed_radix_fftKernels[TP_CASC_LEN - 1].out[0]) = {TP_WINDOW_VSIZE};
             dimensions(m_outWidgetKernel.in[0]) = {TP_WINDOW_VSIZE};
+            conditional_single_buffer<TT_DATA, TP_WINDOW_VSIZE>(m_mixed_radix_fftKernels[TP_CASC_LEN - 1].out[0],
+                                                                m_outWidgetKernel.in[0]);
             connect(m_outWidgetKernel.out[0], out[0]);
             if
                 constexpr(kStreamsPerTile > 1) { connect(m_outWidgetKernel.out[1], out[1]); }
@@ -648,6 +656,8 @@ class mixed_radix_fft_graph : public graph {
             connect(m_mixed_radix_fftKernels[k - 1].out[0], m_mixed_radix_fftKernels[k].in[0]);
             dimensions(m_mixed_radix_fftKernels[k - 1].out[0]) = {TP_WINDOW_VSIZE};
             dimensions(m_mixed_radix_fftKernels[k].in[0]) = {TP_WINDOW_VSIZE};
+            conditional_single_buffer<TT_DATA, TP_WINDOW_VSIZE>(m_mixed_radix_fftKernels[k - 1].out[0],
+                                                                m_mixed_radix_fftKernels[k].in[0]);
         }
 
         for (int k = 0; k < TP_CASC_LEN; k++) {
@@ -715,6 +725,8 @@ class mixed_radix_fft_graph<TT_DATA,
 
     static_assert(std::is_same<TT_DATA, cint32>::value,
                   "Error. The dynamic point size feature is only supported for a data type of cint32");
+    static_assert(std::is_same<TT_TWIDDLE, cint16>::value,
+                  "ERROR: Dynamic point size only supports TT_TWIDDLE=cint16.");
 
     static constexpr int m_kNumDataPorts = 1;   // until stream support is added
     static constexpr int m_kNumHeaderPorts = 1; // until stream support is added
@@ -856,19 +868,25 @@ class mixed_radix_fft_graph<TT_DATA,
         // Inputs
         connect<>(in[0], m_mixed_radix_fftKernels[0].in[0]);
         dimensions(m_mixed_radix_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE};
+        conditional_single_buffer<TT_DATA, TP_WINDOW_VSIZE>(m_mixed_radix_fftKernels[0].in[0]);
         connect<>(headerIn[0], m_mixed_radix_twGenKernels[0].in[0]);
         dimensions(m_mixed_radix_twGenKernels[0].in[0]) = {kNumBytesInLoad / sizeof(TT_DATA)};
+        conditional_single_buffer<TT_DATA, kNumBytesInLoad / sizeof(TT_DATA)>(m_mixed_radix_twGenKernels[0].in[0]);
 
         // Inter-kernel
         connect<>(m_mixed_radix_twGenKernels[0].out[1], m_mixed_radix_fftKernels[0].in[1]);
         dimensions(m_mixed_radix_twGenKernels[0].out[1]) = {kTwBufferSize};
         dimensions(m_mixed_radix_fftKernels[0].in[1]) = {kTwBufferSize};
+        conditional_single_buffer<TT_TWIDDLE, kTwBufferSize>(m_mixed_radix_twGenKernels[0].out[1],
+                                                             m_mixed_radix_fftKernels[0].in[1]);
 
         // Outputs
         connect<>(m_mixed_radix_fftKernels[0].out[0], out[0]);
         dimensions(m_mixed_radix_fftKernels[0].out[0]) = {TP_WINDOW_VSIZE};
+        conditional_single_buffer<TT_DATA, TP_WINDOW_VSIZE>(m_mixed_radix_fftKernels[0].out[0]);
         connect<>(m_mixed_radix_twGenKernels[0].out[0], headerOut[0]);
         dimensions(m_mixed_radix_twGenKernels[0].out[0]) = {kNumBytesInLoad / sizeof(TT_DATA)};
+        conditional_single_buffer<TT_DATA, kNumBytesInLoad / sizeof(TT_DATA)>(m_mixed_radix_twGenKernels[0].out[0]);
 
         runtime<ratio>(m_mixed_radix_fftKernels[0]) = 0.7;
         runtime<ratio>(m_mixed_radix_twGenKernels[0]) = 0.7;

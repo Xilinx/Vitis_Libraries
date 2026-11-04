@@ -1,0 +1,3 @@
+Configure a cumulative sum for an AIE1 device over vectors of 256 int16 samples (1D, so
+the second dimension is 1), accumulating along the first dimension, one frame per call,
+no shift, round-half-up and saturation.

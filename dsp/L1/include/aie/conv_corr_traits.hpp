@@ -63,6 +63,7 @@
 #define SINGLE_STREAM 1
 #define TWO_STREAMS 2
 #define MAC4ROTDELAY 3
+#define MIN_F_LEN_OF_STREAMS 512
 
 // Different Buffer offsets for different num of phases
 #define BASE_OFFSET_OF_SELECT 0x0u
@@ -161,6 +162,10 @@ namespace dsp {
 namespace aie {
 namespace conv_corr {
 
+// ---------------------------------------------------------------------------
+// Architecture register and memory size constants.
+// These drive all buffer sizing and pointer arithmetic throughout the kernel.
+// ---------------------------------------------------------------------------
 static constexpr unsigned int kMaxBitsRegY = 1024;                            // Max number of bits on Y Register.
 static constexpr unsigned int kMaxBitsRegX = 512;                             // Max number of bits on X Register.
 static constexpr unsigned int kMaxBitsRegW = 256;                             // Max number of bits on W Register.
@@ -264,6 +269,8 @@ INLINE_DECL constexpr unsigned int fnSizeOfDataType() {
 // for io buffer cases
 // function to return the number of acc's lanes for a type combo
 #if (__HAS_ACCUM_PERMUTES__ == 1)
+// AIE-1 lane-count specializations for fnNumOfLanes.
+
 template <>
 INLINE_DECL constexpr unsigned int fnNumOfLanes<int8, int8>() {
     return 16;
@@ -374,7 +381,7 @@ INLINE_DECL constexpr unsigned int fnNumOfMuls<cfloat, cfloat>() {
 #endif
 
 #if (__HAS_ACCUM_PERMUTES__ == 0)
-// AIE-2
+// AIE-2 lane-count specializations for fnNumOfLanes.
 template <>
 INLINE_DECL constexpr unsigned int fnNumOfLanes<int8, int8>() {
     return 32;
@@ -1224,14 +1231,21 @@ template <typename TT_DATA_F,
           unsigned int TP_COMPUTE_MODE>
 INLINE_DECL constexpr bool fnCheckInBuffofFLen() {
     if
-        constexpr(TP_API == USE_STREAM_API) { return true; }                   // Stream API bypasses buffer validation
-    constexpr unsigned int baseLoadF = kMaxBytesLoadOnAie / sizeof(TT_DATA_F); // Vector load size in F elements
-    constexpr unsigned int minFLen = baseLoadF << 1;                           // Minimum F length = 2 vector loads
+        constexpr(TP_API == USE_STREAM_API) {
+            // Stream API: bypass IO-buffer length constraints, but enforce the minimum TP_F_LEN of 512 samples.
+            // A minimum of 512 is required so the stream pipeline has enough data to flush out partial results.
+            return (TP_F_LEN >= MIN_F_LEN_OF_STREAMS);
+        }
+    constexpr unsigned int kMaxLoad = __MAX_READ_WRITE__ / 8;        // Architecture-correct max load bytes
+    constexpr unsigned int baseLoadF = kMaxLoad / sizeof(TT_DATA_F); // Vector load size in F elements
+    constexpr unsigned int minFLen = baseLoadF << 1;                 // Minimum F length = 2 vector loads
     constexpr unsigned int dataMaxF = kMaxBufferLenOnAieInBytes / sizeof(TT_DATA_F); // Max F from data memory limit
     constexpr unsigned int maxOutElems = kMaxBufferLenOnAieInBytes / sizeof(TT_DATA_OUT); // Max output elements
-    constexpr unsigned int pingpongThresholdElems =
-        (kMaxBufferLenOnAieInBytes >> 1) / sizeof(TT_DATA_OUT);                  // Half memory in output elements
-    constexpr unsigned int minG = (kMaxBytesLoadOnAie << 1) / sizeof(TT_DATA_G); // Minimum G length = 2 vector loads
+
+    // ADF auto-enables single_buffer when output_bytes > half data memory; mirror that threshold here
+    // so the DRC matches the runtime decision and prevents link-time memory allocation failures.
+    constexpr unsigned int pingpongThresholdElems = (kMaxBufferLenOnAieInBytes >> 1) / sizeof(TT_DATA_OUT);
+    constexpr unsigned int minG = (kMaxLoad << 1) / sizeof(TT_DATA_G); // Minimum G length = 2 vector loads
 
     // Calculate worst-case output size for max F to check if single_buffer will be triggered
     constexpr unsigned int maxOutForMaxF =
@@ -1254,8 +1268,7 @@ INLINE_DECL constexpr bool fnCheckInBuffofFLen() {
 }
 
 // Configuration Defensive check function to validate TP_G_LEN: alignment, min (2*baseLoad), and mode-dependent max from
-// F, data memory, and output constraints. Output constraint skipped when output exceeds ping-pong threshold
-// (single_buffer takes over).
+// F, data memory, and output constraints. Output constraint applied when output at (F, dataMaxG) exceeds single-buffer.
 // MAX_G = min(F, dataMaxG, FULL: maxOut-F+1, SAME/VALID: dataMaxG)
 template <typename TT_DATA_F,
           typename TT_DATA_G,
@@ -1266,12 +1279,16 @@ template <typename TT_DATA_F,
           unsigned int TP_COMPUTE_MODE>
 INLINE_DECL constexpr bool fnCheckInBuffofGLen() {
     if
-        constexpr(TP_API == USE_STREAM_API) { return true; }                   // Stream API bypasses buffer validation
-    constexpr unsigned int baseLoadG = kMaxBytesLoadOnAie / sizeof(TT_DATA_G); // Vector load size in G elements
-    constexpr unsigned int minG = baseLoadG << 1;                              // Minimum G length = 2 vector loads
+        constexpr(TP_API == USE_STREAM_API) { return true; }         // Stream API bypasses buffer validation
+    constexpr unsigned int kMaxLoad = __MAX_READ_WRITE__ / 8;        // Architecture-correct max load bytes
+    constexpr unsigned int baseLoadG = kMaxLoad / sizeof(TT_DATA_G); // Vector load size in G elements
+    constexpr unsigned int minG = baseLoadG << 1;                    // Minimum G length = 2 vector loads
     constexpr unsigned int dataMaxG = kMaxBufferLenOnAieInBytes / sizeof(TT_DATA_G); // Max G from data memory limit
     constexpr unsigned int maxOutElems = kMaxBufferLenOnAieInBytes / sizeof(TT_DATA_OUT); // Max output elements
-    constexpr unsigned int pingpongThresholdBytes = kMaxBufferLenOnAieInBytes >> 1;       // Half memory in bytes
+
+    // ADF auto-enables single_buffer when output_bytes > half data memory; mirror that threshold here
+    // so the DRC matches the runtime decision and prevents link-time memory allocation failures.
+    constexpr unsigned int pingpongThresholdBytes = kMaxBufferLenOnAieInBytes >> 1;
 
     // Calculate worst-case output size with current TP_F_LEN and max G to check if single_buffer triggers
     constexpr unsigned int maxOutWithMaxG =
@@ -1280,7 +1297,7 @@ INLINE_DECL constexpr bool fnCheckInBuffofGLen() {
             : (TP_COMPUTE_MODE == SAME_MODE) ? TP_F_LEN : dataMaxG; // VALID mode: no constraint
     constexpr unsigned int maxOutBytes = maxOutWithMaxG * sizeof(TT_DATA_OUT);
 
-    // Derive max G from output constraint: FULL(out=F+G-1 → maxG=maxOut-F+1), SAME/VALID(no output constraint on G)
+    // Derive max G from output constraint: FULL(out=F+G-1 -> maxG=maxOut-F+1), SAME/VALID(no output constraint on G)
     // Only apply output constraint if output won't trigger single_buffer
     constexpr unsigned int maxGOut =
         (maxOutBytes > pingpongThresholdBytes) ? dataMaxG : // Output uses single_buffer, no constraint

@@ -41,7 +41,11 @@
 #define SEED_RTP 1
 #endif
 
+#ifdef USING_UUT
+#include "conv_corr_native_generated_graph/conv_corr_generated_graph.h"
+#else
 #include QUOTE(UUT_GRAPH.hpp)
+#endif
 
 using namespace adf;
 using xf::dsp::aie::conv_corr::getMinLen;
@@ -103,7 +107,10 @@ class test_graph : public graph {
     std::array<input_plio, 1> inWindowG;
     std::array<output_plio, PHASES> outWindow;
 
-    // Conv_Corr sub-graph instance (class member so update_rtp() and connections can access it)
+// Conv_Corr sub-graph instance (class member so update_rtp() and connections can access it)
+#ifdef USING_UUT
+    conv_corr_native_generated_graph conv_corrGraph;
+#else
     dsplib::conv_corr::UUT_GRAPH<DATA_F,
                                  DATA_G,
                                  DATA_OUT,
@@ -120,6 +127,7 @@ class test_graph : public graph {
                                  PHASES,
                                  USE_RTP_VECTOR_LENGTHS>
         conv_corrGraph;
+#endif
 
 #if (USE_RTP_VECTOR_LENGTHS == 1)
     port_conditional_array<input, (USE_RTP_VECTOR_LENGTHS == 1), 1> rtpVecLen;
@@ -170,13 +178,13 @@ class test_graph : public graph {
         }
 #if (SINGLE_BUF == 1)
 #if (API_IO == 0)
-        single_buffer(conv_corrGraph.getKernels()[0].in[0]);
-        single_buffer(conv_corrGraph.getKernels()[0].in[1]);
-        single_buffer(conv_corrGraph.getKernels()[0].out[0]);
+        single_buffer(conv_corrGraph.conv_corr_graph.getKernels()[0].in[0]);
+        single_buffer(conv_corrGraph.conv_corr_graph.getKernels()[0].in[1]);
+        single_buffer(conv_corrGraph.conv_corr_graph.getKernels()[0].out[0]);
         printf("INFO: Single Buffer Constraint applied to input and output buffers of kernels.\n");
 #else
         for (int i = 0; i < PHASES; i++) {
-            single_buffer(conv_corrGraph.m_conv_corr[i][0].in[2]);
+            single_buffer(conv_corrGraph.conv_corr_graph.m_conv_corr[i][0].in[2]);
             printf("INFO: Single Buffer Constraint applied to input-G buffer of the kernel %d.\n", i);
         }
 #endif // API
@@ -195,7 +203,11 @@ class test_graph : public graph {
 
         std::string inpFile_G_Sig = QUOTE(INPUT_FILE_G);
         inWindowG[0] = input_plio::create("PLIO_inpFile_G_Sig", adf::plio_64_bits, inpFile_G_Sig);
+#ifdef USING_UUT
+        connect<>(inWindowG[0].out[0], conv_corrGraph.inG[0]);
+#else
         connect<>(inWindowG[0].out[0], conv_corrGraph.inG);
+#endif
 
 #if (USE_RTP_VECTOR_LENGTHS == 1)
         connect<parameter>(rtpVecLen[0], conv_corrGraph.rtpVecLen[0]);

@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2019-2022, Xilinx, Inc.
-# Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+# Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -123,6 +123,13 @@ proc get_param_map {libElement} {
         "IS_OUTPUT_SQUARED" "TP_IS_OUTPUT_SQUARED"
         "MODE" "TP_MODE"
         "USE_LUT_RELOAD" "TP_USE_LUT_RELOAD"
+        "P_CONJ_A" "TP_CONJ_A"
+        "P_CONJ_B" "TP_CONJ_B"
+        "T_DATA" "TT_DATA"
+        "DIM_ROWS" "TP_DIM_ROWS"
+        "DIM_COLS" "TP_DIM_COLS"
+        "SPLIT_MODE" "TP_SPLIT_MODE"
+        "CONJUGATE" "TP_CONJUGATE"
     }
     return $param_map
 }

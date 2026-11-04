@@ -562,6 +562,10 @@ Connections to the cascade ports can be made as follows:
       connect<>(mmultGraph.out[i], out[i]);
    }
 
+Conjugation
+-----------
+Matrix-Multiplication supports conjugate operation. That is, ``TP_CONJ_A`` and ``TP_CONJ_B`` control whether or not to conjugate the elements of the A and B inputs respectively before multiplication.
+Such a conjugation occurs on-the-fly during the multiplication operation, so results in no change to performance versus non-conjugated operation.
 
 Constraints
 -----------

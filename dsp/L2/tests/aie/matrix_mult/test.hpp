@@ -83,7 +83,9 @@ class test_graph : public graph {
                                                      P_CASC_LEN,
                                                      P_SAT_MODE,
                                                      UUT_SSR,
-                                                     DATA_OUT_TYPE>;
+                                                     DATA_OUT_TYPE,
+                                                     P_CONJ_A,
+                                                     P_CONJ_B>;
 #endif
     uut mmultGraph;
     // Constructor

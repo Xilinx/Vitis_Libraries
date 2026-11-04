@@ -1,0 +1,4 @@
+Configure a halfband interpolator FIR for an AIE1 device on cint16 data with int16
+coefficients, 23 taps, window I/O, static coefficients, single input and output, no
+cascade, no center-tap upshift, 256 input samples per iteration, shift 15,
+round-half-up, saturate.

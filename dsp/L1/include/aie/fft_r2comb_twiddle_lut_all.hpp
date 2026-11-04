@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #ifndef __FFT_R2COMB_TWIDDLE_LUT_ALL_H__
 #define __FFT_R2COMB_TWIDDLE_LUT_ALL_H__
 
-// DO NOT HAND EDIT THIS FILE. IT WAS CREATED using ../tests/inc/twiddle_r2master.c
+// DO NOT HAND EDIT THIS FILE. IT WAS CREATED using L1/tests/aie/inc/twiddle_gen.c
 
 #include "device_defs.h"
 #ifndef INLINE_DECL
@@ -27,10 +27,10 @@
 #define NOINLINE_DECL inline __attribute__((noinline))
 #endif
 
-// The values in this file were created using twiddle_r2master.c.
+// The values in this file were created using twiddle_gen.c.
 
 static constexpr int kR2MasterTableSize = 32768;
-// The values in this file were created using twiddle_r2master.c
+// The values in this file were created using twiddle_gen.c
 
 static constexpr cint16 r2_twiddle_master_cint16[kR2MasterTableSize] = {
     {32767, 0},       {32767, -3},      {32767, -6},      {32767, -9},      {32767, -13},     {32767, -16},

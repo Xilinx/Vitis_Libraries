@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -398,6 +398,7 @@ class dft_graph : public graph {
                 // // connect input data to each kernel
                 connect(in[kernelIdx], m_dftKernels[kernelIdx].in[0]);
                 dimensions(m_dftKernels[kernelIdx].in[0]) = {cascWindowSize};
+                conditional_single_buffer<TT_DATA, cascWindowSize>(m_dftKernels[kernelIdx].in[0]);
 
                 // Specify mapping constraints
                 runtime<ratio>(m_dftKernels[kernelIdx]) = 0.8;
@@ -408,6 +409,8 @@ class dft_graph : public graph {
             // connect final kernel output to output of the graph
             connect(m_dftKernels[((ssr * TP_CASC_LEN) + TP_CASC_LEN - 1)].out[0], out[ssr]);
             dimensions(m_dftKernels[((ssr * TP_CASC_LEN) + TP_CASC_LEN - 1)].out[0]) = {outWindowSize};
+            conditional_single_buffer<T_outDataType, outWindowSize>(
+                m_dftKernels[((ssr * TP_CASC_LEN) + TP_CASC_LEN - 1)].out[0]);
         }
     };
 };

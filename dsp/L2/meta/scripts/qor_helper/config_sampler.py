@@ -48,6 +48,7 @@ class ConfigSampler:
         self.params = [param for param in param_dicts]
         self.validators = {param: getattr(ip_module, param_dicts[param]["validator"]["function"]) for param in param_dicts}
         self.updaters = {param: getattr(ip_module, param_dicts[param]["updater"]["function"]) for param in param_dicts}
+        self.generate_graph = getattr(ip_module, "generate_graph")  # function to generate graph code for a config.
         
         self.test_max = {param: None for param in param_dicts}  # initializing
         for param in param_dicts:
@@ -59,16 +60,13 @@ class ConfigSampler:
         self.categorical_params = categorical_params
         self.no_iterate_params = no_iterate_params
 
-    def set_metadata_dirs(self, libraries=["xf_dsp", "xf_solver"]):
+    def set_metadata_dirs(self):
         qor_helper_dir = os.path.dirname(os.path.abspath(__file__))
         libraries_dir = qor_helper_dir + "/../../../../../"
-        entries = os.listdir(libraries_dir)
-        dir_names = [entry for entry in entries if os.path.isdir(os.path.join(libraries_dir, entry))]
-        for dir in dir_names:
-            if dir in libraries:
-                repo_dir = os.path.join(libraries_dir, dir)
-                metadata_dir = repo_dir + "/L2/meta"
-                sys.path.append(metadata_dir)
+        for entry in os.listdir(libraries_dir):
+            candidate = os.path.join(libraries_dir, entry, "L2", "meta")
+            if os.path.isdir(candidate):
+                sys.path.append(candidate)
 
     def get_legal_values(self, updated_dict):
         """Returns the values given an updated_dict."""
@@ -179,10 +177,8 @@ class ConfigSampler:
                         if min_val > max_val:   # for cases where the testable_max is below the min allowed by metadata.
                             return {}
 
-                    min_val_log = np.log(min_val + 1)
-                    max_val_log = np.log(max_val + 1)
-                    sampled_log = random.uniform(min_val_log, max_val_log)
-                    config[param] = round(np.exp(sampled_log) - 1)    # prioritizing smaller values. Consider fft: sampling uniformly between 16 and 65536 will overrepresent larger point sizes.
+                    sample = random.uniform(min_val, max_val)
+                    config[param] = round(sample)
 
                 elif param in self.categorical_params:
                     config[param] = random.choice(legal_vals)
@@ -198,6 +194,9 @@ class ConfigSampler:
                 if not validated_dict["is_valid"]:   # if our random guess was illegal...
                     updated_dict = updater(config)
                     config[param] = updated_dict["actual"]  # ...snap to nearest value
+                    validated_dict = validator(config)
+                    if not validated_dict["is_valid"]:
+                        return {}   # if still illegal, return empty dict.
         except:
             print(f"Bugged config. Verify by running it through config_helper: {config}")
             return "BUGGED"

@@ -1,0 +1,17 @@
+You are answering ONE question in an interactive configuration session for
+{api_name}, driven by
+L2/meta/scripts/ip_config_wizard/ip_config_wizard.py. Do not edit files, run
+builds, or read other repository files -- answer using only the information
+given here.
+
+Original user request:
+{user_request}
+
+Parameters already decided in this session:
+{decided_params}
+
+Parameter to answer now: {param}
+{param_guidance}
+
+Respond with the schema's "value" field set to your answer, and a
+one-sentence "reason".

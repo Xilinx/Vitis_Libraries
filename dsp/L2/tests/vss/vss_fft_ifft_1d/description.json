@@ -4,13 +4,15 @@
     "gui": false,
     "flow": "system",
     "platform_allowlist": [
-        "vck190",
-        "vek280",
+        "vck190_base",
+        "vek280_base",
         "vek385"
     ],
     "platform_properties": {
-        "vck190": {
-            "param_set": ["*_aie1_*"],
+        "vck190_base": {
+            "param_set": [
+                "*_aie1_*"
+            ],
             "v++": {
                 "compiler": {
                     "clflags": []
@@ -27,9 +29,11 @@
                 }
             }
         },
-        "vek280": {
-                "param_set": ["*_aie2_*"],
-                "v++": {
+        "vek280_base": {
+            "param_set": [
+                "*_aie2_*"
+            ],
+            "v++": {
                 "compiler": {
                     "clflags": []
                 },
@@ -46,8 +50,10 @@
             }
         },
         "vek385": {
-                "param_set": ["*_aie22_*"],
-                "v++": {
+            "param_set": [
+                "*_aie22_*"
+            ],
+            "v++": {
                 "compiler": {
                     "clflags": []
                 },
@@ -62,17 +68,20 @@
                     ]
                 }
             }
-        }       
+        }
     },
     "data": {
-        "file" : [
+        "file": [
             "PROJECT/data/input_front.txt",
             "PROJECT/data/ref_output.txt"
         ]
     },
     "aiecontainers": [
         {
-            "embed_make_post": ["include ./aie_libadf.mk", "include ./helper.mk"]
+            "embed_make_post": [
+                "include ./aie_libadf.mk",
+                "include ./helper.mk"
+            ]
         }
     ],
     "containers": [
@@ -89,7 +98,9 @@
                     "name": "s2mm_wrapper"
                 }
             ],
-            "associated_files":["vss_fft_ifft_1d/vss_fft_ifft_1d.vss"],
+            "associated_files": [
+                "vss_fft_ifft_1d/vss_fft_ifft_1d.vss"
+            ],
             "name": "kernel"
         }
     ],
@@ -145,7 +156,7 @@
         },
         {
             "build_cmd": "$(if $(filter hw,$(TARGET)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk gen_conn_cfg HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR\")"
-        }      
+        }
     ],
     "post_launch": [
         {
@@ -228,10 +239,10 @@
                 "cmd": "",
                 "max_memory_MB": {
                     "vitis_aie_x86sim": 8192,
-                    "vitis_aie_sim": 32768,
-                    "vitis_hw_build": 40960,
-                    "vitis_hw_emu": 65536,
-                    "vitis_hw_run": 40960
+                    "vitis_aie_sim": 8192,
+                    "vitis_hw_build": 8192,
+                    "vitis_hw_emu": 8192,
+                    "vitis_hw_run": 8192
                 },
                 "max_time_min": {
                     "vitis_aie_sim": 200,

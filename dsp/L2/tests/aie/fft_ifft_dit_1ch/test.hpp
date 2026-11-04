@@ -52,7 +52,11 @@ fft_ifft_dit_1ch graph class.
 #define LOC_XBASE 1
 #define LOC_YBASE 0
 
+#ifdef USING_UUT
+#include "fft_ifft_dit_1ch_native_generated_graph/fft_ifft_dit_1ch_generated_graph.h"
+#else
 #include QUOTE(UUT_GRAPH.hpp)
+#endif
 
 using namespace adf;
 
@@ -63,6 +67,25 @@ namespace testcase {
 
 class test_graph : public graph {
    public:
+#ifdef USING_UUT
+    using uut = fft_ifft_dit_1ch_native_generated_graph;
+#else
+    using uut = xf::dsp::aie::fft::dit_1ch::UUT_GRAPH<DATA_TYPE,
+                                                      TWIDDLE_TYPE,
+                                                      POINT_SIZE,
+                                                      FFT_NIFFT,
+                                                      SHIFT,
+                                                      CASC_LEN,
+                                                      DYN_PT_SIZE,
+                                                      WINDOW_VSIZE,
+                                                      API_IO,
+                                                      PARALLEL_POWER,
+                                                      USE_WIDGETS,
+                                                      ROUND_MODE,
+                                                      SAT_MODE,
+                                                      TWIDDLE_MODE,
+                                                      DATA_OUT_TYPE>;
+#endif
     static constexpr int kStreamsPerTile = get_input_streams_core_module(); // a device trait
     static constexpr int kPortsPerTile = API_IO == 0 ? 1 : kStreamsPerTile;
 
@@ -90,44 +113,11 @@ class test_graph : public graph {
 
 #if (USE_PKT_SWITCHING != 1)
     // FFT sub-graph
-    xf::dsp::aie::fft::dit_1ch::UUT_GRAPH<DATA_TYPE,
-                                          TWIDDLE_TYPE,
-                                          POINT_SIZE,
-                                          FFT_NIFFT,
-                                          SHIFT,
-                                          CASC_LEN,
-                                          DYN_PT_SIZE,
-                                          WINDOW_VSIZE,
-                                          API_IO,
-                                          PARALLEL_POWER,
-                                          USE_WIDGETS,
-                                          ROUND_MODE,
-                                          SAT_MODE,
-                                          TWIDDLE_MODE,
-                                          DATA_OUT_TYPE>
-        fftGraph;
+    uut fftGraph;
 #endif
 
 #if (USE_PKT_SWITCHING == 1)
-    pkt_switch_graph<fftSsr,
-                     NPORT_I,
-                     NPORT_O,
-                     xf::dsp::aie::fft::dit_1ch::UUT_GRAPH<DATA_TYPE,
-                                                           TWIDDLE_TYPE,
-                                                           POINT_SIZE,
-                                                           FFT_NIFFT,
-                                                           SHIFT,
-                                                           CASC_LEN,
-                                                           DYN_PT_SIZE,
-                                                           WINDOW_VSIZE,
-                                                           API_IO,
-                                                           PARALLEL_POWER,
-                                                           USE_WIDGETS,
-                                                           ROUND_MODE,
-                                                           SAT_MODE,
-                                                           TWIDDLE_MODE,
-                                                           DATA_OUT_TYPE> >
-        fftGraphPkt;
+    pkt_switch_graph<fftSsr, NPORT_I, NPORT_O, uut> fftGraphPkt;
 #endif
 
 #if (USE_PKT_SWITCHING == 2)
@@ -205,59 +195,75 @@ class test_graph : public graph {
 #ifdef USING_UUT
 #if (SINGLE_BUF == 1 && API_IO == 0)
 #if (PARALLEL_POWER == 0)
-            single_buffer(fftGraph.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTwinproc.getKernels()->out[0]);
+            single_buffer(fftGraph.fft_graph.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.fft_graph.FFTwinproc.getKernels()->out[0]);
             printf("INFO: Single Buffer Constraint applied to input and output buffers of kernel %d.\n", i);
 #endif // PARALLEL_POWER == 0
 #if (PARALLEL_POWER == 1)
-            single_buffer(fftGraph.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.m_r2Comb[i].out[0]);
+            single_buffer(fftGraph.fft_graph.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.fft_graph.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.fft_graph.m_r2Comb[i].out[0]);
 
             printf("INFO: Single Buffer Constraint applied to input and output buffers of kernel %d.\n", i);
 #endif // PARALLEL_POWER == 1
 #if (PARALLEL_POWER == 2)
-            single_buffer(fftGraph.FFTsubframe0.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe0.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe1.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe1.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.m_r2Comb[i].out[0]);
+            single_buffer(fftGraph.fft_graph.FFTsubframe0.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.fft_graph.FFTsubframe0.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.fft_graph.FFTsubframe1.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.fft_graph.FFTsubframe1.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.fft_graph.m_r2Comb[i].out[0]);
 
             printf("INFO: Single Buffer Constraint applied to input and output buffers of kernel %d.\n", i);
 #endif // PARALLEL_POWER == 2
 #if (PARALLEL_POWER == 3)
-            single_buffer(fftGraph.FFTsubframe0.FFTsubframe0.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe0.FFTsubframe0.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe0.FFTsubframe1.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe0.FFTsubframe1.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe1.FFTsubframe0.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe1.FFTsubframe0.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe1.FFTsubframe1.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe1.FFTsubframe1.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.fft_graph.FFTsubframe0.FFTsubframe0.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.fft_graph.FFTsubframe0.FFTsubframe0.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.fft_graph.FFTsubframe0.FFTsubframe1.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.fft_graph.FFTsubframe0.FFTsubframe1.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.fft_graph.FFTsubframe1.FFTsubframe0.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.fft_graph.FFTsubframe1.FFTsubframe0.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.fft_graph.FFTsubframe1.FFTsubframe1.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.fft_graph.FFTsubframe1.FFTsubframe1.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
 
-            single_buffer(fftGraph.m_r2Comb[i].out[0]);
+            single_buffer(fftGraph.fft_graph.m_r2Comb[i].out[0]);
 
             printf("INFO: Single Buffer Constraint applied to input and output buffers of kernel %d.\n", i);
 #endif // PARALLEL_POWER == 3
 #if (PARALLEL_POWER == 4)
-            single_buffer(fftGraph.FFTsubframe0.FFTsubframe0.FFTsubframe0.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe0.FFTsubframe0.FFTsubframe0.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe0.FFTsubframe0.FFTsubframe1.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe0.FFTsubframe0.FFTsubframe1.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe0.FFTsubframe1.FFTsubframe0.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe0.FFTsubframe1.FFTsubframe0.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe0.FFTsubframe1.FFTsubframe1.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe0.FFTsubframe1.FFTsubframe1.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(
+                fftGraph.fft_graph.FFTsubframe0.FFTsubframe0.FFTsubframe0.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(
+                fftGraph.fft_graph.FFTsubframe0.FFTsubframe0.FFTsubframe0.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(
+                fftGraph.fft_graph.FFTsubframe0.FFTsubframe0.FFTsubframe1.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(
+                fftGraph.fft_graph.FFTsubframe0.FFTsubframe0.FFTsubframe1.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(
+                fftGraph.fft_graph.FFTsubframe0.FFTsubframe1.FFTsubframe0.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(
+                fftGraph.fft_graph.FFTsubframe0.FFTsubframe1.FFTsubframe0.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(
+                fftGraph.fft_graph.FFTsubframe0.FFTsubframe1.FFTsubframe1.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(
+                fftGraph.fft_graph.FFTsubframe0.FFTsubframe1.FFTsubframe1.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
 
-            single_buffer(fftGraph.FFTsubframe1.FFTsubframe0.FFTsubframe0.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe1.FFTsubframe0.FFTsubframe0.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe1.FFTsubframe0.FFTsubframe1.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe1.FFTsubframe0.FFTsubframe1.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe1.FFTsubframe1.FFTsubframe0.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe1.FFTsubframe1.FFTsubframe0.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe1.FFTsubframe1.FFTsubframe1.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.FFTsubframe1.FFTsubframe1.FFTsubframe1.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
-            single_buffer(fftGraph.m_r2Comb[i].out[0]);
+            single_buffer(
+                fftGraph.fft_graph.FFTsubframe1.FFTsubframe0.FFTsubframe0.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(
+                fftGraph.fft_graph.FFTsubframe1.FFTsubframe0.FFTsubframe0.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(
+                fftGraph.fft_graph.FFTsubframe1.FFTsubframe0.FFTsubframe1.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(
+                fftGraph.fft_graph.FFTsubframe1.FFTsubframe0.FFTsubframe1.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(
+                fftGraph.fft_graph.FFTsubframe1.FFTsubframe1.FFTsubframe0.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(
+                fftGraph.fft_graph.FFTsubframe1.FFTsubframe1.FFTsubframe0.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(
+                fftGraph.fft_graph.FFTsubframe1.FFTsubframe1.FFTsubframe1.FFTsubframe0.FFTwinproc.getKernels()->in[0]);
+            single_buffer(
+                fftGraph.fft_graph.FFTsubframe1.FFTsubframe1.FFTsubframe1.FFTsubframe1.FFTwinproc.getKernels()->in[0]);
+            single_buffer(fftGraph.fft_graph.m_r2Comb[i].out[0]);
 
             printf("INFO: Single Buffer Constraint applied to input and output buffers of kernel %d.\n", i);
 #endif // PARALLEL_POWER == 3
@@ -269,56 +275,56 @@ class test_graph : public graph {
 #ifdef USING_UUT
 #if (PARALLEL_POWER == 1)
         for (int lane=0; lane<2; lane++) {
-          location<kernel>(fftGraph.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2, LOC_YBASE + CASC_LEN + 1);
+          location<kernel>(fftGraph.fft_graph.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2, LOC_YBASE + CASC_LEN + 1);
         }
 #endif //(PARALLEL_POWER == 1)
 #if (PARALLEL_POWER == 2)
         for (int lane=0; lane<4; lane++) {
-          location<kernel>(fftGraph.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2, LOC_YBASE + CASC_LEN + 2);
+          location<kernel>(fftGraph.fft_graph.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2, LOC_YBASE + CASC_LEN + 2);
         }
         for (int lane=0; lane<2; lane++) {
-          location<kernel>(fftGraph.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2,    LOC_YBASE + CASC_LEN + 1);
-          location<kernel>(fftGraph.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+4,  LOC_YBASE + CASC_LEN + 1);
+          location<kernel>(fftGraph.fft_graph.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2,    LOC_YBASE + CASC_LEN + 1);
+          location<kernel>(fftGraph.fft_graph.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+4,  LOC_YBASE + CASC_LEN + 1);
         }
 #endif //(PARALLEL_POWER == 2)
 #if (PARALLEL_POWER == 3)
         for (int lane=0; lane<8; lane++) {
-          location<kernel>(fftGraph.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2, LOC_YBASE + CASC_LEN + 3);
+          location<kernel>(fftGraph.fft_graph.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2, LOC_YBASE + CASC_LEN + 3);
         }
         for (int lane=0; lane<4; lane++) {
-          location<kernel>(fftGraph.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2,    LOC_YBASE + CASC_LEN + 2);
-          location<kernel>(fftGraph.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+8,  LOC_YBASE + CASC_LEN + 2);
+          location<kernel>(fftGraph.fft_graph.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2,    LOC_YBASE + CASC_LEN + 2);
+          location<kernel>(fftGraph.fft_graph.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+8,  LOC_YBASE + CASC_LEN + 2);
         }
         for (int lane=0; lane<2; lane++) {
-          location<kernel>(fftGraph.FFTsubframe0.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2,    LOC_YBASE + CASC_LEN + 1);
-          location<kernel>(fftGraph.FFTsubframe0.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+4,  LOC_YBASE + CASC_LEN + 1);
-          location<kernel>(fftGraph.FFTsubframe1.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+8,  LOC_YBASE + CASC_LEN + 1);
-          location<kernel>(fftGraph.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+12, LOC_YBASE + CASC_LEN + 1);
+          location<kernel>(fftGraph.fft_graph.FFTsubframe0.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2,    LOC_YBASE + CASC_LEN + 1);
+          location<kernel>(fftGraph.fft_graph.FFTsubframe0.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+4,  LOC_YBASE + CASC_LEN + 1);
+          location<kernel>(fftGraph.fft_graph.FFTsubframe1.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+8,  LOC_YBASE + CASC_LEN + 1);
+          location<kernel>(fftGraph.fft_graph.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+12, LOC_YBASE + CASC_LEN + 1);
         }
 #endif //(PARALLEL_POWER == 3)
 #if (PARALLEL_POWER == 4)
         for (int lane=0; lane<16; lane++) {
-          location<kernel>(fftGraph.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2, LOC_YBASE + CASC_LEN + 4);
+          location<kernel>(fftGraph.fft_graph.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2, LOC_YBASE + CASC_LEN + 4);
         }
         for (int lane=0; lane<8; lane++) {
-          location<kernel>(fftGraph.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2,    LOC_YBASE + CASC_LEN + 3);
-          location<kernel>(fftGraph.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+16, LOC_YBASE + CASC_LEN + 3);
+          location<kernel>(fftGraph.fft_graph.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2,    LOC_YBASE + CASC_LEN + 3);
+          location<kernel>(fftGraph.fft_graph.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+16, LOC_YBASE + CASC_LEN + 3);
         }
         for (int lane=0; lane<4; lane++) {
-          location<kernel>(fftGraph.FFTsubframe0.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2,    LOC_YBASE + CASC_LEN + 2);
-          location<kernel>(fftGraph.FFTsubframe0.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+8,  LOC_YBASE + CASC_LEN + 2);
-          location<kernel>(fftGraph.FFTsubframe1.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+16, LOC_YBASE + CASC_LEN + 2);
-          location<kernel>(fftGraph.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+24, LOC_YBASE + CASC_LEN + 2);
+          location<kernel>(fftGraph.fft_graph.FFTsubframe0.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2,    LOC_YBASE + CASC_LEN + 2);
+          location<kernel>(fftGraph.fft_graph.FFTsubframe0.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+8,  LOC_YBASE + CASC_LEN + 2);
+          location<kernel>(fftGraph.fft_graph.FFTsubframe1.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+16, LOC_YBASE + CASC_LEN + 2);
+          location<kernel>(fftGraph.fft_graph.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+24, LOC_YBASE + CASC_LEN + 2);
         }
         for (int lane=0; lane<2; lane++) {
-          location<kernel>(fftGraph.FFTsubframe0.FFTsubframe0.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2,    LOC_YBASE + CASC_LEN +1);
-          location<kernel>(fftGraph.FFTsubframe0.FFTsubframe0.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+4,  LOC_YBASE + CASC_LEN +1);
-          location<kernel>(fftGraph.FFTsubframe0.FFTsubframe1.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+8,  LOC_YBASE + CASC_LEN +1);
-          location<kernel>(fftGraph.FFTsubframe0.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+12, LOC_YBASE + CASC_LEN +1);
-          location<kernel>(fftGraph.FFTsubframe1.FFTsubframe0.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+16, LOC_YBASE + CASC_LEN +1);
-          location<kernel>(fftGraph.FFTsubframe1.FFTsubframe0.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+20, LOC_YBASE + CASC_LEN +1);
-          location<kernel>(fftGraph.FFTsubframe1.FFTsubframe1.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+24, LOC_YBASE + CASC_LEN +1);
-          location<kernel>(fftGraph.FFTsubframe1.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+28, LOC_YBASE + CASC_LEN +1);
+          location<kernel>(fftGraph.fft_graph.FFTsubframe0.FFTsubframe0.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2,    LOC_YBASE + CASC_LEN +1);
+          location<kernel>(fftGraph.fft_graph.FFTsubframe0.FFTsubframe0.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+4,  LOC_YBASE + CASC_LEN +1);
+          location<kernel>(fftGraph.fft_graph.FFTsubframe0.FFTsubframe1.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+8,  LOC_YBASE + CASC_LEN +1);
+          location<kernel>(fftGraph.fft_graph.FFTsubframe0.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+12, LOC_YBASE + CASC_LEN +1);
+          location<kernel>(fftGraph.fft_graph.FFTsubframe1.FFTsubframe0.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+16, LOC_YBASE + CASC_LEN +1);
+          location<kernel>(fftGraph.fft_graph.FFTsubframe1.FFTsubframe0.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+20, LOC_YBASE + CASC_LEN +1);
+          location<kernel>(fftGraph.fft_graph.FFTsubframe1.FFTsubframe1.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+24, LOC_YBASE + CASC_LEN +1);
+          location<kernel>(fftGraph.fft_graph.FFTsubframe1.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+28, LOC_YBASE + CASC_LEN +1);
         }
 #endif //(PARALLEL_POWER == 4)
 #endif // USING_UUT

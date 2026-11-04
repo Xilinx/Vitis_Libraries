@@ -668,7 +668,15 @@ public:
     {TP_PHASE_RELOAD_API},    // TP_PHASE_RELOAD_API
     {TP_USE_PHASE_INC_RELOAD} // TP_USE_PHASE_INC_RELOAD
   > mixer_graph;
+  // Constructor using phase values passed as arguments
+  {graphname}(unsigned int phaseInc, unsigned int initialPhaseOffset) : mixer_graph(phaseInc, initialPhaseOffset) {{
+    create_connections();
+  }}
+  // Constructor using internal phase values
   {graphname}() : mixer_graph({args["phaseInc"]}, {args["initialPhaseOffset"]}) {{
+    create_connections();
+  }}
+  void create_connections() {{
     //kernels
     //runtime_ratio
     //connections in loop

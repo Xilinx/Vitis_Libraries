@@ -1,0 +1,1 @@
+Kronecker product of two small int16 matrices on an AIE-ML device.

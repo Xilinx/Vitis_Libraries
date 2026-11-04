@@ -1,0 +1,14 @@
+Configure xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph for an AIE-ML
+(AIE_VARIANT 2) device with exactly these parameters:
+- TT_DATA = cint16, TT_OUT_DATA = cint16, TT_TWIDDLE = cint16
+- TP_TWIDDLE_MODE = 0
+- TP_FFT_NIFFT = 0 (inverse transform)
+- TP_DYN_PT_SIZE = 1 (run-time point size, header on each frame)
+- TP_API = 1 (stream I/O)
+- TP_PARALLEL_POWER = 1 (SSR of 2)
+- TP_POINT_SIZE = 1024, TP_WINDOW_VSIZE = 1024
+- TP_CASC_LEN = 1
+- TP_SHIFT = 10
+- TP_RND = 8
+- TP_SAT = 1
+- TP_USE_WIDGETS = 0

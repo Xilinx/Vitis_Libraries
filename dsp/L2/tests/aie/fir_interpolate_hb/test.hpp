@@ -31,6 +31,7 @@ Halfband Interpolator FIR graph class.
 #include "test_utils.hpp"
 #include "fir_common_traits.hpp"
 #include "device_defs.h"
+#include "fir_interpolate_hb_native_generated_graph/fir_interpolate_hb_generated_graph.h"
 
 #ifndef UUT_GRAPH
 #define UUT_GRAPH fir_interpolate_hb_graph
@@ -133,11 +134,19 @@ class test_graph : public graph {
 #endif
 
 // FIR sub-graph
-#if (USE_COEFF_RELOAD == 1) // Reloadable coefficients
+#if (USE_COEFF_RELOAD == 1)
         static_assert(NITER % 2 == 0,
                       "ERROR: Please set NITER to be a multiple of 2 when reloadable coefficients are used");
+#endif
+#ifdef USING_UUT
+#if (USE_COEFF_RELOAD == 1)
+        fir_interpolate_hb_native_generated_graph firGraph;
+#else
+        fir_interpolate_hb_native_generated_graph firGraph(m_taps_v);
+#endif
+#elif (USE_COEFF_RELOAD == 1) // Reloadable coefficients
         uut_g<INPUT_SAMPLES> firGraph;
-#else // Static coefficients
+#else                         // Static coefficients
         uut_g<INPUT_SAMPLES> firGraph(m_taps_v);
 #endif
 #if (USE_CHAIN == 1 && ((NUM_OUTPUTS == 1 && DUAL_IP == 0) || (NUM_OUTPUTS == 2 && DUAL_INPUT_SAMPLES == 1)))
@@ -238,9 +247,9 @@ class test_graph : public graph {
 
 #ifdef USING_UUT
         // Report out for AIE Synthesizer QoR harvest
-        if (&firGraph.getKernels()[0] != NULL) {
+        if (&firGraph.filter.getKernels()[0] != NULL) {
             printf("KERNEL_ARCHS: [");
-            int arch = firGraph.getKernelArchs();
+            int arch = firGraph.filter.getKernelArchs();
             printf("%d", arch);
             printf("]\n");
         }

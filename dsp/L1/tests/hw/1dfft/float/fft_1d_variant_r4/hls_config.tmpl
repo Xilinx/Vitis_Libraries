@@ -1,0 +1,14 @@
+[hls]
+clock=${HLS_CLOCK}
+flow_target=vivado
+syn.file=${XF_PROJ_ROOT}/L1/tests/hw/1dfft/float/fft_1d_variant_r4/fft1d_variant_r4_top.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/tests/hw/1dfft/float/fft_1d_variant_r4/fft1d_variant_r4_top.cpp,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_fft/float/vitis_fft_variant -I${XF_PROJ_ROOT}/L1/tests/hw/1dfft/float/fft_1d_variant_r4 -DNUM_FFT=${NUM_FFT}
+syn.top=fft1d_variant_r4_stages_top
+tb.file=${XF_PROJ_ROOT}/L1/tests/hw/1dfft/float/fft_1d_variant_r4/test_fft1d_variant_r4_tb.cpp
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/hw/1dfft/float/fft_1d_variant_r4/test_fft1d_variant_r4_tb.cpp,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_fft/float/vitis_fft_variant -I${XF_PROJ_ROOT}/L1/tests/hw/1dfft/float/fft_1d_variant_r4 -DNUM_FFT=${NUM_FFT}
+syn.debug.enable=1
+cosim.trace_level=port
+cosim.wave_debug=false
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog

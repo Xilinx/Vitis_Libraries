@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,11 @@
 #define UUT_GRAPH fft_window_graph
 #endif
 
+#ifdef USING_UUT
+#include "fft_window_native_generated_graph/fft_window_generated_graph.h"
+#else
 #include QUOTE(UUT_GRAPH.hpp)
+#endif
 
 using namespace adf;
 
@@ -123,6 +127,9 @@ class test_graph : public graph {
                     case 3:
                         dsplib::fft::windowfn::getKaiserWindow<COEFF_TYPE>((COEFF_TYPE*)&weights[0], POINT_SIZE);
                         break;
+                    case 4:
+                        for (int i = 0; i < POINT_SIZE; ++i) weights[i] = i;
+                        break;
                     default:
                         printf("ERROR: unknown window choice. Defaulting to Hamming.\n");
                         dsplib::fft::windowfn::getHammingWindow<COEFF_TYPE>((COEFF_TYPE*)&weights[0], POINT_SIZE);
@@ -146,6 +153,9 @@ class test_graph : public graph {
                     case 3:
                         dsplib::fft::windowfn::getKaiserWindow<COEFF_TYPE>((COEFF_TYPE*)&weights[tableBase], ptSize);
                         break;
+                    case 4:
+                        for (int i = 0; i < ptSize; ++i) weights[tableBase + i] = i;
+                        break;
                     default:
                         printf("ERROR: unknown window choice. Defaulting to Hamming.\n");
                         dsplib::fft::windowfn::getHammingWindow<COEFF_TYPE>((COEFF_TYPE*)&weights[tableBase], ptSize);
@@ -156,10 +166,14 @@ class test_graph : public graph {
             }
         }
 
-        // FFTWindow sub-graph
+// FFTWindow sub-graph
+#ifdef USING_UUT
+        fft_window_native_generated_graph fftWindowGraph(weights);
+#else
         dsplib::fft::windowfn::UUT_GRAPH<DATA_TYPE, COEFF_TYPE, POINT_SIZE, WINDOW_VSIZE, SHIFT, API_IO, UUT_SSR,
                                          DYN_PT_SIZE, ROUND_MODE, SAT_MODE>
             fftWindowGraph(weights);
+#endif
 
         // Make connections
         for (int i = 0; i < UUT_SSR * kAPIFactor; i++) {
@@ -176,8 +190,8 @@ class test_graph : public graph {
 // valconnect<>(fftGraph.out[i], out[i].in[0]);
 #ifdef USING_UUT
 #if (SINGLE_BUF == 1 && API_IO == 0)
-            single_buffer(fftWindowGraph.getKernels()[i].in[0]);
-            single_buffer(fftWindowGraph.getKernels()[i].out[0]);
+            single_buffer(fftWindowGraph.fft_window.getKernels()[i].in[0]);
+            single_buffer(fftWindowGraph.fft_window.getKernels()[i].out[0]);
             printf("INFO: Single Buffer Constraint applied to input and output buffers of kernel %d.\n", i);
 #endif
 #endif

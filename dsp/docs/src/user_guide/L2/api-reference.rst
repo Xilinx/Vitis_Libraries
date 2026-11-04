@@ -23,14 +23,15 @@ For all library elements, the recommended approach is to include the L2 library 
 - `FFT Window <../../rst/group_fft_window.html>`_
 - `FIR Filters <../../rst/group_fir_graphs.html>`_
 - `Function Approximation <../../rst/group_func_approx.html>`_
-- `Graph Utilities <../../rst/group_graph_utils.html>`_
 - `GEMM <../../rst/group_gemm_graph.html>`_
 - `GEMV <../../rst/group_matrix_vector_mul_graph.html>`_
+- `Graph Utilities <../../rst/group_graph_utils.html>`_
 - `Hadamard Product <../../rst/group_hadamard_graph.html>`_
 - `Kronecker Matrix Product <../../rst/group_kronecker_graph.html>`_
 - `Outer Tensor Product <../../rst/group_outer_tensor_graph.html>`_
 - `Packet Switch <../../rst/group_pkt_switch_graph.html>`_
 - `Sample Delay <../../rst/group_sample_delay_graph.html>`_
+- `Transpose <../../rst/group_transpose_graph.html>`_
 - `Widgets <../../rst/group_widget_graph.html>`_
 
 

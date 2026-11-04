@@ -65,7 +65,7 @@ class outer_tensor_ref
     : public outer_tensor_ref_base<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_NUM_FRAMES, TP_SHIFT, TP_RND, TP_SAT> {
    private:
    public:
-    using out_t = outTypeMult_t<TT_DATA_A, TT_DATA_B>;
+    using out_t = outType_t<TT_DATA_A, TT_DATA_B>;
 
     // Constructor
     outer_tensor_ref() {}

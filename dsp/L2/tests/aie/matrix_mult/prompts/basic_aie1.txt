@@ -1,0 +1,4 @@
+Configure a matrix multiply (GEMM) for an AIE1 device: A is a 32x32 cint16 matrix and B
+is a 32x32 cint16 matrix, producing a cint16 32x32 result. Row-major storage for all
+matrices, no tiling/detiling kernels, a single kernel (no SSR or cascade), no conjugation.
+Shift the result down by 16 bits with round-half-up and saturation.

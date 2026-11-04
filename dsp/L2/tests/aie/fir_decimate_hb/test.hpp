@@ -30,6 +30,7 @@ Halfband Decimation FIR graph class.
 #include "test_utils.hpp"
 #include "fir_common_traits.hpp"
 #include "device_defs.h"
+#include "fir_decimate_hb_native_generated_graph/fir_decimate_hb_generated_graph.h"
 
 #ifndef UUT_GRAPH
 #define UUT_GRAPH fir_decimate_hb_graph
@@ -125,11 +126,19 @@ class test_graph : public graph {
 #endif
 
 // FIR sub-graph
-#if (USE_COEFF_RELOAD == 1) // Reloadable coefficients
+#if (USE_COEFF_RELOAD == 1)
         static_assert(NITER % 2 == 0,
                       "ERROR: Please set NITER to be a multiple of 2 when reloadable coefficients are used");
+#endif
+#ifdef USING_UUT
+#if (USE_COEFF_RELOAD == 1)
+        fir_decimate_hb_native_generated_graph firGraph;
+#else
+        fir_decimate_hb_native_generated_graph firGraph(m_taps_v);
+#endif
+#elif (USE_COEFF_RELOAD == 1) // Reloadable coefficients
         uut_g<INPUT_SAMPLES> firGraph;
-#else // Static coefficients
+#else                         // Static coefficients
         uut_g<INPUT_SAMPLES> firGraph(m_taps_v);
 #endif
 #if (USE_CHAIN == 1 && ((NUM_OUTPUTS == 1 && DUAL_IP == 0) || (NUM_OUTPUTS == 2 && DUAL_INPUT_SAMPLES == 1)))
@@ -194,7 +203,7 @@ class test_graph : public graph {
             if ((bufferSize > MAX_PING_PONG_SIZE) || (SINGLE_BUF == 1)) {
                 for (unsigned int ssr = 0; ssr < P_SSR; ++ssr) {
                     for (unsigned int i = 0; i < P_SSR; ++i) {
-                        single_buffer(firGraph.getKernels()[ssr * P_SSR * CASC_LEN + CASC_LEN * i].in[0]);
+                        single_buffer(firGraph.filter.getKernels()[ssr * P_SSR * CASC_LEN + CASC_LEN * i].in[0]);
                     }
 
                     single_buffer(firGraph.in[ssr * P_PARA_DECI_POLY]);
@@ -223,9 +232,9 @@ class test_graph : public graph {
 
 #ifdef USING_UUT
         // Report out for AIE Synthesizer QoR harvest
-        if (&firGraph.getKernels()[0] != NULL) {
+        if (&firGraph.filter.getKernels()[0] != NULL) {
             printf("KERNEL_ARCHS: [");
-            int arch = firGraph.getKernelArchs();
+            int arch = firGraph.filter.getKernelArchs();
             printf("%d", arch);
             printf("]\n");
         }

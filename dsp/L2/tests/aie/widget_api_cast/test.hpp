@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
- * Copyright (C) 2022-2025, Advanced Micro Devices, Inc.
+ * Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,11 @@
 #define UUT_GRAPH widget_api_cast_graph
 #endif
 
+#ifdef USING_UUT
+#include "widget_api_cast_native_generated_graph/widget_api_cast_generated_graph.h"
+#else
 #include QUOTE(UUT_GRAPH.hpp)
+#endif
 
 using namespace adf;
 
@@ -88,10 +92,14 @@ class test_graph : public graph {
         printf("HEADER_BYTES      = %d \n", HEADER_BYTES);
         namespace dsplib = xf::dsp::aie;
 
-        // Widget sub-graph
+// Widget sub-graph
+#ifdef USING_UUT
+        widget_api_cast_native_generated_graph widgetGraph;
+#else
         dsplib::widget::api_cast::UUT_GRAPH<DATA_TYPE, IN_API, OUT_API, NUM_INPUTS, WINDOW_VSIZE, NUM_OUTPUT_CLONES,
                                             PATTERN, HEADER_BYTES>
             widgetGraph;
+#endif
 
         // Make connections
         for (int i = 0; i < NUM_INPUTS; i++) {
@@ -111,22 +119,22 @@ class test_graph : public graph {
         // For cases which use 3 or 4 output windows, contention and poor QoR is seen if the processor is at the edge of
         // the array since
         // the windows then share banks and contention occurs.
-        location<kernel>(*widgetGraph.getKernels()) = tile(1, 1);
+        location<kernel>(*widgetGraph.widget_api_cast_graph.getKernels()) = tile(1, 1);
 
 #if (SINGLE_BUF == 1)
 
 #if (IN_API == 0)
-        single_buffer(widgetGraph.getKernels()[0].in[0]);
+        single_buffer(widgetGraph.widget_api_cast_graph.getKernels()[0].in[0]);
 #if (NUM_INPUTS == 2)
-        single_buffer(widgetGraph.getKernels()[0].in[1]);
+        single_buffer(widgetGraph.widget_api_cast_graph.getKernels()[0].in[1]);
 #endif
         printf("INFO: Single Buffer Constraint applied to input buffers of kernel.\n");
 #endif
 
 #if (OUT_API == 0)
-        single_buffer(widgetGraph.getKernels()[0].out[0]);
+        single_buffer(widgetGraph.widget_api_cast_graph.getKernels()[0].out[0]);
 #if (NUM_OUTPUT_CLONES == 2)
-        single_buffer(widgetGraph.getKernels()[0].out[1]);
+        single_buffer(widgetGraph.widget_api_cast_graph.getKernels()[0].out[1]);
 #endif
         printf("INFO: Single Buffer Constraint applied to output buffers of kernel.\n");
 #endif

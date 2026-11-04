@@ -142,6 +142,21 @@ using namespace adf;
  *         e.g. 32-bit ``TT_OUT_DATA``, when ``TT_DATA_A`` and ``TT_DATA_B`` is 16-bit.
  *         - ``TT_OUT_DATA`` must be an integer type if ``TT_DATA_A`` and ``TT_DATA_B`` are integer types
  *         - ``TT_OUT_DATA`` must be a float type if ``TT_DATA_A`` and ``TT_DATA_B`` are float types.
+ * @tparam TP_CONJ_A describes the selection of whether or not to conjugate the elements of input A during
+ *multiplication.
+ *         This parameter has no effect on real-only data types.
+ *         - 0: no conjugation (default)
+ *         - 1: Elements of A are conjugated prior to multiplication.
+ *         This allows the matrix multiplier to perform A*xB = out where A* is the conjugate of A.
+ *         TP_CONJ_A requires a complex TT_DATA_A type (cfloat, cint16, or cint32).
+ * @tparam TP_CONJ_B describes the selection of whether or not to conjugate the elements of input B during
+ *multiplication.
+ *         This parameter has no effect on real-only data types.
+ *         - 0: no conjugation (default)
+ *         - 1: Elements of B are conjugated prior to multiplication.
+ *         This allows the matrix multiplier to perform AxB* = out where B* is the conjugate of B.
+ *         TP_CONJ_B requires a complex TT_DATA_B type (cfloat, cint16, or cint32).
+ *         TP_CONJ_A and TP_CONJ_B may be combined to compute A*xB* = out (Hermitian product).
 **/
 
 template <typename TT_DATA_A,
@@ -162,7 +177,9 @@ template <typename TT_DATA_A,
           unsigned int TP_CASC_LEN = 1,
           unsigned int TP_SAT = 1,
           unsigned int TP_SSR = 1,
-          typename TT_OUT_DATA = outType_t<TT_DATA_A, TT_DATA_B> >
+          typename TT_OUT_DATA = outType_t<TT_DATA_A, TT_DATA_B>,
+          unsigned int TP_CONJ_A = 0,
+          unsigned int TP_CONJ_B = 0>
 class matrix_mult_graph : public graph {
    public:
     /**
@@ -257,7 +274,14 @@ class matrix_mult_graph : public graph {
                                     (TP_INPUT_WINDOW_VSIZE_A / (TP_SSR * TP_CASC_LEN)),
                                     (TP_INPUT_WINDOW_VSIZE_B / TP_CASC_LEN),
                                     cascIn,
-                                    cascOut>;
+                                    cascOut,
+                                    (TP_DIM_A / TP_SSR),       // TP_DIM_A_RANGE
+                                    (TP_DIM_AB / TP_CASC_LEN), // TP_DIM_AB_RANGE
+                                    TP_DIM_B,                  // TP_DIM_B_RANGE
+                                    0,                         // TP_KERNEL_POSITION
+                                    1,                         // TP_CASC_LEN (each kernel sees 1)
+                                    TP_CONJ_A,
+                                    TP_CONJ_B>;
     // avoid redundant instances of unused templates -- Fixes x86sim linker error without resorting to recursive
     // template meta programming
     using onlyMatMult = typename std::conditional<(TP_CASC_LEN == 1), matMultCasc<false, false>, no_kernel>::type;
@@ -301,15 +325,6 @@ class matrix_mult_graph : public graph {
     static constexpr int windowSizePerKernelA = (TP_INPUT_WINDOW_VSIZE_A / (TP_SSR * TP_CASC_LEN));
     static constexpr int windowSizePerKernelB = (TP_INPUT_WINDOW_VSIZE_B / TP_CASC_LEN);
     static constexpr int windowSizePerKernelOut = ((TP_DIM_A / TP_SSR) * TP_DIM_B);
-    static constexpr bool useSingleBufferA = (windowSizePerKernelA * sizeof(TT_DATA_A)) > (__DATA_MEM_BYTES__ / 2)
-                                                 ? true
-                                                 : false;
-    static constexpr bool useSingleBufferB = (windowSizePerKernelB * sizeof(TT_DATA_B)) > (__DATA_MEM_BYTES__ / 2)
-                                                 ? true
-                                                 : false;
-    static constexpr bool useSingleBufferOut = (windowSizePerKernelOut * sizeof(TT_OUT_DATA)) > (__DATA_MEM_BYTES__ / 2)
-                                                   ? true
-                                                   : false;
 
     /**
      * @endcond
@@ -363,18 +378,13 @@ class matrix_mult_graph : public graph {
                         connect<>(tilerA[kernelNum].out[0], m_MatmultKernels[kernelNum].in[0]);
                         dimensions(tilerA[kernelNum].out[0]) = {windowSizePerKernelA};
                         dimensions(m_MatmultKernels[kernelNum].in[0]) = {windowSizePerKernelA};
-                        if
-                            constexpr(useSingleBufferA) {
-                                single_buffer(tilerA[kernelNum].in[0]);
-                                single_buffer(tilerA[kernelNum].out[0]);
-                                single_buffer(m_MatmultKernels[kernelNum].in[0]);
-                            }
+                        conditional_single_buffer<TT_DATA_A, windowSizePerKernelA>(
+                            tilerA[kernelNum].in[0], tilerA[kernelNum].out[0], m_MatmultKernels[kernelNum].in[0]);
                     }
                 else {
                     connect<>(inA[kernelNum], m_MatmultKernels[kernelNum].in[0]);
                     dimensions(m_MatmultKernels[kernelNum].in[0]) = {windowSizePerKernelA};
-                    if
-                        constexpr(useSingleBufferA) { single_buffer(m_MatmultKernels[kernelNum].in[0]); }
+                    conditional_single_buffer<TT_DATA_A, windowSizePerKernelA>(m_MatmultKernels[kernelNum].in[0]);
                 }
 
                 if
@@ -385,18 +395,13 @@ class matrix_mult_graph : public graph {
                         connect<>(tilerB[kernelNum].out[0], m_MatmultKernels[kernelNum].in[1]);
                         dimensions(tilerB[kernelNum].out[0]) = {windowSizePerKernelB};
                         dimensions(m_MatmultKernels[kernelNum].in[1]) = {windowSizePerKernelB};
-                        if
-                            constexpr(useSingleBufferB) {
-                                single_buffer(tilerB[kernelNum].in[0]);
-                                single_buffer(tilerB[kernelNum].out[0]);
-                                single_buffer(m_MatmultKernels[kernelNum].in[1]);
-                            }
+                        conditional_single_buffer<TT_DATA_B, windowSizePerKernelB>(
+                            tilerB[kernelNum].in[0], tilerB[kernelNum].out[0], m_MatmultKernels[kernelNum].in[1]);
                     }
                 else {
                     connect<>(inB[kernelNum], m_MatmultKernels[kernelNum].in[1]);
                     dimensions(m_MatmultKernels[kernelNum].in[1]) = {windowSizePerKernelB};
-                    if
-                        constexpr(useSingleBufferB) { single_buffer(m_MatmultKernels[kernelNum].in[1]); }
+                    conditional_single_buffer<TT_DATA_B, windowSizePerKernelB>(m_MatmultKernels[kernelNum].in[1]);
                 }
                 // Specify mapping constraints - Can be overriden in parent graph.
                 runtime<ratio>(m_MatmultKernels[kernelNum]) = 0.8;
@@ -414,20 +419,15 @@ class matrix_mult_graph : public graph {
                     connect<>(m_MatmultKernels[kernelOutNum].out[0], untiler[ssrRank].in[0]);
                     dimensions(m_MatmultKernels[kernelOutNum].out[0]) = {windowSizePerKernelOut};
                     dimensions(untiler[ssrRank].in[0]) = {windowSizePerKernelOut};
-                    if
-                        constexpr(useSingleBufferOut) {
-                            single_buffer(m_MatmultKernels[kernelOutNum].out[0]);
-                            single_buffer(untiler[ssrRank].in[0]);
-                            single_buffer(untiler[ssrRank].out[0]);
-                        }
+                    conditional_single_buffer<TT_OUT_DATA, windowSizePerKernelOut>(
+                        m_MatmultKernels[kernelOutNum].out[0], untiler[ssrRank].in[0], untiler[ssrRank].out[0]);
                     connect<>(untiler[ssrRank].out[0], out[ssrRank]);
                     dimensions(untiler[ssrRank].out[0]) = {windowSizePerKernelOut};
                 }
             else {
                 connect<>(m_MatmultKernels[kernelOutNum].out[0], out[ssrRank]);
                 dimensions(m_MatmultKernels[kernelOutNum].out[0]) = {windowSizePerKernelOut};
-                if
-                    constexpr(useSingleBufferOut) { single_buffer(m_MatmultKernels[kernelOutNum].out[0]); }
+                conditional_single_buffer<TT_OUT_DATA, windowSizePerKernelOut>(m_MatmultKernels[kernelOutNum].out[0]);
             }
             runtime<ratio>(untiler[ssrRank]) = 0.8;
             source(untiler[ssrRank]) = "matrix_mult_untiler.cpp";

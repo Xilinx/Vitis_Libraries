@@ -1,0 +1,4 @@
+Configure a LUT-based DDS mixer for an AIE1 device in mixer mode 1 with cint16 data,
+window (buffer) I/O, SSR 1, 256 samples per iteration, 60 dB SFDR, a static phase
+increment of 0x08000000 and zero initial phase offset, no runtime phase reload,
+round-half-up and saturation.
