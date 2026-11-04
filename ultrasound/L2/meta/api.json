@@ -62,27 +62,27 @@
                 "ports": [
                     {
                         "name": "image_points",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::apodization_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SPACE_DIMENSION_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::image_points"
                     },
                     {
                         "name": "apodization_reference_i",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::apodization_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SPACE_DIMENSION_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::apodization_reference_i"
                     },
                     {
                         "name": "apo_distance_k",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::apodization_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SPACE_DIMENSION_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::apo_distance_k"
                     },
                     {
                         "name": "F_number",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::apodization_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SPACE_DIMENSION_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::F_number"
                     },
                     {
                         "name": "apodization_output",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::port<output> us::L2::apodization_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SPACE_DIMENSION_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::apodization_output"
                     }
                 ],
@@ -155,27 +155,27 @@
                 "ports": [
                     {
                         "name": "image_points",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::apodization_sa_graph< T, LENGTH_, INCREMENT_MATRIX_, INCREMENT_VECTOR_, SPACE_DIMENSION_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::image_points"
                     },
                     {
                         "name": "apodization_reference",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::apodization_sa_graph< T, LENGTH_, INCREMENT_MATRIX_, INCREMENT_VECTOR_, SPACE_DIMENSION_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::apodization_reference"
                     },
                     {
                         "name": "apo_distance_k",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::apodization_sa_graph< T, LENGTH_, INCREMENT_MATRIX_, INCREMENT_VECTOR_, SPACE_DIMENSION_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::apo_distance_k"
                     },
                     {
                         "name": "F_number",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::apodization_sa_graph< T, LENGTH_, INCREMENT_MATRIX_, INCREMENT_VECTOR_, SPACE_DIMENSION_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::F_number"
                     },
                     {
                         "name": "apodization_output",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::port<output> us::L2::apodization_sa_graph< T, LENGTH_, INCREMENT_MATRIX_, INCREMENT_VECTOR_, SPACE_DIMENSION_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::apodization_output"
                     }
                 ],
@@ -228,37 +228,37 @@
                 "ports": [
                     {
                         "name": "P1",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::bSpline_graph< T, LENGTH_, SIMD_DEPTH_, DIM_MATRIX_ >::P1"
                     },
                     {
                         "name": "P2",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::bSpline_graph< T, LENGTH_, SIMD_DEPTH_, DIM_MATRIX_ >::P2"
                     },
                     {
                         "name": "P3",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::bSpline_graph< T, LENGTH_, SIMD_DEPTH_, DIM_MATRIX_ >::P3"
                     },
                     {
                         "name": "P4",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::bSpline_graph< T, LENGTH_, SIMD_DEPTH_, DIM_MATRIX_ >::P4"
                     },
                     {
                         "name": "P5",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::bSpline_graph< T, LENGTH_, SIMD_DEPTH_, DIM_MATRIX_ >::P5"
                     },
                     {
                         "name": "P6",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::bSpline_graph< T, LENGTH_, SIMD_DEPTH_, DIM_MATRIX_ >::P6"
                     },
                     {
                         "name": "C",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::port<output> us::L2::bSpline_graph< T, LENGTH_, SIMD_DEPTH_, DIM_MATRIX_ >::C"
                     }
                 ],
@@ -331,42 +331,42 @@
                 "ports": [
                     {
                         "name": "image_points_from_PL",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::delay_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, SPACE_DIMENSION_, DIM_VECTOR_, DIM_MATRIX_ >::image_points_from_PL"
                     },
                     {
                         "name": "image_points_from_PL_",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::delay_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, SPACE_DIMENSION_, DIM_VECTOR_, DIM_MATRIX_ >::image_points_from_PL_"
                     },
                     {
                         "name": "tx_def_ref_point",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::delay_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, SPACE_DIMENSION_, DIM_VECTOR_, DIM_MATRIX_ >::tx_def_ref_point"
                     },
                     {
                         "name": "tx_def_delay_distance",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::delay_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, SPACE_DIMENSION_, DIM_VECTOR_, DIM_MATRIX_ >::tx_def_delay_distance"
                     },
                     {
                         "name": "tx_def_delay_distance2",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::delay_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, SPACE_DIMENSION_, DIM_VECTOR_, DIM_MATRIX_ >::tx_def_delay_distance2"
                     },
                     {
                         "name": "tx_def_focal_point",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::delay_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, SPACE_DIMENSION_, DIM_VECTOR_, DIM_MATRIX_ >::tx_def_focal_point"
                     },
                     {
                         "name": "t_start",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::delay_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, SPACE_DIMENSION_, DIM_VECTOR_, DIM_MATRIX_ >::t_start"
                     },
                     {
                         "name": "delay_to_PL",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::port<output> us::L2::delay_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, SPACE_DIMENSION_, DIM_VECTOR_, DIM_MATRIX_ >::delay_to_PL"
                     }
                 ],
@@ -439,22 +439,22 @@
                 "ports": [
                     {
                         "name": "image_points_from_PL",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::delay_pw_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, SPACE_DIMENSION_, DIM_VECTOR_, DIM_MATRIX_ >::image_points_from_PL"
                     },
                     {
                         "name": "tx_def_reference_point",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::delay_pw_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, SPACE_DIMENSION_, DIM_VECTOR_, DIM_MATRIX_ >::tx_def_reference_point"
                     },
                     {
                         "name": "t_start",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::delay_pw_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, SPACE_DIMENSION_, DIM_VECTOR_, DIM_MATRIX_ >::t_start"
                     },
                     {
                         "name": "delay_to_PL",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::port<output> us::L2::delay_pw_graph< T, LENGTH_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, SPACE_DIMENSION_, DIM_VECTOR_, DIM_MATRIX_ >::delay_to_PL"
                     }
                 ],
@@ -512,27 +512,27 @@
                 "ports": [
                     {
                         "name": "apo_ref_0",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::focusing_graph< T, LENGTH_, INCREMENT_VECTOR_, SIMD_DEPTH_, DIM_VECTOR_ >::apo_ref_0"
                     },
                     {
                         "name": "xdc_def_0",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::focusing_graph< T, LENGTH_, INCREMENT_VECTOR_, SIMD_DEPTH_, DIM_VECTOR_ >::xdc_def_0"
                     },
                     {
                         "name": "apo_ref_1",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::focusing_graph< T, LENGTH_, INCREMENT_VECTOR_, SIMD_DEPTH_, DIM_VECTOR_ >::apo_ref_1"
                     },
                     {
                         "name": "xdc_def_1",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::focusing_graph< T, LENGTH_, INCREMENT_VECTOR_, SIMD_DEPTH_, DIM_VECTOR_ >::xdc_def_1"
                     },
                     {
                         "name": "focusing_output",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::port<output> us::L2::focusing_graph< T, LENGTH_, INCREMENT_VECTOR_, SIMD_DEPTH_, DIM_VECTOR_ >::focusing_output"
                     }
                 ],
@@ -590,27 +590,27 @@
                 "ports": [
                     {
                         "name": "apo_ref_0",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::focusing_sa_graph< T, LENGTH_, INCREMENT_VECTOR_, SIMD_DEPTH_, DIM_VECTOR_ >::apo_ref_0"
                     },
                     {
                         "name": "img_points_0",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::focusing_sa_graph< T, LENGTH_, INCREMENT_VECTOR_, SIMD_DEPTH_, DIM_VECTOR_ >::img_points_0"
                     },
                     {
                         "name": "apo_ref_1",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::focusing_sa_graph< T, LENGTH_, INCREMENT_VECTOR_, SIMD_DEPTH_, DIM_VECTOR_ >::apo_ref_1"
                     },
                     {
                         "name": "img_points_1",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::focusing_sa_graph< T, LENGTH_, INCREMENT_VECTOR_, SIMD_DEPTH_, DIM_VECTOR_ >::img_points_1"
                     },
                     {
                         "name": "focusing_output",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::port<output> us::L2::focusing_sa_graph< T, LENGTH_, INCREMENT_VECTOR_, SIMD_DEPTH_, DIM_VECTOR_ >::focusing_output"
                     }
                 ],
@@ -668,22 +668,22 @@
                 "ports": [
                     {
                         "name": "start_positions",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::imagePoints_graph< T, LENGTH_, SPACE_DIMENSION_, INCREMENT_MATRIX_, SIMD_DEPTH_ >::start_positions"
                     },
                     {
                         "name": "directions",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::imagePoints_graph< T, LENGTH_, SPACE_DIMENSION_, INCREMENT_MATRIX_, SIMD_DEPTH_ >::directions"
                     },
                     {
                         "name": "samples_arange",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::imagePoints_graph< T, LENGTH_, SPACE_DIMENSION_, INCREMENT_MATRIX_, SIMD_DEPTH_ >::samples_arange"
                     },
                     {
                         "name": "image_points",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::port<output> us::L2::imagePoints_graph< T, LENGTH_, SPACE_DIMENSION_, INCREMENT_MATRIX_, SIMD_DEPTH_ >::image_points"
                     }
                 ],
@@ -756,27 +756,27 @@
                 "ports": [
                     {
                         "name": "image_points_from_PL",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::samples_graph< T, LENGTH_, SPACE_DIMENSION_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::image_points_from_PL"
                     },
                     {
                         "name": "delay_from_PL",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::samples_graph< T, LENGTH_, SPACE_DIMENSION_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::delay_from_PL"
                     },
                     {
                         "name": "xdc_def_positions",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::samples_graph< T, LENGTH_, SPACE_DIMENSION_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::xdc_def_positions"
                     },
                     {
                         "name": "sampling_frequency",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::samples_graph< T, LENGTH_, SPACE_DIMENSION_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::sampling_frequency"
                     },
                     {
                         "name": "samples_to_PL",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::port<output> us::L2::samples_graph< T, LENGTH_, SPACE_DIMENSION_, INCREMENT_VECTOR_, INCREMENT_MATRIX_, SIMD_DEPTH_, DIM_VECTOR_, DIM_MATRIX_ >::samples_to_PL"
                     }
                 ],
@@ -817,78 +817,78 @@
                         "name": "NUM_LINE",
                         "description": "Number of scanlines",
                         "type": "int",
-                        "minimum": "1",
-                        "maximum": "41"
+                        "minimum": 1,
+                        "maximum": 41
                     },
                     {
                         "name": "NUM_ELEMENT",
                         "description": "Number of transducer's elements",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "128"
+                        "minimum": 8,
+                        "maximum": 128
                     },
                     {
                         "name": "NUM_SAMPLE",
                         "description": "Number of time samples",
                         "type": "int",
-                        "minimum": "64",
-                        "maximum": "2048"
+                        "minimum": 64,
+                        "maximum": 2048
                     },
                     {
                         "name": "NUM_SEG",
                         "description": "Number of segments in one scanline",
                         "type": "int",
-                        "minimum": "4",
-                        "maximum": "4"
+                        "minimum": 4,
+                        "maximum": 4
                     },
                     {
                         "name": "LEN_OUT",
                         "description": "Number of outputdata per invoking",
                         "type": "int",
-                        "minimum": "64",
-                        "maximum": "2048"
+                        "minimum": 64,
+                        "maximum": 2048
                     },
                     {
                         "name": "LEN_IN",
                         "description": "Number of inputdata per invoking",
                         "type": "int",
-                        "minimum": "64",
-                        "maximum": "2048"
+                        "minimum": 64,
+                        "maximum": 2048
                     },
                     {
                         "name": "VECDIM",
                         "description": "Vector dimension",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "8"
+                        "minimum": 8,
+                        "maximum": 8
                     },
                     {
                         "name": "APODI_PRE_LEN32b_PARA",
                         "description": "The number of parameters in the parameter group",
                         "type": "int",
-                        "minimum": "12",
-                        "maximum": "12"
+                        "minimum": 12,
+                        "maximum": 12
                     }
                 ],
                 "ports": [
                     {
                         "name": "out",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::port<output> us::L2::apodi_pre_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_apodi_t, LEN_IN_apodi_t, VECDIM_apodi_t, LEN32b_PARA_apodi_t>::out"
                     },
                     {
                         "name": "img_x_in",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::apodi_pre_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_apodi_t, LEN_IN_apodi_t, VECDIM_apodi_t, LEN32b_PARA_apodi_t>::img_x_in"
                     },
                     {
                         "name": "img_z_in",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::apodi_pre_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_apodi_t, LEN_IN_apodi_t, VECDIM_apodi_t, LEN32b_PARA_apodi_t>::img_z_in"
                     },
                     {
                         "name": "para_apodi_const",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::apodi_pre_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_apodi_t, LEN_IN_apodi_t, VECDIM_apodi_t, LEN32b_PARA_apodi_t>::para_apodi_const"
                     }
                 ],
@@ -929,85 +929,85 @@
                         "name": "NUM_LINE",
                         "description": "Number of scanlines",
                         "type": "int",
-                        "minimum": "1",
-                        "maximum": "41"
+                        "minimum": 1,
+                        "maximum": 41
                     },
                     {
                         "name": "NUM_ELEMENT",
                         "description": "Number of transducer's elements",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "128"
+                        "minimum": 8,
+                        "maximum": 128
                     },
                     {
                         "name": "NUM_SAMPLE",
                         "description": "Number of time samples",
                         "type": "int",
-                        "minimum": "64",
-                        "maximum": "2048"
+                        "minimum": 64,
+                        "maximum": 2048
                     },
                     {
                         "name": "NUM_SEG",
                         "description": "Number of segments in one scanline",
                         "type": "int",
-                        "minimum": "4",
-                        "maximum": "4"
+                        "minimum": 4,
+                        "maximum": 4
                     },
                     {
                         "name": "LEN_OUT",
                         "description": "Number of outputdata per invoking",
                         "type": "int",
-                        "minimum": "64",
-                        "maximum": "512"
+                        "minimum": 64,
+                        "maximum": 512
                     },
                     {
                         "name": "LEN_IN_F",
                         "description": "Number of inputdata per invoking",
                         "type": "int",
-                        "minimum": "512",
-                        "maximum": "512"
+                        "minimum": 512,
+                        "maximum": 512
                     },
                     {
                         "name": "LEN_IN_D",
                         "description": "Number of inputdata per invoking",
                         "type": "int",
-                        "minimum": "512",
-                        "maximum": "512"
+                        "minimum": 512,
+                        "maximum": 512
                     },
                     {
                         "name": "VECDIM",
                         "description": "Vector dimension",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "8"
+                        "minimum": 8,
+                        "maximum": 8
                     },
                     {
                         "name": "APODI_PRE_LEN32b_PARA",
                         "description": "The number of parameters in the parameter group",
                         "type": "int",
-                        "minimum": "12",
-                        "maximum": "12"
+                        "minimum": 12,
+                        "maximum": 12
                     }
                 ],
                 "ports": [
                     {
                         "name": "out",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::port<output> us::L2::apodi_main_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_apodi_t, LEN_IN_apodi_f_t, LEN_IN_apodi_d_t, VECDIM_apodi_t, LEN32b_PARA_apodi_t>::out"
                     },
                     {
                         "name": "p_focal",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::apodi_main_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_apodi_t, LEN_IN_apodi_f_t, LEN_IN_apodi_d_t, VECDIM_apodi_t, LEN32b_PARA_apodi_t>::p_focal"
                     },
                     {
                         "name": "p_invD",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::apodi_main_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_apodi_t, LEN_IN_apodi_f_t, LEN_IN_apodi_d_t, VECDIM_apodi_t, LEN32b_PARA_apodi_t>::p_invD"
                     },
                     {
                         "name": "para_amain_const",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::apodi_main_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_apodi_t, LEN_IN_apodi_f_t, LEN_IN_apodi_d_t, VECDIM_apodi_t, LEN32b_PARA_apodi_t>::para_amain_const"
                     }
                 ],
@@ -1048,62 +1048,62 @@
                         "name": "NUM_LINE",
                         "description": "Number of scanlines",
                         "type": "int",
-                        "minimum": "1",
-                        "maximum": "41"
+                        "minimum": 1,
+                        "maximum": 41
                     },
                     {
                         "name": "VECDIM_delay_t",
                         "description": "Vector dimension",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "8"
+                        "minimum": 8,
+                        "maximum": 8
                     },
                     {
                         "name": "LEN_IN_delay_t",
                         "description": "Number of inputdata per invoking",
                         "type": "int",
-                        "minimum": "512",
-                        "maximum": "512"
+                        "minimum": 512,
+                        "maximum": 512
                     },
                     {
                         "name": "LEN_OUT_delay_t",
                         "description": "Number of outputdata per invoking",
                         "type": "int",
-                        "minimum": "64",
-                        "maximum": "512"
+                        "minimum": 64,
+                        "maximum": 512
                     },
                     {
                         "name": "LEN32b_PARA_delay_t",
                         "description": "The number of parameters in the parameter group",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "8"
+                        "minimum": 8,
+                        "maximum": 8
                     }
                 ],
                 "ports": [
                     {
                         "name": "para_const",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<adf::direction::in> us::L2::delay_graph_wrapper<T, NUM_LINE_t, VECDIM_delay_t, LEN_IN_delay_t, LEN_OUT_delay_t, LEN32b_PARA_delay_t>::para_const"
                     },
                     {
                         "name": "para_t_start",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<adf::direction::in> us::L2::delay_graph_wrapper<T, NUM_LINE_t, VECDIM_delay_t, LEN_IN_delay_t, LEN_OUT_delay_t, LEN32b_PARA_delay_t>::para_t_start"
                     },
                     {
                         "name": "img_x",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::delay_graph_wrapper<T, NUM_LINE_t, VECDIM_delay_t, LEN_IN_delay_t, LEN_OUT_delay_t, LEN32b_PARA_delay_t>::img_x"
                     },
                     {
                         "name": "img_z",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::delay_graph_wrapper<T, NUM_LINE_t, VECDIM_delay_t, LEN_IN_delay_t, LEN_OUT_delay_t, LEN32b_PARA_delay_t>::img_z"
                     },
                     {
                         "name": "delay",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::port<output> us::L2::delay_graph_wrapper<T, NUM_LINE_t, VECDIM_delay_t, LEN_IN_delay_t, LEN_OUT_delay_t, LEN32b_PARA_delay_t>::delay"
                     }
                 ],
@@ -1144,59 +1144,59 @@
                         "name": "NUM_LINE",
                         "description": "Number of scanlines",
                         "type": "int",
-                        "minimum": "1",
-                        "maximum": "41"
+                        "minimum": 1,
+                        "maximum": 41
                     },
                     {
                         "name": "NUM_ELEMENT",
                         "description": "Number of transducer's elements",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "128"
+                        "minimum": 8,
+                        "maximum": 128
                     },
                     {
                         "name": "NUM_SAMPLE",
                         "description": "Number of time samples",
                         "type": "int",
-                        "minimum": "64",
-                        "maximum": "2048"
+                        "minimum": 64,
+                        "maximum": 2048
                     },
                     {
                         "name": "NUM_SEG",
                         "description": "Number of segments in one scanline",
                         "type": "int",
-                        "minimum": "4",
-                        "maximum": "4"
+                        "minimum": 4,
+                        "maximum": 4
                     },
                     {
                         "name": "VECDIM_foc_t",
                         "description": "Vector dimension",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "8"
+                        "minimum": 8,
+                        "maximum": 8
                     },
                     {
                         "name": "LEN32b_PARA_foc_t",
                         "description": "The number of parameters in the parameter group",
                         "type": "int",
-                        "minimum": "6",
-                        "maximum": "6"
+                        "minimum": 6,
+                        "maximum": 6
                     }
                 ],
                 "ports": [
                     {
                         "name": "p_para_const",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::graph_foc_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, VECDIM_foc_t, LEN32b_PARA_foc_t>::p_para_const"
                     },
                     {
                         "name": "p_para_pos",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::graph_foc_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, VECDIM_foc_t, LEN32b_PARA_foc_t>::p_para_pos"
                     },
                     {
                         "name": "dataout1",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::port<output> us::L2::graph_foc_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, VECDIM_foc_t, LEN32b_PARA_foc_t>::dataout1"
                     }
                 ],
@@ -1237,66 +1237,66 @@
                         "name": "NUM_LINE",
                         "description": "Number of scanlines",
                         "type": "int",
-                        "minimum": "1",
-                        "maximum": "41"
+                        "minimum": 1,
+                        "maximum": 41
                     },
                     {
                         "name": "NUM_ELEMENT",
                         "description": "Number of transducer's elements",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "128"
+                        "minimum": 8,
+                        "maximum": 128
                     },
                     {
                         "name": "NUM_SAMPLE",
                         "description": "Number of time samples",
                         "type": "int",
-                        "minimum": "64",
-                        "maximum": "2048"
+                        "minimum": 64,
+                        "maximum": 2048
                     },
                     {
                         "name": "NUM_SEG",
                         "description": "Number of segments in one scanline",
                         "type": "int",
-                        "minimum": "4",
-                        "maximum": "4"
+                        "minimum": 4,
+                        "maximum": 4
                     },
                     {
                         "name": "VECDIM_img_t",
                         "description": "Vector dimension",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "8"
+                        "minimum": 8,
+                        "maximum": 8
                     },
                     {
                         "name": "LEN_OUT_img_t",
                         "description": "Number of outputdata per invoking",
                         "type": "int",
-                        "minimum": "64",
-                        "maximum": "512"
+                        "minimum": 64,
+                        "maximum": 512
                     },
                     {
                         "name": "LEN32b_PARA_img_t",
                         "description": "The number of parameters in the parameter group",
                         "type": "int",
-                        "minimum": "7",
-                        "maximum": "7"
+                        "minimum": 7,
+                        "maximum": 7
                     }
                 ],
                 "ports": [
                     {
                         "name": "p_para_const",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::graph_img_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, VECDIM_img_t, LEN_OUT_img_t, LEN32b_PARA_img_t>::p_para_const"
                     },
                     {
                         "name": "p_para_start",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::graph_img_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, VECDIM_img_t, LEN_OUT_img_t, LEN32b_PARA_img_t>::p_para_start"
                     },
                     {
                         "name": "dataout1",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::port<output> us::L2::graph_img_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, VECDIM_img_t, LEN_OUT_img_t, LEN32b_PARA_img_t>::dataout1"
                     }
                 ],
@@ -1337,90 +1337,90 @@
                         "name": "NUM_LINE",
                         "description": "Number of scanlines",
                         "type": "int",
-                        "minimum": "1",
-                        "maximum": "41"
+                        "minimum": 1,
+                        "maximum": 41
                     },
                     {
                         "name": "NUM_ELEMENT",
                         "description": "Number of transducer's elements",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "128"
+                        "minimum": 8,
+                        "maximum": 128
                     },
                     {
                         "name": "NUM_SAMPLE",
                         "description": "Number of time samples",
                         "type": "int",
-                        "minimum": "64",
-                        "maximum": "2048"
+                        "minimum": 64,
+                        "maximum": 2048
                     },
                     {
                         "name": "NUM_SEG",
                         "description": "Number of segments in one scanline",
                         "type": "int",
-                        "minimum": "4",
-                        "maximum": "4"
+                        "minimum": 4,
+                        "maximum": 4
                     },
                     {
                         "name": "LEN_OUT",
                         "description": "Number of outputdata per invoking",
                         "type": "int",
-                        "minimum": "64",
-                        "maximum": "512"
+                        "minimum": 64,
+                        "maximum": 512
                     },
                     {
                         "name": "LEN_IN",
                         "description": "Number of inputdata per invoking",
                         "type": "int",
-                        "minimum": "64",
-                        "maximum": "512"
+                        "minimum": 64,
+                        "maximum": 512
                     },
                     {
                         "name": "LEN_RF_IN",
                         "description": "Number of inputdata per invoking",
                         "type": "int",
-                        "minimum": "64",
-                        "maximum": "512"
+                        "minimum": 64,
+                        "maximum": 512
                     },
                     {
                         "name": "VECDIM",
                         "description": "Vector dimension",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "8"
+                        "minimum": 8,
+                        "maximum": 8
                     },
                     {
                         "name": "APODI_PRE_LEN32b_PARA",
                         "description": "The number of parameters in the parameter group",
                         "type": "int",
-                        "minimum": "9",
-                        "maximum": "9"
+                        "minimum": 9,
+                        "maximum": 9
                     }
                 ],
                 "ports": [
                     {
                         "name": "out",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::port<output> us::L2::interpolation_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_interp_t, LEN_PAD_interp_t, LEN_IN_interp_t, LEN_IN_interp_rf_t, VECDIM_interp_t, LEN32b_PARA_interp_t>::out"
                     },
                     {
                         "name": "p_sample_in",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::interpolation_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_interp_t, LEN_PAD_interp_t, LEN_IN_interp_t, LEN_IN_interp_rf_t, VECDIM_interp_t, LEN32b_PARA_interp_t>::p_para_const"
                     },
                     {
                         "name": "p_inside_in",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::interpolation_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_interp_t, LEN_PAD_interp_t, LEN_IN_interp_t, LEN_IN_interp_rf_t, VECDIM_interp_t, LEN32b_PARA_interp_t>::p_para_start"
                     },
                     {
                         "name": "p_rfdata_in",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::interpolation_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_interp_t, LEN_PAD_interp_t, LEN_IN_interp_t, LEN_IN_interp_rf_t, VECDIM_interp_t, LEN32b_PARA_interp_t>::p_para_start"
                     },
                     {
                         "name": "para_interp_const",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::interpolation_graph<float, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, LEN_OUT_interp_t, LEN_PAD_interp_t, LEN_IN_interp_t, LEN_IN_interp_rf_t, VECDIM_interp_t, LEN32b_PARA_interp_t>::p_para_start"
                     }
                 ],
@@ -1461,167 +1461,167 @@
                         "name": "NUM_LINE_t",
                         "description": "Number of scanlines",
                         "type": "int",
-                        "minimum": "1",
-                        "maximum": "41"
+                        "minimum": 1,
+                        "maximum": 41
                     },
                     {
                         "name": "NUM_ELEMENT_t",
                         "description": "Number of transducer's elements",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "128"
+                        "minimum": 8,
+                        "maximum": 128
                     },
                     {
                         "name": "NUM_SAMPLE_t",
                         "description": "Number of time samples",
                         "type": "int",
-                        "minimum": "64",
-                        "maximum": "2048"
+                        "minimum": 64,
+                        "maximum": 2048
                     },
                     {
                         "name": "NUM_SEG_t",
                         "description": "Number of segments in one scanline",
                         "type": "int",
-                        "minimum": "4",
-                        "maximum": "4"
+                        "minimum": 4,
+                        "maximum": 4
                     },
                     {
                         "name": "NUM_DEP_SEG_t",
                         "description": "Number of data in one segment",
                         "type": "int",
-                        "minimum": "2048",
-                        "maximum": "2048"
+                        "minimum": 2048,
+                        "maximum": 2048
                     },
                     {
                         "name": "VECDIM_mult_t",
                         "description": "Vector dimension",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "8"
+                        "minimum": 8,
+                        "maximum": 8
                     },
                     {
                         "name": "LEN_IN_mult_t",
                         "description": "Number of inputdata per invoking",
                         "type": "int",
-                        "minimum": "2048",
-                        "maximum": "2048"
+                        "minimum": 2048,
+                        "maximum": 2048
                     },
                     {
                         "name": "LEN_OUT_mult_t",
                         "description": "Number of outputdata per invoking",
                         "type": "int",
-                        "minimum": "2048",
-                        "maximum": "2048"
+                        "minimum": 2048,
+                        "maximum": 2048
                     },
                     {
                         "name": "LEN32b_PARA_mult_t",
                         "description": "Number of inputdata per invoking",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "8"
+                        "minimum": 8,
+                        "maximum": 8
                     },
                     {
                         "name": "MULT_ID_t",
                         "description": "default ID of mult kernel",
                         "type": "int",
-                        "minimum": "0",
-                        "maximum": "0"
+                        "minimum": 0,
+                        "maximum": 0
                     }
                 ],
                 "ports": [
                     {
                         "name": "para_const_pre",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_pre"
                     },
                     {
                         "name": "para_const_0",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_0"
                     },
                     {
                         "name": "para_const_1",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_1"
                     },
                     {
                         "name": "para_const_2",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_2"
                     },
                     {
                         "name": "para_const_3",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_3"
                     },
                     {
                         "name": "para_const_0_0",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_0_0"
                     },
                     {
                         "name": "para_const_0_1",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_0_1"
                     },
                     {
                         "name": "para_const_0_2",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_0_2"
                     },
                     {
                         "name": "para_const_0_3",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_0_3"
                     },
                     {
                         "name": "para_const_1_1_0",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_1_1_0"
                     },
                     {
                         "name": "para_const_1",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_1"
                     },
                     {
                         "name": "para_const_1_2",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_1_2"
                     },
                     {
                         "name": "para_const_1_3",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<direction::in> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::para_const_1_3"
                     },
                     {
                         "name": "interp",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::interp"
                     },
                     {
                         "name": "apod",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::apod"
                     },
                     {
                         "name": "mult_0",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::port<output> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::mult_0"
                     },
                     {
                         "name": "mult_1",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::port<output> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::mult_1"
                     },
                     {
                         "name": "mult_2",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::port<output> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::mult_2"
                     },
                     {
                         "name": "mult_3",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::port<output> us::L2::mult_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, NUM_SAMPLE_t, NUM_SEG_t, NUM_DEP_SEG_t, VECDIM_mult_t, LEN_IN_mult_t, LEN_OUT_mult_t, LEN32b_PARA_mult_t, MULT_ID_t>::mult_3"
                     }
                 ],
@@ -1662,84 +1662,84 @@
                         "name": "NUM_LINE",
                         "description": "Number of scanlines",
                         "type": "int",
-                        "minimum": "1",
-                        "maximum": "41"
+                        "minimum": 1,
+                        "maximum": 41
                     },
                     {
                         "name": "NUM_ELEMENT",
                         "description": "Number of transducer's elements",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "128"
+                        "minimum": 8,
+                        "maximum": 128
                     },
                     {
                         "name": "VECDIM_sample_t",
                         "description": "Vector dimension",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "8"
+                        "minimum": 8,
+                        "maximum": 8
                     },
                     {
                         "name": "LEN_IN_sample_t",
                         "description": "Number of inputdata per invoking",
                         "type": "int",
-                        "minimum": "64",
-                        "maximum": "512"
+                        "minimum": 64,
+                        "maximum": 512
                     },
                     {
                         "name": "LEN_OUT_sample_t",
                         "description": "Number of outputdata per invoking",
                         "type": "int",
-                        "minimum": "64",
-                        "maximum": "512"
+                        "minimum": 64,
+                        "maximum": 512
                     },
                     {
                         "name": "LEN32b_PARA_sample_t",
                         "description": "The number of parameters in the parameter group",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "8"
+                        "minimum": 8,
+                        "maximum": 8
                     }
                 ],
                 "ports": [
                     {
                         "name": "para_const",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<adf::direction::in> us::L2::sample_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, VECDIM_sample_t, LEN_IN_sample_t, LEN_OUT_sample_t, LEN32b_PARA_sample_t>::para_const"
                     },
                     {
                         "name": "para_rfdim",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<adf::direction::innput> us::L2::sample_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, VECDIM_sample_t, LEN_IN_sample_t, LEN_OUT_sample_t, LEN32b_PARA_sample_t>::para_rfdim"
                     },
                     {
                         "name": "para_elem",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<adf::direction::innput> us::L2::sample_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, VECDIM_sample_t, LEN_IN_sample_t, LEN_OUT_sample_t, LEN32b_PARA_sample_t>::para_elem"
                     },
                     {
                         "name": "sample",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::port<output> us::L2::sample_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, VECDIM_sample_t, LEN_IN_sample_t, LEN_OUT_sample_t, LEN32b_PARA_sample_t>::sample"
                     },
                     {
                         "name": "inside",
-                        "direction": "out",
+                        "direction": "output",
                         "type": "adf::port<output> us::L2::sample_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, VECDIM_sample_t, LEN_IN_sample_t, LEN_OUT_sample_t, LEN32b_PARA_sample_t>::inside"
                     },
                     {
                         "name": "img_x",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::sample_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, VECDIM_sample_t, LEN_IN_sample_t, LEN_OUT_sample_t, LEN32b_PARA_sample_t>::img_x"
                     },
                     {
                         "name": "img_z",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::sample_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, VECDIM_sample_t, LEN_IN_sample_t, LEN_OUT_sample_t, LEN32b_PARA_sample_t>::img_z"
                     },
                     {
                         "name": "delay",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "adf::port<input> us::L2::sample_graph_wrapper<T, NUM_LINE_t, NUM_ELEMENT_t, VECDIM_sample_t, LEN_IN_sample_t, LEN_OUT_sample_t, LEN32b_PARA_sample_t>::delay"
                     }
                 ],
@@ -1780,280 +1780,280 @@
                         "name": "NUM_LINE",
                         "description": "Number of scanlines",
                         "type": "int",
-                        "minimum": "1",
-                        "maximum": "41"
+                        "minimum": 1,
+                        "maximum": 41
                     },
                     {
                         "name": "NUM_ELEMENT",
                         "description": "Number of transducer's elements",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "128"
+                        "minimum": 8,
+                        "maximum": 128
                     },
                     {
                         "name": "NUM_SAMPLE",
                         "description": "Number of time samples",
                         "type": "int",
-                        "minimum": "64",
-                        "maximum": "2048"
+                        "minimum": 64,
+                        "maximum": 2048
                     },
                     {
                         "name": "NUM_SEG",
                         "description": "Number of segments in one scanline",
                         "type": "int",
-                        "minimum": "4",
-                        "maximum": "4"
+                        "minimum": 4,
+                        "maximum": 4
                     },
                     {
                         "name": "NUM_DEP_SEG_t",
                         "description": "Number of data in one segment",
                         "type": "int",
-                        "minimum": "2048",
-                        "maximum": "2048"
+                        "minimum": 2048,
+                        "maximum": 2048
                     },
                     {
                         "name": "VECDIM_img_t",
                         "description": "Vector dimension",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "8"
+                        "minimum": 8,
+                        "maximum": 8
                     },
                     {
                         "name": "LEN_OUT_img_t",
                         "description": "Number of outputdata per invoking",
                         "type": "int",
-                        "minimum": "64",
-                        "maximum": "512"
+                        "minimum": 64,
+                        "maximum": 512
                     },
                     {
                         "name": "LEN32b_PARA_img_t",
                         "description": "The number of parameters in the parameter group",
                         "type": "int",
-                        "minimum": "7",
-                        "maximum": "7"
+                        "minimum": 7,
+                        "maximum": 7
                     },
                     {
                         "name": "VECDIM_foc_t",
                         "description": "Vector dimension",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "8"
+                        "minimum": 8,
+                        "maximum": 8
                     },
                     {
                         "name": "LEN_OUT_foc_t",
                         "description": "Number of outputdata per invoking",
                         "type": "int",
-                        "minimum": "128",
-                        "maximum": "128"
+                        "minimum": 128,
+                        "maximum": 128
                     },
                     {
                         "name": "LEN32b_PARA_foc_t",
                         "description": "The number of parameters in the parameter group",
                         "type": "int",
-                        "minimum": "6",
-                        "maximum": "6"
+                        "minimum": 6,
+                        "maximum": 6
                     },
                     {
                         "name": "VECDIM_delay_t",
                         "description": "Vector dimension",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "8"
+                        "minimum": 8,
+                        "maximum": 8
                     },
                     {
                         "name": "LEN_IN_delay_t",
                         "description": "Number of inputdata per invoking",
                         "type": "int",
-                        "minimum": "512",
-                        "maximum": "512"
+                        "minimum": 512,
+                        "maximum": 512
                     },
                     {
                         "name": "LEN_OUT_delay_t",
                         "description": "Number of outputdata per invoking",
                         "type": "int",
-                        "minimum": "64",
-                        "maximum": "512"
+                        "minimum": 64,
+                        "maximum": 512
                     },
                     {
                         "name": "LEN32b_PARA_delay_t",
                         "description": "The number of parameters in the parameter group",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "8"
+                        "minimum": 8,
+                        "maximum": 8
                     },
                     {
                         "name": "VECDIM_apodi_t",
                         "description": "Vector dimension",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "8"
+                        "minimum": 8,
+                        "maximum": 8
                     },
                     {
                         "name": "LEN_IN_apodi_t",
                         "description": "Number of inputdata per invoking",
                         "type": "int",
-                        "minimum": "512",
-                        "maximum": "512"
+                        "minimum": 512,
+                        "maximum": 512
                     },
                     {
                         "name": "LEN_OUT_apodi_t",
                         "description": "Number of outputdata per invoking",
                         "type": "int",
-                        "minimum": "64",
-                        "maximum": "512"
+                        "minimum": 64,
+                        "maximum": 512
                     },
                     {
                         "name": "LEN32b_PARA_apodi_t",
                         "description": "The number of parameters in the parameter group",
                         "type": "int",
-                        "minimum": "12",
-                        "maximum": "12"
+                        "minimum": 12,
+                        "maximum": 12
                     },
                     {
                         "name": "LEN_IN_apodi_f_t",
                         "description": "Number of inputdata per invoking",
                         "type": "int",
-                        "minimum": "512",
-                        "maximum": "512"
+                        "minimum": 512,
+                        "maximum": 512
                     },
                     {
                         "name": "LEN_IN_apodi_d_t",
                         "description": "Number of inputdata per invoking",
                         "type": "int",
-                        "minimum": "512",
-                        "maximum": "512"
+                        "minimum": 512,
+                        "maximum": 512
                     },
                     {
                         "name": "VECDIM_interp_t",
                         "description": "Vector dimension",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "8"
+                        "minimum": 8,
+                        "maximum": 8
                     },
                     {
                         "name": "LEN_IN_interp_t",
                         "description": "Number of inputdata per invoking",
                         "type": "int",
-                        "minimum": "512",
-                        "maximum": "512"
+                        "minimum": 512,
+                        "maximum": 512
                     },
                     {
                         "name": "LEN_OUT_interp_t",
                         "description": "Number of outputdata per invoking",
                         "type": "int",
-                        "minimum": "64",
-                        "maximum": "512"
+                        "minimum": 64,
+                        "maximum": 512
                     },
                     {
                         "name": "LEN32b_PARA_interp_t",
                         "description": "The number of parameters in the parameter group",
                         "type": "int",
-                        "minimum": "12",
-                        "maximum": "12"
+                        "minimum": 12,
+                        "maximum": 12
                     },
                     {
                         "name": "LEN_IN_interp_f_t",
                         "description": "Number of inputdata per invoking",
                         "type": "int",
-                        "minimum": "512",
-                        "maximum": "512"
+                        "minimum": 512,
+                        "maximum": 512
                     },
                     {
                         "name": "LEN_OUT_interp_t",
                         "description": "Number of outputdata per invoking",
                         "type": "int",
-                        "minimum": "512",
-                        "maximum": "512"
+                        "minimum": 512,
+                        "maximum": 512
                     },
                     {
                         "name": "NUM_UPSample_t",
                         "description": "Number of upsample",
                         "type": "int",
-                        "minimum": "4",
-                        "maximum": "4"
+                        "minimum": 4,
+                        "maximum": 4
                     },
                     {
                         "name": "LEN32b_PARA_interp_t",
                         "description": "Number of outputdata per invoking",
                         "type": "int",
-                        "minimum": "9",
-                        "maximum": "9"
+                        "minimum": 9,
+                        "maximum": 9
                     },
                     {
                         "name": "VECDIM_sample_t",
                         "description": "Vector dimension",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "8"
+                        "minimum": 8,
+                        "maximum": 8
                     },
                     {
                         "name": "LEN_IN_sample_t",
                         "description": "Number of inputdata per invoking",
                         "type": "int",
-                        "minimum": "64",
-                        "maximum": "512"
+                        "minimum": 64,
+                        "maximum": 512
                     },
                     {
                         "name": "LEN_OUT_sample_t",
                         "description": "Number of outputdata per invoking",
                         "type": "int",
-                        "minimum": "64",
-                        "maximum": "512"
+                        "minimum": 64,
+                        "maximum": 512
                     },
                     {
                         "name": "LEN32b_PARA_sample_t",
                         "description": "The number of parameters in the parameter group",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "8"
+                        "minimum": 8,
+                        "maximum": 8
                     },
                     {
                         "name": "VECDIM_mult_t",
                         "description": "Vector dimension",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "8"
+                        "minimum": 8,
+                        "maximum": 8
                     },
                     {
                         "name": "LEN_IN_mult_t",
                         "description": "Number of inputdata per invoking",
                         "type": "int",
-                        "minimum": "2048",
-                        "maximum": "2048"
+                        "minimum": 2048,
+                        "maximum": 2048
                     },
                     {
                         "name": "LEN_OUT_mult_t",
                         "description": "Number of outputdata per invoking",
                         "type": "int",
-                        "minimum": "2048",
-                        "maximum": "2048"
+                        "minimum": 2048,
+                        "maximum": 2048
                     },
                     {
                         "name": "NUM_DEP_SEG_mult_t",
                         "description": "Number of data in one segment",
                         "type": "int",
-                        "minimum": "2048",
-                        "maximum": "2048"
+                        "minimum": 2048,
+                        "maximum": 2048
                     },
                     {
                         "name": "MULT_ID_t",
                         "description": "default ID of mult kernel",
                         "type": "int",
-                        "minimum": "0",
-                        "maximum": "0"
+                        "minimum": 0,
+                        "maximum": 0
                     },
                     {
                         "name": "LEN32b_PARA_mult_t",
                         "description": "Number of inputdata per invoking",
                         "type": "int",
-                        "minimum": "8",
-                        "maximum": "8"
+                        "minimum": 8,
+                        "maximum": 8
                     }
                 ],
                 "ports": [
                     {
                         "name": "input_rfd_file_name",
-                        "direction": "in",
+                        "direction": "input",
                         "type": "std::string"
                     }
                 ],

@@ -3,10 +3,10 @@
     "description": "Samples_aieml_int32 Test",
     "flow": "system",
     "platform_allowlist": [
-        "vek280"
+        "vek280_base"
     ],
     "platform_properties": {
-        "vek280": {
+        "vek280_base": {
             "v++": {
                 "linker": {
                     "ldclflags": [
@@ -122,7 +122,7 @@
                 "dependency": [],
                 "max_memory_MB": {
                     "vitis_aie_sim": 32768,
-                    "vitis_aie_x86sim": 32768
+                    "vitis_aie_x86sim": 16384
                 },
                 "max_time_min": 300
             }

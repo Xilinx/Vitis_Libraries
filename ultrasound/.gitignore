@@ -38,6 +38,8 @@ Work
 host_ps_on_x86
 *.img
 *.sh
+# the EDF helper scripts are generated sources a case Makefile calls, not build output
+!/scripts/edf/*.sh
 tmp_org
 .vscode
 __tmp_build

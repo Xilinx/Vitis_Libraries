@@ -3,10 +3,10 @@
     "description": "Full-flow scanline All in AIE design example",
     "flow": "system",
     "platform_allowlist": [
-        "vck190"
+        "vck190_base"
     ],
     "platform_properties": {
-        "vck190": {
+        "vck190_base": {
             "v++": {
                 "linker": {
                     "ldclflags": [
@@ -122,7 +122,7 @@
             {
                 "index": 0,
                 "dependency": [],
-                "max_memory_MB": 32768,
+                "max_memory_MB": 16384,
                 "max_time_min": 600
             }
         ],

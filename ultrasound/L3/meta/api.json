@@ -56,8 +56,8 @@
                         "name": "TIER",
                         "description": "Iteration times of AIE graph, default is enough",
                         "type": "int",
-                        "minimum": "1",
-                        "maximum": "1",
+                        "minimum": 1,
+                        "maximum": 1,
                         "enum": [
                             "1"
                         ]
@@ -119,8 +119,8 @@
                         "name": "TIER",
                         "description": "Iteration times of AIE graph, default is enough",
                         "type": "int",
-                        "minimum": "1",
-                        "maximum": "1",
+                        "minimum": 1,
+                        "maximum": 1,
                         "enum": [
                             "1"
                         ]
@@ -182,8 +182,8 @@
                         "name": "TIER",
                         "description": "Iteration times of AIE graph, default is enough",
                         "type": "int",
-                        "minimum": "1",
-                        "maximum": "1",
+                        "minimum": 1,
+                        "maximum": 1,
                         "enum": [
                             "1"
                         ]
