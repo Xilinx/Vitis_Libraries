@@ -240,6 +240,13 @@ int main(int argc, char** argv) {
         return 0;
     }
 
+#if !T_8U
+    // The interleave below reads the inputs as unsigned short; widen 8-bit inputs to the
+    // W_B_SIZE range that the HDR weights (imax) assume
+    if (in_img1.depth() == CV_8U) in_img1.convertTo(in_img1, CV_16U, W_B_SIZE / 256);
+    if (in_img2.depth() == CV_8U) in_img2.convertTo(in_img2, CV_16U, W_B_SIZE / 256);
+#endif
+
 #if T_8U
     interleaved_img.create(cv::Size(in_img1.cols + NUM_H_BLANK, in_img1.rows * 2), CV_8UC1);
 

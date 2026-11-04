@@ -264,7 +264,9 @@ static void write_flow_output_image(const cv::Mat& flowx_in,
             p3 = outbuf_copy->b;
             p4 = outbuf_copy->a;
             pix = ((unsigned int)p4 << 24) | ((unsigned int)p3 << 16) | ((unsigned int)p2 << 8) | (unsigned int)p1;
-            frame_out.at<unsigned int>(i, j) = pix;
+            // frame_out is CV_8UC4: store the packed pixel through a raw row pointer,
+            // since at<unsigned int> does not match its uchar element type
+            frame_out.ptr<unsigned int>(i)[j] = pix;
         }
     }
 

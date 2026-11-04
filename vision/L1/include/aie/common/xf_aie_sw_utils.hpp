@@ -83,8 +83,17 @@ void analyzeDiff(::cv::Mat& diff_img, int err_thresh, float& err_per) {
                         v_tmp = (int)diff_img.at<short>(i, j);
                     else if (cv_bitdepth == 32 && diff_img.depth() == CV_32S)
                         v_tmp = (int)diff_img.at<int>(i, j);
-                } else // 3 channels
-                    v_tmp = (int)diff_img.at< ::cv::Vec3b>(i, j)[k];
+                } else { // multi-channel: sample k of pixel j, at the image's own depth
+                    int s = j * diff_img.channels() + k;
+                    if (cv_bitdepth == 8)
+                        v_tmp = (int)diff_img.ptr<unsigned char>(i)[s];
+                    else if (diff_img.depth() == CV_16U)
+                        v_tmp = (int)diff_img.ptr<unsigned short>(i)[s];
+                    else if (diff_img.depth() == CV_16S)
+                        v_tmp = (int)diff_img.ptr<short>(i)[s];
+                    else if (diff_img.depth() == CV_32S)
+                        v_tmp = diff_img.ptr<int>(i)[s];
+                }
 
                 if (v_tmp > v) v = v_tmp;
             }

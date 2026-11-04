@@ -6,9 +6,7 @@
         "vek280"
     ],
     "platform_blocklist": [
-        "vck190",
-        "vck5000",
-        "v70"
+        "vck190"
     ],
     "platform_properties": {
         "vek280": {

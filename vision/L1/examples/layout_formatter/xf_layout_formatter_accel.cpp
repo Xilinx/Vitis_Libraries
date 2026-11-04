@@ -55,9 +55,9 @@ void layout_formatter_accel(InStream& s_axis_video,                    // Input 
 #pragma HLS INTERFACE s_axilite port=return bundle=CTRL
     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN> imgInput(in_img_height, in_img_width);
 
-    xf::cv::AXIvideo2xfMat(s_axis_video, imgInput); 
-	
 	#pragma HLS DATAFLOW
+    xf::cv::AXIvideo2xfMat(s_axis_video, imgInput); 
+
 	
 	layout_formatter<OUTPUT_PTR_WIDTH, OUTPUT_PTR_WIDTH_NCHW, SELECT_ORDER, SELECT_TYPE, IN_TYPE, OUT_TYPE, OUT_TYPE_NCHW,
 		HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>

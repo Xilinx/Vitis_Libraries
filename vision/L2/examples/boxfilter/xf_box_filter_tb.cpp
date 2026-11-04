@@ -127,17 +127,13 @@ int main(int argc, char** argv) {
     imwrite("diff_img.jpg", diff); // Save the difference image for debugging purpose
 
     // Find minimum and maximum differences.
-    double minval = 256, maxval = 0;
-    int cnt = 0;
-    for (int i = 0; i < in_img.rows; i++) {
-        for (int j = 0; j < in_img.cols; j++) {
-            uchar v = diff.at<uchar>(i, j);
-            if (v > 1) cnt++;
-            if (minval > v) minval = v;
-            if (maxval < v) maxval = v;
-        }
-    }
-    float err_per = 100.0 * (float)cnt / (in_img.rows * in_img.cols);
+    // diff follows the input depth, which can be 16-bit, so work on its samples
+    // rather than reading it as uchar.
+    cv::Mat diff_samples = diff.reshape(1);
+    double minval, maxval;
+    cv::minMaxLoc(diff_samples, &minval, &maxval);
+    int cnt = cv::countNonZero(diff_samples > 1);
+    float err_per = 100.0 * (float)cnt / diff_samples.total();
     std::cout << "\tMinimum error in intensity = " << minval << std::endl;
     std::cout << "\tMaximum error in intensity = " << maxval << std::endl;
     std::cout << "\tPercentage of pixels above error threshold = " << err_per << std::endl;

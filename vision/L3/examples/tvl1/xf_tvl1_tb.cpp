@@ -115,8 +115,10 @@ void Write_FLowimage(cv::Mat frame1, Mat_<Point2f> flow, bool hwout_en) {
 
             getPseudoColorInt(frame1.at<pix_t>(r, c), u.x, u.y, pix);
 
-            frame_out.at<unsigned int>(r, c) = ((unsigned int)pix.a << 24 | (unsigned int)pix.b << 16 |
-                                                (unsigned int)pix.g << 8 | (unsigned int)pix.r);
+            // frame_out is CV_8UC4: store the packed pixel through a raw row pointer,
+            // since at<unsigned int> does not match its uchar element type
+            frame_out.ptr<unsigned int>(r)[c] = ((unsigned int)pix.a << 24 | (unsigned int)pix.b << 16 |
+                                                 (unsigned int)pix.g << 8 | (unsigned int)pix.r);
         }
     }
 

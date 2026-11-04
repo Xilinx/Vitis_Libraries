@@ -222,7 +222,9 @@ int main(int argc, char** argv) {
         std::cout << std::endl;
 
         std::cout << std::endl;
-        cv::Vec4f pixel = dst.at<cv::Vec4f>(IMAGE_HEIGHT_OUT - 1, 0);
+        // The kernel stores the accumulated sum as floats in the last output row, so the
+        // CV_8UC1 dst is only a byte view of that buffer and cannot be read via at<Vec4f>.
+        const float* pixel = reinterpret_cast<const float*>(dst.ptr<uint8_t>(IMAGE_HEIGHT_OUT - 1));
         std::cout << " *** AIE Sum of Squared Differences (Y): = " << pixel[0] << std::endl;
         std::cout << " *** AIE STD DEV (Y) " << std::sqrt(pixel[0] / (IMAGE_HEIGHT_IN * IMAGE_WIDTH_IN)) << ", "
                   << std::endl;

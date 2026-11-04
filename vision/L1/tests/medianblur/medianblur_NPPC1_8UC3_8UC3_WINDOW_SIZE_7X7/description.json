@@ -41,7 +41,7 @@
                 "env": "",
                 "cmd": "",
                 "max_memory_MB": {
-                    "vivado_syn": 65535,
+                    "vivado_syn": 16384,
                     "hls_csim": 10240,
                     "hls_cosim": 16384,
                     "vivado_impl": 65535,
@@ -52,7 +52,7 @@
                     "hls_csim": 60,
                     "hls_cosim": 300,
                     "vivado_impl": 300,
-                    "hls_csynth": 60
+                    "hls_csynth": 120
                 }
             }
         ],

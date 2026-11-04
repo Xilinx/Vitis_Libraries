@@ -7,11 +7,7 @@
     "platform_allowlist": [
         "vck190"
     ],
-    "platform_blocklist": [
-        "zcu102",
-        "u280",
-        "u250"
-    ],
+    "platform_blocklist": [],
     "platform_properties": {
         "vck190": {
             "host": {
@@ -92,26 +88,6 @@
             "frequency": 300.0
         }
     ],
-    "check_env": [
-        {
-            "env": "OPENCV_INCLUDE",
-            "platform": [
-                "u200",
-                "u50",
-                "aws-vu9p-f1"
-            ],
-            "echo": "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable"
-        },
-        {
-            "env": "OPENCV_LIB",
-            "platform": [
-                "u200",
-                "u50",
-                "aws-vu9p-f1"
-            ],
-            "echo": "Cannot find Opencv lib path. Please set OPENCV_LIB variable"
-        }
-    ],
     "testinfo": {
         "disable": false,
         "jobs": [
@@ -121,8 +97,8 @@
                 "env": "",
                 "cmd": "",
                 "max_memory_MB": {
-                    "vitis_hw_build": 65535,
-                    "vitis_hw_emu": 28672,
+                    "vitis_hw_build": 16384,
+                    "vitis_hw_emu": 16384,
                     "vitis_hw_run": 10240
                 },
                 "max_time_min": {

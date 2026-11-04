@@ -99,19 +99,23 @@ int main(int argc, char** argv) {
                                 cv::Range(width_RGBA / 2, width_RGBA));
 
         // cv::merge((outImage_Ueven_openCV,outImage_Veven_openCV),outImage_UV_openCV);
+        // outImage_UV_openCV is CV_16UC1 holding interleaved U/V bytes: write them through
+        // a raw row pointer, since at<uint8_t> does not match its 16-bit element type
         int ii = 0;
         for (int i = 0; i < height_RGBA / 4; i++) {
             int jj = 0;
+            uint8_t* uv = outImage_UV_openCV.ptr<uint8_t>(ii);
             for (int j = 0; j < (width_RGBA / 2); j = j + 1, jj += 2) {
-                outImage_UV_openCV.at<uint8_t>(ii, jj) = outImage_Ueven_openCV.at<uint8_t>(i, j);
-                outImage_UV_openCV.at<uint8_t>(ii, jj + 1) = outImage_Veven_openCV.at<uint8_t>(i, j);
+                uv[jj] = outImage_Ueven_openCV.at<uint8_t>(i, j);
+                uv[jj + 1] = outImage_Veven_openCV.at<uint8_t>(i, j);
             }
 
             jj = 0;
             ii = ii + 1;
+            uv = outImage_UV_openCV.ptr<uint8_t>(ii);
             for (int j = 0; j < (width_RGBA / 2); j = j + 1, jj += 2) {
-                outImage_UV_openCV.at<uint8_t>(ii, jj) = outImage_Uodd_openCV.at<uint8_t>(i, j);
-                outImage_UV_openCV.at<uint8_t>(ii, jj + 1) = outImage_Vodd_openCV.at<uint8_t>(i, j);
+                uv[jj] = outImage_Uodd_openCV.at<uint8_t>(i, j);
+                uv[jj + 1] = outImage_Vodd_openCV.at<uint8_t>(i, j);
             }
             ii = ii + 1;
         }

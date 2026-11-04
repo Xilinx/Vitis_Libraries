@@ -47,7 +47,7 @@ export CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 export XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L1/*}')
 
 # setting default value
-PLATFORM ?= xilinx_vck190_base_202610_1
+PLATFORM ?= xilinx_vek280_base_202610_1
 
 export PATH := $(XILINX_VIVADO)/bin:$(PATH)
 WORK_DIR ?= hls

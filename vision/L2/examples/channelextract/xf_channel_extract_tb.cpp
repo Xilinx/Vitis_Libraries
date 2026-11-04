@@ -135,17 +135,13 @@ int main(int argc, char** argv) {
     cv::imwrite("diff.jpg", diff);
 
     // Find minimum and maximum differences.
-    double minval = 256, maxval = 0;
-    int cnt = 0;
-    for (int i = 0; i < diff.rows; i++) {
-        for (int j = 0; j < diff.cols; j++) {
-            unsigned char v = diff.at<unsigned char>(i, j);
-            if (v > 0) cnt++;
-            if (minval > v) minval = v;
-            if (maxval < v) maxval = v;
-        }
-    }
-    float err_per = 100.0 * (float)cnt / (in_ref.rows * in_ref.cols);
+    // diff has CV_OUT_TYPE, which can be 16-bit, so work on its samples rather
+    // than reading it as unsigned char.
+    cv::Mat diff_samples = diff.reshape(1);
+    double minval, maxval;
+    cv::minMaxLoc(diff_samples, &minval, &maxval);
+    int cnt = cv::countNonZero(diff_samples > 0);
+    float err_per = 100.0 * (float)cnt / diff_samples.total();
 
     std::cout << "\tMinimum error in intensity = " << minval << std::endl;
     std::cout << "\tMaximum error in intensity = " << maxval << std::endl;

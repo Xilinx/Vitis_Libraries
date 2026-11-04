@@ -7,10 +7,7 @@
     "platform_allowlist": [
         "vck190"
     ],
-    "platform_blocklist": [
-        "u280",
-        "u250"
-    ],
+    "platform_blocklist": [],
     "platform_properties": {
         "vck190": {
             "host": {
@@ -92,26 +89,25 @@
             "frequency": 300.0
         }
     ],
-    "check_env": [
-        {
-            "env": "OPENCV_INCLUDE",
-            "echo": "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable"
-        },
-        {
-            "env": "OPENCV_LIB",
-            "echo": "Cannot find Opencv lib path. Please set OPENCV_LIB variable"
-        }
-    ],
     "testinfo": {
         "disable": false,
+        "lsf_dynamic": "memory",
         "jobs": [
             {
                 "index": 0,
                 "dependency": [],
                 "env": "",
                 "cmd": "",
-                "max_memory_MB": 65535,
-                "max_time_min": 520
+                "max_memory_MB": {
+                    "vitis_hw_emu": 16384,
+                    "vitis_hw_build": 16384,
+                    "vitis_hw_run": 4096
+                },
+                "max_time_min": {
+                    "vitis_hw_emu": 520,
+                    "vitis_hw_build": 520,
+                    "vitis_hw_run": 50
+                }
             }
         ],
         "targets": [

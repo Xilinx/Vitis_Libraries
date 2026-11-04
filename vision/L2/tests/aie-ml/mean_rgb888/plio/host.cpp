@@ -209,13 +209,15 @@ int main(int argc, char** argv) {
                   << std::endl;
         std::cout << std::endl;
 
-        cv::Vec4f pixel = dst.at<cv::Vec4f>(IMAGE_HEIGHT_OUT - 1, 0);
+        // The kernel stores the accumulated sums as 4 floats per output row, so the
+        // CV_8UC4 dst is only a byte view of that buffer and cannot be read via at<Vec4f>.
+        const float* pixel = reinterpret_cast<const float*>(dst.ptr<uint8_t>(IMAGE_HEIGHT_OUT - 1));
         std::cout << std::endl;
         std::cout << " *** AIE  SUM of R, G, B channels =" << pixel[0] << " " << pixel[1] << " " << pixel[2]
                   << std::endl;
-        std::cout << " *** AIE Mean (R,G,B): " << sum[0] / (IMAGE_HEIGHT_IN * IMAGE_WIDTH_IN) << " , "
-                  << sum[1] / (IMAGE_HEIGHT_IN * IMAGE_WIDTH_IN) << " , " << sum[2] / (IMAGE_HEIGHT_IN * IMAGE_WIDTH_IN)
-                  << std::endl;
+        std::cout << " *** AIE Mean (R,G,B): " << pixel[0] / (IMAGE_HEIGHT_IN * IMAGE_WIDTH_IN) << " , "
+                  << pixel[1] / (IMAGE_HEIGHT_IN * IMAGE_WIDTH_IN) << " , "
+                  << pixel[2] / (IMAGE_HEIGHT_IN * IMAGE_WIDTH_IN) << std::endl;
         std::cout << std::endl;
 
         return 0;

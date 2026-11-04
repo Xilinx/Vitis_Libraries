@@ -282,20 +282,15 @@ int main(int argc, char** argv) {
     cv::absdiff(ocv_ref, out_img, diff);
     cv::imwrite("diff_img.jpg", diff);
 
-    // Find the percentage of pixels above error threshold:
-    double minval = 256, maxval = 0;
-    int cnt = 0;
-    for (int i = 0; i < in_gray1.rows; i++) {
-        for (int j = 0; j < in_gray1.cols; j++) {
-            uchar v = diff.at<uchar>(i, j);
+    // Find the percentage of pixels above error threshold.
+    // diff is 8- or 16-bit and 1- or 3-channel depending on the configuration,
+    // so work on its samples rather than reading it as uchar.
+    cv::Mat diff_samples = diff.reshape(1);
+    double minval, maxval;
+    cv::minMaxLoc(diff_samples, &minval, &maxval);
+    int cnt = cv::countNonZero(diff_samples > 2);
 
-            if (v > 2) cnt++;
-            if (minval > v) minval = v;
-            if (maxval < v) maxval = v;
-        }
-    }
-
-    float err_per = 100.0 * (float)cnt / (in_gray1.rows * in_gray1.cols);
+    float err_per = 100.0 * (float)cnt / diff_samples.total();
 
     std::cout << "INFO: Verification results:" << std::endl;
     std::cout << "\tMinimum error in intensity = " << minval << std::endl;

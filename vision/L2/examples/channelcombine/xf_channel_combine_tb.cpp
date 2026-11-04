@@ -237,34 +237,15 @@ int main(int argc, char** argv) {
     cv::absdiff(merged, out_img, diff);
     cv::imwrite("diff.jpg", diff);
 
-    // Find minimum and maximum differences:
-    double minval = 256, maxval = 0;
-    int cnt = 0;
-    for (int i = 0; i < diff.rows; i++) {
-        for (int j = 0; j < diff.cols; j++) {
-            cv::Vec4b v = diff.at<cv::Vec4b>(i, j);
-            if (v[0] > 0) cnt++;
-            if (v[1] > 0) cnt++;
-            if (v[2] > 0) cnt++;
-#if FOUR_INPUT
-            if (v[3] > 0) cnt++;
-#endif
-            if (minval > v[0]) minval = v[0];
-            if (minval > v[1]) minval = v[1];
-            if (minval > v[2]) minval = v[2];
-#if FOUR_INPUT
-            if (minval > v[3]) minval = v[3];
-#endif
-            if (maxval < v[0]) maxval = v[0];
-            if (maxval < v[1]) maxval = v[1];
-            if (maxval < v[2]) maxval = v[2];
-#if FOUR_INPUT
-            if (maxval < v[3]) maxval = v[3];
-#endif
-        }
-    }
+    // Find minimum and maximum differences.
+    // diff has 2, 3 or 4 channels depending on the configuration, so work on its
+    // samples rather than reading every pixel as a Vec4b.
+    cv::Mat diff_samples = diff.reshape(1);
+    double minval, maxval;
+    cv::minMaxLoc(diff_samples, &minval, &maxval);
+    int cnt = cv::countNonZero(diff_samples > 0);
 
-    float err_per = 100.0 * (float)cnt / (in_gray1.rows * in_gray1.cols * in_gray1.channels());
+    float err_per = 100.0 * (float)cnt / diff_samples.total();
 
     std::cout << "INFO: Verification results:" << std::endl;
     std::cout << "\tMinimum error in intensity = " << minval << std::endl;

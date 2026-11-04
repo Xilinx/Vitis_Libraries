@@ -5,10 +5,7 @@
     "platform_allowlist": [
         "vek280"
     ],
-    "platform_blocklist": [
-        "vck5000",
-        "v70"
-    ],
+    "platform_blocklist": [],
     "platform_properties": {
         "vek280": {
             "v++": {
@@ -177,7 +174,7 @@
                 "dependency": [],
                 "env": "",
                 "cmd": "",
-                "max_memory_MB": 32768,
+                "max_memory_MB": 16384,
                 "max_time_min": {
                     "vitis_aie_sim": 50,
                     "vitis_hw_build": 470,

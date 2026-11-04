@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
 
     for (int i = 0; i < in_img.rows; i++) {
         for (int j = 0; j < in_img.cols; j++) {
-            ocv_ref1.at<unsigned int>(i, j) = ocv_ref.at<unsigned int>(i + 1, j + 1);
+            ocv_ref1.at<int>(i, j) = ocv_ref.at<int>(i + 1, j + 1);
         }
     }
 
@@ -140,7 +140,7 @@ int main(int argc, char** argv) {
     int cnt = 0;
     for (int i = 0; i < in_img.rows; i++) {
         for (int j = 0; j < in_img.cols; j++) {
-            unsigned int v = diff.at<unsigned int>(i, j);
+            unsigned int v = diff.at<int>(i, j);
 
             if (v > 0) cnt++;
             if (minval > v) minval = v;

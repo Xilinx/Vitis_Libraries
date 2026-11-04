@@ -288,7 +288,7 @@ int main(int argc, char* argv[]) {
     for (int I1 = 0; I1 < opencv_image.rows; I1++) {
         for (int J1 = 0; J1 < opencv_image.cols; J1++) {
 #if GRAY
-            opencv_image.at<ap_uint8_t>(I1, J1) = 0;
+            opencv_image.at<unsigned char>(I1, J1) = 0;
 #else
             opencv_image.at<cv::Vec3b>(I1, J1) = 0;
 #endif

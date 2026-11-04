@@ -126,7 +126,8 @@ int main(int argc, char** argv) {
     }
 
     // Create the Bayer pattern CFA output
-    cv::Mat cfa_bayer_output(img.rows, img.cols, CV_IN_TYPE);           // simulate the Bayer pattern CFA output
+    // bayerizeImage writes 8-bit samples taken from img; the convertTo below widens them to CV_IN_TYPE
+    cv::Mat cfa_bayer_output(img.rows, img.cols, CV_8UC1);              // simulate the Bayer pattern CFA output
     cv::Mat cfa_bayer_output_converted(img.rows, img.cols, CV_IN_TYPE); // simulate the Bayer pattern CFA output
     cv::Mat color_cfa_bayer_output(img.rows, img.cols, img.type());     // Bayer pattern CFA output in color
     int code = BPATTERN;                                                // Bayer format BG-0; GB-1; GR-2; RG-3
