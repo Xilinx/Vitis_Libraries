@@ -177,9 +177,14 @@ Makefile
 
 Run 'make help' to get the list of supported commands and flows. Running the following commands will initiate a hardware build.
 
+Starting with 2026.2, embedded platforms use the Yocto-based EDF common image. Install steps are in *Getting Started with Versal AI Edge Gen2 with Vitis Unified IDE* (`XD098 <https://docs.amd.com/r/en-US/Vitis-Tutorials-Getting-Started/Getting-Started-with-Versal-AI-Edge-Gen2-with-Vitis-Unified-IDE>`_).
+
 .. code:: c
 
 	source < path-to-Vitis-installation-directory >/settings64.sh
+	# starting with 2026.2 (Yocto-based EDF common image)
+	export YOCTO_ARTIFACTS=<path to design>/yocto_artifacts
+	# for 2026.1 and earlier releases (PetaLinux-based common image)
 	export SYSROOT=< path-to-platform-sysroot >
 	export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
 	make all TARGET=hw 

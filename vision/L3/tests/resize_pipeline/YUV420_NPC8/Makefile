@@ -25,14 +25,8 @@ help::
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) ""
 	$(ECHO) "  NOTE: For embedded platform the following setup steps are required:"
-	$(ECHO) "      a.If the platform and common-image are downloaded from Xilinx Download Center(Suggested):"
-	$(ECHO) "        Run the sdk.sh script from the common-image directory to install sysroot using the command : ./sdk.sh -y -d ./ -p "
-	$(ECHO) "        Unzip the rootfs file : gunzip ./rootfs.ext4.gz"
-	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
-	$(ECHO) "      b.User could also define SYSROOT, K_IMAGE and ROOTFS by themselves: "
-	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
-	$(ECHO) "        export K_IMAGE=< path-to-Image-files >"
-	$(ECHO) "        export ROOTFS=< path-to-rootfs >"
+	$(ECHO) "      export YOCTO_ARTIFACTS=<path to design>/yocto_artifacts"
+	$(ECHO) "      make run TARGET=<hw_emu/hw> PLATFORM=<FPGA platform>"
 	$(ECHO) ""
 	$(ECHO) "  make clean"
 	$(ECHO) "      Command to remove the generated non-hardware files."
@@ -294,8 +288,8 @@ ifeq ($(TARGET), hw)
 	   cp -Lrf "$${d%/}" $(EDF_PACKAGE_OUT)/ && echo "INFO: staged $$(basename $${d%/})"; \
 	 done
 ifeq ($(EDF_SEGMENTED_XSA), on)
-# a segmented XSA carries the PL alone, so v++ writes no boot binary: the board
-# boots the image it already has and fpgautil loads the pdi with the dtbo
+# a segmented XSA: the board keeps the boot image it already has and fpgautil
+# loads the pdi with the dtbo
 	@[ -n "$(EDF_PL_NAME)" ] || { echo "ERROR: EDF_PL_NAME is empty, nothing names the PL overlay to look for"; exit 1; }
 	@for f in $(EDF_PL_PDI) $(EDF_PL_DTBO); do \
 	   [ -f "$$f" ] || { echo "ERROR: v++ package emitted no $$(basename $$f) in $(EDF_PACKAGE_OUT)"; exit 1; }; \

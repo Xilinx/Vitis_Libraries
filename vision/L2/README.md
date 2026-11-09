@@ -12,8 +12,13 @@ The 'tests/aie-ml' directory contains tests that are targeted for AI engine.
 
 ### Commands to Run AIE Tests
 
+Starting with 2026.2, embedded platforms use the Yocto-based EDF common image. Install steps are in *Getting Started with Versal AI Edge Gen2 with Vitis Unified IDE* ([XD098](https://docs.amd.com/r/en-US/Vitis-Tutorials-Getting-Started/Getting-Started-with-Versal-AI-Edge-Gen2-with-Vitis-Unified-IDE)).
+
     source < path-to-Vitis-installation-directory >/settings64.sh
     export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
+    # starting with 2026.2 (Yocto-based EDF common image)
+    export YOCTO_ARTIFACTS=<path to design>/yocto_artifacts
+    # for 2026.1 and earlier releases (PetaLinux-based common image)
     export SYSROOT=< path-to-platform-sysroot >
     make run TARGET=< aiesim / x86sim / hw_emu / hw >
 
@@ -33,6 +38,16 @@ The 'tests/aie-ml' directory contains tests that are targeted for AI engine.
 **For Embedded Devices**
 
 Hardware Emulation and Hardware Build:
+
+Starting with 2026.2, embedded platforms use the Yocto-based EDF common image. Install steps are in *Getting Started with Versal AI Edge Gen2 with Vitis Unified IDE* ([XD098](https://docs.amd.com/r/en-US/Vitis-Tutorials-Getting-Started/Getting-Started-with-Versal-AI-Edge-Gen2-with-Vitis-Unified-IDE)). After installing, build and run with `YOCTO_ARTIFACTS` set:
+
+    source < path-to-Vitis-installation-directory >/settings64.sh
+    export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
+    export YOCTO_ARTIFACTS=<path to design>/yocto_artifacts
+    make host xclbin TARGET=< hw_emu|hw >
+    make run TARGET=< hw_emu|hw > #This command will generate only the sd_card folder in case of hardware build.
+
+For 2026.1 and earlier releases, which use the PetaLinux-based common image:
 
 	Download the platform, and common-image from Xilinx Download Center. Run the sdk.sh script from the common-image directory to install sysroot using the command : "./sdk.sh -y -d ./ -p"
 
