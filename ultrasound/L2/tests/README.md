@@ -1,17 +1,22 @@
 ## Ultrasound Library - Level 2 (L2)
 
 ### Setup Environment
+
+Starting with 2026.2, embedded platforms use the Yocto-based EDF common image. Install steps are in *Getting Started with Versal AI Edge Gen2 with Vitis Unified IDE* ([XD098](https://docs.amd.com/r/en-US/Vitis-Tutorials-Getting-Started/Getting-Started-with-Versal-AI-Edge-Gen2-with-Vitis-Unified-IDE)).
+
 ```bash
 #!/bin/bash
-# setup vitis_24.2 env
-source <Vitis_install_path>/Vitis/2024.2/settings64.sh
+# setup vitis_26.2 env
+source <Vitis_install_path>/2026.2/Vitis/settings64.sh
 source /opt/xilinx/xrt/setup.sh
 export PLATFORM_REPO_PATHS=<path to platforms>
-export PLATFORM=xilinx_vck190_base_202420_1
-# set up your SYSROOT, ROOTFS and K_IMAGE PATH
-export SYSROOT=<path to platforms>/sw/versal/xilinx-versal-common-v2024.2/sysroots/aarch64-xilinx-linux/
-export ROOTFS=<path to platforms>/sw/versal/xilinx-versal-common-v2024.2/rootfs.ext4
-export K_IMAGE=<path to platforms>/sw/versal/xilinx-versal-common-v2024.2/Image
+export PLATFORM=vck190_base
+# starting with 2026.2, set up your YOCTO_ARTIFACTS PATH (Yocto-based EDF common image)
+export YOCTO_ARTIFACTS=<path to design>/yocto_artifacts
+# for 2026.1 and earlier releases, set up your SYSROOT, ROOTFS and K_IMAGE PATH
+export SYSROOT=<path to platforms>/sw/versal/xilinx-versal/sysroots/cortexa72-cortexa53-amd-linux
+export ROOTFS=<path to platforms>/sw/versal/xilinx-versal/rootfs.ext4
+export K_IMAGE=<path to platforms>/sw/versal/xilinx-versal/Image
 ```
 
 ### Run a L2 Example
@@ -30,7 +35,7 @@ make all TARGET=hw       # build the entire program for hw_run
 Licensed using the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0).
 
     Copyright (C) 2019-2022, Xilinx, Inc.
-    Copyright (C) 2022-2024, Advanced Micro Devices, Inc.
+    Copyright (C) 2022-2026, Advanced Micro Devices, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
