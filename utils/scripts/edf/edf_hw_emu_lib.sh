@@ -1,4 +1,17 @@
 #!/bin/bash
+# Copyright (C) 2026, Advanced Micro Devices, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 # Shared helpers for EDF (Embedded Device Flow) hw_emu.
 #
 # Platform differences arrive as EDF_* variables, exported by utils.mk. No board
@@ -15,7 +28,7 @@
 #   EDF_WIC_SECTOR_SIZE   sector size for wic cp, empty means tool default
 #   EDF_AIE_SIM_DIR       AIE sim device directory, empty disables the fixup
 #   EDF_AIE_SIM_JSON      AIE sim device json, empty disables the fixup
-#   EDF_SEGMENTED_XSA     on when v++ packages the PL alone, with no boot binary
+#   EDF_SEGMENTED_XSA     on for a segmented XSA, whose PL is loaded as a pdi/dtbo overlay
 #
 set -euo pipefail
 
