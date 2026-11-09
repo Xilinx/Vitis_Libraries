@@ -29,7 +29,10 @@ Release Note
 * **Substitution** - 2026.1 EA library element now in Production
 * **Eigenvalue** - New EA library element.
 * **LS_Cholesky_Solver** - New EA library element.
-* **MP_Pseudoinverse** - New EA library element.
+* **MP_Pseudoinverse_SVD** - New EA library element.
+* **Config QoR Helper** - Models are now available for Cholesky, QRD, QRD_HH, Substitution and SVD.
+  The tool is delivered with the DSP Library. The constraints file format has changed in 2026.2 and constraints files from
+  2026.1 must be updated. For details see the DSP Library release notes.
 
 +---------------------------------------+-----------------------------------------------------------------------------+
 | **Function**                          | **Namespace and class name**                                                |
@@ -46,7 +49,7 @@ Release Note
 +---------------------------------------+-----------------------------------------------------------------------------+
 | LS_Cholesky_Solver                    |  xf::solver::aie::ls_cholesky_solver::ls_cholesky_solver_graph              |
 +---------------------------------------+-----------------------------------------------------------------------------+
-| MP_Pseudoinverse_svd                  |  xf::solver::aie::mp_pseudoinverse_svd::mp_pseudoinverse_svd_graph          |
+| MP_Pseudoinverse_SVD                  |  xf::solver::aie::mp_pseudoinverse_svd::mp_pseudoinverse_svd_graph          |
 +---------------------------------------+-----------------------------------------------------------------------------+
 | Eigenvalue                            |  xf::solver::aie::eigenvalue::eigenvalue_graph                              |
 +---------------------------------------+-----------------------------------------------------------------------------+
