@@ -1,3 +1,0 @@
-I need a basic FIR filter for an AIE device that handles complex 16-bit
-samples. Keep it simple, with a moderate number of taps, and use whatever
-reasonable coefficient values you like.

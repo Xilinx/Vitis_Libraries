@@ -120,7 +120,10 @@
 
     "FIR_TYPE": "FIR_TYPE",
     "NUM_AIE": "num aie",
+    "NUM_TILES": "num tiles",
     "NUM_BANKS": "num banks",
+    "DATA_MEMORY": "data memory",
+    "UUT_KERNEL": "Library Element",
 
     "first shortest latency (us)" : "first shortest latency (us)",
     "first critical latency (us)" : "first critical latency (us)",
@@ -128,5 +131,7 @@
     "steady critical latency (us)" : "steady critical latency (us)",
     "initiation interval (us)" : "initiation interval (us)",
     "throughput (MSa/s)" : "throughput (MSa/s)",
+    "input throughput (MSa/s)" : "input throughput (MSa/s)",
+    "output throughput (MSa/s)" : "output throughput (MSa/s)",
     "frame rate (kHz)" : "frame rate (kHz)"
 }

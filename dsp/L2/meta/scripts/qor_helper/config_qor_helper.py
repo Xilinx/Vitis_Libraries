@@ -92,11 +92,11 @@ if __name__ == "__main__":
     
     with open(constraints_file, 'r') as file:
         constraints = json.load(file)
-    parameter_constraints = constraints["parameter_constraints"]
-    qor_constraints = constraints["qor_constraints"]
-    sort_by = constraints["sort_by"] if "sort_by" in constraints else dict(DEFAULT_SORT_BY)
-    confidence = constraints["confidence"] if "confidence" in constraints else 1
-    verbose = constraints["verbose"] if "verbose" in constraints else False
+    parameter_constraints = constraints.get("parameter_constraints") or {}
+    qor_constraints = constraints.get("qor_constraints") or {}
+    sort_by = constraints.get("sort_by") or DEFAULT_SORT_BY
+    confidence = constraints.get("confidence") or 1
+    verbose = constraints.get("verbose") or False
 
     for k,v in dict(parameter_constraints).items():
         if not isinstance(v, list):

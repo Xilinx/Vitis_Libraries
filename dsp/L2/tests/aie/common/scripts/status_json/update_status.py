@@ -14,10 +14,12 @@
 import argparse
 import json
 import os
+import sys
 from pathlib import Path
 
+from harvest_cycles import harvest_cycles
 from harvest_memory import harvest_memory
-from harvest_qor import harvest_qor
+from harvest_qor import harvest_qor, round_sig_figs
 
 
 def parse_json(filepath):
@@ -109,6 +111,30 @@ def _cmd_qor(args):
     for field, value in fields.items():
         set_result(args.status_path, field, value)
 
+    # Merge per-core cycle/instruction counts into the CORES entries written by harvest
+    cores = parse_json(args.status_path)["Results"]["CORES"]
+    for core, values in harvest_cycles(aiesimulator_output_dir, cores).items():
+        cores[core].update(values)
+    set_result(args.status_path, "CORES", cores)
+
+def framerate_to_input_throughput(status_path):
+    """
+    Replace the 'frame rate (kHz)' Results field with 'input throughput (MSa/s)'.
+    Only valid for flows (e.g. FIR) that pass the input window size as frames_per_iteration to the qor flow,
+    which makes the 'frame rate' input samples per second / 1e3 (kSa/s). Preserves the -1 (not-steady-state) sentinel.
+    """
+    status = parse_json(status_path)
+    frame_rate = status["Results"].pop("frame rate (kHz)")
+    input_throughput = frame_rate / 1e3 if frame_rate != -1 else -1
+    status["Results"]["input throughput (MSa/s)"] = round_sig_figs(input_throughput)
+    with open(status_path, "w") as f:
+        json.dump(status, f, indent=4)
+
+
+def _cmd_framerate_to_input_throughput(args):
+    framerate_to_input_throughput(args.status_path)
+
+
 def functional_check(status_path, diff_file_path):
     """Temporary bandaid: read diff.txt and set FUNC based on presence of 'identical'."""
     try:
@@ -122,7 +148,12 @@ def functional_check(status_path, diff_file_path):
 
 def _cmd_functional_check(args):
     functional_check(args.status_path, args.diff_file)
-    
+
+
+def _cmd_check_func(args):
+    """Exit non-zero unless FUNC is "1" in the Results block (run last, so a failing test still gets all its metrics)."""
+    sys.exit(0 if parse_json(args.status_path)["Results"]["FUNC"] == "1" else 1)
+
 
 def build_parser():
     parser = argparse.ArgumentParser(
@@ -142,7 +173,7 @@ def build_parser():
 
     harvest_parser = subparsers.add_parser("harvest", help="Harvest AIE memory metrics into the Results block.")
     harvest_parser.add_argument("status_path", help="Path to the status JSON file.")
-    harvest_parser.add_argument("scripts_dir", help="Directory containing the get_num_*.sh subscripts.")
+    harvest_parser.add_argument("scripts_dir", help="Deprecated and ignored (kept for backwards compatibility).")
     harvest_parser.add_argument("work_dir", default="Work", help="AIE Work directory (default: Work).")
 
     qor_parser = subparsers.add_parser("qor", help="Harvest AIE QOR metrics into the Results block.")
@@ -159,9 +190,15 @@ def build_parser():
     qor_parser.add_argument("slope_threshold", type=float, nargs="?", default=0.08, help="Slope threshold for steady state detection. Guards against slow monotone drift that CV alone cannot detect.")
     qor_parser.add_argument("--verbose", action="store_true", default=False, help="Enable verbose output.")
 
+    fr_parser = subparsers.add_parser("framerate_to_input_throughput", help="Convert 'frame rate (kHz)' into 'input throughput (MSa/s)'. Run after qor, only when frames_per_iteration was the input window size.")
+    fr_parser.add_argument("status_path", help="Path to the status JSON file.")
+
     fc_parser = subparsers.add_parser("functional_check", help="Set FUNC based on diff.txt content (temporary).")
     fc_parser.add_argument("status_path", help="Path to the status JSON file.")
     fc_parser.add_argument("diff_file", help="Path to the diff output file (e.g. ./logs/diff.txt).")
+
+    check_parser = subparsers.add_parser("check_func", help="Exit with status 1 unless FUNC is 1 in the Results block.")
+    check_parser.add_argument("status_path", help="Path to the status JSON file.")
 
     return parser
 
@@ -174,8 +211,14 @@ if __name__ == "__main__":
     elif args.command == "set":
         _cmd_set(args)
     elif args.command == "harvest":
+        set_result(args.status_path, "COMPILE", "1")
         _cmd_harvest(args)
     elif args.command == "qor":
+        set_result(args.status_path, "SIM", "1")
         _cmd_qor(args)
+    elif args.command == "framerate_to_input_throughput":
+        _cmd_framerate_to_input_throughput(args)
     elif args.command == "functional_check":
         _cmd_functional_check(args)
+    elif args.command == "check_func":
+        _cmd_check_func(args)

@@ -305,7 +305,7 @@ def harvest_qor(aiesimulator_output_dir,
         "steady shortest latency (us)": round_sig_figs(_0_0_latency_steady_state_progression[-1]),
         "steady critical latency (us)": round_sig_figs(crit_latency_steady_state_progression[-1]),
         "initiation interval (us)": round_sig_figs(initiation_interval_steady_state_progression[-1]),
-        "throughput (MSa/s)": round_sig_figs(cum_throughput_steady_state_progression[-1]),
+        "output throughput (MSa/s)": round_sig_figs(cum_throughput_steady_state_progression[-1]),
         "frame rate (kHz)": round_sig_figs(frames_per_second_steady_state_progression[-1])
     }
     return status_metrics

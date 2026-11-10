@@ -19,6 +19,23 @@ Release Notes
 
 The following features have been added to the library in this release:
 
+* **Config QoR Helper** - Extended model coverage and an updated constraints interface.
+
+  Models are now provided for 11 library elements:
+  FFT/IFFT, FIR SR ASYM, GEMM (``matrix_mult``), Matrix Vector Multiply, Hadamard, Outer Tensor, Cholesky, QRD,
+  QRD-HH, Substitution and SVD. Cholesky, QRD, QRD-HH, Substitution and SVD are in the Solver Library.
+
+  **Backward compatibility:** the constraints file format has changed. Constraints files written for 2026.1 must be updated:
+
+  * ``qor_constraints`` is now a JSON object mapping each metric name to a single ``<`` or ``>`` condition, for example
+    ``{"throughput (MSa/s)": ">300", "steady shortest latency (us)": "<10"}``, instead of a pandas query string.
+    Metric names are case-sensitive and include their units. Latency is now in microseconds (previously nanoseconds).
+    The ``and``/``or`` operators are no longer supported; all conditions must be met.
+  * ``sort_by`` is now a JSON object mapping each key to ``"ascending"`` or ``"descending"``. The separate ``ascending``
+    list is removed.
+  * If no configuration meets the QoR constraints, an error is raised instead of an empty result.
+  * ``confidence`` defaults to 1 when omitted. Only a reduced set of metrics is displayed unless ``"verbose": true`` is set.
+
 * **GEMM** - Added ``TP_CONJ_A`` and ``TP_CONJ_B`` template parameters to conjugate the A and/or B input on the fly during
   multiplication, with no change in performance versus the non-conjugated operation.
 
