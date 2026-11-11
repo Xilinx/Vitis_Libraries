@@ -397,7 +397,8 @@ void qrd_update_A(hls::stream<T>& dotRes_out,          // output
 #pragma HLS INLINE OFF
 
     const int UnrollSize = 1 << (PowUnroll - POWFoldRow);
-    T dot[4];
+    const int FoldIter = 1 << POWFoldRow;
+    T dot[FoldIter];
 #pragma HLS ARRAY_PARTITION variable = dot complete dim = 1
 #pragma HLS BIND_STORAGE variable = dot type = RAM_2P impl = LUTRAM latency = 1
     // update every t
@@ -406,7 +407,7 @@ void qrd_update_A(hls::stream<T>& dotRes_out,          // output
     // update every t
     T tempA[UnrollSize];
 #pragma HLS ARRAY_PARTITION variable = tempA complete dim = 1
-    T tempA2[4]; // low finout maybe more resource !
+    T tempA2[FoldIter]; // low finout maybe more resource !
 #pragma HLS ARRAY_PARTITION variable = tempA2 complete dim = 1
 #pragma HLS BIND_STORAGE variable = tempA2 type = RAM_2P impl = LUTRAM latency = ram_latency
 
@@ -417,7 +418,7 @@ LOOP_A_col:
 #pragma HLS dependence array inter false
         int j = j0 + k;
         // LOOP_update_A_row:
-        for (int t = 0; t < 4; t++) { // k=0 // latency = 4 ,II = 1 //depend on proj
+        for (int t = 0; t < FoldIter; t++) { // latency = FoldIter, II = 1 //depend on proj
 #pragma HLS loop_flatten
 #pragma HLS pipeline II = coreII
 
@@ -485,12 +486,15 @@ LOOP_A_col:
             } else { /* calculate one column Q cycles */
             }
             // dot += addRes;
-            dot[0] = (j > k && t == 0) ? addRes : dot[0];
-            dot[1] = (j > k && t == 1) ? (addRes + dot[0]) : dot[1];
-            dot[2] = (j > k && t == 2) ? (addRes + dot[1]) : dot[2];
-            dot[3] = (j > k && t == 3) ? (addRes + dot[2]) : dot[3];
+            if (j > k) {
+                if (t == 0) {
+                    dot[0] = addRes;
+                } else {
+                    dot[t] = addRes + dot[t - 1];
+                }
+            }
 
-            if (j > k && t == 3) dotRes_out.write(dot[3]); // proj0_strm.write(dot[3]);
+            if (j > k && t == FoldIter - 1) dotRes_out.write(dot[FoldIter - 1]);
 
         } // end t or row
 #ifndef __SYNTHESIS__

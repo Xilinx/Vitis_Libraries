@@ -134,6 +134,109 @@ static double x_rsqrt(double x) {
     return hls::rsqrt(x);
 }
 
+// Number of bits a type resolves below its leading significant bit: the fractional width for a
+// fixed point grid, the significand width for a native floating point format.  Used to size the
+// working precision of an operator against its destination.
+template <typename T>
+struct x_fraction_bits {
+    static const int VALUE = 0;
+};
+template <int W, int I, ap_q_mode Q, ap_o_mode O, int N>
+struct x_fraction_bits<ap_fixed<W, I, Q, O, N> > {
+    static const int VALUE = W - I;
+};
+template <int W, int I, ap_q_mode Q, ap_o_mode O, int N>
+struct x_fraction_bits<ap_ufixed<W, I, Q, O, N> > {
+    static const int VALUE = W - I;
+};
+// Without these a native floating point destination would fall to the primary template's 0 and
+// silently select a working precision narrower than it can hold.
+template <>
+struct x_fraction_bits<half> {
+    static const int VALUE = 11;
+};
+template <>
+struct x_fraction_bits<float> {
+    static const int VALUE = 24;
+};
+template <>
+struct x_fraction_bits<double> {
+    static const int VALUE = 53;
+};
+
+// Working precision available from each native floating point format.
+static const int X_FLOAT_SIGNIFICAND_BITS = 24;
+static const int X_DOUBLE_SIGNIFICAND_BITS = 53;
+
+// Extra bits of working precision demanded beyond the nominal result LSB.  The native reciprocal
+// square roots are not exactly rounded, so at 0 the fixed point back end resolves to about one LSB
+// rather than half of one.  Raise this to buy accuracy at the cost of pushing narrow formats onto
+// the double precision path.
+static const int X_RSQRT_GUARD_BITS = 0;
+
+// Working precision a destination demands when it receives 1/sqrt(x).
+// o Fixed point destination: the result sits on a fixed grid, so the significand must carry both
+//   the range and the grid.  The input's fractional width bounds 1/sqrt(x) by 2^(F_IN/2), needing
+//   ceil(F_IN/2) bits above the binary point, and F_OUT bits below it.
+// o Native floating point destination: the exponent carries the range, so only the destination's
+//   own significand is demanded.  Without this the range term would be added on top of a 53 bit
+//   double and demand a precision no format can supply.
+template <typename T_IN, typename T_OUT>
+struct x_rsqrt_working_bits {
+    static const int VALUE = (x_fraction_bits<T_IN>::VALUE + 1) / 2 + x_fraction_bits<T_OUT>::VALUE;
+};
+template <typename T_IN>
+struct x_rsqrt_working_bits<T_IN, half> {
+    static const int VALUE = 11;
+};
+template <typename T_IN>
+struct x_rsqrt_working_bits<T_IN, float> {
+    static const int VALUE = 24;
+};
+template <typename T_IN>
+struct x_rsqrt_working_bits<T_IN, double> {
+    static const int VALUE = 53;
+};
+
+// Evaluation of a fixed point reciprocal square root at a chosen working precision.
+template <bool SinglePrecisionIsEnough>
+struct x_rsqrt_eval {
+    template <typename T_IN, typename T_OUT>
+    static void calc(T_IN x, T_OUT& res) {
+        res = x_rsqrt((double)x);
+    }
+};
+template <>
+struct x_rsqrt_eval<true> {
+    template <typename T_IN, typename T_OUT>
+    static void calc(T_IN x, T_OUT& res) {
+        res = x_rsqrt((float)x);
+    }
+};
+
+// Fixed point reciprocal square root, resolved to the destination's own quantisation step.
+// o There is no fixed point rsqrt operator, so the value is evaluated in native floating point at
+//   the narrowest format that still resolves the destination.  This keeps narrow types on the
+//   cheap single precision path while wider ones stay accurate.
+// o The destination is taken by reference because the working precision depends on it, which the
+//   single argument overloads above cannot express.
+template <int W, int I, ap_q_mode Q, ap_o_mode O, int N, typename T_OUT>
+void x_rsqrt(ap_fixed<W, I, Q, O, N> x, T_OUT& res) {
+    const int REQUIRED_BITS = x_rsqrt_working_bits<ap_fixed<W, I, Q, O, N>, T_OUT>::VALUE + X_RSQRT_GUARD_BITS;
+    static_assert(REQUIRED_BITS <= X_DOUBLE_SIGNIFICAND_BITS,
+                  "x_rsqrt: these formats need more working precision than double provides; "
+                  "narrow the destination type.");
+    x_rsqrt_eval<(REQUIRED_BITS <= X_FLOAT_SIGNIFICAND_BITS)>::calc(x, res);
+}
+template <int W, int I, ap_q_mode Q, ap_o_mode O, int N, typename T_OUT>
+void x_rsqrt(ap_ufixed<W, I, Q, O, N> x, T_OUT& res) {
+    const int REQUIRED_BITS = x_rsqrt_working_bits<ap_ufixed<W, I, Q, O, N>, T_OUT>::VALUE + X_RSQRT_GUARD_BITS;
+    static_assert(REQUIRED_BITS <= X_DOUBLE_SIGNIFICAND_BITS,
+                  "x_rsqrt: these formats need more working precision than double provides; "
+                  "narrow the destination type.");
+    x_rsqrt_eval<(REQUIRED_BITS <= X_FLOAT_SIGNIFICAND_BITS)>::calc(x, res);
+}
+
 // isneg
 static int x_isneg(float x) {
     fp_struct<float> fs = x;

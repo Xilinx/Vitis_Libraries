@@ -62,9 +62,6 @@ struct choleskyTraits {
     static const int ARCH =
         1; // Select implementation: 0=Basic, 1=Lower latency architecture, 2=Further improved latency architecture
     static const int INNER_II = 1; // Specify the pipelining target for the inner loop
-    static const int UNROLL_FACTOR =
-        1; // Specify the inner loop unrolling factor for the choleskyAlt2 architecture(2) to increase throughput
-    static const int UNROLL_DIM = (LowerTriangularL == true ? 1 : 2); // Dimension to unroll matrix
     static const int ARCH2_ZERO_LOOP =
         true; // Additional implementation "switch" for the choleskyAlt2 architecture (2).
 };
@@ -81,8 +78,6 @@ struct choleskyTraits<LowerTriangularL, RowsColsA, hls::x_complex<InputBaseType>
     typedef hls::x_complex<OutputBaseType> L_OUTPUT_T;
     static const int ARCH = 1;
     static const int INNER_II = 1;
-    static const int UNROLL_FACTOR = 1;
-    static const int UNROLL_DIM = (LowerTriangularL == true ? 1 : 2);
     static const int ARCH2_ZERO_LOOP = true;
 };
 
@@ -98,8 +93,6 @@ struct choleskyTraits<LowerTriangularL, RowsColsA, std::complex<InputBaseType>, 
     typedef std::complex<OutputBaseType> L_OUTPUT_T;
     static const int ARCH = 1;
     static const int INNER_II = 1;
-    static const int UNROLL_FACTOR = 1;
-    static const int UNROLL_DIM = (LowerTriangularL == true ? 1 : 2);
     static const int ARCH2_ZERO_LOOP = true;
 };
 
@@ -127,13 +120,14 @@ struct choleskyTraits<LowerTriangularL, RowsColsA, ap_fixed<W1, I1, Q1, O1, N1>,
     typedef ap_fixed<W1 + 1, I1 + 1, AP_RND_CONV, AP_SAT, 0> ADD_T;
     typedef ap_fixed<(W1 + 1) * 2, I1 + 1, AP_RND_CONV, AP_SAT, 0> DIAG_T;     // Takes result of sqrt
     typedef ap_fixed<(W1 + 1) * 2, I1 + 1, AP_RND_CONV, AP_SAT, 0> OFF_DIAG_T; // Takes result of /
-    typedef ap_fixed<2 + (W2 - I2) + W2, 2 + (W2 - I2), AP_RND_CONV, AP_SAT, 0> RECIP_DIAG_T;
+    // Reciprocal of the diagonal, 1/sqrt(x).  See the std::complex<ap_fixed> specialization for the
+    // derivation: the width is bounded by the sqrt *input*, ADD_T, not by the output type.
+    typedef ap_fixed<(1 + ((W1 - I1) + 1) / 2) + (W2 - I2) + 1, 1 + ((W1 - I1) + 1) / 2, AP_RND_CONV, AP_SAT, 0>
+        RECIP_DIAG_T;
     typedef ap_fixed<W2, I2, AP_RND_CONV, AP_SAT, 0>
         L_OUTPUT_T; // Takes new L value.  Same as L output but saturation set
     static const int ARCH = 1;
     static const int INNER_II = 1;
-    static const int UNROLL_FACTOR = 1;
-    static const int UNROLL_DIM = (LowerTriangularL == true ? 1 : 2);
     static const int ARCH2_ZERO_LOOP = true;
 };
 
@@ -164,13 +158,14 @@ struct choleskyTraits<LowerTriangularL,
     typedef hls::x_complex<ap_fixed<W1 + 1, I1 + 1, AP_RND_CONV, AP_SAT, 0> > ADD_T;
     typedef hls::x_complex<ap_fixed<(W1 + 1) * 2, I1 + 1, AP_RND_CONV, AP_SAT, 0> > DIAG_T;     // Takes result of sqrt
     typedef hls::x_complex<ap_fixed<(W1 + 1) * 2, I1 + 1, AP_RND_CONV, AP_SAT, 0> > OFF_DIAG_T; // Takes result of /
-    typedef ap_fixed<2 + (W2 - I2) + W2, 2 + (W2 - I2), AP_RND_CONV, AP_SAT, 0> RECIP_DIAG_T;
+    // Reciprocal of the diagonal, 1/sqrt(x).  See the std::complex<ap_fixed> specialization for the
+    // derivation: the width is bounded by the sqrt *input*, ADD_T, not by the output type.
+    typedef ap_fixed<(1 + ((W1 - I1) + 1) / 2) + (W2 - I2) + 1, 1 + ((W1 - I1) + 1) / 2, AP_RND_CONV, AP_SAT, 0>
+        RECIP_DIAG_T;
     typedef hls::x_complex<ap_fixed<W2, I2, AP_RND_CONV, AP_SAT, 0> >
         L_OUTPUT_T; // Takes new L value.  Same as L output but saturation set
     static const int ARCH = 1;
     static const int INNER_II = 1;
-    static const int UNROLL_FACTOR = 1;
-    static const int UNROLL_DIM = (LowerTriangularL == true ? 1 : 2);
     static const int ARCH2_ZERO_LOOP = true;
 };
 
@@ -201,13 +196,19 @@ struct choleskyTraits<LowerTriangularL,
     typedef std::complex<ap_fixed<W1 + 1, I1 + 1, AP_RND_CONV, AP_SAT, 0> > ADD_T;
     typedef std::complex<ap_fixed<(W1 + 1) * 2, I1 + 1, AP_RND_CONV, AP_SAT, 0> > DIAG_T;     // Takes result of sqrt
     typedef std::complex<ap_fixed<(W1 + 1) * 2, I1 + 1, AP_RND_CONV, AP_SAT, 0> > OFF_DIAG_T; // Takes result of /
-    typedef ap_fixed<2 + (W2 - I2) + W2, 2 + (W2 - I2), AP_RND_CONV, AP_SAT, 0> RECIP_DIAG_T;
+    // Reciprocal of the diagonal, 1/sqrt(x).
+    // o The width is bounded by the *input* of the square root, not by the output type: x is an
+    //   ADD_T, ap_fixed<W1+1, I1+1>, so its smallest non-zero magnitude is 2^-(W1-I1) and
+    //   1/sqrt(x) cannot exceed 2^((W1-I1)/2).  Sizing the integer part from the output type
+    //   instead (2 + W2 - I2 bits) makes this type ~8 bits wider than it needs to be and inflates
+    //   every multiplier that consumes it.
+    // o The fraction is kept at W2 - I2 + 1 bits, as before.
+    typedef ap_fixed<(1 + ((W1 - I1) + 1) / 2) + (W2 - I2) + 1, 1 + ((W1 - I1) + 1) / 2, AP_RND_CONV, AP_SAT, 0>
+        RECIP_DIAG_T;
     typedef std::complex<ap_fixed<W2, I2, AP_RND_CONV, AP_SAT, 0> >
         L_OUTPUT_T; // Takes new L value.  Same as L output but saturation set
     static const int ARCH = 1;
     static const int INNER_II = 1;
-    static const int UNROLL_FACTOR = 1;
-    static const int UNROLL_DIM = (LowerTriangularL == true ? 1 : 2);
     static const int ARCH2_ZERO_LOOP = true;
 };
 
@@ -261,21 +262,156 @@ Function_cholesky_sqrt_op_complex:;
     return (0);
 }
 
+// ===================================================================================================================
+// Square root back ends, selected on the data type.
+//
+// The square root and its reciprocal are the dominant cost of the Cholesky diagonal, and the right
+// implementation is entirely type dependent:
+//
+//   type              1/sqrt(x)                            sqrt(x)
+//   ---------------   ----------------------------------   ------------------------------------------
+//   half/float/       the type's own reciprocal square      x_sqrt(): cheap and exactly rounded, so
+//   double            root operator                         it is taken directly
+//   ap_fixed<W,I>     evaluated in native floating point;   x * (1/sqrt(x)): x_sqrt() of a fixed
+//   ap_ufixed<W,I>    the working precision is derived      point value evaluates a *double
+//                     from the fixed point formats so       precision* hls::sqrt() and a second one
+//                     the result is resolved to its own     cannot be afforded on the critical path
+//                     quantisation step
+//
+// Any other element type is a compile time error rather than a silent fallthrough.
+//
+// The reciprocal square root itself, and the working precision it needs, are generic numeric
+// utilities and live in x_matrix_utils.hpp.  What is decided here is only how the square root is
+// recovered from it, which is a Cholesky critical path trade off.
+//
+// o Native floating point: the type's own operators.  A native square root is cheap and exactly
+//   rounded, and recovering it as x * (1/sqrt(x)) would turn x == 0 into 0 * inf = NaN, so it is
+//   evaluated directly.
+template <typename T>
+struct choleskyMathOpsFloat {
+    template <typename T_RECIP>
+    static void rsqrt(T x, T_RECIP& res) {
+        res = x_rsqrt(x);
+    }
+    template <typename T_RECIP, typename T_OUT>
+    static void sqrt_from_rsqrt(T x, T_RECIP recip, T_OUT& res) {
+        res = x_sqrt(x);
+    }
+};
+
+// o Fixed point: x_sqrt() of a fixed point value evaluates a double precision hls::sqrt(), and a
+//   second one cannot be afforded on the critical path, so the root is recovered with a multiply.
+//   A zero input saturates the reciprocal, so the product is correctly zero.
+template <typename T>
+struct choleskyMathOpsFixed {
+    template <typename T_RECIP>
+    static void rsqrt(T x, T_RECIP& res) {
+        x_rsqrt(x, res);
+    }
+    template <typename T_RECIP, typename T_OUT>
+    static void sqrt_from_rsqrt(T x, T_RECIP recip, T_OUT& res) {
+        res = x * recip;
+    }
+};
+
+template <typename T>
+struct choleskyAlwaysFalse {
+    static const bool VALUE = false;
+};
+
+// Back end selection.  The primary template is a hard error rather than a silent fallthrough to
+// floating point, so an unhandled element type is reported at compile time.
+template <typename T>
+struct choleskyMathOps {
+    static_assert(choleskyAlwaysFalse<T>::VALUE,
+                  "cholesky: no square root back end for this element type; add a "
+                  "choleskyMathOps specialisation for it.");
+};
+template <>
+struct choleskyMathOps<half> : choleskyMathOpsFloat<half> {};
+template <>
+struct choleskyMathOps<float> : choleskyMathOpsFloat<float> {};
+template <>
+struct choleskyMathOps<double> : choleskyMathOpsFloat<double> {};
+template <int W, int I, ap_q_mode Q, ap_o_mode O, int N>
+struct choleskyMathOps<ap_fixed<W, I, Q, O, N> > : choleskyMathOpsFixed<ap_fixed<W, I, Q, O, N> > {};
+template <int W, int I, ap_q_mode Q, ap_o_mode O, int N>
+struct choleskyMathOps<ap_ufixed<W, I, Q, O, N> > : choleskyMathOpsFixed<ap_ufixed<W, I, Q, O, N> > {};
+
 // Reciprocal square root.
 template <typename InputType, typename OutputType>
 void cholesky_rsqrt(InputType x, OutputType& res) {
-Function_cholesky_rsqrt_default:;
-    res = x_rsqrt(x);
+Function_cholesky_rsqrt:;
+    choleskyMathOps<InputType>::rsqrt(x, res);
 }
-template <int W1, int I1, ap_q_mode Q1, ap_o_mode O1, int N1, int W2, int I2, ap_q_mode Q2, ap_o_mode O2, int N2>
-void cholesky_rsqrt(ap_fixed<W1, I1, Q1, O1, N1> x, ap_fixed<W2, I2, Q2, O2, N2>& res) {
-Function_cholesky_rsqrt_fixed:;
-    ap_fixed<W2, I2, Q2, O2, N2> one = 1;
-    ap_fixed<W1, I1, Q1, O1, N1> sqrt_res;
-    ap_fixed<W2, I2, Q2, O2, N2> sqrt_res_cast;
-    sqrt_res = x_sqrt(x);
-    sqrt_res_cast = sqrt_res;
-    res = one / sqrt_res_cast;
+
+// Recovery of the square root from the reciprocal square root.
+template <typename T_IN, typename T_RECIP, typename T_OUT>
+void cholesky_sqrt_from_rsqrt(T_IN a, T_RECIP recip, T_OUT& b) {
+Function_cholesky_sqrt_from_rsqrt:;
+    choleskyMathOps<T_IN>::sqrt_from_rsqrt(a, recip, b);
+}
+
+// Combined square root and reciprocal square root of the same value.
+// o The Cholesky diagonal needs both sqrt(x) (the diagonal value itself) and 1/sqrt(x) (kept to
+//   avoid a divide in every off-diagonal calculation).  Calling cholesky_sqrt_op() and
+//   cholesky_rsqrt() separately instantiates two square root operators which the scheduler runs
+//   back to back on the critical path of every row/column.
+// o Only the reciprocal square root is computed here; the square root is recovered with a single
+//   multiply, sqrt(x) = x * (1/sqrt(x)).
+template <typename T_IN, typename T_RECIP, typename T_OUT>
+int cholesky_rsqrt_and_sqrt(T_IN a, T_RECIP& recip, T_OUT& b) {
+Function_cholesky_rsqrt_and_sqrt_real:;
+    const T_IN ZERO = 0;
+    const T_RECIP RECIP_ZERO = 0;
+    if (a < ZERO) {
+        b = ZERO;
+        recip = RECIP_ZERO;
+        return (1);
+    }
+    cholesky_rsqrt(a, recip);
+    cholesky_sqrt_from_rsqrt(a, recip, b);
+    return (0);
+}
+template <typename T_IN, typename T_RECIP, typename T_OUT>
+int cholesky_rsqrt_and_sqrt(hls::x_complex<T_IN> din, T_RECIP& recip, hls::x_complex<T_OUT>& dout) {
+Function_cholesky_rsqrt_and_sqrt_complex:;
+    const T_IN ZERO = 0;
+    const T_RECIP RECIP_ZERO = 0;
+    T_IN a = din.real();
+    dout.imag(ZERO);
+
+    if (a < ZERO) {
+        dout.real(ZERO);
+        recip = RECIP_ZERO;
+        return (1);
+    }
+
+    cholesky_rsqrt(a, recip);
+    T_OUT sqrt_res;
+    cholesky_sqrt_from_rsqrt(a, recip, sqrt_res);
+    dout.real(sqrt_res);
+    return (0);
+}
+template <typename T_IN, typename T_RECIP, typename T_OUT>
+int cholesky_rsqrt_and_sqrt(std::complex<T_IN> din, T_RECIP& recip, std::complex<T_OUT>& dout) {
+Function_cholesky_rsqrt_and_sqrt_complex:;
+    const T_IN ZERO = 0;
+    const T_RECIP RECIP_ZERO = 0;
+    T_IN a = din.real();
+    dout.imag(ZERO);
+
+    if (a < ZERO) {
+        dout.real(ZERO);
+        recip = RECIP_ZERO;
+        return (1);
+    }
+
+    cholesky_rsqrt(a, recip);
+    T_OUT sqrt_res;
+    cholesky_sqrt_from_rsqrt(a, recip, sqrt_res);
+    dout.real(sqrt_res);
+    return (0);
 }
 
 // Local multiplier to handle a complex case currently not supported by the hls::x_complex class
@@ -337,7 +473,9 @@ col_loop:
                 } else {
                     retrieved_L = L_internal[k][j];
                 }
-                sum[j] = hls::x_conj(retrieved_L) * retrieved_L;
+                // Accumulates sum(|L[j][k]|^2) over k < j; a plain assignment here would leave
+                // only the last term and is wrong for every column beyond the second.
+                sum[j] += hls::x_conj(retrieved_L) * retrieved_L;
             }
         }
         A_cast_to_sum = A[j][j];
@@ -433,7 +571,6 @@ int choleskyAlt(const InputType A[RowsColsA][RowsColsA], OutputType L[RowsColsA]
     typename CholeskyTraits::ACCUM_T square_sum;
     typename CholeskyTraits::ACCUM_T A_cast_to_sum;
     typename CholeskyTraits::ADD_T A_minus_sum;
-    typename CholeskyTraits::DIAG_T A_minus_sum_cast_diag;
     typename CholeskyTraits::DIAG_T new_L_diag;
     typename CholeskyTraits::RECIP_DIAG_T new_L_diag_recip;
     typename CholeskyTraits::PROD_T prod;
@@ -496,7 +633,10 @@ row_loop:
         // Diagonal calculation
         A_cast_to_sum = A[i][i];
         A_minus_sum = A_cast_to_sum - square_sum;
-        if (cholesky_sqrt_op(A_minus_sum, new_L_diag)) {
+        // Generate the reciprocal of the diagonal for internal use to aviod the latency of a divide in every
+        // off-diagonal calculation, and recover the diagonal itself as x * (1/sqrt(x)) so that only a single
+        // square root operator is instantiated on the critical path.
+        if (cholesky_rsqrt_and_sqrt(A_minus_sum, new_L_diag_recip, new_L_diag)) {
 #ifndef __SYNTHESIS__
             printf("ERROR: Trying to find the square root of a negative number\n");
 #endif
@@ -504,10 +644,6 @@ row_loop:
         }
         // Round to target format using method specifed by traits defined types.
         new_L = new_L_diag;
-        // Generate the reciprocal of the diagonal for internal use to aviod the latency of a divide in every
-        // off-diagonal calculation
-        A_minus_sum_cast_diag = A_minus_sum;
-        cholesky_rsqrt(hls::x_real(A_minus_sum_cast_diag), new_L_diag_recip);
         // Store diagonal value
         diag_internal[i] = new_L_diag_recip;
         if (LowerTriangularL == true) {
@@ -520,90 +656,112 @@ row_loop:
 }
 
 // ===================================================================================================================
-// choleskyAlt2: Further improved latency architecture requiring higher resource
+// choleskyAlt2: Flattens the column loop into the same pipeline as the reduction/finalize work,
+// instead of choleskyAlt's separate, un-pipelined outer column loop where every column serially
+// paid its diagonal reciprocal-square-root latency (the single largest term in the critical
+// dependency chain) with no chance of hiding it behind other columns' independent work. Column j's
+// diagonal reciprocal-square-root is placed at the otherwise-idle (k == 0, i == j) slot (the k == 0
+// sweep primes product_sum_array for i > j, so i == j is unused there); its result is read back at
+// (k == j, i > j) for that same column's off-diagonal finalize, j*RowsColsA flattened iterations
+// later, which is the only place in the design a later column's independent reduction work can
+// plausibly overlap with an earlier column's still-draining reciprocal-square-root.
+// Fastest option at small/moderate RowsColsA; see the file header for the large-matrix caveat.
+
+// Uniquely-named, non-overloaded wrapper around cholesky_rsqrt_and_sqrt so that
+// #pragma HLS ALLOCATION below has an unambiguous function to bind: the real function has three
+// overloads (real/x_complex/std::complex), and HLS 207-7045 ("not a valid function pointer
+// expression") is the tool refusing to guess which overload the bare, overloaded name means.
+template <typename T_IN, typename T_RECIP, typename T_OUT>
+static inline int choleskyAlt2_rsqrt_and_sqrt(T_IN a, T_RECIP& recip, T_OUT& b) {
+    return cholesky_rsqrt_and_sqrt(a, recip, b);
+}
+
+// Same wrapper trick for cholesky_prod_sum_mult (also overloaded real/x_complex/std::complex).
+// Only used in the finalize branch (k == j, i > j) -- ~N(N-1)/2 calls total, each already gated
+// behind that column's diag_recip_array[j], itself paced by the now-shared rsqrt unit above. So
+// sharing this one too should cost little: the calls it makes are not on the critical throughput
+// path the way the reduction's multiply-accumulate (operator*/operator+=) is.
+template <typename T_A, typename T_B, typename T_C>
+static inline void choleskyAlt2_prod_sum_mult(T_A a, T_B b, T_C& c) {
+    cholesky_prod_sum_mult(a, b, c);
+}
+
 template <bool LowerTriangularL, int RowsColsA, typename CholeskyTraits, class InputType, class OutputType>
 int choleskyAlt2(const InputType A[RowsColsA][RowsColsA], OutputType L[RowsColsA][RowsColsA]) {
+#pragma HLS PIPELINE
+// clang-format off
+#pragma HLS ALLOCATION function instances=choleskyAlt2_rsqrt_and_sqrt<typename CholeskyTraits::ADD_T, typename CholeskyTraits::RECIP_DIAG_T, typename CholeskyTraits::DIAG_T> limit=1
+#pragma HLS ALLOCATION function instances=choleskyAlt2_prod_sum_mult<typename CholeskyTraits::OFF_DIAG_T, typename CholeskyTraits::RECIP_DIAG_T, typename CholeskyTraits::OFF_DIAG_T> limit=1
+    // clang-format on
     int return_code = 0;
 
-    // To avoid array index calculations every iteration this architecture uses a simple 2D array rather than a
-    // optimized/packed triangular matrix.
     OutputType L_internal[RowsColsA][RowsColsA];
-    OutputType prod_column_top;
     typename CholeskyTraits::ACCUM_T square_sum_array[RowsColsA];
     typename CholeskyTraits::ACCUM_T A_cast_to_sum;
     typename CholeskyTraits::ADD_T A_minus_sum;
-    typename CholeskyTraits::DIAG_T A_minus_sum_cast_diag;
     typename CholeskyTraits::DIAG_T new_L_diag;
     typename CholeskyTraits::RECIP_DIAG_T new_L_diag_recip;
+    // Persists the reciprocal diagonal per column: the diagonal calc is part of the flattened
+    // iteration space below, so its result must survive from (k==0, i==j) to (k==j, i>j).
+    typename CholeskyTraits::RECIP_DIAG_T diag_recip_array[RowsColsA];
     typename CholeskyTraits::PROD_T prod;
     typename CholeskyTraits::ACCUM_T prod_cast_to_sum;
-    typename CholeskyTraits::ACCUM_T product_sum;
     typename CholeskyTraits::ACCUM_T product_sum_array[RowsColsA];
     typename CholeskyTraits::OFF_DIAG_T prod_cast_to_off_diag;
     typename CholeskyTraits::OFF_DIAG_T new_L_off_diag;
     typename CholeskyTraits::L_OUTPUT_T new_L;
 
-#pragma HLS ARRAY_PARTITION variable = A cyclic dim = CholeskyTraits::UNROLL_DIM factor = CholeskyTraits::UNROLL_FACTOR
-#pragma HLS ARRAY_PARTITION variable = L cyclic dim = CholeskyTraits::UNROLL_DIM factor = CholeskyTraits::UNROLL_FACTOR
-#pragma HLS ARRAY_PARTITION variable = L_internal cyclic dim = CholeskyTraits::UNROLL_DIM factor = \
-    CholeskyTraits::UNROLL_FACTOR
-#pragma HLS ARRAY_PARTITION variable = square_sum_array cyclic dim = 1 factor = CholeskyTraits::UNROLL_FACTOR
-#pragma HLS ARRAY_PARTITION variable = product_sum_array cyclic dim = 1 factor = CholeskyTraits::UNROLL_FACTOR
+#pragma HLS ARRAY_PARTITION variable = product_sum_array complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = diag_recip_array complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = square_sum_array complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = L_internal complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = A complete dim = 0
+#pragma HLS ARRAY_PARTITION variable = L complete dim = 0
 
+// Column j flattened together with k and i, instead of being a separate, un-pipelined outer loop.
 col_loop:
     for (int j = 0; j < RowsColsA; j++) {
-        // Diagonal calculation
-        A_cast_to_sum = A[j][j];
-        if (j == 0) {
-            A_minus_sum = A_cast_to_sum;
-        } else {
-            A_minus_sum = A_cast_to_sum - square_sum_array[j];
-        }
-        if (cholesky_sqrt_op(A_minus_sum, new_L_diag)) {
-#ifndef __SYNTHESIS__
-            printf("ERROR: Trying to find the square root of a negative number\n");
-#endif
-            return_code = 1;
-        }
-        // Round to target format using method specifed by traits defined types.
-        new_L = new_L_diag;
-        // Generate the reciprocal of the diagonal for internal use to aviod the latency of a divide in every
-        // off-diagonal calculation
-        A_minus_sum_cast_diag = A_minus_sum;
-        cholesky_rsqrt(hls::x_real(A_minus_sum_cast_diag), new_L_diag_recip);
-        // Store diagonal value
-        if (LowerTriangularL == true) {
-            L[j][j] = new_L;
-        } else {
-            L[j][j] = hls::x_conj(new_L);
-        }
-
-    sum_loop:
-        for (int k = 0; k <= j; k++) {
-// Define average trip count for reporting, loop reduces in length for every iteration of col_loop
-#pragma HLS loop_tripcount max = 1 + RowsColsA / 2
-            // Same value used in all calcs
-            // o Implement -1* here
-            prod_column_top = -hls::x_conj(L_internal[j][k]);
-
-        // NOTE: Using a fixed loop length combined with a "if" to implement reducing loop length
-        // o Ensures the inner loop can achieve the maximum II (1)
-        // o May introduce a small overhead resolving the "if" statement but HLS struggled to schedule when the variable
-        //   loop bound expression was used.
-        // o Will report inaccurate trip count as it will reduce by one with the col_loop
-        // o Variable loop bound code: row_loop: for(int i = j+1; i < RowsColsA; i++) {
-        row_loop:
+        for (int k = 0; k < RowsColsA; k++) {
             for (int i = 0; i < RowsColsA; i++) {
-// IMPORTANT: row_loop must not merge with sum_loop as the merged loop becomes variable length and HLS will struggle
-// with scheduling
-#pragma HLS LOOP_FLATTEN off
-#pragma HLS PIPELINE II = CholeskyTraits::INNER_II
-#pragma HLS UNROLL FACTOR = CholeskyTraits::UNROLL_FACTOR
-
-                if (i > j) {
-                    prod = L_internal[i][k] * prod_column_top;
-                    prod_cast_to_sum = prod;
-
+                if (k == 0 && i == j) {
+                    // Diagonal calculation for this column, placed in the (k == 0, i == j) slot,
+                    // which the i > j guards below leave otherwise idle.
+                    A_cast_to_sum = A[j][j];
+                    if (j == 0) {
+                        A_minus_sum = A_cast_to_sum;
+                    } else {
+                        A_minus_sum = A_cast_to_sum - square_sum_array[j];
+                    }
+                    // Generate the reciprocal of the diagonal for internal use to aviod the latency of a divide in
+                    // every off-diagonal calculation, and recover the diagonal itself as x * (1/sqrt(x)) so that
+                    // only a single square root operator is instantiated on the critical path.
+                    if (choleskyAlt2_rsqrt_and_sqrt(A_minus_sum, new_L_diag_recip, new_L_diag)) {
+#ifndef __SYNTHESIS__
+                        printf("ERROR: Trying to find the square root of a negative number\n");
+#endif
+                        return_code = 1;
+                    }
+                    diag_recip_array[j] = new_L_diag_recip;
+                    // Round to target format using method specifed by traits defined types.
+                    new_L = new_L_diag;
+                    // Store diagonal value
+                    if (LowerTriangularL == true) {
+                        L[j][j] = new_L;
+                    } else {
+                        L[j][j] = hls::x_conj(new_L);
+                    }
+                } else if (i > j) {
+                    // Prime, accumulate, and finalize are three INDEPENDENT "if"s, not an
+                    // if/else-if/else chain. This matters for two overlapping cases:
+                    //  - column j == 0: k == 0 and k == j are the SAME iteration, so both prime
+                    //    and finalize must fire on it (prime sets product_sum_array[i], which
+                    //    finalize immediately consumes).
+                    //  - any column j >= 1: k == 0 is ALSO the first term of the reduction
+                    //    (k < j, since 0 < j), so both prime and accumulate must fire on it --
+                    //    prime sets product_sum_array[i] = A[i][j], then accumulate immediately
+                    //    adds the k == 0 product term on top. Chaining prime and accumulate as
+                    //    if/else-if lets the k == 0 prime branch silently steal the iteration and
+                    //    drop that first reduction term for every column.
                     if (k == 0) {
                         // Prime first sum
                         if (LowerTriangularL == true) {
@@ -611,35 +769,31 @@ col_loop:
                         } else {
                             A_cast_to_sum = hls::x_conj(A[j][i]);
                         }
-                        product_sum = A_cast_to_sum;
-                    } else {
-                        product_sum = product_sum_array[i];
+                        product_sum_array[i] = A_cast_to_sum;
                     }
-
                     if (k < j) {
                         // Accumulate row sum of columns
-                        product_sum_array[i] = product_sum + prod_cast_to_sum;
-                    } else {
-                        // Final calculation for off diagonal value
-                        prod_cast_to_off_diag = product_sum;
+                        prod = L_internal[i][k] * (-hls::x_conj(L_internal[j][k]));
+                        prod_cast_to_sum = prod;
+                        product_sum_array[i] += prod_cast_to_sum;
+                    }
+                    if (k == j) {
+                        // final calculation for off diagonal value, using the diagonal
+                        // reciprocal computed at this column's (k == 0, i == j) slot above.
+                        // (k > j does nothing here -- correctly idle.)
+                        prod_cast_to_off_diag = product_sum_array[i];
                         // Diagonal is stored in its reciprocal form so only need to multiply the product sum
-                        cholesky_prod_sum_mult(prod_cast_to_off_diag, new_L_diag_recip, new_L_off_diag);
+                        choleskyAlt2_prod_sum_mult(prod_cast_to_off_diag, diag_recip_array[j], new_L_off_diag);
                         // Round to target format using method specifed by traits defined types.
                         new_L = new_L_off_diag;
-                        // Build sum for use in diagonal calculation for this row.
-                        if (k == 0) {
-                            square_sum_array[j] = hls::x_conj(new_L) * new_L;
+                        // Build sum for use in the diagonal calculation of row i.
+                        if (j == 0) {
+                            square_sum_array[i] = hls::x_conj(new_L) * new_L;
                         } else {
-                            square_sum_array[j] = hls::x_conj(new_L) * new_L;
+                            square_sum_array[i] += hls::x_conj(new_L) * new_L;
                         }
                         // Store result
                         L_internal[i][j] = new_L;
-                        // NOTE: Use the upper/lower triangle zeroing in the subsequent loop so the double memory access
-                        // does not
-                        // become a bottleneck
-                        // o Results in a further increase of DSP resources due to the higher II of this loop.
-                        // o Retaining the zeroing operation here can give this a loop a max II of 2 and HLS will
-                        // resource share.
                         if (LowerTriangularL == true) {
                             L[i][j] = new_L;                                   // Store in lower triangle
                             if (!CholeskyTraits::ARCH2_ZERO_LOOP) L[j][i] = 0; // Zero upper
@@ -653,21 +807,15 @@ col_loop:
         }
     }
     // Zero upper/lower triangle
-    // o Use separate loop to ensure main calcuation can achieve an II of 1
-    // o As noted above this may increase the DSP resources.
-    // o Required when unrolling the inner loop due to array dimension access
     if (CholeskyTraits::ARCH2_ZERO_LOOP) {
     zero_rows_loop:
         for (int i = 0; i < RowsColsA - 1; i++) {
         zero_cols_loop:
             for (int j = i + 1; j < RowsColsA; j++) {
-// Define average trip count for reporting, loop reduces in length for every iteration of zero_rows_loop
-#pragma HLS loop_tripcount max = 1 + RowsColsA / 2
-#pragma HLS PIPELINE
                 if (LowerTriangularL == true) {
-                    L[i][j] = 0; // Zero upper
+                    L[i][j] = 0;
                 } else {
-                    L[j][i] = 0; // Zero lower
+                    L[j][i] = 0;
                 }
             }
         }
