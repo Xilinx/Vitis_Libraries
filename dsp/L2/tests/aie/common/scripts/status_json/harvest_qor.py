@@ -191,7 +191,7 @@ def calc_frames_per_second(iteration_time, frames_per_iteration) -> float:
     return frames_per_iteration / iteration_time
 
 
-def window_steady_state(window: list, window_size=4, cv_threshold=0.02, slope_threshold=0.008):
+def window_steady_state(window: list, window_size=4, cv_threshold=0.05, slope_threshold=0.03):
     """Returns -1 if not steady state, otherwise returns the steady-state value as the window average.
     Steady state is determined according to 2 critieria:
     1. The coefficient of variation (CV) of the window must be below cv_threshold.

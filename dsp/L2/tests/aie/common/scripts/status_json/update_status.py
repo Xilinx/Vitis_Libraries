@@ -186,8 +186,8 @@ def build_parser():
     qor_parser.add_argument("plio_width_bits", type=int, help="Width of the PLIO in bits.")
     qor_parser.add_argument("out_datatype", type=str, help="Output datatype used for throughput calculations.")
     qor_parser.add_argument("steady_state_window_size", type=int, nargs="?", default=4, help="Size of the steady state window for latency calculation.")
-    qor_parser.add_argument("cv_threshold", type=float, nargs="?", default=0.02, help="Coefficient of variation threshold for steady state detection.")
-    qor_parser.add_argument("slope_threshold", type=float, nargs="?", default=0.08, help="Slope threshold for steady state detection. Guards against slow monotone drift that CV alone cannot detect.")
+    qor_parser.add_argument("cv_threshold", type=float, nargs="?", default=0.05, help="Coefficient of variation threshold for steady state detection.")
+    qor_parser.add_argument("slope_threshold", type=float, nargs="?", default=0.03, help="Slope threshold for steady state detection. Guards against slow monotone drift that CV alone cannot detect.")
     qor_parser.add_argument("--verbose", action="store_true", default=False, help="Enable verbose output.")
 
     fr_parser = subparsers.add_parser("framerate_to_input_throughput", help="Convert 'frame rate (kHz)' into 'input throughput (MSa/s)'. Run after qor, only when frames_per_iteration was the input window size.")
