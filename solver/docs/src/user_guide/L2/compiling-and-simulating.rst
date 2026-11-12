@@ -60,11 +60,11 @@ Use the following steps to compile and simulate the reference model with the x86
 
 .. code-block::
 
-        make cleanall run PLATFORM=vck190
+        make cleanall run PLATFORM=vck190_base
 
 .. note:: It is recommended to run a ``cleanall`` stage before compiling the design to ensure no stale objects interfere with the compilation process.
 
-.. note:: Platform information (e.g., PLATFORM=vck190) is a requirement of a make build process. A list of supported platforms can be found in `L2/tests/aie/<library_element>/description.json` in the "platform_allowlist" section.
+.. note:: Platform information (e.g., PLATFORM=vck190_base) is a requirement of a make build process. A list of supported platforms can be found in `L2/tests/aie/<library_element>/description.json` in the "platform_allowlist" section.
 
 Configuring the Test Case
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -83,7 +83,7 @@ To run a test case, specify the test case name passed to the PARAMS argument, e.
 
 .. code-block::
 
-        make cleanall run PLATFORM=vck190 PARAMS=test_my_design
+        make cleanall run PLATFORM=vck190_base PARAMS=test_my_design
 
 For a list of all configurable parameters, see :ref:`SOLVER_CONFIGURATION_PARAMETERS`.
 
@@ -114,6 +114,14 @@ List of all the Makefile targets:
 
 .. note::
     For embedded platforms, the following setup steps are required:
+        Starting with 2026.2, embedded platforms use the Yocto-based EDF common image. Install steps are in *Getting Started with Versal AI Edge Gen2 with Vitis Unified IDE* (`XD098 <https://docs.amd.com/r/en-US/Vitis-Tutorials-Getting-Started/Getting-Started-with-Versal-AI-Edge-Gen2-with-Vitis-Unified-IDE>`_). After installing, build and run with ``YOCTO_ARTIFACTS`` set:
+            .. code-block::
+
+                export YOCTO_ARTIFACTS=<path to design>/yocto_artifacts
+                make run TARGET=<hw_emu/hw> PLATFORM=<FPGA platform>
+
+        For 2026.1 and earlier releases, which use the PetaLinux-based common image:
+
         a. If the platform and common-image are downloaded from the Download Center (Suggested):
             | Run the `sdk.sh` script from the `common-image` directory to install sysroot using the command: ./sdk.sh -y -d ./ -p
             | Unzip the `rootfs` file : gunzip ./rootfs.ext4.gz

@@ -14,8 +14,8 @@ For all library elements, the recommended approach is to instantiate each librar
 
 - `Cholesky <../../rst/group_cholesky_graph.html>`_
 - `Eigenvalue <../../rst/group_eigenvalue_graph.html>`_
-- `Least Squares Cholesky Solver <../../rst/group_ls_cholesky_solver_graph.html>`_
-- `Moore Penrose Pseudoinverse SVD<../../rst/group_mp_pseudoinverse_svd_graph.html>`_
+- `Least Squares Cholesky Solver <../../rst/group_ls_cholesky_solver.html>`_
+- `Moore Penrose Pseudoinverse SVD <../../rst/group_mp_pseudoinverse_svd_graph.html>`_
 - `QRD <../../rst/group_qrd_graph.html>`_
 - `QRD_HH <../../rst/group_qrd_hh_graph.html>`_
 - `Substitution <../../rst/group_substitution_graph.html>`_
