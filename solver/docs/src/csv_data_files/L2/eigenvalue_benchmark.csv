@@ -1,16 +1,16 @@
 Library Element,AIE_VARIANT,TT_DATA,TP_DIM,TP_PASSES,TP_CASC_LEN,first shortest latency (us),first critical latency (us),steady shortest latency (us),steady critical latency (us),initiation interval (us),output throughput (MSa/s),frame rate (kHz),num banks,num aie,num tiles,data memory (bytes)
 eigenvalue,AIE,cfloat,4,20,1,8.922,8.922,-1,-1,-1,-1,-1,10,2,3,9951
 eigenvalue,AIE,cfloat,4,20,1,7.496,7.496,-1,-1,-1,-1,-1,9,2,3,9951
-eigenvalue,AIE,float,8,30,1,48.85,48.85,-1,-1,-1,-1,-1,9,2,3,10717
-eigenvalue,AIE,cfloat,8,30,1,63.3,63.3,-1,-1,-1,-1,-1,10,2,3,12383
-eigenvalue,AIE,cfloat,12,40,1,197.4,197.4,-1,-1,-1,-1,-1,9,2,3,16351
+eigenvalue,AIE,float,8,30,1,48.85,48.85,173.8,173.8,-1,-1,-1,9,2,3,10717
+eigenvalue,AIE,cfloat,8,30,1,63.3,63.3,268.6,268.6,-1,-1,-1,10,2,3,12383
+eigenvalue,AIE,cfloat,12,40,1,197.4,197.4,755.2,755.2,-1,-1,-1,9,2,3,16351
 eigenvalue,AIE,float,16,50,1,251.9,251.9,1134.0,1134.0,-1,-1,-1,9,2,3,15453
 eigenvalue,AIE,cfloat,16,50,1,397.5,397.5,1911.0,1911.0,-1,-1,-1,10,2,3,21855
 eigenvalue,AIE,float,24,75,1,787.6,787.6,3374.0,3374.0,-1,-1,-1,9,2,3,23261
-eigenvalue,AIE,float,32,100,1,1573.0,1573.0,6950.0,6950.0,-1,-1,-1,9,2,4,34141
+eigenvalue,AIE,float,32,100,1,1573.0,1573.0,6950.0,6950.0,1388.0,0.02307,0.7211,9,2,4,34141
 eigenvalue,AIE-ML,cfloat,4,20,1,65.52,65.52,-1,-1,-1,-1,-1,9,2,3,9914
 eigenvalue,AIE-ML,float,8,30,1,208.0,208.0,-1,-1,-1,-1,-1,9,2,3,10673
-eigenvalue,AIE-ML,cfloat,8,30,1,397.5,397.5,-1,-1,-1,-1,-1,9,2,3,12346
-eigenvalue,AIE-MLv2,cfloat,4,20,1,59.93,59.93,-1,-1,-1,-1,-1,9,2,3,9981
-eigenvalue,AIE-MLv2,float,8,30,1,205.6,205.6,-1,-1,-1,-1,-1,9,2,3,10727
-eigenvalue,AIE-MLv2,cfloat,8,30,1,453.0,453.0,-1,-1,-1,-1,-1,9,2,3,12413
+eigenvalue,AIE-ML,cfloat,8,30,1,397.5,397.5,1655.0,1655.0,-1,-1,-1,9,2,3,12346
+eigenvalue,AIE-MLv2,cfloat,4,20,1,50.36,50.36,-1,-1,-1,-1,-1,9,2,3,9981
+eigenvalue,AIE-MLv2,float,8,30,1,172.8,172.8,-1,-1,-1,-1,-1,9,2,3,10727
+eigenvalue,AIE-MLv2,cfloat,8,30,1,380.7,380.7,1570.0,1570.0,-1,-1,-1,9,2,3,12413
